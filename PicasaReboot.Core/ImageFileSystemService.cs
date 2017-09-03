@@ -15,20 +15,16 @@ namespace PicasaReboot.Core
             FileSystem = fileSystem;
         }
 
-        public IReadOnlyList<ImageFile> ListFiles(string directory)
+        public string[] ListFiles(string directory)
         {
             Guard.NotNullOrEmpty(nameof(directory), directory);
 
             var strings = FileSystem.Directory.GetFiles(directory);
 
             return strings
-                .Where(s => FileSystem.Path.GetExtension(s) == ".jpg")
-                .Select(CreateImageFileFromPath).ToArray();
-        }
-
-        private ImageFile CreateImageFileFromPath(string path)
-        {
-            return new ImageFile(this, path);
+                .Select(s => new Tuple<string, string>(s, FileSystem.Path.GetExtension(s)))
+                .Where(tuple => tuple.Item2 == ".jpg" || tuple.Item2 == ".jpeg" || tuple.Item2 == ".png")
+                .Select(tuple => tuple.Item1).ToArray();
         }
     }
 }

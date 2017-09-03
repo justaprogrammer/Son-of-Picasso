@@ -4,9 +4,20 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PicasaReboot.Windows"
+        xmlns:viewModels="clr-namespace:PicasaReboot.Windows.ViewModels"
+        xmlns:designTimeData="clr-namespace:PicasaReboot.Windows.ViewModels.DesignTimeData"
         mc:Ignorable="d"
+        d:DataContext="{x:Static designTimeData:ApplicationViewModelSampleData.SampleData}"
         Title="MainWindow" Height="350" Width="525">
     <Grid>
-        
+        <ListView  ItemsSource="{Binding Images}">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel>
+                        <Label Content="{Binding}" />
+                    </StackPanel>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
     </Grid>
 </Window>

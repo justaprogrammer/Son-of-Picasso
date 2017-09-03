@@ -1,11 +1,6 @@
-﻿using System;
-using System.Drawing;
-using System.IO.Abstractions;
-using System.IO.Abstractions.TestingHelpers;
+﻿using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
-using System.Reactive.Linq;
 using FluentAssertions;
-using Microsoft.Reactive.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PicasaReboot.Core;
 
@@ -23,7 +18,7 @@ namespace PicasaReboot.Tests
             var imageFileSystemService = new ImageFileSystemService(mockFileSystem);
             var items = imageFileSystemService.ListFiles(@"c:\images");
 
-            items.ShouldAllBeEquivalentTo(Enumerable.Empty<ImageFile>());
+            items.ShouldAllBeEquivalentTo(Enumerable.Empty<string>());
         }
 
         [TestMethod]
@@ -31,14 +26,16 @@ namespace PicasaReboot.Tests
         {
             var image1Bytes = Resources.image1.ImageToBytes();
 
+            var image1Jpg = @"c:\images\image1.jpg";
+
             var mockFileSystem = new MockFileSystem();
             mockFileSystem.AddDirectory(@"c:\images");
-            mockFileSystem.AddFile(@"c:\images\image1.jpg", new MockFileData(image1Bytes));
+            mockFileSystem.AddFile(image1Jpg, new MockFileData(image1Bytes));
 
             var imageFileSystemService = new ImageFileSystemService(mockFileSystem);
             var items = imageFileSystemService.ListFiles(@"c:\images");
 
-            items.ShouldAllBeEquivalentTo(new [] {new ImageFile(@"c:\images\image1.jpg"), });
+            items.ShouldAllBeEquivalentTo(new [] { image1Jpg });
         }
     }
 }
