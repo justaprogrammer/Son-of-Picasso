@@ -26,7 +26,7 @@ namespace PicasaReboot.Tests
         [Test]
         public void ListFolder()
         {
-            var image1Bytes = Resources.image1.ImageToBytes();
+            var image1Bytes = Resources.image1.GetBytes();
 
             var image1Jpg = @"c:\images\image1.jpg";
 

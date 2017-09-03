@@ -1,17 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using PicasaReboot.Core;
+using PicasaReboot.Windows.ViewModels;
 
 namespace PicasaReboot.Windows
 {
@@ -23,6 +13,22 @@ namespace PicasaReboot.Windows
         public MainWindow()
         {
             InitializeComponent();
+
+            var imageFileSystemService = new ImageFileSystemService();
+
+            var files = imageFileSystemService.ListFiles(@"C:\Users\StanleyGoldman\Dropbox\Camera Uploads");
+            var images = files.Take(10).Select(s =>
+            {
+                var bitmapImage = imageFileSystemService.LoadImage(s);
+                return new ImageView(s, bitmapImage);
+            }).ToList();
+
+            var applicationViewModel = new ApplicationViewModel
+            {
+                Images = images
+            };
+
+            DataContext = applicationViewModel;
         }
     }
 }

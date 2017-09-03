@@ -1,9 +1,9 @@
 using System.IO;
 using System.Windows.Media.Imaging;
 
-namespace PicasaReboot.Windows.Helpers
+namespace PicasaReboot.Core.Helpers
 {
-    public static class Blah
+    public static class ImageHelpers
     {
         public static BitmapImage LoadImage(byte[] imageData)
         {

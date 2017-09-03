@@ -8,12 +8,13 @@
         xmlns:designTimeData="clr-namespace:PicasaReboot.Windows.ViewModels.DesignTimeData"
         mc:Ignorable="d"
         d:DataContext="{x:Static designTimeData:ApplicationViewModelSampleData.SampleData}"
-        Title="MainWindow" Height="350" Width="525">
+        Title="MainWindow" Height="350" Width="747.667">
     <Grid>
         <ListView  ItemsSource="{Binding Images}">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <StackPanel>
+                        <Image Source="{Binding Image}" />
                         <Label Content="{Binding File}" />
                     </StackPanel>
                 </DataTemplate>
@@ -21,3 +22,4 @@
         </ListView>
     </Grid>
 </Window>
+
