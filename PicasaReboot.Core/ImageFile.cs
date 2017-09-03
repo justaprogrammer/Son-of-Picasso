@@ -1,11 +1,15 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
+using System.Reactive.Linq;
 
 namespace PicasaReboot.Core
 {
-    public struct ImageFile
+    public class ImageFile
     {
+        public string Path;
+
+        public ImageFile(ImageFileSystemService fileSystem, string path)
+        {
+            Path = path;
+        }
     }
 }

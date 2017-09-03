@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO.Abstractions;
+using System.Linq;
+using System.Reactive.Linq;
 
 namespace PicasaReboot.Core
 {
@@ -12,11 +15,20 @@ namespace PicasaReboot.Core
             FileSystem = fileSystem;
         }
 
-        public string LibraryDirectory { get; set; }
-
-        public IObservable<ImageFile> ListFiles()
+        public IReadOnlyList<ImageFile> ListFiles(string directory)
         {
-            throw new NotImplementedException();
+            Guard.NotNullOrEmpty(nameof(directory), directory);
+
+            var strings = FileSystem.Directory.GetFiles(directory);
+
+            return strings
+                .Where(s => FileSystem.Path.GetExtension(s) == ".jpg")
+                .Select(CreateImageFileFromPath).ToArray();
+        }
+
+        private ImageFile CreateImageFileFromPath(string path)
+        {
+            return new ImageFile(this, path);
         }
     }
 }
