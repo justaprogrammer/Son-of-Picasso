@@ -1,6 +1,6 @@
 ﻿namespace PicasaReboot.Windows.ViewModels
 {
-    public interface IImageView
+    public interface IImageViewModel
     {
         string File { get; }
     }

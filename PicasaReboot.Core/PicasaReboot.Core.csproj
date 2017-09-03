@@ -76,7 +76,7 @@
     <Compile Include="Guard.cs" />
     <Compile Include="Extensions\ImageExtensions.cs" />
     <Compile Include="Helpers\ImageHelpers.cs" />
-    <Compile Include="ImageFileSystemService.cs" />
+    <Compile Include="ImageService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -17,7 +17,7 @@ namespace PicasaReboot.Tests
             var mockFileSystem = new MockFileSystem();
             mockFileSystem.AddDirectory(@"c:\images");
 
-            var imageFileSystemService = new ImageFileSystemService(mockFileSystem);
+            var imageFileSystemService = new ImageService(mockFileSystem);
             var items = imageFileSystemService.ListFiles(@"c:\images");
 
             items.ShouldAllBeEquivalentTo(Enumerable.Empty<string>());
@@ -34,7 +34,7 @@ namespace PicasaReboot.Tests
             mockFileSystem.AddDirectory(@"c:\images");
             mockFileSystem.AddFile(image1Jpg, new MockFileData(image1Bytes));
 
-            var imageFileSystemService = new ImageFileSystemService(mockFileSystem);
+            var imageFileSystemService = new ImageService(mockFileSystem);
             var items = imageFileSystemService.ListFiles(@"c:\images");
 
             items.ShouldAllBeEquivalentTo(new [] { image1Jpg });

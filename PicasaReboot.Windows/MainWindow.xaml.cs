@@ -14,21 +14,10 @@ namespace PicasaReboot.Windows
         {
             InitializeComponent();
 
-            var imageFileSystemService = new ImageFileSystemService();
-
-            var files = imageFileSystemService.ListFiles(@"C:\Users\StanleyGoldman\Dropbox\Camera Uploads");
-            var images = files.Take(10).Select(s =>
-            {
-                var bitmapImage = imageFileSystemService.LoadImage(s);
-                return new ImageView(s, bitmapImage);
-            }).ToList();
-
-            var applicationViewModel = new ApplicationViewModel
-            {
-                Images = images
-            };
-
+            var applicationViewModel = new ApplicationViewModel(new ImageService());
             DataContext = applicationViewModel;
+
+            applicationViewModel.Initialize(@"C:\Users\StanleyGoldman\Dropbox\Camera Uploads");
         }
     }
 }

@@ -1,23 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO.Abstractions;
 using System.Linq;
-using System.Reactive.Linq;
 using System.Windows.Media.Imaging;
 using PicasaReboot.Core.Helpers;
 
 namespace PicasaReboot.Core
 {
-    public class ImageFileSystemService
+    public class ImageService
     {
         protected IFileSystem FileSystem { get; }
 
-        public ImageFileSystemService(IFileSystem fileSystem)
+        public ImageService(IFileSystem fileSystem)
         {
             FileSystem = fileSystem;
         }
 
-        public ImageFileSystemService() : this(new FileSystem())
+        public ImageService() : this(new FileSystem())
         {
         }
 
