@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PicasaReboot.Windows", "PicasaReboot.Windows\PicasaReboot.Windows.csproj", "{12086427-2DFC-493E-99EE-0C5522405A81}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PicasaReboot.Core", "PicasaReboot.Core\PicasaReboot.Core.csproj", "{68CDEEB6-3ABA-4DCD-9CD8-C1887CDE6964}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PicasaReboot.Tests", "PicasaReboot.Tests\PicasaReboot.Tests.csproj", "{F1D93406-A6F7-4D62-AE8A-4DF362932082}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{12086427-2DFC-493E-99EE-0C5522405A81}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12086427-2DFC-493E-99EE-0C5522405A81}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12086427-2DFC-493E-99EE-0C5522405A81}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12086427-2DFC-493E-99EE-0C5522405A81}.Release|Any CPU.Build.0 = Release|Any CPU
+		{68CDEEB6-3ABA-4DCD-9CD8-C1887CDE6964}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68CDEEB6-3ABA-4DCD-9CD8-C1887CDE6964}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68CDEEB6-3ABA-4DCD-9CD8-C1887CDE6964}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68CDEEB6-3ABA-4DCD-9CD8-C1887CDE6964}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F1D93406-A6F7-4D62-AE8A-4DF362932082}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1D93406-A6F7-4D62-AE8A-4DF362932082}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1D93406-A6F7-4D62-AE8A-4DF362932082}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1D93406-A6F7-4D62-AE8A-4DF362932082}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
