@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO.Abstractions;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PicasaReboot.Core
 {
@@ -14,6 +10,13 @@ namespace PicasaReboot.Core
         public ImageFileSystemService(IFileSystem fileSystem)
         {
             FileSystem = fileSystem;
+        }
+
+        public string LibraryDirectory { get; set; }
+
+        public IObservable<ImageFile> ListFiles()
+        {
+            throw new NotImplementedException();
         }
     }
 }
