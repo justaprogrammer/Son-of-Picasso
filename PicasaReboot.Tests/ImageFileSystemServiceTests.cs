@@ -12,6 +12,16 @@ namespace PicasaReboot.Tests
     public class ImageFileSystemServiceTests
     {
         [Test]
+        public void LogTest()
+        {
+            Log.Verbose("Hello");
+            Log.Debug("Hello");
+            Log.Warning("Hello");
+            Log.Error("Hello");
+            Log.Information("Hello");
+        }
+
+        [Test]
         public void ListEmptyFolder()
         {
             var mockFileSystem = new MockFileSystem();

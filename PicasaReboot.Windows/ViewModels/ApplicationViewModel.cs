@@ -10,18 +10,22 @@ namespace PicasaReboot.Windows.ViewModels
         public ApplicationViewModel(ImageService imageService)
         {
             ImageService = imageService;
+            _images = new ObservableCollection<ImageViewModel>();
         }
 
         public void Initialize(string directory)
         {
             var files = ImageService.ListFiles(directory);
-            var imageViewModels = new ObservableCollection<ImageViewModel>();
+            foreach (var file in files)
+            {
+                _images.Add(new ImageViewModel(ImageService, file));
+            }
         }
 
-        private IList<ImageViewModel> _images;
+        private ObservableCollection<ImageViewModel> _images;
         public ImageService ImageService { get; }
 
-        public IList<ImageViewModel> Images
+        public ObservableCollection<ImageViewModel> Images
         {
             get { return _images; }
             set { this.RaiseAndSetIfChanged(ref _images, value); }

@@ -3,11 +3,14 @@ using System.IO.Abstractions;
 using System.Linq;
 using System.Windows.Media.Imaging;
 using PicasaReboot.Core.Helpers;
+using Serilog;
 
 namespace PicasaReboot.Core
 {
     public class ImageService
     {
+        protected static ILogger Logger = LogManager.ForContext<ImageService>();
+
         protected IFileSystem FileSystem { get; }
 
         public ImageService(IFileSystem fileSystem)
@@ -21,6 +24,8 @@ namespace PicasaReboot.Core
 
         public string[] ListFiles(string directory)
         {
+            Logger.Debug("ListFiles: {directory}", directory);
+
             Guard.NotNullOrEmpty(nameof(directory), directory);
 
             var strings = FileSystem.Directory.GetFiles(directory);
@@ -33,6 +38,8 @@ namespace PicasaReboot.Core
 
         public BitmapImage LoadImage(string path)
         {
+            Logger.Debug("LoadImage: {path}", path);
+
             Guard.NotNullOrEmpty(nameof(path), path);
 
             var bytes = FileSystem.File.ReadAllBytes(path);
