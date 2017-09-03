@@ -14,7 +14,7 @@
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <StackPanel>
-                        <Label Content="{Binding}" />
+                        <Label Content="{Binding File}" />
                     </StackPanel>
                 </DataTemplate>
             </ListView.ItemTemplate>

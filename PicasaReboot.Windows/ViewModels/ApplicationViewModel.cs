@@ -6,9 +6,9 @@ namespace PicasaReboot.Windows.ViewModels
 {
     public class ApplicationViewModel : ReactiveObject, IApplicationViewModel
     {
-        private IList<string> _images;
+        private IList<ImageView> _images;
 
-        public IList<string> Images
+        public IList<ImageView> Images
         {
             get { return _images; }
             set { this.RaiseAndSetIfChanged(ref _images, value); }

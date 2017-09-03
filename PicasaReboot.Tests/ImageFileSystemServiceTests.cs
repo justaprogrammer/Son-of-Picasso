@@ -1,15 +1,17 @@
 ﻿using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using FluentAssertions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using PicasaReboot.Core;
+using PicasaReboot.Core.Extensions;
+using PicasaReboot.SampleImages;
 
 namespace PicasaReboot.Tests
 {
-    [TestClass]
+    [TestFixture]
     public class ImageFileSystemServiceTests
     {
-        [TestMethod]
+        [Test]
         public void ListEmptyFolder()
         {
             var mockFileSystem = new MockFileSystem();
@@ -21,7 +23,7 @@ namespace PicasaReboot.Tests
             items.ShouldAllBeEquivalentTo(Enumerable.Empty<string>());
         }
 
-        [TestMethod]
+        [Test]
         public void ListFolder()
         {
             var image1Bytes = Resources.image1.ImageToBytes();

@@ -1,6 +1,6 @@
 using System.Drawing;
 
-namespace PicasaReboot.Tests
+namespace PicasaReboot.Core.Extensions
 {
     public static class ImageExtensions
     {

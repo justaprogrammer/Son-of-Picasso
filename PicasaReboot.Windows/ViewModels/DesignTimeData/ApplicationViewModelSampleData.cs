@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Windows.Media.Imaging;
+using PicasaReboot.Windows.Properties;
 
 namespace PicasaReboot.Windows.ViewModels.DesignTimeData
 {
@@ -8,13 +10,15 @@ namespace PicasaReboot.Windows.ViewModels.DesignTimeData
         {
             get
             {
-                var applicationViewModelSampleData = new ApplicationViewModelSampleData();
-                applicationViewModelSampleData.Images.Add("image1.jpeg");
 
+                var applicationViewModelSampleData = new ApplicationViewModelSampleData();
+                var imageView = new ImageView("image1.jpeg", null);
+
+                applicationViewModelSampleData.Images.Add(imageView);
                 return applicationViewModelSampleData;
             }
         }
 
-        public IList<string> Images { get; set; } = new List<string>();
+        public IList<ImageView> Images { get; set; } = new List<ImageView>();
     }
 }
