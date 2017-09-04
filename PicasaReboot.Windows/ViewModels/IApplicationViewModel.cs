@@ -6,6 +6,6 @@ namespace PicasaReboot.Windows.ViewModels
 {
     public interface IApplicationViewModel
     {
-        ObservableCollection<ImageViewModel> Images { get; set; }
+        ObservableCollection<ImageViewModel> Images { get; }
     }
 }

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using PicasaReboot.Core.Extensions;
+﻿using System.Collections.ObjectModel;
 
 namespace PicasaReboot.Windows.ViewModels.DesignTimeData
 {
@@ -15,6 +14,6 @@ namespace PicasaReboot.Windows.ViewModels.DesignTimeData
             }
         }
 
-        public IList<ImageViewModel> Images { get; set; } = new List<ImageViewModel>();
+        public ObservableCollection<ImageViewModel> Images { get; set; } = new ObservableCollection<ImageViewModel>();
     }
 }

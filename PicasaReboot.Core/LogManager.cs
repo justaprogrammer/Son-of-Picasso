@@ -14,6 +14,17 @@ namespace PicasaReboot.Core
             var directory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             Guard.NotNull(directory, nameof(directory));
             var logPath = Path.Combine(directory, "application.log");
+            var oldLogPath = Path.Combine(directory, "application-old.log");
+
+            if (File.Exists(logPath))
+            {
+                if (File.Exists(oldLogPath))
+                {
+                    File.Delete(oldLogPath);
+                }
+
+                File.Move(logPath, oldLogPath);
+            }
 
             const string outputTemplate =
                 "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} {Level:u4} {ThreadId} <{SourceContext}> {Message}{NewLine}{Exception}";

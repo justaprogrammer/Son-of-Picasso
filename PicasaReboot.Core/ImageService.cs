@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO.Abstractions;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Windows.Media.Imaging;
 using PicasaReboot.Core.Helpers;
 using Serilog;
@@ -9,7 +10,7 @@ namespace PicasaReboot.Core
 {
     public class ImageService
     {
-        protected static ILogger Logger = LogManager.ForContext<ImageService>();
+        private static ILogger Log { get; }= LogManager.ForContext<ImageService>();
 
         protected IFileSystem FileSystem { get; }
 
@@ -24,7 +25,7 @@ namespace PicasaReboot.Core
 
         public string[] ListFiles(string directory)
         {
-            Logger.Debug("ListFiles: {directory}", directory);
+            Log.Debug("ListFiles: {directory}", directory);
 
             Guard.NotNullOrEmpty(nameof(directory), directory);
 
@@ -36,14 +37,32 @@ namespace PicasaReboot.Core
                 .Select(tuple => tuple.Item1).ToArray();
         }
 
+        public IObservable<string[]> ListFilesAsync(string directory)
+        {
+            Log.Debug("ListFilesAsync: {directory}", directory);
+
+            return Observable.Create<string[]>(
+                o => Observable.ToAsync<string, string[]>(ListFiles)(directory).Subscribe(o)
+            );
+        }
+
         public BitmapImage LoadImage(string path)
         {
-            Logger.Debug("LoadImage: {path}", path);
+            Log.Debug("LoadImage: {path}", path);
 
             Guard.NotNullOrEmpty(nameof(path), path);
 
             var bytes = FileSystem.File.ReadAllBytes(path);
-            return ImageHelpers.LoadImage(bytes);
+            return ImageHelpers.LoadBitmapImageFromBytes(bytes);
+        }
+
+        public IObservable<BitmapImage> LoadImageAsync(string path)
+        {
+            Log.Debug("LoadImageAsync: {path}", path);
+
+            return Observable.Create<BitmapImage>(
+                o => Observable.ToAsync<string, BitmapImage>(LoadImage)(path).Subscribe(o)
+            );
         }
     }
 }

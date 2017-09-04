@@ -15,7 +15,7 @@ namespace PicasaReboot.Core.Extensions
         public static BitmapImage GetBitmapImage(this Image img)
         {
             var bytes = img.GetBytes();
-            return ImageHelpers.LoadImage(bytes);
+            return ImageHelpers.LoadBitmapImageFromBytes(bytes);
         }
     }
 }

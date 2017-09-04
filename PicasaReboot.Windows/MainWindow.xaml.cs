@@ -2,6 +2,7 @@
 using System.Windows;
 using PicasaReboot.Core;
 using PicasaReboot.Windows.ViewModels;
+using Serilog;
 
 namespace PicasaReboot.Windows
 {
@@ -10,14 +11,18 @@ namespace PicasaReboot.Windows
     /// </summary>
     public partial class MainWindow : Window
     {
+        private static ILogger Log { get; } = LogManager.ForContext<MainWindow>();
+
         public MainWindow()
         {
+            Log.Debug("Initializing");
+
             InitializeComponent();
 
-            var applicationViewModel = new ApplicationViewModel(new ImageService());
+            var applicationViewModel = new ApplicationViewModel(new ImageService(), @"C:\Users\StanleyGoldman\Dropbox\Camera Uploads");
             DataContext = applicationViewModel;
 
-            applicationViewModel.Initialize(@"C:\Users\StanleyGoldman\Dropbox\Camera Uploads");
+            Log.Debug("Initialized");
         }
     }
 }

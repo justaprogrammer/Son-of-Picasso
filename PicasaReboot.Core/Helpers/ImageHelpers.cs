@@ -5,7 +5,7 @@ namespace PicasaReboot.Core.Helpers
 {
     public static class ImageHelpers
     {
-        public static BitmapImage LoadImage(byte[] imageData)
+        public static BitmapImage LoadBitmapImageFromBytes(byte[] imageData)
         {
             if (imageData == null || imageData.Length == 0) return null;
             var image = new BitmapImage();

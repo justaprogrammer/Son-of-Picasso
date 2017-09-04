@@ -8,7 +8,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>PicasaReboot.Windows.Tests</RootNamespace>
     <AssemblyName>PicasaReboot.Windows.Tests</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
@@ -16,6 +16,7 @@
     <ReferencePath>$(ProgramFiles)\Common Files\microsoft shared\VSTT\$(VisualStudioVersion)\UITestExtensionPackages</ReferencePath>
     <IsCodedUITest>False</IsCodedUITest>
     <TestProjectType>UnitTest</TestProjectType>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -81,6 +82,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.IO.Abstractions, Version=2.0.0.144, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\System.IO.Abstractions.2.0.0.144\lib\net40\System.IO.Abstractions.dll</HintPath>
       <Private>True</Private>
@@ -127,11 +129,29 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
-    <Compile Include="UnitTest1.cs" />
+    <Compile Include="ApplicationViewModelTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PicasaReboot.Core\PicasaReboot.Core.csproj">
+      <Project>{68cdeeb6-3aba-4dcd-9cd8-c1887cde6964}</Project>
+      <Name>PicasaReboot.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PicasaReboot.SampleImages\PicasaReboot.SampleImages.csproj">
+      <Project>{f0b85c37-4bb3-45ba-b47f-d9b0d978c9d3}</Project>
+      <Name>PicasaReboot.SampleImages</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PicasaReboot.Tests\PicasaReboot.Tests.csproj">
+      <Project>{f1d93406-a6f7-4d62-ae8a-4df362932082}</Project>
+      <Name>PicasaReboot.Tests</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PicasaReboot.Windows\PicasaReboot.Windows.csproj">
+      <Project>{12086427-2dfc-493e-99ee-0c5522405a81}</Project>
+      <Name>PicasaReboot.Windows</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
