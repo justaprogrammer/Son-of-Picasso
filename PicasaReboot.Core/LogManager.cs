@@ -35,9 +35,9 @@ namespace PicasaReboot.Core
             return new LoggerConfiguration()
                 .MinimumLevel.Verbose()
                 .Enrich.WithThreadId()
-                .WriteTo.File(logPath,
-                    fileSizeLimitBytes: fileSizeLimitBytes,
-                    outputTemplate: outputTemplate)
+//                .WriteTo.File(logPath,
+//                    fileSizeLimitBytes: fileSizeLimitBytes,
+//                    outputTemplate: outputTemplate)
                 .WriteTo.Console(outputTemplate: outputTemplate)
                 .CreateLogger();
         }
