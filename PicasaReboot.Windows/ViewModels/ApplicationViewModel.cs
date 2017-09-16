@@ -2,14 +2,10 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Reactive;
-using System.Reactive.Concurrency;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using PicasaReboot.Core;
 using ReactiveUI;
 using Serilog;
-using Log = PicasaReboot.Core.Log;
 
 namespace PicasaReboot.Windows.ViewModels
 {
@@ -17,26 +13,34 @@ namespace PicasaReboot.Windows.ViewModels
     {
         private static ILogger Log { get; } = LogManager.ForContext<ApplicationViewModel>();
 
-        private readonly string _directory;
+        string _directory;
 
-        public ApplicationViewModel(ImageService imageService, string directory)
+        public string Directory
         {
-            _directory = directory;
+            get { return _directory; }
+            set { this.RaiseAndSetIfChanged(ref _directory, value); }
+        }
+
+        public ReactiveList<ImageViewModel> Images { get; } = new ReactiveList<ImageViewModel>();
+
+        public ApplicationViewModel(ImageService imageService)
+        {
             ImageService = imageService;
 
-            Log.Debug("Getting images");
-
-            var listFiles = ImageService.ListFiles(_directory).Take(5);
-
-            foreach (var file in listFiles)
-            {
-                Log.Debug("Image");
-                Images.Add(new ImageViewModel(imageService, file));
-            }
+            this.WhenAnyValue(model => model.Directory)
+                .Subscribe(directory =>
+                {
+                    Images.Clear();
+                    if (directory != null)
+                    {
+                        imageService
+                            .ListFilesAsync(directory)
+                            .Select(images => images.Select(image => new ImageViewModel(imageService, image)))
+                            .Subscribe(Images.AddRange);
+                    }
+                });
         }
 
         public ImageService ImageService { get; }
-
-        public ObservableCollection<ImageViewModel> Images { get; } = new ObservableCollection<ImageViewModel>();
     }
 }

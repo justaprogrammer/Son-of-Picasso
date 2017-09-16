@@ -19,7 +19,7 @@ namespace PicasaReboot.Windows
 
             InitializeComponent();
 
-            var applicationViewModel = new ApplicationViewModel(new ImageService(), @"C:\Users\StanleyGoldman\Dropbox\Camera Uploads");
+            var applicationViewModel = new ApplicationViewModel(new ImageService());
             DataContext = applicationViewModel;
 
             Log.Debug("Initialized");

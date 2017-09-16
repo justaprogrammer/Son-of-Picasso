@@ -1,13 +1,14 @@
 ﻿using System;
-using System.Reactive;
-using System.Reactive.Concurrency;
-using System.Reactive.Linq;
+using System.Collections;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Threading;
 using FluentAssertions;
 using NUnit.Framework;
 using PicasaReboot.Core;
 using PicasaReboot.Tests;
 using PicasaReboot.Windows.ViewModels;
+using ReactiveUI;
 
 namespace PicasaReboot.Windows.Tests
 {
@@ -20,23 +21,25 @@ namespace PicasaReboot.Windows.Tests
             var mockFileSystem = MockFileSystemFactory.Create();
 
             var imageFileSystemService = new ImageService(mockFileSystem);
-            var applicationViewModel = new ApplicationViewModel(imageFileSystemService, MockFileSystemFactory.ImagesFolder);
+            var applicationViewModel = new ApplicationViewModel(imageFileSystemService);
 
             var autoResetEvent = new AutoResetEvent(false);
 
-            ImageViewModel imageViewModel = null;
-
-            applicationViewModel.Images.Subscribe(Observer.Create<ImageViewModel>(model =>
+            IList argsNewItems = null;
+            applicationViewModel.Images.Changed.Subscribe(args =>
+            {
+                if (args.Action == NotifyCollectionChangedAction.Add)
                 {
-                    imageViewModel = model;
-                },
-                () =>
-                {
+                    argsNewItems = args.NewItems;
                     autoResetEvent.Set();
-                }));
+                }
+            });
+
+            applicationViewModel.Directory = MockFileSystemFactory.ImagesFolder;
 
             autoResetEvent.WaitOne();
-            imageViewModel.Should().NotBeNull();
+
+            argsNewItems.Should().NotBeNull();
         }
     }
 }
