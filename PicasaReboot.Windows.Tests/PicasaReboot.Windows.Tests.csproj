@@ -45,10 +45,6 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Microsoft.Reactive.Testing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Reactive.Testing.4.0.0-preview00001\lib\net45\Microsoft.Reactive.Testing.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="NSubstitute, Version=2.0.3.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca, processorArchitecture=MSIL">
       <HintPath>..\packages\NSubstitute.2.0.3\lib\net45\NSubstitute.dll</HintPath>
       <Private>True</Private>

@@ -2,12 +2,12 @@
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using FluentAssertions;
 using NUnit.Framework;
 using PicasaReboot.Core;
 using PicasaReboot.Core.Extensions;
 using PicasaReboot.SampleImages;
-using Log = PicasaReboot.Core.Log;
 
 namespace PicasaReboot.Tests.Core
 {
@@ -47,6 +47,34 @@ namespace PicasaReboot.Tests.Core
             items.ShouldAllBeEquivalentTo(new[] { image1Jpg });
 
             Log.Debug("Completed");
+        }
+
+        [Test]
+        public void ListFolderAsync()
+        {
+            var image1Bytes = Resources.image1.GetBytes();
+            var image1Jpg = @"c:\images\image1.jpg";
+
+            var mockFileSystem = new MockFileSystem();
+            mockFileSystem.AddDirectory(@"c:\images");
+            mockFileSystem.AddFile(image1Jpg, new MockFileData(image1Bytes));
+
+            var imageFileSystemService = new ImageService(mockFileSystem);
+            var observable = imageFileSystemService.ListFilesAsync(@"c:\images");
+
+            var autoResetEvent = new AutoResetEvent(false);
+
+            string[] items = null;
+            observable.Subscribe(strings =>
+            {
+                items = strings;
+            }, () =>
+            {
+                autoResetEvent.Set();
+            });
+
+            autoResetEvent.WaitOne();
+            items.ShouldAllBeEquivalentTo(new[] { image1Jpg });
         }
     }
 }
