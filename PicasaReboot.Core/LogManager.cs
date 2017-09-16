@@ -1,9 +1,7 @@
 ﻿using System;
 using System.IO;
-using System.Reflection;
 using Serilog;
 using Serilog.Core;
-using Serilog.Events;
 
 namespace PicasaReboot.Core
 {
@@ -11,42 +9,16 @@ namespace PicasaReboot.Core
     {
         static Logger CreateLogger()
         {
-            var directory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            Guard.NotNull(directory, nameof(directory));
-            var logPath = Path.Combine(directory, "application.log");
-            var oldLogPath = Path.Combine(directory, "application-old.log");
-
-            if (File.Exists(logPath))
-            {
-                if (File.Exists(oldLogPath))
-                {
-                    File.Delete(oldLogPath);
-                }
-
-                File.Move(logPath, oldLogPath);
-            }
-
-            const string outputTemplate =
-                "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} {Level:u4} {ThreadId} <{SourceContext}> {Message}{NewLine}{Exception}";
-
-            //2MBs
-            const long fileSizeLimitBytes = 2L * 1024L * 1024L;
-
             return new LoggerConfiguration()
-                .MinimumLevel.Verbose()
-                .Enrich.WithThreadId()
-//                .WriteTo.File(logPath,
-//                    fileSizeLimitBytes: fileSizeLimitBytes,
-//                    outputTemplate: outputTemplate)
-                .WriteTo.Console(outputTemplate: outputTemplate)
+                .ReadFrom.AppSettings()
                 .CreateLogger();
         }
 
         static Lazy<Logger> Logger { get; } = new Lazy<Logger>(CreateLogger);
 
-        public static ILogger ForContext<T>() => Logger.Value.ForContext<T>();
+        public static ILogger ForContext<T>() => ForContext(typeof(T));
 
-        public static ILogger ForContext(Type type) => Logger.Value.ForContext(type);
+        public static ILogger ForContext(Type type) => Logger.Value.ForContext("SourceContext", type.Name);
     }
 
     public static class Log
