@@ -1,14 +1,12 @@
 ﻿using System;
-using System.IO.Abstractions.TestingHelpers;
-using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Threading;
 using FluentAssertions;
 using NUnit.Framework;
 using PicasaReboot.Core;
-using PicasaReboot.Core.Extensions;
-using PicasaReboot.SampleImages;
+using PicasaReboot.Tests;
 using PicasaReboot.Windows.ViewModels;
 
 namespace PicasaReboot.Windows.Tests
@@ -17,29 +15,28 @@ namespace PicasaReboot.Windows.Tests
     public class ApplicationViewModelTests
     {
         [Test]
-        public void TestOne()
+        public void CanCreateImageViewModel()
         {
-            Log.Information("TestOne");
-
-            var image1Bytes = Resources.image1.GetBytes();
-
-            var image1Jpg = @"c:\images\image1.jpg";
-            var imageFolder = @"c:\images";
-
-            var mockFileSystem = new MockFileSystem();
-            mockFileSystem.AddDirectory(imageFolder);
-            mockFileSystem.AddFile(image1Jpg, new MockFileData(image1Bytes));
+            var mockFileSystem = MockFileSystemFactory.Create();
 
             var imageFileSystemService = new ImageService(mockFileSystem);
-            var applicationViewModel = new ApplicationViewModel(imageFileSystemService, imageFolder);
-            //var observeOn = Observable.ObserveOn(Observable.Create(
-            //  observer => { }), ThreadPoolScheduler.Instance);
+            var applicationViewModel = new ApplicationViewModel(imageFileSystemService, MockFileSystemFactory.ImagesFolder);
 
-            var observeOn = Observer.Create<ImageViewModel>(model =>
-            {
-                Log.Information("Get Model");
-            });
-            var imageViewModels = applicationViewModel.Images.Subscribe(observeOn, ThreadPoolScheduler.Instance);
+            var autoResetEvent = new AutoResetEvent(false);
+
+            ImageViewModel imageViewModel = null;
+
+            applicationViewModel.Images.Subscribe(Observer.Create<ImageViewModel>(model =>
+                {
+                    imageViewModel = model;
+                },
+                () =>
+                {
+                    autoResetEvent.Set();
+                }));
+
+            autoResetEvent.WaitOne();
+            imageViewModel.Should().NotBeNull();
         }
     }
 }

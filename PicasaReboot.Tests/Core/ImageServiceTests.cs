@@ -1,13 +1,10 @@
 ﻿using System;
-using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using FluentAssertions;
 using NUnit.Framework;
 using PicasaReboot.Core;
-using PicasaReboot.Core.Extensions;
-using PicasaReboot.SampleImages;
 
 namespace PicasaReboot.Tests.Core
 {
@@ -21,8 +18,7 @@ namespace PicasaReboot.Tests.Core
             Log.Verbose(Environment.CurrentDirectory);
             Log.Verbose("TestDirectory {TestDirectory}", TestContext.CurrentContext.TestDirectory);
 
-            var mockFileSystem = new MockFileSystem();
-            mockFileSystem.AddDirectory(@"c:\images");
+            var mockFileSystem = MockFileSystemFactory.Create(false);
 
             var imageFileSystemService = new ImageService(mockFileSystem);
             var items = imageFileSystemService.ListFiles(@"c:\images");
@@ -33,18 +29,12 @@ namespace PicasaReboot.Tests.Core
         [Test]
         public void ListFolder()
         {
-            var image1Bytes = Resources.image1.GetBytes();
-
-            var image1Jpg = @"c:\images\image1.jpg";
-
-            var mockFileSystem = new MockFileSystem();
-            mockFileSystem.AddDirectory(@"c:\images");
-            mockFileSystem.AddFile(image1Jpg, new MockFileData(image1Bytes));
+            var mockFileSystem = MockFileSystemFactory.Create();
 
             var imageFileSystemService = new ImageService(mockFileSystem);
             var items = imageFileSystemService.ListFiles(@"c:\images");
 
-            items.ShouldAllBeEquivalentTo(new[] { image1Jpg });
+            items.ShouldAllBeEquivalentTo(new[] { MockFileSystemFactory.Image1Jpg });
 
             Log.Debug("Completed");
         }
@@ -52,12 +42,7 @@ namespace PicasaReboot.Tests.Core
         [Test]
         public void ListFolderAsync()
         {
-            var image1Bytes = Resources.image1.GetBytes();
-            var image1Jpg = @"c:\images\image1.jpg";
-
-            var mockFileSystem = new MockFileSystem();
-            mockFileSystem.AddDirectory(@"c:\images");
-            mockFileSystem.AddFile(image1Jpg, new MockFileData(image1Bytes));
+            var mockFileSystem = MockFileSystemFactory.Create();
 
             var imageFileSystemService = new ImageService(mockFileSystem);
             var observable = imageFileSystemService.ListFilesAsync(@"c:\images");
@@ -74,7 +59,7 @@ namespace PicasaReboot.Tests.Core
             });
 
             autoResetEvent.WaitOne();
-            items.ShouldAllBeEquivalentTo(new[] { image1Jpg });
+            items.ShouldAllBeEquivalentTo(new[] { MockFileSystemFactory.Image1Jpg });
         }
     }
 }

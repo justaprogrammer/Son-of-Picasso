@@ -118,6 +118,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Core\ImageServiceTests.cs" />
+    <Compile Include="MockFileSystemFactory.cs" />
     <Compile Include="Logging\NUnitConfigurationExtensions.cs" />
     <Compile Include="Logging\NUnitEnricher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
