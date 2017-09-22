@@ -5,17 +5,18 @@ using System.Threading;
 using FluentAssertions;
 using NUnit.Framework;
 using PicasaReboot.Core;
+using Serilog;
 
 namespace PicasaReboot.Tests.Core
 {
     [TestFixture]
     public class ImageServiceTests
     {
+        private static ILogger Log { get; } = LogManager.ForContext<ImageServiceTests>();
+
         [Test]
         public void ListEmptyFolder()
         {
-            Log.Verbose(Assembly.GetExecutingAssembly().Location);
-            Log.Verbose(Environment.CurrentDirectory);
             Log.Verbose("TestDirectory {TestDirectory}", TestContext.CurrentContext.TestDirectory);
 
             var mockFileSystem = MockFileSystemFactory.Create(false);

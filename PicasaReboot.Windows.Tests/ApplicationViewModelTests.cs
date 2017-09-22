@@ -9,12 +9,15 @@ using PicasaReboot.Core;
 using PicasaReboot.Tests;
 using PicasaReboot.Windows.ViewModels;
 using ReactiveUI;
+using Serilog;
 
 namespace PicasaReboot.Windows.Tests
 {
     [TestFixture]
     public class ApplicationViewModelTests
     {
+        private static ILogger Log { get; } = LogManager.ForContext<ApplicationViewModelTests>();
+
         [Test]
         public void CanCreateApplicationViewModel()
         {
@@ -46,6 +49,8 @@ namespace PicasaReboot.Windows.Tests
     [TestFixture]
     public class ImageViewModelTests
     {
+        private static ILogger Log { get; } = LogManager.ForContext<ImageViewModelTests>();
+
         [Test]
         public void CanCreateImageViewModel()
         {

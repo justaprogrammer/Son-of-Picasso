@@ -39,6 +39,8 @@ namespace PicasaReboot.Windows.ViewModels
                             .Subscribe(Images.AddRange);
                     }
                 });
+
+            Log.Debug("Created");
         }
 
         public ImageService ImageService { get; }
