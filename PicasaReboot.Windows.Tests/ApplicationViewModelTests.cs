@@ -16,7 +16,7 @@ namespace PicasaReboot.Windows.Tests
     public class ApplicationViewModelTests
     {
         [Test]
-        public void CanCreateImageViewModel()
+        public void CanCreateApplicationViewModel()
         {
             var mockFileSystem = MockFileSystemFactory.Create();
 
@@ -40,6 +40,22 @@ namespace PicasaReboot.Windows.Tests
             autoResetEvent.WaitOne();
 
             argsNewItems.Should().NotBeNull();
+        }
+    }
+
+    [TestFixture]
+    public class ImageViewModelTests
+    {
+        [Test]
+        public void CanCreateImageViewModel()
+        {
+            var mockFileSystem = MockFileSystemFactory.Create();
+
+            var imageFileSystemService = new ImageService(mockFileSystem);
+            var imageViewModel = new ImageViewModel(imageFileSystemService, MockFileSystemFactory.Image1Jpg);
+
+            imageViewModel.File.Should().Be(MockFileSystemFactory.Image1Jpg);
+            imageViewModel.Image.Should().NotBeNull();
         }
     }
 }
