@@ -1,9 +1,8 @@
 ﻿using System;
-using System.IO;
 using Serilog;
 using Serilog.Core;
 
-namespace PicasaReboot.Core
+namespace PicasaReboot.Core.Logging
 {
     public static class LogManager
     {

@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Windows;
 using PicasaReboot.Core;
+using PicasaReboot.Core.Logging;
 using PicasaReboot.Windows.ViewModels;
 using Serilog;
 
@@ -23,6 +24,8 @@ namespace PicasaReboot.Windows
             DataContext = applicationViewModel;
 
             Log.Debug("Initialized");
+
+            applicationViewModel.Directory = @"C:\Users\Spade\Desktop\New folder";
         }
     }
 }

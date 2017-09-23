@@ -1,9 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using PicasaReboot.Core;
+using PicasaReboot.Core.Logging;
+using PicasaReboot.Core.Scheduling;
 using ReactiveUI;
 using Serilog;
 
@@ -21,22 +22,40 @@ namespace PicasaReboot.Windows.ViewModels
             set { this.RaiseAndSetIfChanged(ref _directory, value); }
         }
 
-        public ReactiveList<ImageViewModel> Images { get; } = new ReactiveList<ImageViewModel>();
+        public ReactiveList<IImageViewModel> Images { get; } = new ReactiveList<IImageViewModel>();
 
         public ApplicationViewModel(ImageService imageService)
+            : this(imageService,  new SchedulerProvider())
+        {
+        }
+
+        public ApplicationViewModel(ImageService imageService, ISchedulerProvider scheduler)
         {
             ImageService = imageService;
 
             this.WhenAnyValue(model => model.Directory)
                 .Subscribe(directory =>
                 {
+                    Log.Verbose("Directory Changed: {directory}", directory);
+
                     Images.Clear();
                     if (directory != null)
                     {
                         imageService
                             .ListFilesAsync(directory)
-                            .Select(images => images.Select(image => new ImageViewModel(imageService, image)))
-                            .Subscribe(Images.AddRange);
+                            .ObserveOn(scheduler.ThreadPool)
+                            .SelectMany(strings => strings)
+                            .Select(s =>
+                            {
+                                Log.Verbose("Creating ImageViewModel {File}", s);
+                                return new ImageViewModel(imageService, s);
+                            })
+                            .ObserveOn(scheduler.Dispatcher)
+                            .Subscribe(imageViewModel =>
+                            {
+                                Log.Verbose("Populating image: {File}", imageViewModel.File);
+                                Images.Add(imageViewModel);
+                            });
                     }
                 });
 

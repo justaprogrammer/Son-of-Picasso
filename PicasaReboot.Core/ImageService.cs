@@ -4,6 +4,8 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Windows.Media.Imaging;
 using PicasaReboot.Core.Helpers;
+using PicasaReboot.Core.Logging;
+using PicasaReboot.Core.Scheduling;
 using Serilog;
 
 namespace PicasaReboot.Core
@@ -14,12 +16,15 @@ namespace PicasaReboot.Core
 
         protected IFileSystem FileSystem { get; }
 
-        public ImageService(IFileSystem fileSystem)
+        public ISchedulerProvider Scheduler { get; }
+
+        public ImageService(IFileSystem fileSystem, ISchedulerProvider scheduler)
         {
+            Scheduler = scheduler;
             FileSystem = fileSystem;
         }
 
-        public ImageService() : this(new FileSystem())
+        public ImageService() : this(new FileSystem(), new SchedulerProvider())
         {
         }
 
@@ -44,7 +49,9 @@ namespace PicasaReboot.Core
             Log.Debug("ListFilesAsync: {Directory}", directory);
 
             return Observable.Create<string[]>(
-                o => Observable.ToAsync<string, string[]>(ListFiles)(directory).Subscribe(o));
+                o => Observable.ToAsync<string, string[]>(ListFiles)(directory)
+                    .SubscribeOn(Scheduler.ThreadPool)
+                    .Subscribe(o));
         }
 
         public BitmapImage LoadImage(string path)

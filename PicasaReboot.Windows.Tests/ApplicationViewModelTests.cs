@@ -1,18 +1,21 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Reactive.Linq;
 using System.Threading;
 using FluentAssertions;
 using NUnit.Framework;
 using PicasaReboot.Core;
+using PicasaReboot.Core.Logging;
 using PicasaReboot.Tests;
+using PicasaReboot.Tests.Core;
+using PicasaReboot.Tests.Scheduling;
 using PicasaReboot.Windows.ViewModels;
-using ReactiveUI;
 using Serilog;
 
 namespace PicasaReboot.Windows.Tests
 {
+
     [TestFixture]
     public class ApplicationViewModelTests
     {
@@ -21,46 +24,45 @@ namespace PicasaReboot.Windows.Tests
         [Test]
         public void CanCreateApplicationViewModel()
         {
+            Log.Verbose("CanCreateApplicationViewModel");
+
+            var schedulers = new TestSchedulers();
+            schedulers.ThreadPool.Start();
+            schedulers.Dispatcher.Start();
+
             var mockFileSystem = MockFileSystemFactory.Create();
 
-            var imageFileSystemService = new ImageService(mockFileSystem);
-            var applicationViewModel = new ApplicationViewModel(imageFileSystemService);
+            var imageFileSystemService = new ImageService(mockFileSystem, schedulers);
+            var applicationViewModel = new ApplicationViewModel(imageFileSystemService, schedulers);
 
             var autoResetEvent = new AutoResetEvent(false);
 
             IList argsNewItems = null;
-            applicationViewModel.Images.Changed.Subscribe(args =>
-            {
-                if (args.Action == NotifyCollectionChangedAction.Add)
+            applicationViewModel.Images.Changed
+                .ObserveOn(schedulers.ThreadPool)
+                .Subscribe(args =>
                 {
-                    argsNewItems = args.NewItems;
-                    autoResetEvent.Set();
-                }
-            });
+                    Log.Verbose("Images.Changed: {Action}", args.Action);
+
+                    if (args.Action == NotifyCollectionChangedAction.Add)
+                    {
+                        argsNewItems = args.NewItems;
+                        autoResetEvent.Set();
+                    }
+                });
 
             applicationViewModel.Directory = MockFileSystemFactory.ImagesFolder;
 
-            autoResetEvent.WaitOne();
+            Log.Verbose("CanCreateApplicationViewModel");
 
-            argsNewItems.Should().NotBeNull();
-        }
-    }
-
-    [TestFixture]
-    public class ImageViewModelTests
-    {
-        private static ILogger Log { get; } = LogManager.ForContext<ImageViewModelTests>();
-
-        [Test]
-        public void CanCreateImageViewModel()
-        {
-            var mockFileSystem = MockFileSystemFactory.Create();
-
-            var imageFileSystemService = new ImageService(mockFileSystem);
-            var imageViewModel = new ImageViewModel(imageFileSystemService, MockFileSystemFactory.Image1Jpg);
-
-            imageViewModel.File.Should().Be(MockFileSystemFactory.Image1Jpg);
-            imageViewModel.Image.Should().NotBeNull();
+            try
+            {
+                autoResetEvent.WaitOne(TimeSpan.FromSeconds(5)).Should().BeTrue();
+            }
+            catch (Exception e)
+            {
+                
+            }
         }
     }
 }
