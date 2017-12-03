@@ -19,9 +19,9 @@ namespace PicasaReboot.Tests.Core
         private static ILogger Log { get; } = LogManager.ForContext<ImageServiceTests>();
 
         [Test]
-        public void ListEmptyFolder()
+        public void ListFilesOfEmptyFolder()
         {
-            Log.Verbose("ListEmptyFolder");
+            Log.Verbose("ListFilesOfEmptyFolder");
 
             var schedulers = new TestSchedulers();
             var mockFileSystem = MockFileSystemFactory.Create(false);
@@ -33,9 +33,9 @@ namespace PicasaReboot.Tests.Core
         }
 
         [Test]
-        public void ListFolder()
+        public void ListFiles()
         {
-            Log.Verbose("ListFolder");
+            Log.Verbose("ListFiles");
 
             var schedulers = new TestSchedulers();
             var mockFileSystem = MockFileSystemFactory.Create();
@@ -49,9 +49,9 @@ namespace PicasaReboot.Tests.Core
         }
 
         [Test]
-        public void ListFolderAsync()
+        public void ListFilesAsync()
         {
-            Log.Verbose("ListFolderAsync");
+            Log.Verbose("ListFilesAsync");
 
             var schedulers = new TestSchedulers();
             var mockFileSystem = MockFileSystemFactory.Create();
