@@ -5,10 +5,9 @@ using ReactiveUI;
 
 namespace PicasaReboot.Windows.ViewModels
 {
-    public interface IApplicationViewModel
+    public interface IDirectoryViewModel
     {
-        string Directory { get; set; }
+        string Name { get; set; }
         ReactiveList<IImageViewModel> Images { get; }
-        ImageService ImageService { get; }
     }
 }

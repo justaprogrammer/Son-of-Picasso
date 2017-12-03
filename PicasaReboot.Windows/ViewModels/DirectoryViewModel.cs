@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Linq;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using PicasaReboot.Core;
 using PicasaReboot.Core.Logging;
@@ -10,34 +8,30 @@ using Serilog;
 
 namespace PicasaReboot.Windows.ViewModels
 {
-    public class ApplicationViewModel : ReactiveObject, IApplicationViewModel
+    public class DirectoryViewModel : ReactiveObject, IDirectoryViewModel
     {
-        private static ILogger Log { get; } = LogManager.ForContext<ApplicationViewModel>();
+        private static ILogger Log { get; } = LogManager.ForContext<DirectoryViewModel>();
 
-        string _directory;
+        private string _name;
 
-        public string Directory
+        public string Name
         {
-            get { return _directory; }
-            set { this.RaiseAndSetIfChanged(ref _directory, value); }
+            get { return _name; }
+            set { this.RaiseAndSetIfChanged(ref _name, value); }
         }
 
         public ReactiveList<IImageViewModel> Images { get; } = new ReactiveList<IImageViewModel>();
 
-        public ApplicationViewModel(ImageService imageService)
+        public DirectoryViewModel(ImageService imageService)
             : this(imageService,  new SchedulerProvider())
         {
         }
 
-        public ApplicationViewModel(ImageService imageService, ISchedulerProvider scheduler)
+        public DirectoryViewModel(ImageService imageService, ISchedulerProvider scheduler)
         {
-            ImageService = imageService;
-
-            this.WhenAnyValue(model => model.Directory)
+            this.WhenAnyValue(model => model.Name)
                 .Subscribe(directory =>
                 {
-                    Log.Verbose("Directory Changed: {directory}", directory);
-
                     Images.Clear();
                     if (directory != null)
                     {
@@ -61,7 +55,5 @@ namespace PicasaReboot.Windows.ViewModels
 
             Log.Debug("Created");
         }
-
-        public ImageService ImageService { get; }
     }
 }

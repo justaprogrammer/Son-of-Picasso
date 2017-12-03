@@ -144,7 +144,7 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
-    <Compile Include="ApplicationViewModelTests.cs" />
+    <Compile Include="DirectoryViewModelTests.cs" />
     <Compile Include="ImageViewModelTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

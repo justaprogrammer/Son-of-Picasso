@@ -4,15 +4,15 @@ using ReactiveUI;
 
 namespace PicasaReboot.Windows.ViewModels.DesignTimeData
 {
-    public class ApplicationViewModelSampleData : IApplicationViewModel
+    public class DirectoryViewModelSampleData : IDirectoryViewModel
     {
-        public static IApplicationViewModel SampleData
+        public static IDirectoryViewModel SampleData
         {
             get
             {
-                var applicationViewModelSampleData = new ApplicationViewModelSampleData()
+                var applicationViewModelSampleData = new DirectoryViewModelSampleData()
                 {
-                    Directory = @"c:\Images",
+                    Name = @"c:\Images",
                     Images = new ReactiveList<IImageViewModel>
                     {
                         new ImageViewModelSampleData
@@ -27,7 +27,7 @@ namespace PicasaReboot.Windows.ViewModels.DesignTimeData
             }
         }
 
-        public string Directory { get; set; }
+        public string Name { get; set; }
         public ReactiveList<IImageViewModel> Images { get; set; }
         public ImageService ImageService { get; set; }
     }

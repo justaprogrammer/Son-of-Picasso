@@ -17,14 +17,14 @@ namespace PicasaReboot.Windows.Tests
 {
 
     [TestFixture]
-    public class ApplicationViewModelTests
+    public class DirectoryViewModelTests
     {
-        private static ILogger Log { get; } = LogManager.ForContext<ApplicationViewModelTests>();
+        private static ILogger Log { get; } = LogManager.ForContext<DirectoryViewModelTests>();
 
         [Test]
-        public void CanCreateApplicationViewModel()
+        public void CanCreateDirectoryViewModel()
         {
-            Log.Verbose("CanCreateApplicationViewModel");
+            Log.Verbose("CanCreateDirectoryViewModel");
 
             var schedulers = new TestSchedulers();
             schedulers.ThreadPool.Start();
@@ -33,12 +33,12 @@ namespace PicasaReboot.Windows.Tests
             var mockFileSystem = MockFileSystemFactory.Create();
 
             var imageFileSystemService = new ImageService(mockFileSystem, schedulers);
-            var applicationViewModel = new ApplicationViewModel(imageFileSystemService, schedulers);
+            var directoryViewModel = new DirectoryViewModel(imageFileSystemService, schedulers);
 
             var autoResetEvent = new AutoResetEvent(false);
 
             IList argsNewItems = null;
-            applicationViewModel.Images.Changed
+            directoryViewModel.Images.Changed
                 .ObserveOn(schedulers.ThreadPool)
                 .Subscribe(args =>
                 {
@@ -51,9 +51,9 @@ namespace PicasaReboot.Windows.Tests
                     }
                 });
 
-            applicationViewModel.Directory = MockFileSystemFactory.ImagesFolder;
+            directoryViewModel.Name = MockFileSystemFactory.ImagesFolder;
 
-            Log.Verbose("CanCreateApplicationViewModel");
+            Log.Verbose("CanCreateDirectoryViewModel");
 
             try
             {

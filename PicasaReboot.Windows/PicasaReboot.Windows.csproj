@@ -113,10 +113,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="ViewModels\ApplicationViewModel.cs" />
-    <Compile Include="ViewModels\DesignTimeData\ApplicationViewModelSampleData.cs" />
+    <Compile Include="ViewModels\DirectoryViewModel.cs" />
+    <Compile Include="ViewModels\DesignTimeData\DirectoryViewModelSampleData.cs" />
     <Compile Include="ViewModels\DesignTimeData\ImageViewModelSampleData.cs" />
-    <Compile Include="ViewModels\IApplicationViewModel.cs" />
+    <Compile Include="ViewModels\IDirectoryViewModel.cs" />
     <Compile Include="ViewModels\IImageViewModel.cs" />
     <Compile Include="ViewModels\ImageViewModel.cs" />
     <Page Include="MainWindow.xaml">

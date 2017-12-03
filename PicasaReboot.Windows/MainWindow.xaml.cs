@@ -20,12 +20,12 @@ namespace PicasaReboot.Windows
 
             InitializeComponent();
 
-            var applicationViewModel = new ApplicationViewModel(new ImageService());
+            var applicationViewModel = new DirectoryViewModel(new ImageService());
             DataContext = applicationViewModel;
 
             Log.Debug("Initialized");
 
-            applicationViewModel.Directory = @"C:\Users\Spade\Desktop\New folder";
+            applicationViewModel.Name = @"C:\Users\Spade\Desktop\New folder";
         }
     }
 }
