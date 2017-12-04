@@ -12,45 +12,31 @@ namespace PicasaReboot.Windows.ViewModels
     {
         private static ILogger Log { get; } = LogManager.ForContext<DirectoryViewModel>();
 
-        private string _name;
-
-        public string Name
-        {
-            get { return _name; }
-            set { this.RaiseAndSetIfChanged(ref _name, value); }
-        }
-
         public ReactiveList<IImageViewModel> Images { get; } = new ReactiveList<IImageViewModel>();
+        public string Name { get; }
 
-        public DirectoryViewModel(ImageService imageService)
-            : this(imageService,  new SchedulerProvider())
+        public DirectoryViewModel(ImageService imageService, string name)
+            : this(imageService, name,  new SchedulerProvider())
         {
         }
 
-        public DirectoryViewModel(ImageService imageService, ISchedulerProvider scheduler)
+        public DirectoryViewModel(ImageService imageService, string name, ISchedulerProvider scheduler)
         {
-            this.WhenAnyValue(model => model.Name)
-                .Subscribe(directory =>
+            Name = name;
+            imageService
+                .ListFilesAsync(name)
+                .ObserveOn(scheduler.ThreadPool)
+                .SelectMany(strings => strings)
+                .Select(file =>
                 {
-                    Images.Clear();
-                    if (directory != null)
-                    {
-                        imageService
-                            .ListFilesAsync(directory)
-                            .ObserveOn(scheduler.ThreadPool)
-                            .SelectMany(strings => strings)
-                            .Select(s =>
-                            {
-                                Log.Verbose("Creating ImageViewModel {File}", s);
-                                return new ImageViewModel(imageService, s);
-                            })
-                            .ObserveOn(scheduler.Dispatcher)
-                            .Subscribe(imageViewModel =>
-                            {
-                                Log.Verbose("Populating image: {File}", imageViewModel.File);
-                                Images.Add(imageViewModel);
-                            });
-                    }
+                    Log.Verbose("Creating ImageViewModel {File}", file);
+                    return new ImageViewModel(imageService, file, scheduler);
+                })
+                .ObserveOn(scheduler.Dispatcher)
+                .Subscribe(imageViewModel =>
+                {
+                    Log.Verbose("Populating image: {File}", imageViewModel.File);
+                    Images.Add(imageViewModel);
                 });
 
             Log.Debug("Created");

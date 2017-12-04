@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Reflection;
 using System.Threading;
+using System.Windows.Media.Imaging;
 using FluentAssertions;
 using NUnit.Framework;
 using PicasaReboot.Core;
@@ -27,7 +28,7 @@ namespace PicasaReboot.Tests.Core
             var mockFileSystem = MockFileSystemFactory.Create(false);
 
             var imageFileSystemService = new ImageService(mockFileSystem, schedulers);
-            var items = imageFileSystemService.ListFiles(@"c:\images");
+            var items = imageFileSystemService.ListFiles(MockFileSystemFactory.ImagesFolder);
 
             items.ShouldAllBeEquivalentTo(Enumerable.Empty<string>());
         }
@@ -41,7 +42,7 @@ namespace PicasaReboot.Tests.Core
             var mockFileSystem = MockFileSystemFactory.Create();
 
             var imageFileSystemService = new ImageService(mockFileSystem, schedulers);
-            var items = imageFileSystemService.ListFiles(@"c:\images");
+            var items = imageFileSystemService.ListFiles(MockFileSystemFactory.ImagesFolder);
 
             items.ShouldAllBeEquivalentTo(new[] { MockFileSystemFactory.Image1Jpg });
 
@@ -57,7 +58,9 @@ namespace PicasaReboot.Tests.Core
             var mockFileSystem = MockFileSystemFactory.Create();
 
             var imageFileSystemService = new ImageService(mockFileSystem, schedulers);
-            var observable = imageFileSystemService.ListFilesAsync(@"c:\images");
+            var observable = imageFileSystemService.ListFilesAsync(MockFileSystemFactory.ImagesFolder);
+
+            Log.Debug("Created Observable");
 
             var autoResetEvent = new AutoResetEvent(false);
 
@@ -75,6 +78,56 @@ namespace PicasaReboot.Tests.Core
             autoResetEvent.WaitOne();
 
             items.ShouldAllBeEquivalentTo(new[] { MockFileSystemFactory.Image1Jpg });
+
+            Log.Debug("Completed");
+        }
+
+        [Test]
+        public void LoadImage()
+        {
+            Log.Verbose("LoadImage");
+
+            var schedulers = new TestSchedulers();
+            var mockFileSystem = MockFileSystemFactory.Create();
+
+            var imageFileSystemService = new ImageService(mockFileSystem, schedulers);
+            var bitmapImage = imageFileSystemService.LoadImage(MockFileSystemFactory.Image1Jpg);
+            bitmapImage.Should().NotBeNull();
+
+            Log.Debug("Completed");
+        }
+
+        [Test]
+        public void LoadImageAsync()
+        {
+            Log.Verbose("LoadImageAsync");
+
+            var schedulers = new TestSchedulers();
+            var mockFileSystem = MockFileSystemFactory.Create();
+
+            var imageFileSystemService = new ImageService(mockFileSystem, schedulers);
+            var observable = imageFileSystemService.LoadImageAsync(MockFileSystemFactory.Image1Jpg);
+
+            Log.Debug("Created Observable");
+
+            var autoResetEvent = new AutoResetEvent(false);
+
+            BitmapImage image = null;
+            observable
+                .Subscribe(i =>
+                {
+                    image = i;
+                    autoResetEvent.Set();
+                }, () =>
+                {
+                });
+
+            schedulers.ThreadPool.AdvanceBy(1);
+            autoResetEvent.WaitOne();
+
+            image.Should().NotBeNull();
+
+            Log.Debug("Completed");
         }
     }
 }

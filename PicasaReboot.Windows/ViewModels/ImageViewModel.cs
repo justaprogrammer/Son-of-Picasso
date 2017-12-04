@@ -1,8 +1,9 @@
-﻿using System.IO.Abstractions;
+﻿using System;
 using System.Reactive.Concurrency;
 using System.Windows.Media.Imaging;
 using PicasaReboot.Core;
 using PicasaReboot.Core.Logging;
+using PicasaReboot.Core.Scheduling;
 using ReactiveUI;
 using Serilog;
 
@@ -10,38 +11,27 @@ namespace PicasaReboot.Windows.ViewModels
 {
     public class ImageViewModel : ReactiveObject, IImageViewModel
     {
-        private string _file;
-
-        private BitmapImage _image;
-
         public ImageViewModel(ImageService imageService, string file)
-            : this(imageService, file, DefaultScheduler.Instance)
+            : this(imageService, file, new SchedulerProvider())
         {
         }
 
-        public ImageViewModel(ImageService imageService, string file, IScheduler scheduler)
+        public ImageViewModel(ImageService imageService, string file, ISchedulerProvider scheduler)
         {
             ImageService = imageService;
             File = file;
 
-            Image = ImageService.LoadImage(file);
+            Image = ImageService.LoadImageAsync(file);
+
             Log.Debug("Created");
         }
 
         private static ILogger Log { get; } = LogManager.ForContext<ImageViewModel>();
 
+        public IObservable<BitmapImage> Image { get; }
+
+        public string File { get; }
+
         protected ImageService ImageService { get; }
-
-        public BitmapImage Image
-        {
-            get { return _image; }
-            set { this.RaiseAndSetIfChanged(ref _image, value); }
-        }
-
-        public string File
-        {
-            get { return _file; }
-            set { this.RaiseAndSetIfChanged(ref _file, value); }
-        }
     }
 }

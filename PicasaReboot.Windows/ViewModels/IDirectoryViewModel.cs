@@ -7,7 +7,7 @@ namespace PicasaReboot.Windows.ViewModels
 {
     public interface IDirectoryViewModel
     {
-        string Name { get; set; }
+        string Name { get; }
         ReactiveList<IImageViewModel> Images { get; }
     }
 }

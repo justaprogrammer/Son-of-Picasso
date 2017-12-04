@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Specialized;
-using System.Reactive.Linq;
-using System.Threading;
-using FluentAssertions;
+﻿using System.Threading;
 using NUnit.Framework;
 using PicasaReboot.Core;
 using PicasaReboot.Core.Logging;
 using PicasaReboot.Tests;
-using PicasaReboot.Tests.Core;
 using PicasaReboot.Tests.Scheduling;
 using PicasaReboot.Windows.ViewModels;
 using Serilog;
@@ -33,36 +27,9 @@ namespace PicasaReboot.Windows.Tests
             var mockFileSystem = MockFileSystemFactory.Create();
 
             var imageFileSystemService = new ImageService(mockFileSystem, schedulers);
-            var directoryViewModel = new DirectoryViewModel(imageFileSystemService, schedulers);
+            var directoryViewModel = new DirectoryViewModel(imageFileSystemService, MockFileSystemFactory.ImagesFolder, schedulers);
 
             var autoResetEvent = new AutoResetEvent(false);
-
-            IList argsNewItems = null;
-            directoryViewModel.Images.Changed
-                .ObserveOn(schedulers.ThreadPool)
-                .Subscribe(args =>
-                {
-                    Log.Verbose("Images.Changed: {Action}", args.Action);
-
-                    if (args.Action == NotifyCollectionChangedAction.Add)
-                    {
-                        argsNewItems = args.NewItems;
-                        autoResetEvent.Set();
-                    }
-                });
-
-            directoryViewModel.Name = MockFileSystemFactory.ImagesFolder;
-
-            Log.Verbose("CanCreateDirectoryViewModel");
-
-            try
-            {
-                autoResetEvent.WaitOne(TimeSpan.FromSeconds(5)).Should().BeTrue();
-            }
-            catch (Exception e)
-            {
-                
-            }
         }
     }
 }

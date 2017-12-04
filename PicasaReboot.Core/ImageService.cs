@@ -63,5 +63,17 @@ namespace PicasaReboot.Core
             var bytes = FileSystem.File.ReadAllBytes(path);
             return ImageHelpers.LoadBitmapImageFromBytes(bytes);
         }
+
+        public IObservable<BitmapImage> LoadImageAsync(string path)
+        {
+            Log.Debug("LoadImageAsync: {Path}", path);
+
+            Guard.NotNullOrEmpty(nameof(path), path);
+
+            return Observable.Create<BitmapImage>(
+                o => Observable.ToAsync<string, BitmapImage>(LoadImage)(path)
+                    .SubscribeOn(Scheduler.ThreadPool)
+                    .Subscribe(o));
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Windows.Media.Imaging;
+﻿using System;
+using System.Windows.Media.Imaging;
 
 namespace PicasaReboot.Windows.ViewModels
 {
@@ -6,6 +7,6 @@ namespace PicasaReboot.Windows.ViewModels
     {
         string File { get; }
 
-        BitmapImage Image { get; }
+        IObservable<BitmapImage> Image { get; }
     }
 }

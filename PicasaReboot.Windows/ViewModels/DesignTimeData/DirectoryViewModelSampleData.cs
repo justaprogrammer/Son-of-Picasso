@@ -1,4 +1,5 @@
-﻿using PicasaReboot.Core;
+﻿using System.Reactive.Linq;
+using PicasaReboot.Core;
 using PicasaReboot.Core.Extensions;
 using ReactiveUI;
 
@@ -18,7 +19,7 @@ namespace PicasaReboot.Windows.ViewModels.DesignTimeData
                         new ImageViewModelSampleData
                         {
                             File = "image.jpg",
-                            Image = SampleImages.Resources.image1.GetBitmapImage()
+                            Image = Observable.Return(SampleImages.Resources.image1.GetBitmapImage())
                         }
                     }
                 };
