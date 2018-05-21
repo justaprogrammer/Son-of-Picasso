@@ -7,7 +7,10 @@
         xmlns:viewModels="clr-namespace:PicasaReboot.Windows.ViewModels"
         xmlns:designTimeData="clr-namespace:PicasaReboot.Windows.ViewModels.DesignTimeData"
         mc:Ignorable="d"
-        
+        asdf
+        asdf
+        asdfasd
+        asdf
         d:DataContext="{x:Static designTimeData:DirectoryViewModelSampleData.SampleData}"
         Title="MainWindow" Height="350" Width="747.667">
     <Grid>
