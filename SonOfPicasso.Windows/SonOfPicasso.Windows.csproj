@@ -163,11 +163,11 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\PicasaReboot.Core\SonOfPicasso.Core.csproj">
+    <ProjectReference Include="..\SonOfPicasso.Core\SonOfPicasso.Core.csproj">
       <Project>{68CDEEB6-3ABA-4DCD-9CD8-C1887CDE6964}</Project>
       <Name>SonOfPicasso.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\PicasaReboot.SampleImages\SonOfPicasso.SampleImages.csproj">
+    <ProjectReference Include="..\SonOfPicasso.SampleImages\SonOfPicasso.SampleImages.csproj">
       <Project>{f0b85c37-4bb3-45ba-b47f-d9b0d978c9d3}</Project>
       <Name>SonOfPicasso.SampleImages</Name>
     </ProjectReference>
