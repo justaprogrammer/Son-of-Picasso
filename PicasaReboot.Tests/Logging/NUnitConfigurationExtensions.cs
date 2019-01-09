@@ -1,8 +1,6 @@
 ﻿using System;
-using Serilog;
-using Serilog.Configuration;
 
-namespace PicasaReboot.Tests.Logging
+namespace SonOfPicasso.Tests.Logging
 {
     public static class NUnitConfigurationExtensions
     {

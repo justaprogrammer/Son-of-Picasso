@@ -1,9 +1,4 @@
-using System.IO.Abstractions;
-using System.IO.Abstractions.TestingHelpers;
-using PicasaReboot.Core.Extensions;
-using PicasaReboot.SampleImages;
-
-namespace PicasaReboot.Tests
+namespace SonOfPicasso.Tests
 {
     public class MockFileSystemFactory
     {

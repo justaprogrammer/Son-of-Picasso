@@ -1,13 +1,11 @@
 ﻿using System.Threading;
-using NUnit.Framework;
-using PicasaReboot.Core;
-using PicasaReboot.Core.Logging;
-using PicasaReboot.Tests;
-using PicasaReboot.Tests.Scheduling;
-using PicasaReboot.Windows.ViewModels;
-using Serilog;
+using SonOfPicasso.Core;
+using SonOfPicasso.Core.Logging;
+using SonOfPicasso.Tests;
+using SonOfPicasso.Tests.Scheduling;
+using SonOfPicasso.Windows.ViewModels;
 
-namespace PicasaReboot.Windows.Tests
+namespace SonOfPicasso.Windows.Tests
 {
 
     [TestFixture]

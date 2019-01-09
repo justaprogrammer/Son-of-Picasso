@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
-using JetBrains.Annotations;
 
-namespace PicasaReboot.Core
+namespace SonOfPicasso.Core
 {
     public static class Guard
     {

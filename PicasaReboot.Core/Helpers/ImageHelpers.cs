@@ -1,7 +1,7 @@
 using System.IO;
 using System.Windows.Media.Imaging;
 
-namespace PicasaReboot.Core.Helpers
+namespace SonOfPicasso.Core.Helpers
 {
     public static class ImageHelpers
     {

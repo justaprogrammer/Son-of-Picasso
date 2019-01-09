@@ -1,9 +1,6 @@
-﻿using System.Reactive.Concurrency;
-using Microsoft.Reactive.Testing;
-using PicasaReboot.Core;
-using PicasaReboot.Core.Scheduling;
+﻿using SonOfPicasso.Core.Scheduling;
 
-namespace PicasaReboot.Tests.Scheduling
+namespace SonOfPicasso.Tests.Scheduling
 {
     public sealed class TestSchedulers : ISchedulerProvider
     {

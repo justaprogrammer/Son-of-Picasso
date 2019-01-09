@@ -1,12 +1,8 @@
-﻿using System;
-using System.Reactive.Linq;
-using PicasaReboot.Core;
-using PicasaReboot.Core.Logging;
-using PicasaReboot.Core.Scheduling;
-using ReactiveUI;
-using Serilog;
+﻿using SonOfPicasso.Core;
+using SonOfPicasso.Core.Logging;
+using SonOfPicasso.Core.Scheduling;
 
-namespace PicasaReboot.Windows.ViewModels
+namespace SonOfPicasso.Windows.ViewModels
 {
     public class DirectoryViewModel : ReactiveObject, IDirectoryViewModel
     {

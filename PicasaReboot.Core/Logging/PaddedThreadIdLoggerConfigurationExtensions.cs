@@ -1,8 +1,6 @@
 ﻿using System;
-using Serilog;
-using Serilog.Configuration;
 
-namespace PicasaReboot.Core.Logging
+namespace SonOfPicasso.Core.Logging
 {
     public static class PaddedThreadIdLoggerConfigurationExtensions
     {

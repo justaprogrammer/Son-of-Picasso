@@ -1,6 +1,4 @@
-﻿using System.Reactive.Concurrency;
-
-namespace PicasaReboot.Core.Scheduling
+﻿namespace SonOfPicasso.Core.Scheduling
 {
     public sealed class SchedulerProvider : ISchedulerProvider
     {

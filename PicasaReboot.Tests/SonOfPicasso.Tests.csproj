@@ -6,8 +6,8 @@
     <ProjectGuid>{F1D93406-A6F7-4D62-AE8A-4DF362932082}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PicasaReboot.Tests</RootNamespace>
-    <AssemblyName>PicasaReboot.Tests</AssemblyName>
+    <RootNamespace>SonOfPicasso.Tests</RootNamespace>
+    <AssemblyName>SonOfPicasso.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -151,13 +151,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\PicasaReboot.Core\PicasaReboot.Core.csproj">
+    <ProjectReference Include="..\PicasaReboot.Core\SonOfPicasso.Core.csproj">
       <Project>{68CDEEB6-3ABA-4DCD-9CD8-C1887CDE6964}</Project>
-      <Name>PicasaReboot.Core</Name>
+      <Name>SonOfPicasso.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\PicasaReboot.SampleImages\PicasaReboot.SampleImages.csproj">
+    <ProjectReference Include="..\PicasaReboot.SampleImages\SonOfPicasso.SampleImages.csproj">
       <Project>{F0B85C37-4BB3-45BA-B47F-D9B0D978C9D3}</Project>
-      <Name>PicasaReboot.SampleImages</Name>
+      <Name>SonOfPicasso.SampleImages</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

@@ -1,11 +1,9 @@
-﻿using System.Linq;
-using System.Windows;
-using PicasaReboot.Core;
-using PicasaReboot.Core.Logging;
-using PicasaReboot.Windows.ViewModels;
-using Serilog;
+﻿using System.Windows;
+using SonOfPicasso.Core;
+using SonOfPicasso.Core.Logging;
+using SonOfPicasso.Windows.ViewModels;
 
-namespace PicasaReboot.Windows
+namespace SonOfPicasso.Windows
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

@@ -7,8 +7,8 @@
     <ProjectGuid>{68CDEEB6-3ABA-4DCD-9CD8-C1887CDE6964}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PicasaReboot.Core</RootNamespace>
-    <AssemblyName>PicasaReboot.Core</AssemblyName>
+    <RootNamespace>SonOfPicasso.Core</RootNamespace>
+    <AssemblyName>SonOfPicasso.Core</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

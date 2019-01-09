@@ -1,9 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using PicasaReboot.Core;
-using ReactiveUI;
-
-namespace PicasaReboot.Windows.ViewModels
+﻿namespace SonOfPicasso.Windows.ViewModels
 {
     public interface IDirectoryViewModel
     {

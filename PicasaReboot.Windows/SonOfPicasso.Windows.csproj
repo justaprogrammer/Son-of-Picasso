@@ -7,8 +7,8 @@
     <ProjectGuid>{12086427-2DFC-493E-99EE-0C5522405A81}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PicasaReboot.Windows</RootNamespace>
-    <AssemblyName>PicasaReboot.Windows</AssemblyName>
+    <RootNamespace>SonOfPicasso.Windows</RootNamespace>
+    <AssemblyName>SonOfPicasso.Windows</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -163,13 +163,13 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\PicasaReboot.Core\PicasaReboot.Core.csproj">
+    <ProjectReference Include="..\PicasaReboot.Core\SonOfPicasso.Core.csproj">
       <Project>{68CDEEB6-3ABA-4DCD-9CD8-C1887CDE6964}</Project>
-      <Name>PicasaReboot.Core</Name>
+      <Name>SonOfPicasso.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\PicasaReboot.SampleImages\PicasaReboot.SampleImages.csproj">
+    <ProjectReference Include="..\PicasaReboot.SampleImages\SonOfPicasso.SampleImages.csproj">
       <Project>{f0b85c37-4bb3-45ba-b47f-d9b0d978c9d3}</Project>
-      <Name>PicasaReboot.SampleImages</Name>
+      <Name>SonOfPicasso.SampleImages</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

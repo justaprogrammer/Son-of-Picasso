@@ -1,8 +1,8 @@
 using System.Drawing;
 using System.Windows.Media.Imaging;
-using PicasaReboot.Core.Helpers;
+using SonOfPicasso.Core.Helpers;
 
-namespace PicasaReboot.Core.Extensions
+namespace SonOfPicasso.Core.Extensions
 {
     public static class ImageExtensions
     {

@@ -1,9 +1,6 @@
-﻿using System.Reactive.Linq;
-using PicasaReboot.Core;
-using PicasaReboot.Core.Extensions;
-using ReactiveUI;
+﻿using SonOfPicasso.Core;
 
-namespace PicasaReboot.Windows.ViewModels.DesignTimeData
+namespace SonOfPicasso.Windows.ViewModels.DesignTimeData
 {
     public class DirectoryViewModelSampleData : IDirectoryViewModel
     {

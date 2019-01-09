@@ -1,8 +1,6 @@
 ﻿using System;
-using Serilog.Core;
-using Serilog.Events;
 
-namespace PicasaReboot.Core.Logging
+namespace SonOfPicasso.Core.Logging
 {
     public class PaddedThreadIdEnricher : ILogEventEnricher
     {

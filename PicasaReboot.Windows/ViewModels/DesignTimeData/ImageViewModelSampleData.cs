@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Media.Imaging;
 
-namespace PicasaReboot.Windows.ViewModels.DesignTimeData
+namespace SonOfPicasso.Windows.ViewModels.DesignTimeData
 {
     public class ImageViewModelSampleData : IImageViewModel
     {

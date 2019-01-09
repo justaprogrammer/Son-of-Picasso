@@ -1,18 +1,11 @@
-﻿using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Reflection;
+﻿using System.Linq;
 using System.Threading;
 using System.Windows.Media.Imaging;
-using FluentAssertions;
-using NUnit.Framework;
-using PicasaReboot.Core;
-using PicasaReboot.Core.Logging;
-using PicasaReboot.Tests.Scheduling;
-using Serilog;
+using SonOfPicasso.Core;
+using SonOfPicasso.Core.Logging;
+using SonOfPicasso.Tests.Scheduling;
 
-namespace PicasaReboot.Tests.Core
+namespace SonOfPicasso.Tests.Core
 {
     [TestFixture]
     public class ImageServiceTests

@@ -1,7 +1,6 @@
 ﻿using System;
-using NUnit.Framework;
 
-namespace PicasaReboot.Tests
+namespace SonOfPicasso.Tests
 {
     [SetUpFixture]
     public class SetupFixture

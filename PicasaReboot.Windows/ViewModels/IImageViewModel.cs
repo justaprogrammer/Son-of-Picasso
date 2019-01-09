@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Media.Imaging;
 
-namespace PicasaReboot.Windows.ViewModels
+namespace SonOfPicasso.Windows.ViewModels
 {
     public interface IImageViewModel
     {

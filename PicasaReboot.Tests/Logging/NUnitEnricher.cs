@@ -1,9 +1,6 @@
 ﻿using System;
-using NUnit.Framework;
-using Serilog.Core;
-using Serilog.Events;
 
-namespace PicasaReboot.Tests.Logging
+namespace SonOfPicasso.Tests.Logging
 {
     public class NUnitEnricher : ILogEventEnricher
     {

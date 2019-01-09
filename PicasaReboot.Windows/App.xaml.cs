@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using System.Reflection;
-using System.Threading.Tasks;
 using System.Windows;
-using PicasaReboot.Core;
+using SonOfPicasso.Core;
 
-namespace PicasaReboot.Windows
+namespace SonOfPicasso.Windows
 {
     /// <summary>
     /// Interaction logic for App.xaml

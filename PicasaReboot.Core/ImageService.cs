@@ -1,14 +1,10 @@
 ﻿using System;
-using System.IO.Abstractions;
-using System.Linq;
-using System.Reactive.Linq;
 using System.Windows.Media.Imaging;
-using PicasaReboot.Core.Helpers;
-using PicasaReboot.Core.Logging;
-using PicasaReboot.Core.Scheduling;
-using Serilog;
+using SonOfPicasso.Core.Helpers;
+using SonOfPicasso.Core.Logging;
+using SonOfPicasso.Core.Scheduling;
 
-namespace PicasaReboot.Core
+namespace SonOfPicasso.Core
 {
     public class ImageService
     {

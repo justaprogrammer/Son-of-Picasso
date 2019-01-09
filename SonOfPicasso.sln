@@ -1,17 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.168
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PicasaReboot.Windows", "PicasaReboot.Windows\PicasaReboot.Windows.csproj", "{12086427-2DFC-493E-99EE-0C5522405A81}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SonOfPicasso.Windows", "PicasaReboot.Windows\SonOfPicasso.Windows.csproj", "{12086427-2DFC-493E-99EE-0C5522405A81}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PicasaReboot.Core", "PicasaReboot.Core\PicasaReboot.Core.csproj", "{68CDEEB6-3ABA-4DCD-9CD8-C1887CDE6964}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SonOfPicasso.Core", "PicasaReboot.Core\SonOfPicasso.Core.csproj", "{68CDEEB6-3ABA-4DCD-9CD8-C1887CDE6964}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PicasaReboot.Tests", "PicasaReboot.Tests\PicasaReboot.Tests.csproj", "{F1D93406-A6F7-4D62-AE8A-4DF362932082}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SonOfPicasso.Tests", "PicasaReboot.Tests\SonOfPicasso.Tests.csproj", "{F1D93406-A6F7-4D62-AE8A-4DF362932082}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PicasaReboot.SampleImages", "PicasaReboot.SampleImages\PicasaReboot.SampleImages.csproj", "{F0B85C37-4BB3-45BA-B47F-D9B0D978C9D3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SonOfPicasso.SampleImages", "PicasaReboot.SampleImages\SonOfPicasso.SampleImages.csproj", "{F0B85C37-4BB3-45BA-B47F-D9B0D978C9D3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PicasaReboot.Windows.Tests", "PicasaReboot.Windows.Tests\PicasaReboot.Windows.Tests.csproj", "{5A397C41-FD3C-41E9-A3E6-B1B04213E15C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SonOfPicasso.Windows.Tests", "PicasaReboot.Windows.Tests\SonOfPicasso.Windows.Tests.csproj", "{5A397C41-FD3C-41E9-A3E6-B1B04213E15C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,5 +42,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2C01583D-05D7-4F03-A86C-ECF79DA041D0}
 	EndGlobalSection
 EndGlobal
