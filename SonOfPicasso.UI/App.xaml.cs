@@ -11,6 +11,7 @@ using Serilog;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Logging;
 using SonOfPicasso.Core.Services;
+using SonOfPicasso.UI.Scheduling;
 using SonOfPicasso.UI.ViewModels;
 using SonOfPicasso.UI.Views;
 
@@ -40,6 +41,7 @@ namespace SonOfPicasso.UI
             var serviceCollection = new ServiceCollection()
                 .AddLogging(builder => builder.AddSerilog())
                 .AddScoped<IFileSystem, FileSystem>()
+                .AddScoped<ISchedulerProvider, SchedulerProvider>()
                 .AddScoped<IImageLocationService, ImageLocationService>()
                 .AddScoped<ISharedCache, SharedCache>()
                 .AddScoped<IEnvironmentService, EnvironmentService>()

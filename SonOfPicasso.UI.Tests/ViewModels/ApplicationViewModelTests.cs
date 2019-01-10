@@ -1,4 +1,6 @@
-﻿using NSubstitute;
+﻿using FluentAssertions;
+using NSubstitute;
+using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Testing.Common;
 using SonOfPicasso.UI.Tests.Extensions;
 using SonOfPicasso.UI.Tests.Scheduling;
@@ -16,10 +18,27 @@ namespace SonOfPicasso.UI.Tests.ViewModels
         }
 
         [Fact]
-        public void Initialize()
+        public void CanInitialize()
         {
-            var applicationViewModel = this.CreateApplicationViewModel();
+            var imageLocationService = Substitute.For<IImageLocationService>();
+
+            var applicationViewModel = this.CreateApplicationViewModel(
+                imageLocationService: imageLocationService);
+
             applicationViewModel.Initialize();
+        }
+
+        [Fact]
+        public void ShouldHandlePathToImages()
+        {
+            var imageLocationService = Substitute.For<IImageLocationService>();
+
+            var applicationViewModel = this.CreateApplicationViewModel(
+                imageLocationService: imageLocationService);
+
+            applicationViewModel.PathToImages = Faker.System.DirectoryPath();
+
+            imageLocationService.Received().GetImages(Arg.Any<string>());
         }
     }
 }

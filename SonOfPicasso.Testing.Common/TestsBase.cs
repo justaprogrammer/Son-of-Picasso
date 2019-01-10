@@ -7,7 +7,6 @@ using Xunit.Abstractions;
 using Serilog.Core;
 using Serilog.Events;
 using SonOfPicasso.Core.Logging;
-using SonOfPicasso.Core.Services;
 
 namespace SonOfPicasso.Testing.Common
 {

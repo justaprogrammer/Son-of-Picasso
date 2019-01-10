@@ -1,6 +1,12 @@
-﻿namespace SonOfPicasso.Core.Interfaces
+﻿using System;
+using System.Reactive;
+using SonOfPicasso.Core.Models;
+
+namespace SonOfPicasso.Core.Interfaces
 {
     public interface ISharedCache
     {
+        IObservable<UserSettings> GetUserSettings();
+        IObservable<Unit> SetUserSettings(UserSettings userSettings);
     }
 }

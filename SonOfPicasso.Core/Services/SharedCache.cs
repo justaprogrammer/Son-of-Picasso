@@ -1,12 +1,19 @@
 ﻿using System;
+using System.Reactive;
 using Akavache;
 using Microsoft.Extensions.Logging;
 using SonOfPicasso.Core.Interfaces;
+using SonOfPicasso.Core.Models;
 
 namespace SonOfPicasso.Core.Services
 {
     public class SharedCache : ISharedCache
     {
+        private const string UserSettingsKey = "UserSettings";
+        private readonly ILogger<SharedCache> _logger;
+        private readonly IBlobCache _userAccount;
+        private readonly IBlobCache _localMachine;
+
         static SharedCache()
         {
             try
@@ -27,16 +34,12 @@ namespace SonOfPicasso.Core.Services
             IBlobCache userAccountCache,
             IBlobCache localMachineCache)
         {
-            Logger = logger;
-            UserAccount = userAccountCache ?? GetBlobCacheWithFallback(() => BlobCache.UserAccount, "UserAccount");
-            LocalMachine = localMachineCache ?? GetBlobCacheWithFallback(() => BlobCache.LocalMachine, "LocalMachine");
+            _logger = logger;
+            _userAccount = userAccountCache ?? GetBlobCacheWithFallback(() => BlobCache.UserAccount, "UserAccount");
+            _localMachine = localMachineCache ?? GetBlobCacheWithFallback(() => BlobCache.LocalMachine, "LocalMachine");
         }
 
-        public IBlobCache UserAccount { get; }
-        public IBlobCache LocalMachine { get; }
-        public ILogger<SharedCache> Logger { get; }
-
-        IBlobCache GetBlobCacheWithFallback(Func<IBlobCache> blobCacheFunc, string cacheName)
+        private IBlobCache GetBlobCacheWithFallback(Func<IBlobCache> blobCacheFunc, string cacheName)
         {
             try
             {
@@ -44,9 +47,21 @@ namespace SonOfPicasso.Core.Services
             }
             catch (Exception e)
             {
-                Logger.LogError(e, "Failed to set the {CacheName} cache", cacheName);
+                _logger.LogError(e, "Failed to set the {CacheName} cache", cacheName);
                 return new InMemoryBlobCache();
             }
+        }
+
+        public IObservable<UserSettings> GetUserSettings()
+        {
+            _logger.LogDebug("GetUserSettings");
+            return _userAccount.GetOrCreateObject(UserSettingsKey, () => new UserSettings());
+        }
+
+        public IObservable<Unit> SetUserSettings(UserSettings userSettings)
+        {
+            _logger.LogDebug("SetUserSettings");
+            return _userAccount.InsertObject(UserSettingsKey, userSettings);
         }
     }
 }

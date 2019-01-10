@@ -9,5 +9,6 @@ namespace SonOfPicasso.UI.Scheduling
         IScheduler NewThread { get; }
         IScheduler ThreadPool { get; }
         IScheduler TaskPool { get; }
+        IScheduler MainThreadScheduler { get; }
     }
 }
