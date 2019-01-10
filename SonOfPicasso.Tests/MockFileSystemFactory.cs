@@ -1,3 +1,8 @@
+using System.IO.Abstractions;
+using System.IO.Abstractions.TestingHelpers;
+using SonOfPicasso.Core.Extensions;
+using SonOfPicasso.SampleImages;
+
 namespace SonOfPicasso.Tests
 {
     public class MockFileSystemFactory

@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Threading;
 using System.Windows.Media.Imaging;
+using FluentAssertions;
+using NUnit.Framework;
+using Serilog;
 using SonOfPicasso.Core;
 using SonOfPicasso.Core.Logging;
 using SonOfPicasso.Tests;

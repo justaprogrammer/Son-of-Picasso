@@ -1,4 +1,9 @@
-﻿using SonOfPicasso.Core;
+﻿using System;
+using System.Reactive.Linq;
+using ReactiveUI;
+using ReactiveUI.Legacy;
+using Serilog;
+using SonOfPicasso.Core;
 using SonOfPicasso.Core.Logging;
 using SonOfPicasso.Core.Scheduling;
 

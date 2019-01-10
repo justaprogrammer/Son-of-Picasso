@@ -1,4 +1,7 @@
 ﻿using System;
+using NUnit.Framework;
+using Serilog.Core;
+using Serilog.Events;
 
 namespace SonOfPicasso.Tests.Logging
 {

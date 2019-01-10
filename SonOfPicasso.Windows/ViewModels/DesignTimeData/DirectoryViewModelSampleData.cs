@@ -1,4 +1,7 @@
-﻿using SonOfPicasso.Core;
+﻿using System.Reactive.Linq;
+using ReactiveUI.Legacy;
+using SonOfPicasso.Core;
+using SonOfPicasso.Core.Extensions;
 
 namespace SonOfPicasso.Windows.ViewModels.DesignTimeData
 {

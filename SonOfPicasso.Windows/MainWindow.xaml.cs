@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using Serilog;
 using SonOfPicasso.Core;
 using SonOfPicasso.Core.Logging;
 using SonOfPicasso.Windows.ViewModels;

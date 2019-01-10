@@ -1,6 +1,10 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Windows.Media.Imaging;
+using FluentAssertions;
+using NUnit.Framework;
+using Serilog;
 using SonOfPicasso.Core;
 using SonOfPicasso.Core.Logging;
 using SonOfPicasso.Tests.Scheduling;
@@ -23,7 +27,7 @@ namespace SonOfPicasso.Tests.Core
             var imageFileSystemService = new ImageService(mockFileSystem, schedulers);
             var items = imageFileSystemService.ListFiles(MockFileSystemFactory.ImagesFolder);
 
-            items.ShouldAllBeEquivalentTo(Enumerable.Empty<string>());
+            items.Should().BeEquivalentTo(Enumerable.Empty<string>());
         }
 
         [Test]
@@ -37,7 +41,7 @@ namespace SonOfPicasso.Tests.Core
             var imageFileSystemService = new ImageService(mockFileSystem, schedulers);
             var items = imageFileSystemService.ListFiles(MockFileSystemFactory.ImagesFolder);
 
-            items.ShouldAllBeEquivalentTo(new[] { MockFileSystemFactory.Image1Jpg });
+            items.Should().BeEquivalentTo(new[] { MockFileSystemFactory.Image1Jpg });
 
             Log.Debug("Completed");
         }
@@ -63,14 +67,14 @@ namespace SonOfPicasso.Tests.Core
                 {
                     items = strings;
                     autoResetEvent.Set();
-                }, () =>
+                }, _ => { }, () =>
                 {
                 });
 
             schedulers.ThreadPool.AdvanceBy(1);
             autoResetEvent.WaitOne();
 
-            items.ShouldAllBeEquivalentTo(new[] { MockFileSystemFactory.Image1Jpg });
+            items.Should().BeEquivalentTo(new[] { MockFileSystemFactory.Image1Jpg });
 
             Log.Debug("Completed");
         }

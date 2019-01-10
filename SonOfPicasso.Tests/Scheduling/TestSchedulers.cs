@@ -1,4 +1,6 @@
-﻿using SonOfPicasso.Core.Scheduling;
+﻿using System.Reactive.Concurrency;
+using Microsoft.Reactive.Testing;
+using SonOfPicasso.Core.Scheduling;
 
 namespace SonOfPicasso.Tests.Scheduling
 {

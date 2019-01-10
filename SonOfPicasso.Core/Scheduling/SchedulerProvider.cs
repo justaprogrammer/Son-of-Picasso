@@ -1,4 +1,6 @@
-﻿namespace SonOfPicasso.Core.Scheduling
+﻿using System.Reactive.Concurrency;
+
+namespace SonOfPicasso.Core.Scheduling
 {
     public sealed class SchedulerProvider : ISchedulerProvider
     {

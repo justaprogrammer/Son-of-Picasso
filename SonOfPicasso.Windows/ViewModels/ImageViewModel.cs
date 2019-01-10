@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Windows.Media.Imaging;
+using ReactiveUI;
+using Serilog;
 using SonOfPicasso.Core;
 using SonOfPicasso.Core.Logging;
 using SonOfPicasso.Core.Scheduling;

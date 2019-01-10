@@ -1,4 +1,6 @@
-﻿namespace SonOfPicasso.Windows.ViewModels
+﻿using ReactiveUI.Legacy;
+
+namespace SonOfPicasso.Windows.ViewModels
 {
     public interface IDirectoryViewModel
     {

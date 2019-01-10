@@ -1,4 +1,6 @@
 ﻿using System.Threading;
+using NUnit.Framework;
+using Serilog;
 using SonOfPicasso.Core;
 using SonOfPicasso.Core.Logging;
 using SonOfPicasso.Tests;

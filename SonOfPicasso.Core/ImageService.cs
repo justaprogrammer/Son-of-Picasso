@@ -1,5 +1,9 @@
 ﻿using System;
+using System.IO.Abstractions;
+using System.Linq;
+using System.Reactive.Linq;
 using System.Windows.Media.Imaging;
+using Serilog;
 using SonOfPicasso.Core.Helpers;
 using SonOfPicasso.Core.Logging;
 using SonOfPicasso.Core.Scheduling;
