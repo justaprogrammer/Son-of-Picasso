@@ -5,11 +5,15 @@ VisualStudioVersion = 15.0.28307.168
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SonOfPicasso.UI", "SonOfPicasso.UI\SonOfPicasso.UI.csproj", "{B9FBDA9B-B6C7-4AD7-916C-E1FB8FF520F1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SonOfPicasso.Core", "SonOfPicasso.Core\SonOfPicasso.Core.csproj", "{3D2D1A44-E25E-4D1A-B0FD-9921DC08C412}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SonOfPicasso.Core", "SonOfPicasso.Core\SonOfPicasso.Core.csproj", "{3D2D1A44-E25E-4D1A-B0FD-9921DC08C412}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SonOfPicasso.Core.Tests", "SonOfPicasso.Core.Tests\SonOfPicasso.Core.Tests.csproj", "{23724150-0719-42D3-ADF3-9C3CA1C0B0ED}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SonOfPicasso.Core.Tests", "SonOfPicasso.Core.Tests\SonOfPicasso.Core.Tests.csproj", "{23724150-0719-42D3-ADF3-9C3CA1C0B0ED}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SonOfPicasso.UI.Tests", "SonOfPicasso.UI.Tests\SonOfPicasso.UI.Tests.csproj", "{95CCEAEE-8A44-40D2-975A-DEFDAED35523}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SonOfPicasso.Testing.Common", "SonOfPicasso.Testing.Common\SonOfPicasso.Testing.Common.csproj", "{CCD5BFB0-6F3D-47E1-9184-C021FE3059BF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{12E2CEF6-EB9D-412F-98E3-ECBBBD00A29A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,9 +37,18 @@ Global
 		{95CCEAEE-8A44-40D2-975A-DEFDAED35523}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{95CCEAEE-8A44-40D2-975A-DEFDAED35523}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{95CCEAEE-8A44-40D2-975A-DEFDAED35523}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CCD5BFB0-6F3D-47E1-9184-C021FE3059BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CCD5BFB0-6F3D-47E1-9184-C021FE3059BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CCD5BFB0-6F3D-47E1-9184-C021FE3059BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CCD5BFB0-6F3D-47E1-9184-C021FE3059BF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{23724150-0719-42D3-ADF3-9C3CA1C0B0ED} = {12E2CEF6-EB9D-412F-98E3-ECBBBD00A29A}
+		{95CCEAEE-8A44-40D2-975A-DEFDAED35523} = {12E2CEF6-EB9D-412F-98E3-ECBBBD00A29A}
+		{CCD5BFB0-6F3D-47E1-9184-C021FE3059BF} = {12E2CEF6-EB9D-412F-98E3-ECBBBD00A29A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2C01583D-05D7-4F03-A86C-ECF79DA041D0}
