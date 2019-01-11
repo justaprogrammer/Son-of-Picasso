@@ -5,8 +5,10 @@ using System.Reactive;
 using System.Reactive.Linq;
 using DynamicData;
 using Microsoft.Extensions.Logging;
+using MoreLinq;
 using ReactiveUI;
 using SonOfPicasso.Core.Interfaces;
+using SonOfPicasso.Core.Models;
 using SonOfPicasso.UI.Scheduling;
 
 namespace SonOfPicasso.UI.ViewModels
@@ -32,12 +34,15 @@ namespace SonOfPicasso.UI.ViewModels
 
             AddFolder = ReactiveCommand.Create<string>(async path =>
             {
-                var userSettings = await sharedCache.GetUserSettings();
+                var imageFolders = await sharedCache.GetImageFolders();
+                if (!imageFolders.ContainsKey(path))
+                {
+                    imageFolders.Add(path, new ImageFolder { Path = path });
+                }
 
-                userSettings.Paths =
-                    (userSettings.Paths ?? Enumerable.Empty<string>()).Append(path).Distinct().ToArray();
+                await sharedCache.SetImageFolders(imageFolders);
 
-                await sharedCache.SetUserSettings(userSettings);
+                LoadImageFolders();
             });
         }
 
@@ -45,21 +50,20 @@ namespace SonOfPicasso.UI.ViewModels
         {
             _logger.LogDebug("Initialized");
 
-            _sharedCache.GetUserSettings()
+            LoadImageFolders();
+        }
+
+        private void LoadImageFolders()
+        {
+            _sharedCache.GetImageFolders()
                 .ObserveOn(_schedulerProvider.MainThreadScheduler)
-                .Subscribe(settings =>
+                .Subscribe(imageFolders =>
                 {
-                    Paths.Clear();
-                    Paths.AddRange(settings.Paths);
+                    ImageFolders.Clear();
+                    ImageFolders.AddRange(imageFolders.Values);
                 });
         }
 
-        private ObservableCollection<string> _paths = new ObservableCollection<string>();
-
-        public ObservableCollection<string> Paths
-        {
-            get => _paths;
-            set => this.RaiseAndSetIfChanged(ref _paths, value);
-        }
+        public ObservableCollection<ImageFolder> ImageFolders { get; } = new ObservableCollection<ImageFolder>();
     }
 }

@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:models="clr-namespace:SonOfPicasso.Core.Models;assembly=SonOfPicasso.Core"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <DockPanel>
@@ -15,8 +16,8 @@
         <DockPanel>
             <ListView DockPanel.Dock="Left" MinWidth="300" Name="FoldersListView">
                 <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <Label Content="{Binding}"></Label>
+                    <DataTemplate DataType="{x:Type models:ImageFolder}">
+                        <Label Content="{Binding Path}"></Label>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>

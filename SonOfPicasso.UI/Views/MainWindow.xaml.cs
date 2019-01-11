@@ -33,7 +33,9 @@ namespace SonOfPicasso.UI.Views
 
             this.WhenActivated(disposable =>
                 {
-                    this.OneWayBind(ViewModel, model => model.Paths, window => window.FoldersListView.ItemsSource);
+                    this.OneWayBind(ViewModel, 
+                        model => model.ImageFolders, 
+                        window => window.FoldersListView.ItemsSource);
                 });
         }
 
@@ -58,8 +60,9 @@ namespace SonOfPicasso.UI.Views
 
             if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                _logger.LogDebug("Adding Folder {0}", dialog.SelectedPath);
-                ViewModel.AddFolder.Execute(dialog.SelectedPath).Subscribe();
+                var selectedPath = dialog.SelectedPath;
+                _logger.LogDebug("Adding Folder {0}", selectedPath);
+                ViewModel.AddFolder.Execute(selectedPath).Subscribe();
             }
         }
     }

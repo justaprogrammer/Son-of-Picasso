@@ -10,6 +10,7 @@ namespace SonOfPicasso.Core.Services
     public class SharedCache : ISharedCache
     {
         private const string UserSettingsKey = "UserSettings";
+        private const string ImageFoldersKey = "ImageFolders";
         private readonly ILogger<SharedCache> _logger;
         private readonly IBlobCache _userAccount;
         private readonly IBlobCache _localMachine;
@@ -62,6 +63,18 @@ namespace SonOfPicasso.Core.Services
         {
             _logger.LogDebug("SetUserSettings");
             return _userAccount.InsertObject(UserSettingsKey, userSettings);
+        }
+
+        public IObservable<ImageFolderDictionary> GetImageFolders()
+        {
+            _logger.LogDebug("GetImageFolders");
+            return _userAccount.GetOrCreateObject(ImageFoldersKey, () => new ImageFolderDictionary());
+        }
+
+        public IObservable<Unit> SetImageFolders(ImageFolderDictionary imageFolders)
+        {
+            _logger.LogDebug("SetImageFolders");
+            return _userAccount.InsertObject(ImageFoldersKey, imageFolders);
         }
     }
 }

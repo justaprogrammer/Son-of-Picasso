@@ -27,18 +27,5 @@ namespace SonOfPicasso.UI.Tests.ViewModels
 
             applicationViewModel.Initialize();
         }
-
-        [Fact]
-        public void ShouldHandlePathToImages()
-        {
-            var imageLocationService = Substitute.For<IImageLocationService>();
-
-            var applicationViewModel = this.CreateApplicationViewModel(
-                imageLocationService: imageLocationService);
-
-            applicationViewModel.PathToImages = Faker.System.DirectoryPath();
-
-            imageLocationService.Received().GetImages(Arg.Any<string>());
-        }
     }
 }

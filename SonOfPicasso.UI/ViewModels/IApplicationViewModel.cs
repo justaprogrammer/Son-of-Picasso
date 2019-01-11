@@ -2,6 +2,7 @@
 using System.Reactive;
 using System.Threading.Tasks;
 using ReactiveUI;
+using SonOfPicasso.Core.Models;
 
 namespace SonOfPicasso.UI.ViewModels
 {
@@ -9,6 +10,6 @@ namespace SonOfPicasso.UI.ViewModels
     {
         void Initialize();
         ReactiveCommand<string, Unit> AddFolder { get; }
-        ObservableCollection<string> Paths { get; set; }
+        ObservableCollection<ImageFolder> ImageFolders { get; }
     }
 }
