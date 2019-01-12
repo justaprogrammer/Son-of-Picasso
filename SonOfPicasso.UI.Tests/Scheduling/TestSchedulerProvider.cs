@@ -1,8 +1,6 @@
 ﻿using System.Reactive.Concurrency;
-using System.Threading.Tasks;
 using Microsoft.Reactive.Testing;
 using SonOfPicasso.Core.Scheduling;
-using SonOfPicasso.UI.Scheduling;
 
 namespace SonOfPicasso.UI.Tests.Scheduling
 {

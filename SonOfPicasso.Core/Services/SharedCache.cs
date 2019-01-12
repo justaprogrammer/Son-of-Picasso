@@ -17,14 +17,7 @@ namespace SonOfPicasso.Core.Services
 
         static SharedCache()
         {
-            try
-            {
-                BlobCache.ApplicationName = "SonOfPicasso";
-            }
-            catch (Exception e)
-            {
-//                log.Error(e, "Error while running the static inializer for SharedCache");
-            }
+            BlobCache.ApplicationName = "SonOfPicasso";
         }
 
         public SharedCache(ILogger<SharedCache> logger) : this(logger, null, null)
@@ -35,22 +28,22 @@ namespace SonOfPicasso.Core.Services
             IBlobCache userAccountCache,
             IBlobCache localMachineCache)
         {
-            _logger = logger;
-            _userAccount = userAccountCache ?? GetBlobCacheWithFallback(() => BlobCache.UserAccount, "UserAccount");
-            _localMachine = localMachineCache ?? GetBlobCacheWithFallback(() => BlobCache.LocalMachine, "LocalMachine");
-        }
+            IBlobCache GetBlobCacheOrFallback(Func<IBlobCache> blobCacheFunc, string cacheName)
+            {
+                try
+                {
+                    return blobCacheFunc();
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, "Failed to set the {CacheName} cache", cacheName);
+                    return new InMemoryBlobCache();
+                }
+            }
 
-        private IBlobCache GetBlobCacheWithFallback(Func<IBlobCache> blobCacheFunc, string cacheName)
-        {
-            try
-            {
-                return blobCacheFunc();
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "Failed to set the {CacheName} cache", cacheName);
-                return new InMemoryBlobCache();
-            }
+            _logger = logger;
+            _userAccount = userAccountCache ?? GetBlobCacheOrFallback(() => BlobCache.UserAccount, "UserAccount");
+            _localMachine = localMachineCache ?? GetBlobCacheOrFallback(() => BlobCache.LocalMachine, "LocalMachine");
         }
 
         public IObservable<UserSettings> GetUserSettings()

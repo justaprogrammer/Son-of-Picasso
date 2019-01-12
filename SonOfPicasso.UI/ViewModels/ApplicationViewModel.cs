@@ -1,17 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using DynamicData;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using MoreLinq;
 using ReactiveUI;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Models;
 using SonOfPicasso.Core.Scheduling;
-using SonOfPicasso.UI.Scheduling;
 
 namespace SonOfPicasso.UI.ViewModels
 {
@@ -21,22 +21,25 @@ namespace SonOfPicasso.UI.ViewModels
         private readonly ISchedulerProvider _schedulerProvider;
         private readonly ISharedCache _sharedCache;
         private readonly IImageLocationService _imageLocationService;
+        private readonly IServiceProvider _serviceProvider;
 
         public ApplicationViewModel(ILogger<ApplicationViewModel> logger,
             ISchedulerProvider schedulerProvider,
             ISharedCache sharedCache,
-            IImageLocationService imageLocationService)
+            IImageLocationService imageLocationService,
+            IServiceProvider serviceProvider)
         {
             _logger = logger;
             _schedulerProvider = schedulerProvider;
             _sharedCache = sharedCache;
             _imageLocationService = imageLocationService;
+            _serviceProvider = serviceProvider;
 
-            var imageFolders = new ObservableCollection<ImageFolder>();
+            var imageFolders = new ObservableCollection<IImageFolderViewModel>();
             imageFolders.CollectionChanged += ImageFoldersOnCollectionChanged;
             ImageFolders = imageFolders;
 
-            Images = new ObservableCollection<Image>();
+            Images = new ObservableCollection<IImageViewModel>();
 
             AddFolder = ReactiveCommand.CreateFromObservable<string, Unit>(ExecuteAddFolder);
         }
@@ -44,11 +47,27 @@ namespace SonOfPicasso.UI.ViewModels
         private void ImageFoldersOnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             _logger.LogDebug("ImageFoldersOnCollectionChanged");
+
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                var paths = e.NewItems.Cast<ImageFolderViewModel>()
+                    .Select(folder => folder.ImageFolder.Path);
+
+                ScanFolders(paths).Subscribe();
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Reset)
+            {
+
+            }
         }
 
-        public ObservableCollection<ImageFolder> ImageFolders { get; }
+        public ObservableCollection<IImageFolderViewModel> ImageFolders { get; }
 
-        public ObservableCollection<Image> Images { get; }
+        public ObservableCollection<IImageViewModel> Images { get; }
 
         public ReactiveCommand<string, Unit> AddFolder { get; }
 
@@ -57,15 +76,6 @@ namespace SonOfPicasso.UI.ViewModels
             _logger.LogDebug("Initializing");
 
             return LoadImageFolders()
-                .ObserveOn(_schedulerProvider.TaskPool)
-                .SelectMany(unit => {
-                    return ImageFolders
-                        .ToObservable()
-                        .ObserveOn(_schedulerProvider.TaskPool)
-                        .SelectMany(folder => ScanFolder(folder.Path))
-                        .Append(Unit.Default)
-                        .LastAsync();
-                })
                 .Select(unit =>
                 {
                     _logger.LogDebug("Initialized");
@@ -89,13 +99,27 @@ namespace SonOfPicasso.UI.ViewModels
                 .SelectMany(_ => LoadImageFolders());
         }
 
-        private IObservable<Unit> ScanFolder(string path)
+        private IObservable<Unit> ScanFolders(IEnumerable<string> paths)
         {
-            return _imageLocationService.GetImages(path)
+            return paths.ToObservable()
+                .SelectMany(s => _imageLocationService.GetImages(s))
+                .SelectMany(fileInfo => fileInfo)
+                .ToArray()
                 .ObserveOn(_schedulerProvider.MainThreadScheduler)
                 .Select(fileInfos =>
                 {
-                    Images.AddRange(fileInfos.Select(fileInfo => new Image { Path = fileInfo.FullName }));
+                    var enumerable = fileInfos
+                        .Select(fileInfo =>
+                        {
+                            var image = new Image {Path = fileInfo.FullName};
+
+                            var imageViewModel = _serviceProvider.GetService<IImageViewModel>();
+                            imageViewModel.Initialize(image);
+
+                            return imageViewModel;
+                        });
+
+                    Images.AddRange(enumerable);
                     return Unit.Default;
                 });
         }
@@ -109,7 +133,15 @@ namespace SonOfPicasso.UI.ViewModels
                 .Select(imageFolders =>
                 {
                     ImageFolders.Clear();
-                    ImageFolders.AddRange(imageFolders.Values);
+                    var enumerable = imageFolders.Values.Select(imageFolder =>
+                    {
+                        var imageFolderViewModel = _serviceProvider.GetService<IImageFolderViewModel>();
+                        imageFolderViewModel.Initialize(imageFolder);
+
+                        return imageFolderViewModel;
+                    });
+
+                    ImageFolders.AddRange(enumerable);
 
                     return Unit.Default;
                 });
