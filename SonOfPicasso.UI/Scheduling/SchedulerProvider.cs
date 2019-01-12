@@ -1,5 +1,6 @@
 ﻿using System.Reactive.Concurrency;
 using ReactiveUI;
+using SonOfPicasso.Core.Scheduling;
 
 namespace SonOfPicasso.UI.Scheduling
 {

@@ -3,6 +3,7 @@ using System.IO.Abstractions.TestingHelpers;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using SonOfPicasso.Core.Interfaces;
+using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Testing.Common;
 using SonOfPicasso.Testing.Common.Services;
 using SonOfPicasso.UI.Scheduling;

@@ -2,11 +2,13 @@
 using System.IO.Abstractions;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using SonOfPicasso.Core.Interfaces;
+using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.UI.ViewModels;
 
 namespace SonOfPicasso.UI.Views
@@ -19,15 +21,17 @@ namespace SonOfPicasso.UI.Views
         private readonly ILogger<MainWindow> _logger;
         private readonly IEnvironmentService _environmentService;
         private readonly IFileSystem _fileSystem;
+        private readonly ISchedulerProvider _schedulerProvider;
 
         public static readonly DependencyProperty ViewModelProperty = DependencyProperty.Register(
             "ViewModel", typeof(IApplicationViewModel), typeof(MainWindow), new PropertyMetadata(null));
 
-        public MainWindow(ILogger<MainWindow> logger, IEnvironmentService environmentService, IFileSystem fileSystem)
+        public MainWindow(ILogger<MainWindow> logger, IEnvironmentService environmentService, IFileSystem fileSystem, ISchedulerProvider schedulerProvider)
         {
             _logger = logger;
             _environmentService = environmentService;
             _fileSystem = fileSystem;
+            _schedulerProvider = schedulerProvider;
 
             InitializeComponent();
 
@@ -36,6 +40,10 @@ namespace SonOfPicasso.UI.Views
                     this.OneWayBind(ViewModel, 
                         model => model.ImageFolders, 
                         window => window.FoldersListView.ItemsSource);
+
+                    this.OneWayBind(ViewModel, 
+                        model => model.Images, 
+                        window => window.ImagesListView.ItemsSource);
                 });
         }
 
@@ -55,13 +63,14 @@ namespace SonOfPicasso.UI.Views
         {
             var dialog = new FolderBrowserDialog
             {
-                SelectedPath = _environmentService.GetFolderPath(Environment.SpecialFolder.UserProfile)
+                SelectedPath = _environmentService.GetFolderPath(Environment.SpecialFolder.MyPictures)
             };
 
             if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 var selectedPath = dialog.SelectedPath;
                 _logger.LogDebug("Adding Folder {0}", selectedPath);
+
                 ViewModel.AddFolder.Execute(selectedPath).Subscribe();
             }
         }

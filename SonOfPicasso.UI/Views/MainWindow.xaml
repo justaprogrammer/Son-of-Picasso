@@ -21,8 +21,12 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-            <ListView>
-
+            <ListView Name="ImagesListView">
+                <ListView.ItemTemplate>
+                    <DataTemplate DataType="{x:Type models:Image}">
+                        <Label Content="{Binding Path}"></Label>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
             </ListView>
         </DockPanel>
     </DockPanel>

@@ -1,7 +1,10 @@
-﻿namespace SonOfPicasso.Core.Interfaces
+﻿using System;
+using System.IO.Abstractions;
+
+namespace SonOfPicasso.Core.Interfaces
 {
     public interface IImageLocationService
     {
-        void GetImages(string path);
+        IObservable<FileInfoBase[]> GetImages(string path);
     }
 }

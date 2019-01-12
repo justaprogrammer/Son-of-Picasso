@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Logging;
+using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Core.Services;
 using SonOfPicasso.UI.Scheduling;
 using SonOfPicasso.UI.ViewModels;
@@ -53,7 +54,7 @@ namespace SonOfPicasso.UI
             var mainWindow = serviceProvider.GetService<MainWindow>();
             mainWindow.ViewModel = serviceProvider.GetService<IApplicationViewModel>();
             mainWindow.Show();
-            mainWindow.ViewModel.Initialize();
+            mainWindow.ViewModel.Initialize().Subscribe();
         }
     }
 }
