@@ -1,5 +1,6 @@
 ﻿using ReactiveUI;
 using SonOfPicasso.Core.Models;
+using SonOfPicasso.UI.Interfaces;
 
 namespace SonOfPicasso.UI.ViewModels
 {

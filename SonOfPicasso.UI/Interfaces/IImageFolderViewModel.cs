@@ -1,6 +1,6 @@
 ﻿using SonOfPicasso.Core.Models;
 
-namespace SonOfPicasso.UI.ViewModels
+namespace SonOfPicasso.UI.Interfaces
 {
     public interface IImageFolderViewModel
     {

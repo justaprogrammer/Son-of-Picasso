@@ -12,10 +12,11 @@ namespace SonOfPicasso.Core.Services
 {
     public class ImageLocationService: IImageLocationService
     {
+        private static readonly string[] ImageExtensions = { ".jpg", ".jpeg", ".tiff", ".bmp" };
+
         private readonly IFileSystem _fileSystem;
         private readonly ISchedulerProvider _schedulerProvider;
         private readonly ILogger<ImageLocationService> _logger;
-        private static readonly string[] ImageExtensions = new[] { ".jpg", ".jpeg", ".tiff", ".bmp" };
 
         public ImageLocationService(ILogger<ImageLocationService> logger, IFileSystem fileSystem, ISchedulerProvider schedulerProvider)
         {

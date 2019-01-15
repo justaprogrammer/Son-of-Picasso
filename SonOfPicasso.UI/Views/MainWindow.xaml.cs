@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
+using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.ViewModels;
 
 namespace SonOfPicasso.UI.Views

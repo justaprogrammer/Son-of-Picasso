@@ -12,6 +12,7 @@ using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Logging;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Core.Services;
+using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.Scheduling;
 using SonOfPicasso.UI.ViewModels;
 using SonOfPicasso.UI.Views;

@@ -12,6 +12,7 @@ using ReactiveUI;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Models;
 using SonOfPicasso.Core.Scheduling;
+using SonOfPicasso.UI.Interfaces;
 
 namespace SonOfPicasso.UI.ViewModels
 {
