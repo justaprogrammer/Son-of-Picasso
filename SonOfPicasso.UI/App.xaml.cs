@@ -48,10 +48,10 @@ namespace SonOfPicasso.UI
                 .AddSingleton<IImageLocationService, ImageLocationService>()
                 .AddSingleton<ISharedCache, SharedCache>()
                 .AddSingleton<IEnvironmentService, EnvironmentService>()
-                .AddScoped<IApplicationViewModel, ApplicationViewModel>()
-                .AddScoped<IImageFolderViewModel, ImageFolderViewModel>()
-                .Add<IImageViewModel, ImageViewModel>()
-                .AddScoped<MainWindow>();
+                .AddTransient<IApplicationViewModel, ApplicationViewModel>()
+                .AddTransient<IImageFolderViewModel, ImageFolderViewModel>()
+                .AddTransient<IImageViewModel, ImageViewModel>()
+                .AddTransient<MainWindow>();
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
