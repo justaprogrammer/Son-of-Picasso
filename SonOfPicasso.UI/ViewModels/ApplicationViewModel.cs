@@ -105,22 +105,20 @@ namespace SonOfPicasso.UI.ViewModels
             return paths.ToObservable()
                 .SelectMany(s => _imageLocationService.GetImages(s))
                 .SelectMany(fileInfo => fileInfo)
+                .Select(fileInfo =>
+                {
+                    var image = new Image { Path = fileInfo.FullName };
+
+                    var imageViewModel = _serviceProvider.GetService<IImageViewModel>();
+                    imageViewModel.Initialize(image);
+
+                    return imageViewModel;
+                })
                 .ToArray()
                 .ObserveOn(_schedulerProvider.MainThreadScheduler)
-                .Select(fileInfos =>
+                .Select(items =>
                 {
-                    var enumerable = fileInfos
-                        .Select(fileInfo =>
-                        {
-                            var image = new Image {Path = fileInfo.FullName};
-
-                            var imageViewModel = _serviceProvider.GetService<IImageViewModel>();
-                            imageViewModel.Initialize(image);
-
-                            return imageViewModel;
-                        });
-
-                    Images.AddRange(enumerable);
+                    Images.AddRange(items);
                     return Unit.Default;
                 });
         }

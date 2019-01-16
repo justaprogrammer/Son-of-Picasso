@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:SonOfPicasso.UI.ViewModels"
+        xmlns:interfaces="clr-namespace:SonOfPicasso.UI.Interfaces"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <DockPanel>
@@ -16,15 +17,18 @@
         <DockPanel>
             <ListView DockPanel.Dock="Left" MinWidth="300" Name="FoldersListView">
                 <ListView.ItemTemplate>
-                    <DataTemplate DataType="{x:Type viewModels:ImageFolderViewModel}">
+                    <DataTemplate DataType="{x:Type interfaces:IImageFolderViewModel}">
                         <Label Content="{Binding ImageFolder.Path}"></Label>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
             <ListView Name="ImagesListView">
                 <ListView.ItemTemplate>
-                    <DataTemplate DataType="{x:Type viewModels:ImageViewModel}">
-                        <Label Content="{Binding Image.Path}"></Label>
+                    <DataTemplate DataType="{x:Type interfaces:IImageViewModel}">
+                        <StackPanel Orientation="Vertical">
+                            <Label Content="{Binding Image.Path}"></Label>
+                            <Image Source="{Binding Bitmap}" Height="250" Width="250" ></Image>
+                        </StackPanel>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>

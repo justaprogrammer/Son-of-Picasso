@@ -21,7 +21,11 @@ namespace SonOfPicasso.Core.Services
         {
             return Observable.Using(
                 () => _fileSystem.File.OpenRead(path),
-                stream => Observable.FromAsync(() => BitmapLoader.Current.Load(stream, null, null)));
+                stream => Observable.FromAsync(() =>
+                {
+                    var load = BitmapLoader.Current.Load(stream, null, null);
+                    return load;
+                }));
         }
     }
 }

@@ -44,12 +44,13 @@ namespace SonOfPicasso.UI
                 .AddLogging(builder => builder.AddSerilog())
                 .AddSingleton<IFileSystem, FileSystem>()
                 .AddSingleton<ISchedulerProvider, SchedulerProvider>()
+                .AddSingleton<IImageLoadingService, ImageLoadingService>()
                 .AddSingleton<IImageLocationService, ImageLocationService>()
                 .AddSingleton<ISharedCache, SharedCache>()
                 .AddSingleton<IEnvironmentService, EnvironmentService>()
                 .AddScoped<IApplicationViewModel, ApplicationViewModel>()
                 .AddScoped<IImageFolderViewModel, ImageFolderViewModel>()
-                .AddScoped<IImageViewModel, ImageViewModel>()
+                .Add<IImageViewModel, ImageViewModel>()
                 .AddScoped<MainWindow>();
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
