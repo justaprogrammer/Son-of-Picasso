@@ -17,15 +17,12 @@ namespace SonOfPicasso.UI.Views
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window, IViewFor<IApplicationViewModel>
+    public partial class MainWindow : ReactiveWindow<IApplicationViewModel>
     {
         private readonly ILogger<MainWindow> _logger;
         private readonly IEnvironmentService _environmentService;
         private readonly IFileSystem _fileSystem;
         private readonly ISchedulerProvider _schedulerProvider;
-
-        public static readonly DependencyProperty ViewModelProperty = DependencyProperty.Register(
-            "ViewModel", typeof(IApplicationViewModel), typeof(MainWindow), new PropertyMetadata(null));
 
         public MainWindow(ILogger<MainWindow> logger, IEnvironmentService environmentService, IFileSystem fileSystem, ISchedulerProvider schedulerProvider)
         {
@@ -46,18 +43,6 @@ namespace SonOfPicasso.UI.Views
                         model => model.Images, 
                         window => window.ImagesListView.ItemsSource);
                 });
-        }
-
-        object IViewFor.ViewModel
-        {
-            get => ViewModel;
-            set => ViewModel = (IApplicationViewModel)value;
-        }
-
-        public IApplicationViewModel ViewModel
-        {
-            get => (IApplicationViewModel)GetValue(ViewModelProperty);
-            set => SetValue(ViewModelProperty, value);
         }
 
         private void AddFolder_Click(object sender, RoutedEventArgs e)
