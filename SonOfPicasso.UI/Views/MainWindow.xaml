@@ -10,7 +10,7 @@
     <DockPanel>
         <Menu DockPanel.Dock="Top" Width="Auto" Height="20">
             <MenuItem Header="_File">
-                <MenuItem x:Name="AddFolder" Header="_Add Folder" HorizontalAlignment="Left" Width="140" Click="AddFolder_Click"/>
+                <MenuItem x:Name="AddFolder" Header="_Add Folder" Click="AddFolder_Click"/>
             </MenuItem>
         </Menu>
 
