@@ -89,13 +89,13 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="ReactiveUI, Version=9.8.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ReactiveUI.9.8.1\lib\net461\ReactiveUI.dll</HintPath>
+      <HintPath>..\packages\ReactiveUI.9.8.9\lib\net461\ReactiveUI.dll</HintPath>
     </Reference>
     <Reference Include="ReactiveUI.Testing, Version=9.8.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ReactiveUI.Testing.9.8.1\lib\net461\ReactiveUI.Testing.dll</HintPath>
+      <HintPath>..\packages\ReactiveUI.Testing.9.8.9\lib\net461\ReactiveUI.Testing.dll</HintPath>
     </Reference>
     <Reference Include="ReactiveUI.WPF, Version=9.8.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ReactiveUI.WPF.9.8.1\lib\net461\ReactiveUI.WPF.dll</HintPath>
+      <HintPath>..\packages\ReactiveUI.WPF.9.8.9\lib\net461\ReactiveUI.WPF.dll</HintPath>
     </Reference>
     <Reference Include="Splat, Version=6.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Splat.6.1.1\lib\net461\Splat.dll</HintPath>

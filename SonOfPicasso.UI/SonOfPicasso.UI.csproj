@@ -46,6 +46,12 @@
     <Reference Include="Akavache.Sqlite3, Version=6.2.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\akavache.sqlite3.6.2.3\lib\netstandard2.0\Akavache.Sqlite3.dll</HintPath>
     </Reference>
+    <Reference Include="Autofac, Version=4.8.1.0, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
+      <HintPath>..\packages\Autofac.4.8.1\lib\net45\Autofac.dll</HintPath>
+    </Reference>
+    <Reference Include="Autofac.Extensions.DependencyInjection, Version=4.3.1.0, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
+      <HintPath>..\packages\Autofac.Extensions.DependencyInjection.4.3.1\lib\netstandard2.0\Autofac.Extensions.DependencyInjection.dll</HintPath>
+    </Reference>
     <Reference Include="DynamicData, Version=6.7.1.2534, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\DynamicData.6.7.1.2534\lib\net46\DynamicData.dll</HintPath>
     </Reference>
@@ -87,13 +93,13 @@
     </Reference>
     <Reference Include="PresentationFramework.Aero" />
     <Reference Include="ReactiveUI, Version=9.8.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ReactiveUI.9.8.1\lib\net461\ReactiveUI.dll</HintPath>
+      <HintPath>..\packages\ReactiveUI.9.8.9\lib\net461\ReactiveUI.dll</HintPath>
     </Reference>
     <Reference Include="ReactiveUI.Events.WPF, Version=9.8.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ReactiveUI.Events.WPF.9.8.1\lib\net461\ReactiveUI.Events.WPF.dll</HintPath>
+      <HintPath>..\packages\ReactiveUI.Events.WPF.9.8.9\lib\net461\ReactiveUI.Events.WPF.dll</HintPath>
     </Reference>
     <Reference Include="ReactiveUI.WPF, Version=9.8.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ReactiveUI.WPF.9.8.1\lib\net461\ReactiveUI.WPF.dll</HintPath>
+      <HintPath>..\packages\ReactiveUI.WPF.9.8.9\lib\net461\ReactiveUI.WPF.dll</HintPath>
     </Reference>
     <Reference Include="Serilog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
       <HintPath>..\packages\Serilog.2.7.1\lib\net46\Serilog.dll</HintPath>
@@ -211,8 +217,17 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Scheduling\SchedulerProvider.cs" />
+    <Compile Include="SplatDependencyResolver.cs" />
     <Compile Include="ViewModels\ApplicationViewModel.cs" />
-    <Page Include="Views\MainWindow.xaml">
+    <Page Include="Views\ImageFolderViewControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ImageViewControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -225,7 +240,13 @@
     <Compile Include="Interfaces\IImageViewModel.cs" />
     <Compile Include="ViewModels\ImageFolderViewModel.cs" />
     <Compile Include="ViewModels\ImageViewModel.cs" />
-    <Compile Include="Views\MainWindow.xaml.cs">
+    <Compile Include="Views\ImageFolderViewControl.xaml.cs">
+      <DependentUpon>ImageFolderViewControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ImageViewControl.xaml.cs">
+      <DependentUpon>ImageViewControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>

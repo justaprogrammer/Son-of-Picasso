@@ -1,12 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.Globalization;
 using System.IO.Abstractions;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Data;
+using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
+using ReactiveUI;
 using Serilog;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Logging;
@@ -16,6 +21,8 @@ using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.Scheduling;
 using SonOfPicasso.UI.ViewModels;
 using SonOfPicasso.UI.Views;
+using SonOfPicasso.UI.Windows;
+using Splat;
 
 namespace SonOfPicasso.UI
 {
@@ -51,9 +58,21 @@ namespace SonOfPicasso.UI
                 .AddTransient<IApplicationViewModel, ApplicationViewModel>()
                 .AddTransient<IImageFolderViewModel, ImageFolderViewModel>()
                 .AddTransient<IImageViewModel, ImageViewModel>()
+                .AddTransient<ImageFolderViewControl>()
+                .AddTransient<ImageFolderViewControl>()
                 .AddTransient<MainWindow>();
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
+
+            var containerBuilder = new ContainerBuilder();
+            containerBuilder.Populate(serviceCollection);
+            var container = containerBuilder.Build();
+
+            var resolver = new SplatDependencyResolver(container);
+            resolver.InitializeSplat();
+            resolver.InitializeReactiveUI();
+
+            Locator.CurrentMutable = resolver;
 
             var mainWindow = serviceProvider.GetService<MainWindow>();
             mainWindow.ViewModel = serviceProvider.GetService<IApplicationViewModel>();

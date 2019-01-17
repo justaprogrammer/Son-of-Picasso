@@ -1,8 +1,6 @@
 ﻿using System;
 using System.IO.Abstractions;
 using System.Reactive.Disposables;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
 using Microsoft.Extensions.Logging;
@@ -12,7 +10,7 @@ using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.ViewModels;
 
-namespace SonOfPicasso.UI.Views
+namespace SonOfPicasso.UI.Windows
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -35,13 +33,15 @@ namespace SonOfPicasso.UI.Views
 
             this.WhenActivated(disposable =>
                 {
-                    this.OneWayBind(ViewModel, 
-                        model => model.ImageFolders, 
-                        window => window.FoldersListView.ItemsSource);
+                    this.OneWayBind(ViewModel,
+                            model => model.ImageFolders,
+                            window => window.FoldersListView.ItemsSource)
+                        .DisposeWith(disposable);
 
-                    this.OneWayBind(ViewModel, 
-                        model => model.Images, 
-                        window => window.ImagesListView.ItemsSource);
+                    this.OneWayBind(ViewModel,
+                            model => model.Images,
+                            window => window.ImagesListView.ItemsSource)
+                        .DisposeWith(disposable);
                 });
         }
 
