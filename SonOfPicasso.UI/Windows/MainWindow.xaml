@@ -20,14 +20,13 @@
                 <ListView.ItemTemplate>
                     <DataTemplate DataType="{x:Type interfaces:IImageFolderViewModel}">
                         <reactiveUi:ViewModelViewHost ViewModel="{Binding}" />
-                        <!-- <views:ImageFolderViewControl ViewModel="{Binding}" /> -->
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
             <ListView Name="ImagesListView">
                 <ListView.ItemTemplate>
                     <DataTemplate DataType="{x:Type interfaces:IImageViewModel}">
-                        <views:ImageViewControl ViewModel="{Binding}" />
+                        <reactiveUi:ViewModelViewHost ViewModel="{Binding}" />
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>

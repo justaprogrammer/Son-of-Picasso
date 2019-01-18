@@ -8,8 +8,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
-using Autofac;
-using Autofac.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 using Serilog;
@@ -47,8 +45,15 @@ namespace SonOfPicasso.UI
 
             Log.Logger = loggerConfiguration.CreateLogger();
 
-            var serviceCollection = new ServiceCollection()
+            var serviceCollection = new ServiceCollection();
+
+            var resolver = new SplatDependencyResolver(serviceCollection);
+            resolver.InitializeSplat();
+            resolver.InitializeReactiveUI();
+
+            serviceCollection
                 .AddLogging(builder => builder.AddSerilog())
+                .AddSingleton<IViewLocator, CustomViewLocator>()
                 .AddSingleton<IFileSystem, FileSystem>()
                 .AddSingleton<ISchedulerProvider, SchedulerProvider>()
                 .AddSingleton<IImageLoadingService, ImageLoadingService>()
@@ -63,14 +68,7 @@ namespace SonOfPicasso.UI
                 .AddTransient<MainWindow>();
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
-
-            var containerBuilder = new ContainerBuilder();
-            containerBuilder.Populate(serviceCollection);
-            var container = containerBuilder.Build();
-
-            var resolver = new SplatDependencyResolver(container);
-            resolver.InitializeSplat();
-            resolver.InitializeReactiveUI();
+            resolver.ServiceProvider = serviceProvider;
 
             Locator.CurrentMutable = resolver;
 
@@ -78,6 +76,16 @@ namespace SonOfPicasso.UI
             mainWindow.ViewModel = serviceProvider.GetService<IApplicationViewModel>();
             mainWindow.Show();
             mainWindow.ViewModel.Initialize().Subscribe();
+        }
+    }
+
+    public class CustomViewLocator : IViewLocator
+    {
+        public IViewFor ResolveView<T>(T viewModel, string contract = null) where T : class
+        {
+            var type = viewModel.GetType();
+            var interfaces = type.GetInterfaces();
+            throw new NotImplementedException();
         }
     }
 }

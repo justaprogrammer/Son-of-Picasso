@@ -1,85 +1,83 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using Autofac;
-using Autofac.Core;
+using Microsoft.Extensions.DependencyInjection;
 using Splat;
 
 namespace SonOfPicasso.UI
 {
     public class SplatDependencyResolver : IMutableDependencyResolver
     {
-        private readonly IContainer _container;
+        protected internal const string ContractsAreNotSupported = "Contracts are not supported";
+        protected internal const string ServiceProviderNotSet = "ServiceProvider not set";
 
-        public SplatDependencyResolver(IContainer container)
+        private readonly IServiceCollection _serviceCollection;
+        private ServiceProvider _serviceProvider;
+
+        public SplatDependencyResolver(IServiceCollection serviceCollection)
         {
-            _container = container;
+            _serviceCollection = serviceCollection;
         }
 
-        public object GetService(Type serviceType, string contract = null)
+        void IMutableDependencyResolver.Register(Func<object> factory, Type serviceType, string contract)
         {
-            try
+            _serviceCollection.AddTransient(serviceType, provider => factory());
+        }
+
+        void IMutableDependencyResolver.UnregisterCurrent(Type serviceType, string contract)
+        {
+            throw new NotSupportedException();
+        }
+
+        void IMutableDependencyResolver.UnregisterAll(Type serviceType, string contract)
+        {
+            throw new NotSupportedException();
+        }
+
+        IDisposable IMutableDependencyResolver.ServiceRegistrationCallback(Type serviceType, string contract, Action<IDisposable> callback)
+        {
+            throw new NotSupportedException();
+        }
+
+        object IDependencyResolver.GetService(Type serviceType, string contract)
+        {
+            GuardContractUsage(contract);
+            
+            return ServiceProvider.GetService(serviceType);
+        }
+
+        IEnumerable<object> IDependencyResolver.GetServices(Type serviceType, string contract)
+        {
+            GuardContractUsage(contract);
+
+            return ServiceProvider.GetServices(serviceType);
+        }
+
+        private static void GuardContractUsage(string contract)
+        {
+            if (contract != null)
             {
-                return string.IsNullOrEmpty(contract)
-                    ? _container.Resolve(serviceType)
-                    : _container.ResolveNamed(contract, serviceType);
+                throw new NotSupportedException(ContractsAreNotSupported);
             }
-            catch (DependencyResolutionException)
+        }
+
+        public ServiceProvider ServiceProvider
+        {
+            get
             {
-                return null;
+                if (this._serviceProvider == null)
+                {
+                    throw new InvalidOperationException(ServiceProviderNotSet);
+                }
+
+                return _serviceProvider;
             }
+            set { this._serviceProvider = value; }
         }
 
-        public IEnumerable<object> GetServices(Type serviceType, string contract = null)
+        void IDisposable.Dispose()
         {
-            try
-            {
-                var enumerableType = typeof(IEnumerable<>).MakeGenericType(serviceType);
-                object instance = string.IsNullOrEmpty(contract)
-                    ? _container.Resolve(enumerableType)
-                    : _container.ResolveNamed(contract, enumerableType);
-                return ((IEnumerable)instance).Cast<object>();
-            }
-            catch (DependencyResolutionException)
-            {
-                return null;
-            }
-        }
-
-        public void Register(Func<object> factory, Type serviceType, string contract = null)
-        {
-            var builder = new ContainerBuilder();
-            if (string.IsNullOrEmpty(contract))
-            {
-                builder.Register(x => factory()).As(serviceType).AsImplementedInterfaces();
-            }
-            else
-            {
-                builder.Register(x => factory()).Named(contract, serviceType).AsImplementedInterfaces();
-            }
-
-            builder.Update(_container);
-        }
-
-        public void UnregisterCurrent(Type serviceType, string contract = null)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void UnregisterAll(Type serviceType, string contract = null)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IDisposable ServiceRegistrationCallback(Type serviceType, string contract, Action<IDisposable> callback)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Dispose()
-        {
-            _container.Dispose();
+            _serviceProvider?.Dispose();
         }
     }
 }
