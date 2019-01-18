@@ -1,9 +1,12 @@
-﻿using ReactiveUI;
+﻿using System;
+using ReactiveUI;
 using SonOfPicasso.Core.Models;
 using SonOfPicasso.UI.Interfaces;
+using SonOfPicasso.UI.Views;
 
 namespace SonOfPicasso.UI.ViewModels
 {
+    [ViewModelView(typeof(ImageFolderViewControl))]
     public class ImageFolderViewModel : ReactiveObject, IImageFolderViewModel
     {
         public ImageFolder ImageFolder { get; private set; }
@@ -12,5 +15,15 @@ namespace SonOfPicasso.UI.ViewModels
         {
             ImageFolder = imageFolder;
         }
+    }
+
+    public class ViewModelViewAttribute : Attribute
+    {
+        public ViewModelViewAttribute(Type type)
+        {
+            Type = type;
+        }
+
+        public Type Type { get; }
     }
 }
