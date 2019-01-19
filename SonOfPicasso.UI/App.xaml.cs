@@ -8,7 +8,7 @@ using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Logging;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Core.Services;
-using SonOfPicasso.UI.DependencyInjection;
+using SonOfPicasso.UI.Injection;
 using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.Scheduling;
 using SonOfPicasso.UI.ViewModels;

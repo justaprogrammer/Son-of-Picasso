@@ -2,7 +2,7 @@
 using System.Reflection;
 using ReactiveUI;
 
-namespace SonOfPicasso.UI.DependencyInjection
+namespace SonOfPicasso.UI.Injection
 {
     public class CustomViewLocator : IViewLocator
     {

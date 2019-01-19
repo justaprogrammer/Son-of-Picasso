@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SonOfPicasso.UI.DependencyInjection
+namespace SonOfPicasso.UI.Injection
 {
     public class ViewModelViewAttribute : Attribute
     {

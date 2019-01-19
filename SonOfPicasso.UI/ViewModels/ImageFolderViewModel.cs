@@ -1,6 +1,6 @@
 ﻿using ReactiveUI;
 using SonOfPicasso.Core.Models;
-using SonOfPicasso.UI.DependencyInjection;
+using SonOfPicasso.UI.Injection;
 using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.Views;
 

@@ -210,9 +210,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="DependencyInjection\CustomViewLocator.cs" />
+    <Compile Include="Injection\CustomViewLocator.cs" />
     <Compile Include="Scheduling\SchedulerProvider.cs" />
-    <Compile Include="DependencyInjection\SplatDependencyResolver.cs" />
+    <Compile Include="Injection\SplatDependencyResolver.cs" />
     <Compile Include="ViewModels\ApplicationViewModel.cs" />
     <Page Include="Views\ImageFolderViewControl.xaml">
       <SubType>Designer</SubType>
@@ -235,7 +235,7 @@
     <Compile Include="Interfaces\IImageViewModel.cs" />
     <Compile Include="ViewModels\ImageFolderViewModel.cs" />
     <Compile Include="ViewModels\ImageViewModel.cs" />
-    <Compile Include="DependencyInjection\ViewModelViewAttribute.cs" />
+    <Compile Include="Injection\ViewModelViewAttribute.cs" />
     <Compile Include="Views\ImageFolderViewControl.xaml.cs">
       <DependentUpon>ImageFolderViewControl.xaml</DependentUpon>
     </Compile>

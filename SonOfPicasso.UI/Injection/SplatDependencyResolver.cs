@@ -4,7 +4,7 @@ using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Splat;
 
-namespace SonOfPicasso.UI.DependencyInjection
+namespace SonOfPicasso.UI.Injection
 {
     public class SplatDependencyResolver : IMutableDependencyResolver
     {
