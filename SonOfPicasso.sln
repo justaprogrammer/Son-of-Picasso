@@ -11,9 +11,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SonOfPicasso.Core.Tests", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SonOfPicasso.UI.Tests", "SonOfPicasso.UI.Tests\SonOfPicasso.UI.Tests.csproj", "{95CCEAEE-8A44-40D2-975A-DEFDAED35523}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SonOfPicasso.Testing.Common", "SonOfPicasso.Testing.Common\SonOfPicasso.Testing.Common.csproj", "{CCD5BFB0-6F3D-47E1-9184-C021FE3059BF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SonOfPicasso.Testing.Common", "SonOfPicasso.Testing.Common\SonOfPicasso.Testing.Common.csproj", "{CCD5BFB0-6F3D-47E1-9184-C021FE3059BF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{12E2CEF6-EB9D-412F-98E3-ECBBBD00A29A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Submodules", "Submodules", "{614E8446-254E-48B0-885C-2555D6F1DEF1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Splat.Serilog", "submodules\splat.serilog\Source\Splat.Serilog\Splat.Serilog.csproj", "{9BB88148-5AE2-4F0D-97F0-692331A47CA9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,6 +45,10 @@ Global
 		{CCD5BFB0-6F3D-47E1-9184-C021FE3059BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CCD5BFB0-6F3D-47E1-9184-C021FE3059BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CCD5BFB0-6F3D-47E1-9184-C021FE3059BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9BB88148-5AE2-4F0D-97F0-692331A47CA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9BB88148-5AE2-4F0D-97F0-692331A47CA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9BB88148-5AE2-4F0D-97F0-692331A47CA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9BB88148-5AE2-4F0D-97F0-692331A47CA9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -49,6 +57,7 @@ Global
 		{23724150-0719-42D3-ADF3-9C3CA1C0B0ED} = {12E2CEF6-EB9D-412F-98E3-ECBBBD00A29A}
 		{95CCEAEE-8A44-40D2-975A-DEFDAED35523} = {12E2CEF6-EB9D-412F-98E3-ECBBBD00A29A}
 		{CCD5BFB0-6F3D-47E1-9184-C021FE3059BF} = {12E2CEF6-EB9D-412F-98E3-ECBBBD00A29A}
+		{9BB88148-5AE2-4F0D-97F0-692331A47CA9} = {614E8446-254E-48B0-885C-2555D6F1DEF1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2C01583D-05D7-4F03-A86C-ECF79DA041D0}

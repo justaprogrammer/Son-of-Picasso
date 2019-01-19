@@ -1,4 +1,5 @@
-﻿using System.Reactive.Linq;
+﻿using System;
+using System.Reactive.Linq;
 using System.Windows.Media.Imaging;
 using ReactiveUI;
 using SonOfPicasso.Core.Interfaces;
@@ -27,9 +28,8 @@ namespace SonOfPicasso.UI.ViewModels
         {
             this.Image = image;
 
-            var imageFromPath = _imageLoadingService.LoadImageFromPath(image.Path);
-
-            _bitmap = imageFromPath
+            _bitmap = _imageLoadingService
+                .LoadImageFromPath(image.Path)
                 .Select(bitmap => bitmap.ToNative())
                 .ObserveOn(_schedulerProvider.MainThreadScheduler)
                 .ToProperty(this, x => x.Bitmap);

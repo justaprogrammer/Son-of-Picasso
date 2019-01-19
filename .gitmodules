@@ -1,0 +1,3 @@
+[submodule "submodules/splat.serilog"]
+	path = submodules/splat.serilog
+	url = https://github.com/StanleyGoldman/Splat.Serilog.git

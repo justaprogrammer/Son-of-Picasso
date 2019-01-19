@@ -15,6 +15,7 @@ using SonOfPicasso.UI.ViewModels;
 using SonOfPicasso.UI.Views;
 using SonOfPicasso.UI.Windows;
 using Splat;
+using Splat.Serilog;
 
 namespace SonOfPicasso.UI
 {
@@ -60,6 +61,7 @@ namespace SonOfPicasso.UI
             CustomViewLocator.ServiceProvider = serviceProvider;
 
             Locator.CurrentMutable = new SplatDependencyResolver(serviceCollection, serviceProvider);
+            Registration.Register(Log.Logger);
 
             var mainWindow = serviceProvider.GetService<MainWindow>();
             mainWindow.ViewModel = serviceProvider.GetService<IApplicationViewModel>();
