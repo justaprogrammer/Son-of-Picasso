@@ -8,13 +8,13 @@ namespace SonOfPicasso.UI.DependencyInjection
 {
     public class SplatDependencyResolver : IMutableDependencyResolver
     {
-        private readonly IServiceCollection _serviceCollection;
+        private readonly HashSet<Type> _serviceProviderLookup;
         private readonly IServiceProvider _serviceProvider;
         private readonly ModernDependencyResolver _modernDependencyResolver = new ModernDependencyResolver();
 
         public SplatDependencyResolver(IServiceCollection serviceCollection, IServiceProvider serviceProvider)
         {
-            _serviceCollection = serviceCollection;
+            _serviceProviderLookup = new HashSet<Type>(serviceCollection.Select(descriptor => descriptor.ImplementationType).Distinct());
             _serviceProvider = serviceProvider;
         }
 
@@ -25,17 +25,17 @@ namespace SonOfPicasso.UI.DependencyInjection
 
         public object GetService(Type serviceType, string contract = null)
         {
-            if (_serviceCollection.Any(descriptor => descriptor.ServiceType == serviceType))
+            if (_serviceProviderLookup.Contains(serviceType))
             {
                 return _serviceProvider.GetService(serviceType);
             }
         
             return _modernDependencyResolver.GetService(serviceType, contract);
         }
-        
+
         public IEnumerable<object> GetServices(Type serviceType, string contract = null)
         {
-            if (_serviceCollection.Any(descriptor => descriptor.ServiceType == serviceType))
+            if (_serviceProviderLookup.Contains(serviceType))
             {
                 return _serviceProvider.GetServices(serviceType);
             }
