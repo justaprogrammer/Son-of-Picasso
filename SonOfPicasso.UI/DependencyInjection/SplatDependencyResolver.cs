@@ -14,7 +14,11 @@ namespace SonOfPicasso.UI.DependencyInjection
 
         public SplatDependencyResolver(IServiceCollection serviceCollection, IServiceProvider serviceProvider)
         {
-            _serviceProviderLookup = new HashSet<Type>(serviceCollection.Select(descriptor => descriptor.ImplementationType).Distinct());
+            var collection = serviceCollection
+                    .Select(descriptor => descriptor.ServiceType)
+                    .Distinct();
+
+            _serviceProviderLookup = new HashSet<Type>(collection);
             _serviceProvider = serviceProvider;
         }
 
