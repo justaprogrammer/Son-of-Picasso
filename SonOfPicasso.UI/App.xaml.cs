@@ -1,13 +1,6 @@
 ﻿using System;
-using System.Configuration;
-using System.Data;
-using System.Globalization;
 using System.IO.Abstractions;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Data;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 using Serilog;
@@ -15,6 +8,7 @@ using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Logging;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Core.Services;
+using SonOfPicasso.UI.DependencyInjection;
 using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.Scheduling;
 using SonOfPicasso.UI.ViewModels;
@@ -45,15 +39,8 @@ namespace SonOfPicasso.UI
 
             Log.Logger = loggerConfiguration.CreateLogger();
 
-            var serviceCollection = new ServiceCollection();
-
-            var resolver = new SplatDependencyResolver(serviceCollection);
-            resolver.InitializeSplat();
-            resolver.InitializeReactiveUI();
-
-            serviceCollection
+            var serviceCollection = new ServiceCollection()
                 .AddLogging(builder => builder.AddSerilog())
-                .AddSingleton<IViewLocator, CustomViewLocator>()
                 .AddSingleton<IFileSystem, FileSystem>()
                 .AddSingleton<ISchedulerProvider, SchedulerProvider>()
                 .AddSingleton<IImageLoadingService, ImageLoadingService>()
@@ -64,28 +51,20 @@ namespace SonOfPicasso.UI
                 .AddTransient<IImageFolderViewModel, ImageFolderViewModel>()
                 .AddTransient<IImageViewModel, ImageViewModel>()
                 .AddTransient<ImageFolderViewControl>()
-                .AddTransient<ImageFolderViewControl>()
-                .AddTransient<MainWindow>();
+                .AddTransient<ImageViewControl>()
+                .AddTransient<MainWindow>()
+                .AddTransient<IViewLocator, CustomViewLocator>();
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
-            resolver.ServiceProvider = serviceProvider;
 
-            Locator.CurrentMutable = resolver;
+            CustomViewLocator.ServiceProvider = serviceProvider;
+
+            Locator.CurrentMutable = new SplatDependencyResolver(serviceCollection, serviceProvider);
 
             var mainWindow = serviceProvider.GetService<MainWindow>();
             mainWindow.ViewModel = serviceProvider.GetService<IApplicationViewModel>();
             mainWindow.Show();
             mainWindow.ViewModel.Initialize().Subscribe();
-        }
-    }
-
-    public class CustomViewLocator : IViewLocator
-    {
-        public IViewFor ResolveView<T>(T viewModel, string contract = null) where T : class
-        {
-            var type = viewModel.GetType();
-            var interfaces = type.GetInterfaces();
-            throw new NotImplementedException();
         }
     }
 }

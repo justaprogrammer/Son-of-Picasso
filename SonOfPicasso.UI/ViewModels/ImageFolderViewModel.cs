@@ -1,6 +1,6 @@
-﻿using System;
-using ReactiveUI;
+﻿using ReactiveUI;
 using SonOfPicasso.Core.Models;
+using SonOfPicasso.UI.DependencyInjection;
 using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.Views;
 
@@ -15,15 +15,5 @@ namespace SonOfPicasso.UI.ViewModels
         {
             ImageFolder = imageFolder;
         }
-    }
-
-    public class ViewModelViewAttribute : Attribute
-    {
-        public ViewModelViewAttribute(Type type)
-        {
-            Type = type;
-        }
-
-        public Type Type { get; }
     }
 }
