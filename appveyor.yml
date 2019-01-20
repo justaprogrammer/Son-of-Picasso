@@ -1,0 +1,17 @@
+version: 1.0.{build}
+image: Visual Studio 2017
+install:
+  - dotnet tool install fake-cli -g
+  - dotnet tool install coverlet.console -g --version 1.3.0
+  - choco install codecov --no-progress --confirm
+  - choco install gitversion.portable --no-progress --confirm
+cache:
+  - C:\ProgramData\chocolatey\bin -> appveyor.yml
+  - C:\ProgramData\chocolatey\lib -> appveyor.yml
+  - '.fake -> Build.fsx'
+before_build:
+  - ps: gitversion /output buildserver 
+build_script:
+- ps: >-
+    fake run Build.fsx
+test: off
