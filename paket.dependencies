@@ -1,0 +1,24 @@
+version 5.193.0
+source https://www.nuget.org/api/v2
+
+// [ FAKE GROUP ]
+group FakeBuild
+  source https://www.nuget.org/api/v2
+  framework: netstandard2.0
+  storage:none
+
+  nuget Fake.Core.Target 
+  nuget Fake.BuildServer.AppVeyor
+  nuget Fake.DotNet.Cli
+  nuget Fake.DotNet.MSBuild
+  nuget Fake.DotNet.Testing.OpenCover
+  nuget Fake.IO.FileSystem
+  nuget Fake.Tools.GitVersion
+  groupref FakeBuildResources
+
+group FakeBuildResources
+  source https://www.nuget.org/api/v2
+  storage: packages
+
+  nuget xunit.runner.console
+  nuget OpenCover
