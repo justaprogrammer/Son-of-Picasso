@@ -42,8 +42,7 @@ Target.create "Build" (fun _ ->
 
   let configuration = (fun p -> { p with 
                                     DoRestore = true
-                                    MaxCpuCount = None
-                                    Verbosity = Some MSBuildVerbosity.Normal })
+                                    Verbosity = Some MSBuildVerbosity.Minimal })
 
   !! "SonOfPicasso.sln"
   |> MSBuild.runRelease configuration null "Build"
