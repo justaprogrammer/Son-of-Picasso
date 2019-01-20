@@ -277,8 +277,8 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SonOfPicasso.Core\SonOfPicasso.Core.csproj">
-      <Project>{3d2d1a44-e25e-4d1a-b0fd-9921dc08c412}</Project>
+    <ProjectReference Include="..\src\SonOfPicasso.Core\SonOfPicasso.Core.csproj">
+      <Project>{dd6fab82-72d4-4556-a4c3-ebcd49c89598}</Project>
       <Name>SonOfPicasso.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\src\submodules\splat.serilog\Source\Splat.Serilog\Splat.Serilog.csproj">
