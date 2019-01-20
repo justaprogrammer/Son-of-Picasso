@@ -210,8 +210,8 @@
     <Analyzer Include="..\..\packages\xunit.analyzers.0.10.0\analyzers\dotnet\cs\xunit.analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\SonOfPicasso.Core\SonOfPicasso.Core.csproj">
-      <Project>{3d2d1a44-e25e-4d1a-b0fd-9921dc08c412}</Project>
+    <ProjectReference Include="..\SonOfPicasso.Core\SonOfPicasso.Core.csproj">
+      <Project>{DD6FAB82-72D4-4556-A4C3-EBCD49C89598}</Project>
       <Name>SonOfPicasso.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\SonOfPicasso.Testing.Common\SonOfPicasso.Testing.Common.csproj">
