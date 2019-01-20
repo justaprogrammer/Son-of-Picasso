@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.168
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SonOfPicasso.UI", "SonOfPicasso.UI\SonOfPicasso.UI.csproj", "{B9FBDA9B-B6C7-4AD7-916C-E1FB8FF520F1}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{12E2CEF6-EB9D-412F-98E3-ECBBBD00A29A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Submodules", "Submodules", "{614E8446-254E-48B0-885C-2555D6F1DEF1}"
@@ -19,16 +17,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SonOfPicasso.UI.Tests", "sr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SonOfPicasso.Core", "src\SonOfPicasso.Core\SonOfPicasso.Core.csproj", "{DD6FAB82-72D4-4556-A4C3-EBCD49C89598}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SonOfPicasso.UI", "src\SonOfPicasso.UI\SonOfPicasso.UI.csproj", "{B9FBDA9B-B6C7-4AD7-916C-E1FB8FF520F1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B9FBDA9B-B6C7-4AD7-916C-E1FB8FF520F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B9FBDA9B-B6C7-4AD7-916C-E1FB8FF520F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B9FBDA9B-B6C7-4AD7-916C-E1FB8FF520F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B9FBDA9B-B6C7-4AD7-916C-E1FB8FF520F1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{90E0176E-66C4-4AB2-834B-ADC8887C0BC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{90E0176E-66C4-4AB2-834B-ADC8887C0BC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{90E0176E-66C4-4AB2-834B-ADC8887C0BC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -49,6 +45,10 @@ Global
 		{DD6FAB82-72D4-4556-A4C3-EBCD49C89598}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DD6FAB82-72D4-4556-A4C3-EBCD49C89598}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DD6FAB82-72D4-4556-A4C3-EBCD49C89598}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B9FBDA9B-B6C7-4AD7-916C-E1FB8FF520F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B9FBDA9B-B6C7-4AD7-916C-E1FB8FF520F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B9FBDA9B-B6C7-4AD7-916C-E1FB8FF520F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B9FBDA9B-B6C7-4AD7-916C-E1FB8FF520F1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

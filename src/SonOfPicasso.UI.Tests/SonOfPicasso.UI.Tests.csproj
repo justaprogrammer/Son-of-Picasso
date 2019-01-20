@@ -218,10 +218,6 @@
       <Project>{CCD5BFB0-6F3D-47E1-9184-C021FE3059BF}</Project>
       <Name>SonOfPicasso.Testing.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\SonOfPicasso.UI\SonOfPicasso.UI.csproj">
-      <Project>{b9fbda9b-b6c7-4ad7-916c-e1fb8ff520f1}</Project>
-      <Name>SonOfPicasso.UI</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
