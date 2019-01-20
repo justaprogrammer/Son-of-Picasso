@@ -6,6 +6,7 @@ using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Testing.Common;
 using SonOfPicasso.Testing.Common.Services;
+using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.Scheduling;
 using SonOfPicasso.UI.Tests.Scheduling;
 using SonOfPicasso.UI.ViewModels;
@@ -18,16 +19,19 @@ namespace SonOfPicasso.UI.Tests.Extensions
             IFileSystem fileSystem = null,
             ISharedCache sharedCache = null,
             IImageLocationService imageLocationService = null,
-            ISchedulerProvider schedulerProvider = null)
+            ISchedulerProvider schedulerProvider = null,
+            IImageFolderViewModel imageFolderViewModel = null)
         {
             fileSystem = fileSystem ?? new MockFileSystem();
             imageLocationService = imageLocationService ?? Substitute.For<IImageLocationService>();
             schedulerProvider = schedulerProvider ?? new TestSchedulerProvider();
+            imageFolderViewModel = imageFolderViewModel ?? new ImageFolderViewModel();
 
             var serviceCollection = databaseReaderTests.GetServiceCollection()
                 .AddSingleton(fileSystem)
                 .AddSingleton(schedulerProvider)
                 .AddSingleton(imageLocationService)
+                .AddSingleton(imageFolderViewModel)
                 .AddSingleton(typeof(ApplicationViewModel));
 
             if (sharedCache != null)
