@@ -281,8 +281,8 @@
       <Project>{3d2d1a44-e25e-4d1a-b0fd-9921dc08c412}</Project>
       <Name>SonOfPicasso.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\submodules\splat.serilog\Source\Splat.Serilog\Splat.Serilog.csproj">
-      <Project>{9BB88148-5AE2-4F0D-97F0-692331A47CA9}</Project>
+    <ProjectReference Include="..\src\submodules\splat.serilog\Source\Splat.Serilog\Splat.Serilog.csproj">
+      <Project>{90e0176e-66c4-4ab2-834b-adc8887c0bc8}</Project>
       <Name>Splat.Serilog</Name>
     </ProjectReference>
   </ItemGroup>
