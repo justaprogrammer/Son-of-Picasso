@@ -103,7 +103,6 @@ Target.create "Coverage" (fun _ ->
     ]
     |> Seq.iter (fun (proj, framework) -> 
             let dllPath = sprintf "src\\%s\\bin\\Release\\%s\\%s.dll" proj framework proj
-            let projectPath = sprintf "src\\%s\\%s.csproj" proj proj
             let reportPath = sprintf "reports/%s-%s.coverage.xml" proj framework
 
             Directory.ensure "reports"
