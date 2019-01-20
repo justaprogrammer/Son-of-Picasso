@@ -16,10 +16,10 @@
 
   <ItemGroup>
     <Reference Include="Microsoft.Extensions.Logging.Abstractions">
-      <HintPath>..\..\..\.nuget\packages\microsoft.extensions.logging.abstractions\2.0.0\lib\netstandard2.0\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
+      <HintPath>..\..\..\..\.nuget\packages\microsoft.extensions.logging.abstractions\2.0.0\lib\netstandard2.0\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
     </Reference>
     <Reference Include="Serilog">
-      <HintPath>..\..\..\.nuget\packages\serilog\2.7.1\lib\netstandard1.3\Serilog.dll</HintPath>
+      <HintPath>..\..\..\..\.nuget\packages\serilog\2.7.1\lib\netstandard1.3\Serilog.dll</HintPath>
     </Reference>
   </ItemGroup>
 

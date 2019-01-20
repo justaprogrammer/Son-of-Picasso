@@ -20,19 +20,19 @@
 
   <ItemGroup>
     <Reference Include="Bogus">
-      <HintPath>..\..\..\.nuget\packages\bogus\25.0.3\lib\netstandard2.0\Bogus.dll</HintPath>
+      <HintPath>..\..\..\..\.nuget\packages\bogus\25.0.3\lib\netstandard2.0\Bogus.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions">
-      <HintPath>..\packages\Microsoft.Extensions.DependencyInjection.Abstractions.2.2.0\lib\netstandard2.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.Extensions.DependencyInjection.Abstractions.2.2.0\lib\netstandard2.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Extensions.Logging.Abstractions">
-      <HintPath>..\..\..\.nuget\packages\microsoft.extensions.logging.abstractions\2.0.0\lib\netstandard2.0\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
+      <HintPath>..\..\..\..\.nuget\packages\microsoft.extensions.logging.abstractions\2.0.0\lib\netstandard2.0\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
     </Reference>
     <Reference Include="Serilog">
-      <HintPath>..\packages\Serilog.2.7.1\lib\net46\Serilog.dll</HintPath>
+      <HintPath>..\..\packages\Serilog.2.7.1\lib\net46\Serilog.dll</HintPath>
     </Reference>
     <Reference Include="xunit.abstractions">
-      <HintPath>..\..\..\.nuget\packages\xunit.abstractions\2.0.2\lib\netstandard2.0\xunit.abstractions.dll</HintPath>
+      <HintPath>..\..\..\..\.nuget\packages\xunit.abstractions\2.0.2\lib\netstandard2.0\xunit.abstractions.dll</HintPath>
     </Reference>
   </ItemGroup>
 
