@@ -41,6 +41,7 @@ Target.create "Build" (fun _ ->
   |> ignore
 
   let configuration = (fun p -> { p with 
+                                    DoRestore = true
                                     MaxCpuCount = None
                                     Verbosity = Some MSBuildVerbosity.Normal })
 
