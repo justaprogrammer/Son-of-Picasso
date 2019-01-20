@@ -11,5 +11,14 @@ group FakeBuild
   nuget Fake.BuildServer.AppVeyor
   nuget Fake.DotNet.Cli
   nuget Fake.DotNet.MSBuild
+  nuget Fake.DotNet.Testing.OpenCover
   nuget Fake.IO.FileSystem
   nuget Fake.Tools.GitVersion
+  groupref FakeBuildResources
+
+group FakeBuildResources
+  source https://www.nuget.org/api/v2
+  storage: packages
+
+  nuget xunit.runner.console
+  nuget OpenCover

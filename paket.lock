@@ -78,12 +78,11 @@ NUGET
       Fake.IO.FileSystem (>= 5.12)
       FSharp.Core (>= 4.3.4)
       MSBuild.StructuredLogger (>= 2.0.61)
-    Fake.DotNet.Testing.XUnit2 (5.12)
+    Fake.DotNet.Testing.OpenCover (5.12)
+      Fake.Core.Environment (>= 5.12)
       Fake.Core.Process (>= 5.12)
-      Fake.Core.String (>= 5.12)
       Fake.Core.Trace (>= 5.12)
       Fake.IO.FileSystem (>= 5.12)
-      Fake.Testing.Common (>= 5.12)
       FSharp.Core (>= 4.3.4)
     Fake.IO.FileSystem (5.12)
       Fake.Core.String (>= 5.12)
@@ -94,9 +93,6 @@ NUGET
       Fake.Core.Trace (>= 5.12)
       FSharp.Core (>= 4.3.4)
       System.Net.Http (>= 4.3.4)
-    Fake.Testing.Common (5.12)
-      Fake.Core.Trace (>= 5.12)
-      FSharp.Core (>= 4.3.4)
     Fake.Tools.GitVersion (5.12)
       Fake.Core.Environment (>= 5.12)
       Fake.Core.Process (>= 5.12)
@@ -684,3 +680,13 @@ NUGET
       System.Xml.ReaderWriter (>= 4.3)
       System.Xml.XmlDocument (>= 4.3)
       System.Xml.XPath (>= 4.3)
+
+GROUP FakeBuildResources
+STORAGE: PACKAGES
+NUGET
+  remote: https://www.nuget.org/api/v2
+    OpenCover (4.6.519)
+    xunit.runner.console (2.4.1)
+
+GROUP groupref FakeBuildResources
+

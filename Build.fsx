@@ -5,7 +5,7 @@ open Fake.IO
 open Fake.BuildServer
 open Fake.IO.Globbing.Operators
 open Fake.DotNet
-open Fake.DotNet.Testing.XUnit2
+open Fake.DotNet.Testing
 open Fake.Core
 open Fake.Tools
 
@@ -73,10 +73,9 @@ Target.create "Test" (fun _ ->
         ))
 )
 
-Target.create "Coverage" (fun _ ->
+Target.create "Core Coverage" (fun _ ->
     [
         ("SonOfPicasso.Core.Tests", "netcoreapp2.1");
-        ("SonOfPicasso.UI.Tests", "net472");
     ]
     |> Seq.iter (fun (proj, framework) -> 
             let dllPath = sprintf "src\\%s\\bin\\Release\\%s\\%s.dll" proj framework proj
@@ -98,6 +97,38 @@ Target.create "Coverage" (fun _ ->
         )
 )
 
+Target.create "Coverage" (fun _ ->
+    [
+        ("SonOfPicasso.UI.Tests", "net472");
+    ]
+    |> Seq.iter (fun (proj, framework) -> 
+            let dllPath = sprintf "src\\%s\\bin\\Release\\%s\\%s.dll" proj framework proj
+            let projectPath = sprintf "src\\%s\\%s.csproj" proj proj
+            let reportPath = sprintf "reports/%s-%s.coverage.xml" proj framework
+
+            Directory.ensure "reports"
+
+            OpenCover.getVersion (Some (fun p -> { p with ExePath = "./packages/fakebuildresources/OpenCover/tools/OpenCover.Console.exe" }))
+
+            OpenCover.run (fun p ->
+                { p with
+                        ExePath = "./packages/fakebuildresources/OpenCover/tools/OpenCover.Console.exe"
+                        TestRunnerExePath = "./packages/fakebuildresources/xunit.runner.console/tools/net472/xunit.console.exe";
+                        Output = reportPath;
+                        Register = OpenCover.RegisterUser;
+                        Filter = "+[SonOfPicasso.*]*";
+                })
+                (sprintf "%s -noshadow" dllPath)
+
+            Trace.publish ImportData.BuildArtifact reportPath
+
+            if isAppveyor then
+                CreateProcess.fromRawCommandLine "codecov" (sprintf "-f \"%s\"" reportPath)
+                |> Proc.run
+                |> ignore
+        )
+)
+
 Target.create "Default" (fun _ -> 
     ()
 )
@@ -106,6 +137,7 @@ open Fake.Core.TargetOperators
 "Clean" ==> "Build"
 
 "Build" ==> "Test" ==> "Default"
+"Build" ==> "Core Coverage" ==> "Default"
 "Build" ==> "Coverage" ==> "Default"
 
 // start build
