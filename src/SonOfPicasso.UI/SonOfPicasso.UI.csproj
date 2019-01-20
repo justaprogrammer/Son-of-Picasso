@@ -37,6 +37,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\common\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" Condition="Exists('..\common\SharedAssemblyInfo.cs')" />
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="Akavache, Version=6.2.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\akavache.6.2.3\lib\net461\Akavache.dll</HintPath>
     </Reference>

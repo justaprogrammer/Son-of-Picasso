@@ -46,32 +46,38 @@ Target.create "Build" (fun _ ->
 
   !! "SonOfPicasso.sln"
   |> MSBuild.runRelease configuration null "Build"
-  |> Trace.logItems "AppBuild-Output: "
+  |> Trace.logItems "Build-Output: "
 )
 
-(*
 Target.create "Test" (fun _ ->
-    List.allPairs ["BCC.Core.Tests"] ["net471" ; "netcoreapp2.1"]
-    |> Seq.iter (fun (proj, framework) -> 
+    [
+        ("SonOfPicasso.Core.Tests", "netcoreapp2.1");
+        ("SonOfPicasso.UI.Tests", "net472");
+    ]
+    |> Seq.iter (fun (proj, framework) ->
+        (
             let projectPath = sprintf "src\\%s\\%s.csproj" proj proj
             let reportFile = sprintf "%s-%s.results.trx" proj framework
 
             let configuration: (DotNet.TestOptions -> DotNet.TestOptions)
                 = (fun t -> {t with
-                               Configuration = DotNet.BuildConfiguration.Release
-                               NoBuild = true
-                               Framework = Some framework
-                               Logger = Some (sprintf "trx;LogFileName=%s" reportFile)
-                               ResultsDirectory = Some "../../reports"})
+                                Configuration = DotNet.BuildConfiguration.Release
+                                NoBuild = true
+                                Framework = Some framework
+                                Logger = Some (sprintf "trx;LogFileName=%s" reportFile)
+                                ResultsDirectory = Some "../../reports"})
 
             DotNet.test configuration projectPath
             
             Trace.publish ImportData.BuildArtifact (sprintf "reports/%s" reportFile)
-    )
+        ))
 )
 
 Target.create "Coverage" (fun _ ->
-    List.allPairs ["BCC.Core.Tests"] ["net471" ; "netcoreapp2.1"]
+    [
+        ("SonOfPicasso.Core.Tests", "netcoreapp2.1");
+        ("SonOfPicasso.UI.Tests", "net472");
+    ]
     |> Seq.iter (fun (proj, framework) -> 
             let dllPath = sprintf "src\\%s\\bin\\Release\\%s\\%s.dll" proj framework proj
             let projectPath = sprintf "src\\%s\\%s.csproj" proj proj
@@ -91,19 +97,16 @@ Target.create "Coverage" (fun _ ->
                 |> ignore
         )
 )
-*)
 
 Target.create "Default" (fun _ -> 
     ()
 )
 
 open Fake.Core.TargetOperators
-"Clean" ==> "Build" ==> "Default"
+"Clean" ==> "Build"
 
-(*
 "Build" ==> "Test" ==> "Default"
 "Build" ==> "Coverage" ==> "Default"
-*)
 
 // start build
 Target.runOrDefault "Default"
