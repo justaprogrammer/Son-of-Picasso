@@ -10,7 +10,7 @@
     <PackageReference Include="akavache.core" Version="6.2.3" />
     <PackageReference Include="akavache.sqlite3" Version="6.2.3" />
     <PackageReference Include="morelinq" Version="3.1.0" />
-    <PackageReference Include="Splat" Version="6.1.1" />
+    <PackageReference Include="Splat" Version="6.1.5" />
     <PackageReference Include="System.IO.Abstractions" Version="3.0.10" />
     <PackageReference Include="System.Reactive" Version="4.1.2" />
   </ItemGroup>

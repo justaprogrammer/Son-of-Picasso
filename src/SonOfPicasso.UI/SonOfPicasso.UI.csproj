@@ -90,16 +90,16 @@
     </Reference>
     <Reference Include="PresentationFramework.Aero" />
     <Reference Include="ReactiveUI, Version=9.8.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\ReactiveUI.9.8.9\lib\net461\ReactiveUI.dll</HintPath>
+      <HintPath>..\..\packages\ReactiveUI.9.8.15\lib\net461\ReactiveUI.dll</HintPath>
     </Reference>
     <Reference Include="ReactiveUI.Events.WPF, Version=9.8.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\ReactiveUI.Events.WPF.9.8.9\lib\net461\ReactiveUI.Events.WPF.dll</HintPath>
+      <HintPath>..\..\packages\ReactiveUI.Events.WPF.9.8.15\lib\net461\ReactiveUI.Events.WPF.dll</HintPath>
     </Reference>
     <Reference Include="ReactiveUI.WPF, Version=9.8.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\ReactiveUI.WPF.9.8.9\lib\net461\ReactiveUI.WPF.dll</HintPath>
+      <HintPath>..\..\packages\ReactiveUI.WPF.9.8.15\lib\net461\ReactiveUI.WPF.dll</HintPath>
     </Reference>
     <Reference Include="Serilog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Serilog.2.7.1\lib\net46\Serilog.dll</HintPath>
+      <HintPath>..\..\packages\Serilog.2.8.0\lib\net46\Serilog.dll</HintPath>
     </Reference>
     <Reference Include="Serilog.Enrichers.Thread, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Serilog.Enrichers.Thread.3.0.0\lib\net45\Serilog.Enrichers.Thread.dll</HintPath>
@@ -111,7 +111,7 @@
       <HintPath>..\..\packages\Serilog.Sinks.Debug.1.0.1\lib\net46\Serilog.Sinks.Debug.dll</HintPath>
     </Reference>
     <Reference Include="Splat, Version=6.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Splat.6.1.1\lib\net461\Splat.dll</HintPath>
+      <HintPath>..\..\packages\Splat.6.1.5\lib\net461\Splat.dll</HintPath>
     </Reference>
     <Reference Include="SQLitePCLRaw.batteries_e_sqlite3, Version=1.1.12.351, Culture=neutral, PublicKeyToken=17faffbb2a73a73f, processorArchitecture=MSIL">
       <HintPath>..\..\packages\SQLitePCLRaw.bundle_e_sqlite3.1.1.12\lib\net45\SQLitePCLRaw.batteries_e_sqlite3.dll</HintPath>
