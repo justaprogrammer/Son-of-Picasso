@@ -15,5 +15,10 @@ before_build:
   - ps: gitversion /output buildserver 
 build_script:
 - ps: >-
-    fake run Build.fsx
+    fake build --parallel 4
 test: off
+deploy:
+- provider: Environment
+  name: GitHub
+  on:
+    APPVEYOR_REPO_TAG: true
