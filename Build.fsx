@@ -17,7 +17,7 @@ let isAppveyor = AppVeyor.detect()
 let gitVersion = GitVersion.generateProperties id
 
 Target.create "Clean" (fun _ ->
-  ["reports" ; "src/common"]
+  ["reports" ; "build" ; "src/common"]
   |> Seq.iter Directory.delete
 
   !! "nuget/*"
@@ -82,6 +82,8 @@ Target.create "Core Coverage" (fun _ ->
             let projectPath = sprintf "src\\%s\\%s.csproj" proj proj
             let reportPath = sprintf "reports/%s-%s.coverage.xml" proj framework
 
+            Directory.ensure "reports"
+          
             sprintf "%s --target \"dotnet\" --targetargs \"test -c Release -f %s %s --no-build\" --format opencover --output \"./%s\""
                 dllPath framework projectPath reportPath
             |> CreateProcess.fromRawCommandLine "coverlet"
@@ -128,6 +130,18 @@ Target.create "Coverage" (fun _ ->
         )
 )
 
+Target.create "Package" (fun _ -> 
+    let packagePath = "build/son-of-picasso.zip"
+
+    Directory.ensure "build"
+  
+    !! "src/SonOfPicasso.UI/bin/Release/**/*"
+    |> Zip.filesAsSpecs "src\\SonOfPicasso.UI\\bin\\Release"
+    |> Zip.zipSpec packagePath
+
+    Trace.publish ImportData.BuildArtifact packagePath
+)
+
 Target.create "Default" (fun _ -> 
     ()
 )
@@ -138,6 +152,7 @@ open Fake.Core.TargetOperators
 "Build" ==> "Test" ==> "Default"
 "Build" ==> "Core Coverage" ==> "Default"
 "Build" ==> "Coverage" ==> "Default"
+"Build" ==> "Package" ==> "Default"
 
 // start build
 Target.runOrDefault "Default"
