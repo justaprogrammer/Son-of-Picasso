@@ -2,7 +2,7 @@ style: github
 template: CHANGELOG.tpl.md
 info:
   title: CHANGELOG
-  repository_url: https://github.com/StanleyGoldman/Son-of-Picasso
+  repository_url: https://github.com/justaprogrammer/Son-of-Picasso
 options:
   commits:
     filters:
