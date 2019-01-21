@@ -17,3 +17,8 @@ build_script:
 - ps: >-
     fake run Build.fsx
 test: off
+deploy:
+- provider: Environment
+  name: GitHub
+  on:
+    APPVEYOR_REPO_TAG: true
