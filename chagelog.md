@@ -1,6 +1,9 @@
 <a name="unreleased"></a>
 ## [Unreleased]
 
+### Chores
+- Change changelog template to not show unreleased commits by default
+
 
 <a name="v0.0.1"></a>
 ## v0.0.1 - 2019-01-21
