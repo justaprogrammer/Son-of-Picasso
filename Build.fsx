@@ -131,7 +131,7 @@ Target.create "Coverage" (fun _ ->
 )
 
 Target.create "Package" (fun _ -> 
-    let packagePath = "build/son-of-picasso.zip"
+    let packagePath = (sprintf "build/son-of-picasso-%s.zip" gitVersion.FullSemVer)
 
     Directory.ensure "build"
   
