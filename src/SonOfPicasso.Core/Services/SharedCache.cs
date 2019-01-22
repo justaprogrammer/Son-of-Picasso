@@ -12,21 +12,19 @@ namespace SonOfPicasso.Core.Services
         private const string UserSettingsKey = "UserSettings";
         private const string ImageFoldersKey = "ImageFolders";
         private readonly ILogger<SharedCache> _logger;
-        private readonly IBlobCache _userAccount;
-        private readonly IBlobCache _localMachine;
+        private readonly IBlobCache _blobCache;
 
         static SharedCache()
         {
             BlobCache.ApplicationName = "SonOfPicasso";
         }
 
-        public SharedCache(ILogger<SharedCache> logger) : this(logger, null, null)
+        public SharedCache(ILogger<SharedCache> logger) : this(logger, null)
         {
         }
 
         protected SharedCache(ILogger<SharedCache> logger,
-            IBlobCache userAccountCache,
-            IBlobCache localMachineCache)
+            IBlobCache blobCache)
         {
             IBlobCache GetBlobCacheOrFallback(Func<IBlobCache> blobCacheFunc, string cacheName)
             {
@@ -42,32 +40,36 @@ namespace SonOfPicasso.Core.Services
             }
 
             _logger = logger;
-            _userAccount = userAccountCache ?? GetBlobCacheOrFallback(() => BlobCache.UserAccount, "UserAccount");
-            _localMachine = localMachineCache ?? GetBlobCacheOrFallback(() => BlobCache.LocalMachine, "LocalMachine");
+            _blobCache = blobCache ?? GetBlobCacheOrFallback(() => BlobCache.UserAccount, "UserAccount");
+        }
+
+        public IObservable<Unit> Clear()
+        {
+            return _blobCache.InvalidateAll();
         }
 
         public IObservable<UserSettings> GetUserSettings()
         {
             _logger.LogDebug("GetUserSettings");
-            return _userAccount.GetOrCreateObject(UserSettingsKey, () => new UserSettings());
+            return _blobCache.GetOrCreateObject(UserSettingsKey, () => new UserSettings());
         }
 
         public IObservable<Unit> SetUserSettings(UserSettings userSettings)
         {
             _logger.LogDebug("SetUserSettings");
-            return _userAccount.InsertObject(UserSettingsKey, userSettings);
+            return _blobCache.InsertObject(UserSettingsKey, userSettings);
         }
 
         public IObservable<ImageFolderDictionary> GetImageFolders()
         {
             _logger.LogDebug("GetImageFolders");
-            return _userAccount.GetOrCreateObject(ImageFoldersKey, () => new ImageFolderDictionary());
+            return _blobCache.GetOrCreateObject(ImageFoldersKey, () => new ImageFolderDictionary());
         }
 
         public IObservable<Unit> SetImageFolders(ImageFolderDictionary imageFolders)
         {
             _logger.LogDebug("SetImageFolders");
-            return _userAccount.InsertObject(ImageFoldersKey, imageFolders);
+            return _blobCache.InsertObject(ImageFoldersKey, imageFolders);
         }
     }
 }

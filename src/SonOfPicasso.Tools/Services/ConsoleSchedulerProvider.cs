@@ -1,7 +1,7 @@
 ﻿using System.Reactive.Concurrency;
 using SonOfPicasso.Core.Scheduling;
 
-namespace SonOfPicasso.Tools
+namespace SonOfPicasso.Tools.Services
 {
     public sealed class ConsoleSchedulerProvider : ISchedulerProvider
     {

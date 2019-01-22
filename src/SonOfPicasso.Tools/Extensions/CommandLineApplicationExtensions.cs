@@ -2,7 +2,7 @@ using System;
 using FluentColorConsole;
 using McMaster.Extensions.CommandLineUtils;
 
-namespace SonOfPicasso.Tools
+namespace SonOfPicasso.Tools.Extensions
 {
     public static class CommandLineApplicationExtensions
     {

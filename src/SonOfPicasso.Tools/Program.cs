@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO.Abstractions;
+using System.Reactive.Linq;
 using FluentColorConsole;
 using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,6 +9,8 @@ using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Logging;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Core.Services;
+using SonOfPicasso.Tools.Extensions;
+using SonOfPicasso.Tools.Services;
 
 namespace SonOfPicasso.Tools
 {
@@ -33,7 +36,23 @@ namespace SonOfPicasso.Tools
                     setCmd.HandleValidationError();
 
                     var count = setCmd.Argument<int>("count", "The number of images to generate").IsRequired();
-                    setCmd.OnExecute(() => ToolsService.GenerateImages(count.ParsedValue));
+                    var path = setCmd.Argument<string>("path", "The location for these images").IsRequired();
+
+                    setCmd.OnExecute(() => ToolsService.GenerateImages(count.ParsedValue, path.ParsedValue).LastAsync().Wait());
+                });
+            });
+
+            app.Command("cache", configCmd =>
+            {
+                configCmd.HandleSpecifySubCommandError();
+
+                configCmd.Command("clear", setCmd =>
+                {
+                    setCmd.Description = "Clear Cache";
+
+                    setCmd.HandleValidationError();
+
+                    setCmd.OnExecute(() => ToolsService.ClearCache().LastAsync().Wait());
                 });
             });
 
