@@ -20,11 +20,6 @@ Target.create "Clean" (fun _ ->
   ["reports" ; "build" ; "src/common"]
   |> Seq.iter Directory.delete
 
-  !! "nuget/*"
-  -- "nuget/*.txt"
-  -- "nuget/*.nuspec"
-  |> File.deleteAll
-
   let configuration = 
     (fun p -> { p with 
                   Properties = ["Configuration", "Release"]
