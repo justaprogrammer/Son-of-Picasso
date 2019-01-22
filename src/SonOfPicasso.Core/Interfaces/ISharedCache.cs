@@ -10,5 +10,6 @@ namespace SonOfPicasso.Core.Interfaces
         IObservable<Unit> SetUserSettings(UserSettings userSettings);
         IObservable<ImageFolderDictionary> GetImageFolders();
         IObservable<Unit> SetImageFolders(ImageFolderDictionary imageFolders);
+        IObservable<Unit> Clear();
     }
 }
