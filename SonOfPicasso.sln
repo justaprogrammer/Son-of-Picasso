@@ -27,6 +27,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{30DC3442
 		paket.dependencies = paket.dependencies
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{DE25AC0A-8FB7-4D88-8B3A-CDC3EF9AE88F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SonOfPicasso.Tools", "src\SonOfPicasso.Tools\SonOfPicasso.Tools.csproj", "{2BA6995C-ED7F-4636-9DEA-0D8EE2504771}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +61,10 @@ Global
 		{B9FBDA9B-B6C7-4AD7-916C-E1FB8FF520F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B9FBDA9B-B6C7-4AD7-916C-E1FB8FF520F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B9FBDA9B-B6C7-4AD7-916C-E1FB8FF520F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2BA6995C-ED7F-4636-9DEA-0D8EE2504771}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2BA6995C-ED7F-4636-9DEA-0D8EE2504771}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2BA6995C-ED7F-4636-9DEA-0D8EE2504771}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2BA6995C-ED7F-4636-9DEA-0D8EE2504771}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -66,6 +74,7 @@ Global
 		{0D73C26E-D1F1-4DE7-8354-9C9549FD2F93} = {12E2CEF6-EB9D-412F-98E3-ECBBBD00A29A}
 		{BB58C648-8910-4106-AEEB-98E37B6C5559} = {12E2CEF6-EB9D-412F-98E3-ECBBBD00A29A}
 		{95CCEAEE-8A44-40D2-975A-DEFDAED35523} = {12E2CEF6-EB9D-412F-98E3-ECBBBD00A29A}
+		{2BA6995C-ED7F-4636-9DEA-0D8EE2504771} = {DE25AC0A-8FB7-4D88-8B3A-CDC3EF9AE88F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2C01583D-05D7-4F03-A86C-ECF79DA041D0}
