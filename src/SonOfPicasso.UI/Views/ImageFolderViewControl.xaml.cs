@@ -17,8 +17,9 @@ namespace SonOfPicasso.UI.Views
             this.WhenActivated(disposable =>
             {
                 this.OneWayBind(ViewModel,
-                        model => model.ImageFolder.Path,
-                        window => window.FolderName.Content)
+                        model => model.ImageFolder,
+                        window => window.FolderName.Content,
+                        folder => folder.Path)
                     .DisposeWith(disposable);
             });
         }
