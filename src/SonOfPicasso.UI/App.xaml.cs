@@ -46,6 +46,7 @@ namespace SonOfPicasso.UI
                 .AddSingleton<ISchedulerProvider, SchedulerProvider>()
                 .AddSingleton<IImageLoadingService, ImageLoadingService>()
                 .AddSingleton<IImageLocationService, ImageLocationService>()
+                .AddSingleton<IImageViewModelBitmapConveter, ImageViewModelBitmapConveter>()
                 .AddSingleton<ISharedCache, SharedCache>()
                 .AddSingleton<IEnvironmentService, EnvironmentService>()
                 .AddTransient<IApplicationViewModel, ApplicationViewModel>()

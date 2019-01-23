@@ -1,5 +1,6 @@
 ﻿using System.Windows.Media.Imaging;
 using SonOfPicasso.Core.Models;
+using SonOfPicasso.UI.ViewModels;
 using Splat;
 
 namespace SonOfPicasso.UI.Interfaces
@@ -8,6 +9,5 @@ namespace SonOfPicasso.UI.Interfaces
     {
         void Initialize(Image image);
         Image Image { get; }
-        BitmapSource Bitmap { get; }
     }
 }
