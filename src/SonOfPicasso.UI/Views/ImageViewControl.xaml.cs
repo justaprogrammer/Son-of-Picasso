@@ -46,8 +46,9 @@ namespace SonOfPicasso.UI.Views
                     .DisposeWith(disposable);
 
                 this.OneWayBind(ViewModel,
-                        model => model.Image.Path,
-                        window => window.ImageLabel.Content)
+                        model => model.Image,
+                        window => window.ImageLabel.Content,
+                        image => image.Path)
                     .DisposeWith(disposable);
             });
         }
