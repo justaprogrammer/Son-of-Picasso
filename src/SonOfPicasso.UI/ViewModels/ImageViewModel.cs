@@ -34,9 +34,6 @@ namespace SonOfPicasso.UI.ViewModels
 
             _imageLoadingService.LoadImageFromPath(image.Path)
                 .Subscribe(bitmap => taskCompletionSource.SetResult(new WeakReference<IBitmap>(bitmap)));
-
-
-            Bitmap = NotifyTask.Create(taskCompletionSource.Task);
         }
 
         private Image _image;
@@ -47,12 +44,9 @@ namespace SonOfPicasso.UI.ViewModels
             set => this.RaiseAndSetIfChanged(ref _image, value);
         }
 
-        private NotifyTask<WeakReference<IBitmap>> _bitmap;
-
-        public NotifyTask<WeakReference<IBitmap>> Bitmap
+        public IObservable<IBitmap> GetImage()
         {
-            get => _bitmap;
-            set => this.RaiseAndSetIfChanged(ref _bitmap, value);
+            return _imageLoadingService.LoadImageFromPath(Image.Path);
         }
     }
 }

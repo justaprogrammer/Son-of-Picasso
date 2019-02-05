@@ -11,7 +11,6 @@ using SonOfPicasso.Core.Services;
 using SonOfPicasso.UI.Injection;
 using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.Scheduling;
-using SonOfPicasso.UI.Services;
 using SonOfPicasso.UI.ViewModels;
 using SonOfPicasso.UI.Views;
 using SonOfPicasso.UI.Windows;
@@ -47,7 +46,6 @@ namespace SonOfPicasso.UI
                 .AddSingleton<ISchedulerProvider, SchedulerProvider>()
                 .AddSingleton<IImageLoadingService, ImageLoadingService>()
                 .AddSingleton<IImageLocationService, ImageLocationService>()
-                .AddSingleton<IImageViewModelBitmapConveter, ImageViewModelBitmapConveter>()
                 .AddSingleton<ISharedCache, SharedCache>()
                 .AddSingleton<IEnvironmentService, EnvironmentService>()
                 .AddTransient<IApplicationViewModel, ApplicationViewModel>()
