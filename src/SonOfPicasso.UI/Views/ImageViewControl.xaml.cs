@@ -36,7 +36,6 @@ namespace SonOfPicasso.UI.Views
             this.WhenActivated(disposable =>
             {
                 this.OneWayBind(ViewModel,
-                this.OneWayBind(ViewModel,
                         model => model.Image,
                         window => window.ImageLabel.Content,
                         image => image.Path)
