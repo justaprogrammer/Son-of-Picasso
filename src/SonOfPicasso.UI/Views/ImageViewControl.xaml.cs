@@ -11,19 +11,6 @@ using Splat;
 
 namespace SonOfPicasso.UI.Views
 {
-    public class WeakReferenceBitmap : IBindingTypeConverter
-    {
-        public int GetAffinityForObjects(Type fromType, Type toType)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool TryConvert(object @from, Type toType, object conversionHint, out object result)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
     /// <summary>
     /// Interaction logic for ImageViewControl.xaml
     /// </summary>

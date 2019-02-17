@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Windows.Media.Imaging;
-using Nito.Mvvm;
 using SonOfPicasso.Core.Models;
-using SonOfPicasso.UI.ViewModels;
 using Splat;
 
 namespace SonOfPicasso.UI.Interfaces
