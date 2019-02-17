@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using Nito.Mvvm;
 using ReactiveUI;
-using SonOfPicasso.Core.Extensions;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.UI.Interfaces;
-using SonOfPicasso.UI.ViewModels;
 using Splat;
 
 namespace SonOfPicasso.UI.Views

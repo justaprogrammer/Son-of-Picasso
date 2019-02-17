@@ -1,14 +1,8 @@
 ﻿using System;
-using System.Globalization;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
-using System.Windows.Data;
-using System.Windows.Media.Imaging;
-using Nito.Mvvm;
 using ReactiveUI;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Models;
-using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.UI.Injection;
 using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.Views;
