@@ -23,7 +23,7 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-            <ListView Name="ImagesListView">
+            <ListView Name="ImagesListView" VirtualizingStackPanel.ScrollUnit="Pixel">
                 <ListView.ItemTemplate>
                     <DataTemplate DataType="{x:Type interfaces:IImageViewModel}">
                         <reactiveUi:ViewModelViewHost ViewModel="{Binding}" />
