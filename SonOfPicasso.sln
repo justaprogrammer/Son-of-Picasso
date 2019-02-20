@@ -29,7 +29,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{30DC3442
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{DE25AC0A-8FB7-4D88-8B3A-CDC3EF9AE88F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SonOfPicasso.Tools", "src\SonOfPicasso.Tools\SonOfPicasso.Tools.csproj", "{2BA6995C-ED7F-4636-9DEA-0D8EE2504771}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SonOfPicasso.Tools", "src\SonOfPicasso.Tools\SonOfPicasso.Tools.csproj", "{2BA6995C-ED7F-4636-9DEA-0D8EE2504771}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

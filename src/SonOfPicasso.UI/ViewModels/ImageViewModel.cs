@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Reactive.Linq;
-using System.Windows.Media.Imaging;
+using System.Threading.Tasks;
 using ReactiveUI;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Models;
@@ -27,12 +27,6 @@ namespace SonOfPicasso.UI.ViewModels
         public void Initialize(Image image)
         {
             this.Image = image;
-
-            _bitmap = _imageLoadingService
-                .LoadImageFromPath(image.Path)
-                .Select(bitmap => bitmap.ToNative())
-                .ObserveOn(_schedulerProvider.MainThreadScheduler)
-                .ToProperty(this, x => x.Bitmap);
         }
 
         private Image _image;
@@ -43,8 +37,10 @@ namespace SonOfPicasso.UI.ViewModels
             set => this.RaiseAndSetIfChanged(ref _image, value);
         }
 
-        private ObservableAsPropertyHelper<BitmapSource> _bitmap;
-
-        public BitmapSource Bitmap => _bitmap.Value;
+        public IObservable<IBitmap> GetImage()
+        {
+            return _imageLoadingService.LoadImageFromPath(Image.Path)
+                .ObserveOn(_schedulerProvider.MainThreadScheduler);
+        }
     }
 }
