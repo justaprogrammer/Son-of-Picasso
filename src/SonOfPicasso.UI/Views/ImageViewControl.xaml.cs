@@ -13,7 +13,7 @@ namespace SonOfPicasso.UI.Views
     /// </summary>
     public partial class ImageViewControl : ReactiveUserControl<IImageViewModel>
     {
-        public ImageViewControl(ISchedulerProvider schedulerProvider)
+        public ImageViewControl()
         {
             InitializeComponent();
 
@@ -26,7 +26,6 @@ namespace SonOfPicasso.UI.Views
                     .DisposeWith(disposable);
 
                 this.ViewModel.GetImage()
-                    .ObserveOn(schedulerProvider.MainThreadScheduler)
                     .Subscribe(bitmap =>
                     {
                         ImageBitmap.Source = bitmap.ToNative();

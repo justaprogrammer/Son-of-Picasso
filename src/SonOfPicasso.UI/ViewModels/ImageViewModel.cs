@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using ReactiveUI;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Models;
+using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.UI.Injection;
 using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.Views;
@@ -14,20 +16,17 @@ namespace SonOfPicasso.UI.ViewModels
     public class ImageViewModel : ReactiveObject, IImageViewModel
     {
         private readonly IImageLoadingService _imageLoadingService;
+        private readonly ISchedulerProvider _schedulerProvider;
 
-        public ImageViewModel(IImageLoadingService imageLoadingService)
+        public ImageViewModel(IImageLoadingService imageLoadingService, ISchedulerProvider schedulerProvider)
         {
             _imageLoadingService = imageLoadingService;
+            _schedulerProvider = schedulerProvider;
         }
 
         public void Initialize(Image image)
         {
             this.Image = image;
-
-            var taskCompletionSource = new TaskCompletionSource<WeakReference<IBitmap>>();
-
-            _imageLoadingService.LoadImageFromPath(image.Path)
-                .Subscribe(bitmap => taskCompletionSource.SetResult(new WeakReference<IBitmap>(bitmap)));
         }
 
         private Image _image;
@@ -40,7 +39,8 @@ namespace SonOfPicasso.UI.ViewModels
 
         public IObservable<IBitmap> GetImage()
         {
-            return _imageLoadingService.LoadImageFromPath(Image.Path);
+            return _imageLoadingService.LoadImageFromPath(Image.Path)
+                .ObserveOn(_schedulerProvider.MainThreadScheduler);
         }
     }
 }

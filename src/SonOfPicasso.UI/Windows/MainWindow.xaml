@@ -16,14 +16,20 @@
         </Menu>
 
         <DockPanel>
-            <ListView DockPanel.Dock="Left" MinWidth="300" Name="FoldersListView">
+            <ListView Name="FoldersListView" 
+                      DockPanel.Dock="Left" 
+                      MinWidth="300"
+                      VirtualizingStackPanel.VirtualizationMode="Recycling"
+                      VirtualizingStackPanel.ScrollUnit="Pixel">
                 <ListView.ItemTemplate>
                     <DataTemplate DataType="{x:Type interfaces:IImageFolderViewModel}">
                         <reactiveUi:ViewModelViewHost ViewModel="{Binding}" />
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-            <ListView Name="ImagesListView" VirtualizingStackPanel.ScrollUnit="Pixel">
+            <ListView Name="ImagesListView" 
+                      VirtualizingStackPanel.VirtualizationMode="Recycling"
+                      VirtualizingStackPanel.ScrollUnit="Pixel">
                 <ListView.ItemTemplate>
                     <DataTemplate DataType="{x:Type interfaces:IImageViewModel}">
                         <reactiveUi:ViewModelViewHost ViewModel="{Binding}" />
