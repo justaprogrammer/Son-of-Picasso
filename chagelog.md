@@ -1,9 +1,23 @@
-<a name="unreleased"></a>
-## [Unreleased]
+
+<a name="v0.0.2"></a>
+## [v0.0.2] - 2019-02-20
+### Bug Fixes
+- Addressing memory issues by using virtualization correctly
+- Correcting ReactiveUI binding
 
 ### Chores
+- Command line functionality to create test images and clear cache
+- Remove nuget artifact from clean task in build script
 - Fixing repository url in changelog template
 - Change changelog template to not show unreleased commits by default
+
+### Pull Requests
+- Merge pull request [#13](https://github.com/justaprogrammer/Son-of-Picasso/issues/13) from justaprogrammer/image-converter
+- Merge pull request [#12](https://github.com/justaprogrammer/Son-of-Picasso/issues/12) from justaprogrammer/binding-nitpick
+- Merge pull request [#10](https://github.com/justaprogrammer/Son-of-Picasso/issues/10) from justaprogrammer/command-line-dev-tools
+- Merge pull request [#11](https://github.com/justaprogrammer/Son-of-Picasso/issues/11) from justaprogrammer/build-fix
+- Merge pull request [#9](https://github.com/justaprogrammer/Son-of-Picasso/issues/9) from justaprogrammer/changelog-template
+- Merge pull request [#8](https://github.com/justaprogrammer/Son-of-Picasso/issues/8) from justaprogrammer/changelog-template
 
 
 <a name="v0.0.1"></a>
@@ -35,4 +49,4 @@
 - Merge pull request [#6](https://github.com/justaprogrammer/Son-of-Picasso/issues/6) from justaprogrammer/fix-test
 
 
-[Unreleased]: https://github.com/justaprogrammer/Son-of-Picasso/compare/v0.0.1...HEAD
+[v0.0.2]: https://github.com/justaprogrammer/Son-of-Picasso/compare/v0.0.1...v0.0.2
