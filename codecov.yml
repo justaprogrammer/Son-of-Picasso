@@ -31,3 +31,5 @@ fixes:
 ignore:
   - "**/*.xaml"
   - "**/*.xaml.cs"
+  - "**/Resources.Designer.cs"
+  - "**/Settings.Designer.cs"
