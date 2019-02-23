@@ -52,13 +52,18 @@ namespace SonOfPicasso.Core.Services
         public IObservable<UserSettings> GetUserSettings()
         {
             _logger.LogDebug("GetUserSettings");
-            return BlobCache.GetOrCreateObject(UserSettingsKey, () => new UserSettings());
+            return BlobCache.GetOrCreateObject(UserSettingsKey, CreateUserSettings);
         }
 
         public IObservable<Unit> SetUserSettings(UserSettings userSettings)
         {
             _logger.LogDebug("SetUserSettings");
             return BlobCache.InsertObject(UserSettingsKey, userSettings);
+        }
+
+        private static UserSettings CreateUserSettings()
+        {
+            return new UserSettings();
         }
 
         public IObservable<string[]> GetFolderList()
@@ -76,7 +81,12 @@ namespace SonOfPicasso.Core.Services
         public IObservable<ImageFolder> GetFolder(string path)
         {
             _logger.LogDebug("GetFolder");
-            return BlobCache.GetOrCreateObject(GetImageFolderDetailKey(path), () => new ImageFolder());
+            return BlobCache.GetOrCreateObject(GetImageFolderDetailKey(path), CreateImageFolder);
+        }
+
+        private static ImageFolder CreateImageFolder()
+        {
+            return new ImageFolder();
         }
 
         public IObservable<Unit> SetFolder(ImageFolder imageFolder)

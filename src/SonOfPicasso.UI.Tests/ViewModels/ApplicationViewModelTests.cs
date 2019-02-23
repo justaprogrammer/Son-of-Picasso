@@ -70,7 +70,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             var autoResetEvent = new AutoResetEvent(false);
 
             applicationViewModel.AddFolder.Execute(Faker.System.DirectoryPath())
-                .Subscribe(unit => { autoResetEvent.Set(); });
+                .Subscribe(_ => autoResetEvent.Set());
 
             testSchedulerProvider.TaskPool.AdvanceBy(1);
             testSchedulerProvider.MainThreadScheduler.AdvanceBy(1);
