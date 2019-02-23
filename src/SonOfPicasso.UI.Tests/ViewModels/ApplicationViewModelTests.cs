@@ -4,7 +4,6 @@ using System.Threading;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using SonOfPicasso.Core.Interfaces;
-using SonOfPicasso.Core.Models;
 using SonOfPicasso.Testing.Common;
 using SonOfPicasso.Testing.Common.Scheduling;
 using SonOfPicasso.UI.Tests.Extensions;
@@ -29,8 +28,8 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             var imageLocationService = Substitute.For<IImageLocationService>();
             var sharedCache = Substitute.For<ISharedCache>();
 
-            sharedCache.GetImageFolders()
-                .Returns(Observable.Return(new ImageFolderDictionary()));
+            sharedCache.GetFolderList()
+                .Returns(Observable.Return(Array.Empty<string>()));
 
             var applicationViewModel = this.CreateApplicationViewModel(
                 imageLocationService: imageLocationService,
@@ -42,7 +41,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             applicationViewModel.Initialize()
                 .Subscribe(_ => autoResetEvent.Set());
 
-            sharedCache.Received().GetImageFolders();
+            sharedCache.Received().GetFolderList();
 
             testSchedulerProvider.MainThreadScheduler.AdvanceBy(1);
             testSchedulerProvider.TaskPool.AdvanceBy(1);
@@ -60,8 +59,8 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             var imageLocationService = Substitute.For<IImageLocationService>();
             var sharedCache = Substitute.For<ISharedCache>();
 
-            sharedCache.GetImageFolders()
-                .Returns(Observable.Return(new ImageFolderDictionary()));
+            sharedCache.GetFolderList()
+                .Returns(Observable.Return(Array.Empty<string>()));
 
             var applicationViewModel = this.CreateApplicationViewModel(
                 imageLocationService: imageLocationService,

@@ -10,6 +10,5 @@ namespace SonOfPicasso.UI.Interfaces
         IObservable<Unit> Initialize();
         ReactiveCommand<string, Unit> AddFolder { get; }
         ObservableCollection<IImageFolderViewModel> ImageFolders { get; }
-        ObservableCollection<IImageViewModel> Images { get; }
     }
 }

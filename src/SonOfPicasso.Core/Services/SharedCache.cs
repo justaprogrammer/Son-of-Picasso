@@ -61,16 +61,30 @@ namespace SonOfPicasso.Core.Services
             return BlobCache.InsertObject(UserSettingsKey, userSettings);
         }
 
-        public IObservable<ImageFolderDictionary> GetImageFolders()
+        public IObservable<string[]> GetFolderList()
         {
-            _logger.LogDebug("GetImageFolders");
-            return BlobCache.GetOrCreateObject(ImageFoldersKey, () => new ImageFolderDictionary());
+            _logger.LogDebug("GetFolderList");
+            return BlobCache.GetOrCreateObject(ImageFoldersKey, Array.Empty<string>);
         }
 
-        public IObservable<Unit> SetImageFolders(ImageFolderDictionary imageFolders)
+        public IObservable<Unit> SetFolderList(string[] paths)
         {
-            _logger.LogDebug("SetImageFolders");
-            return BlobCache.InsertObject(ImageFoldersKey, imageFolders);
+            _logger.LogDebug("SetFolderList");
+            return BlobCache.InsertObject(ImageFoldersKey, paths);
         }
+
+        public IObservable<ImageFolder> GetFolder(string path)
+        {
+            _logger.LogDebug("GetFolder");
+            return BlobCache.GetOrCreateObject(GetImageFolderDetailKey(path), () => new ImageFolder());
+        }
+
+        public IObservable<Unit> SetFolder(ImageFolder imageFolder)
+        {
+            _logger.LogDebug("SetFolder");
+            return BlobCache.InsertObject(GetImageFolderDetailKey(imageFolder.Path), imageFolder);
+        }
+
+        private static string GetImageFolderDetailKey(string path) => $"ImageFolder {path}";
     }
 }

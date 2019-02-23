@@ -63,5 +63,30 @@ namespace SonOfPicasso.Core.Tests.Extensions
 
             return buildServiceProvider.MustGetService<ImageLocationService>();
         }
+
+        public static ImageManagementService CreateImageManagementService<T>(this TestsBase<T> tests,
+            ISharedCache sharedCache = null,
+            IImageLocationService imageLocationService = null)
+        {
+            imageLocationService = imageLocationService ?? Substitute.For<IImageLocationService>();
+
+            var serviceCollection = tests.GetServiceCollection()
+                .AddSingleton(imageLocationService)
+                .AddSingleton<ImageManagementService>();
+
+            if (sharedCache != null)
+            {
+                serviceCollection.AddSingleton(sharedCache);
+            }
+            else
+            {
+                serviceCollection.AddSingleton<ISharedCache, TestCache>();
+            }
+
+            var buildServiceProvider = serviceCollection
+                .BuildServiceProvider();
+
+            return buildServiceProvider.MustGetService<ImageManagementService>();
+        }
     }
 }

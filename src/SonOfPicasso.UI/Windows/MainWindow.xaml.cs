@@ -38,10 +38,10 @@ namespace SonOfPicasso.UI.Windows
                             window => window.FoldersListView.ItemsSource)
                         .DisposeWith(disposable);
 
-                    this.OneWayBind(ViewModel,
-                            model => model.Images,
-                            window => window.ImagesListView.ItemsSource)
-                        .DisposeWith(disposable);
+//                    this.OneWayBind(ViewModel,
+//                            model => model.Images,
+//                            window => window.ImagesListView.ItemsSource)
+//                        .DisposeWith(disposable);
                 });
         }
 

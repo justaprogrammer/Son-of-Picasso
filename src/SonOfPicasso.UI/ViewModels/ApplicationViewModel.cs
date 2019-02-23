@@ -37,39 +37,12 @@ namespace SonOfPicasso.UI.ViewModels
             _imageLocationService = imageLocationService;
             _serviceProvider = serviceProvider;
 
-            var imageFolders = new ObservableCollection<IImageFolderViewModel>();
-            imageFolders.CollectionChanged += ImageFoldersOnCollectionChanged;
-            ImageFolders = imageFolders;
-
-            Images = new ObservableCollection<IImageViewModel>();
+            ImageFolders = new ObservableCollection<IImageFolderViewModel>();
 
             AddFolder = ReactiveCommand.CreateFromObservable<string, Unit>(ExecuteAddFolder);
         }
 
-        private void ImageFoldersOnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            _logger.LogDebug("ImageFoldersOnCollectionChanged");
-
-            if (e.Action == NotifyCollectionChangedAction.Add)
-            {
-                var paths = e.NewItems.Cast<ImageFolderViewModel>()
-                    .Select(folder => folder.ImageFolder.Path);
-
-                ScanFolders(paths).Subscribe();
-            }
-            else if (e.Action == NotifyCollectionChangedAction.Remove)
-            {
-
-            }
-            else if (e.Action == NotifyCollectionChangedAction.Reset)
-            {
-
-            }
-        }
-
         public ObservableCollection<IImageFolderViewModel> ImageFolders { get; }
-
-        public ObservableCollection<IImageViewModel> Images { get; }
 
         public ReactiveCommand<string, Unit> AddFolder { get; }
 
@@ -85,58 +58,58 @@ namespace SonOfPicasso.UI.ViewModels
                 });
         }
 
-        private IObservable<Unit> ExecuteAddFolder(string path)
+        private IObservable<Unit> ExecuteAddFolder(string addPath)
         {
-            return _sharedCache.GetImageFolders()
+            return _sharedCache.GetFolderList()
                 .ObserveOn(_schedulerProvider.TaskPool)
-                .SelectMany(imageFolders =>
+                .SelectMany(paths =>
                 {
-                    if (!imageFolders.ContainsKey(path))
+                    if (!paths.Any(path => path.Equals(addPath)))
                     {
-                        imageFolders.Add(path, new ImageFolder { Path = path });
+                        paths = paths.Append(addPath).ToArray();
                     }
 
-                    return _sharedCache.SetImageFolders(imageFolders);
+                    return _sharedCache.SetFolderList(paths);
                 })
                 .SelectMany(_ => LoadImageFolders());
         }
 
-        private IObservable<Unit> ScanFolders(IEnumerable<string> paths)
-        {
-            return paths.ToObservable()
-                .SelectMany(s => _imageLocationService.GetImages(s))
-                .SelectMany(fileInfo => fileInfo)
-                .Select(fileInfo =>
-                {
-                    var image = new Image { Path = fileInfo.FullName };
-
-                    var imageViewModel = _serviceProvider.GetService<IImageViewModel>();
-                    imageViewModel.Initialize(image);
-
-                    return imageViewModel;
-                })
-                .ToArray()
-                .ObserveOn(_schedulerProvider.MainThreadScheduler)
-                .Select(items =>
-                {
-                    Images.AddRange(items);
-                    return Unit.Default;
-                });
-        }
+//        private IObservable<Unit> ScanFolders(IEnumerable<string> paths)
+//        {
+//            return paths.ToObservable()
+//                .SelectMany(s => _imageLocationService.GetImages(s))
+//                .SelectMany(fileInfo => fileInfo)
+//                .Select(fileInfo =>
+//                {
+//                    var image = new Image { Path = fileInfo.FullName };
+//
+//                    var imageViewModel = _serviceProvider.GetService<IImageViewModel>();
+//                    imageViewModel.Initialize(image);
+//
+//                    return imageViewModel;
+//                })
+//                .ToArray()
+//                .ObserveOn(_schedulerProvider.MainThreadScheduler)
+//                .Select(items =>
+//                {
+//                    Images.AddRange(items);
+//                    return Unit.Default;
+//                });
+//        }
 
         private IObservable<Unit> LoadImageFolders()
         {
             _logger.LogDebug("LoadImageFolders");
 
-            return _sharedCache.GetImageFolders()
+            return _sharedCache.GetFolderList()
                 .ObserveOn(_schedulerProvider.MainThreadScheduler)
                 .Select(imageFolders =>
                 {
                     ImageFolders.Clear();
-                    var enumerable = imageFolders.Values.Select(imageFolder =>
+                    var enumerable = imageFolders.Select(path =>
                     {
                         var imageFolderViewModel = _serviceProvider.GetService<IImageFolderViewModel>();
-                        imageFolderViewModel.Initialize(imageFolder);
+                        imageFolderViewModel.Initialize(path);
 
                         return imageFolderViewModel;
                     });
