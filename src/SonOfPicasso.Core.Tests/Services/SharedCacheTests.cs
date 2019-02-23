@@ -14,7 +14,7 @@ namespace SonOfPicasso.Core.Tests.Services
         {
         }
 
-        [Fact(Timeout = 500)]
+        [Fact]
         public void CanInitialize()
         {
             Logger.LogDebug("CanInitialize");
