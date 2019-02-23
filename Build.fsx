@@ -112,7 +112,7 @@ Target.create "Coverage" (fun _ ->
                         TestRunnerExePath = "./packages/fakebuildresources/xunit.runner.console/tools/net472/xunit.console.exe";
                         Output = reportPath;
                         Register = OpenCover.RegisterUser;
-                        Filter = "+[SonOfPicasso.*]*";
+                        Filter = "+[SonOfPicasso.*]* -[SonOfPicasso.*.Tests]* -[SonOfPicasso.Testing.Common]*";
                 })
                 (sprintf "%s -noshadow" dllPath)
 
