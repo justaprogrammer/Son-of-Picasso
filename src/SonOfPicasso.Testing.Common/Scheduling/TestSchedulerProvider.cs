@@ -2,7 +2,7 @@
 using Microsoft.Reactive.Testing;
 using SonOfPicasso.Core.Scheduling;
 
-namespace SonOfPicasso.UI.Tests.Scheduling
+namespace SonOfPicasso.Testing.Common.Scheduling
 {
     public sealed class TestSchedulerProvider : ISchedulerProvider
     {

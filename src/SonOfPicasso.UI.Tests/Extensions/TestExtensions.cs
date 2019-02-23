@@ -5,17 +5,18 @@ using NSubstitute;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Testing.Common;
+using SonOfPicasso.Testing.Common.Extensions;
+using SonOfPicasso.Testing.Common.Scheduling;
 using SonOfPicasso.Testing.Common.Services;
 using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.Scheduling;
-using SonOfPicasso.UI.Tests.Scheduling;
 using SonOfPicasso.UI.ViewModels;
 
 namespace SonOfPicasso.UI.Tests.Extensions
 {
     public static class TestExtensions
     {
-        public static ApplicationViewModel CreateApplicationViewModel<T>(this TestsBase<T> databaseReaderTests,
+        public static ApplicationViewModel CreateApplicationViewModel<T>(this TestsBase<T> tests,
             IFileSystem fileSystem = null,
             ISharedCache sharedCache = null,
             IImageLocationService imageLocationService = null,
@@ -27,7 +28,7 @@ namespace SonOfPicasso.UI.Tests.Extensions
             schedulerProvider = schedulerProvider ?? new TestSchedulerProvider();
             imageFolderViewModel = imageFolderViewModel ?? new ImageFolderViewModel();
 
-            var serviceCollection = databaseReaderTests.GetServiceCollection()
+            var serviceCollection = tests.GetServiceCollection()
                 .AddSingleton(fileSystem)
                 .AddSingleton(schedulerProvider)
                 .AddSingleton(imageLocationService)
@@ -46,7 +47,7 @@ namespace SonOfPicasso.UI.Tests.Extensions
             var buildServiceProvider = serviceCollection
                 .BuildServiceProvider();
 
-            return buildServiceProvider.GetService<ApplicationViewModel>();
+            return buildServiceProvider.MustGetService<ApplicationViewModel>();
         }
     }
 }
