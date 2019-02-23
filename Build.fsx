@@ -88,7 +88,7 @@ Target.create "Core Coverage" (fun _ ->
             Trace.publish ImportData.BuildArtifact reportPath
 
             if isAppveyor then
-                CreateProcess.fromRawCommandLine "codecov" (sprintf "-f \"%s\"" reportPath)
+                CreateProcess.fromRawCommandLine "codecov" (sprintf "-f \"%s\" --flag coretest" reportPath)
                 |> Proc.run
                 |> ignore
         )
@@ -119,7 +119,7 @@ Target.create "Coverage" (fun _ ->
             Trace.publish ImportData.BuildArtifact reportPath
 
             if isAppveyor then
-                CreateProcess.fromRawCommandLine "codecov" (sprintf "-f \"%s\"" reportPath)
+                CreateProcess.fromRawCommandLine "codecov" (sprintf "-f \"%s\" --flag uitest" reportPath)
                 |> Proc.run
                 |> ignore
         )
