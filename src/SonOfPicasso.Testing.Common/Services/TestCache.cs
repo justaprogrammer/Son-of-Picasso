@@ -9,5 +9,7 @@ namespace SonOfPicasso.Testing.Common.Services
         public TestCache(ILogger<SharedCache> logger) : base(logger, new InMemoryBlobCache())
         {
         }
+
+        public InMemoryBlobCache InMemoryBlobCache => (InMemoryBlobCache) BlobCache;
     }
 }

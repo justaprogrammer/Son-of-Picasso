@@ -16,8 +16,8 @@ namespace SonOfPicasso.Core.Services
 
         public ImageLoadingService(IFileSystem fileSystem, ILogger<ImageLoadingService> logger)
         {
-            _fileSystem = fileSystem;
-            _logger = logger;
+            _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public IObservable<IBitmap> LoadImageFromPath(string path)
