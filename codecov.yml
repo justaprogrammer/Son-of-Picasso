@@ -21,7 +21,7 @@ parsers:
       macro: no
 
 comment:
-  layout: "header, diff, files"
+  layout: "header, reach, diff, files"
   behavior: once
   require_changes: no
   
