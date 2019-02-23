@@ -81,12 +81,15 @@ namespace SonOfPicasso.Core.Services
         public IObservable<ImageFolder> GetFolder(string path)
         {
             _logger.LogDebug("GetFolder");
-            return BlobCache.GetOrCreateObject(GetImageFolderDetailKey(path), CreateImageFolder);
+            return BlobCache.GetOrCreateObject(GetImageFolderDetailKey(path), () => CreateImageFolder(path));
         }
 
-        private static ImageFolder CreateImageFolder()
+        private static ImageFolder CreateImageFolder(string path)
         {
-            return new ImageFolder();
+            return new ImageFolder
+            {
+                Path = path
+            };
         }
 
         public IObservable<Unit> SetFolder(ImageFolder imageFolder)
