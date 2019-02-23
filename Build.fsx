@@ -79,7 +79,7 @@ Target.create "Core Coverage" (fun _ ->
 
             Directory.ensure "reports"
           
-            sprintf "%s --target \"dotnet\" --targetargs \"test -c Release -f %s %s --no-build\" --include \"[SonOfPicasso.*]*\" --format opencover --output \"./%s\""
+            sprintf "%s --target \"dotnet\" --targetargs \"test -c Release -f %s %s --no-build\" --include \"[SonOfPicasso.*]*\" --exclude \"[SonOfPicasso.*.Tests]*\" --exclude \"[SonOfPicasso.Testing.Common]*\" --format opencover --output \"./%s\""
                 dllPath framework projectPath reportPath
             |> CreateProcess.fromRawCommandLine "coverlet"
             |> Proc.run

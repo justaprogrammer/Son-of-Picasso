@@ -27,6 +27,3 @@ comment:
   
 fixes:
   - "/C/projects/son-of-picasso/::"
-
-ignore:
-  - "*Tests/"
