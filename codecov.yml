@@ -29,5 +29,5 @@ fixes:
   - "/C/projects/son-of-picasso/::"
 
 ignore:
-  - "*.xaml"
-  - "*.xaml.cs"
+  - "**/*.xaml"
+  - "**/*.xaml.cs"
