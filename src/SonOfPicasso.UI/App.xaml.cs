@@ -11,6 +11,7 @@ using SonOfPicasso.Core.Services;
 using SonOfPicasso.UI.Injection;
 using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.Scheduling;
+using SonOfPicasso.UI.Services;
 using SonOfPicasso.UI.ViewModels;
 using SonOfPicasso.UI.Views;
 using SonOfPicasso.UI.Windows;
