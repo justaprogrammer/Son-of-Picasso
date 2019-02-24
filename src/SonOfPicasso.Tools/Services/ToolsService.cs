@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Drawing;
 using System.IO.Abstractions;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using Bogus;
+using ExifLibrary;
 using Microsoft.Extensions.Logging;
 using Skybrud.Colors;
 using SonOfPicasso.Core.Interfaces;
@@ -43,13 +45,13 @@ namespace SonOfPicasso.Tools.Services
                     var fileName = $"{time.ToString("s").Replace("-", "_").Replace(":", "_")}.jpg";
                     var filePath = _fileSystem.Path.Combine(directoryInfoBase.ToString(), fileName);
 
-                    GenerateImage(filePath, 1024, 768);
+                    GenerateImage(filePath, 1024, 768, time);
 
                     return filePath;
                 });
         }
 
-        private void GenerateImage(string path, int width, int height)
+        private void GenerateImage(string path, int width, int height, DateTime time)
         {
             _logger.LogDebug("GenerateImage {path} {width} {height}", path, width, height);
 
@@ -83,6 +85,14 @@ namespace SonOfPicasso.Tools.Services
                 }
 
                 bitmap.Save(path, System.Drawing.Imaging.ImageFormat.Jpeg);
+
+                var imageFile = ImageFile.FromFile(path);
+                imageFile.Properties.Add(ExifTag.DateTime, time);
+                imageFile.Properties.Add(ExifTag.GPSLongitude, Faker.Address.Longitude());
+                imageFile.Properties.Add(ExifTag.GPSLatitude, Faker.Address.Latitude());
+                imageFile.Properties.Add(ExifTag.GPSAltitude, Faker.Random.Double());
+
+                imageFile.Save(path);
             }
         }
 
