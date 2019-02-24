@@ -45,17 +45,14 @@ namespace SonOfPicasso.Core.Tests.Extensions
 
         public static ImageLocationService CreateImageLocationService<T>(this TestsBase<T> tests,
             IFileSystem fileSystem = null,
-            ISchedulerProvider schedulerProvider = null,
-            IImageLocationService imageLocationService = null)
+            ISchedulerProvider schedulerProvider = null)
         {
             fileSystem = fileSystem ?? new MockFileSystem();
-            imageLocationService = imageLocationService ?? Substitute.For<IImageLocationService>();
             schedulerProvider = schedulerProvider ?? new TestSchedulerProvider();
 
             var serviceCollection = tests.GetServiceCollection()
                 .AddSingleton(fileSystem)
                 .AddSingleton(schedulerProvider)
-                .AddSingleton(imageLocationService)
                 .AddSingleton<ImageLocationService>();
 
             var buildServiceProvider = serviceCollection
