@@ -79,7 +79,7 @@ Target.create "Core Coverage" (fun _ ->
 
             Directory.ensure "reports"
           
-            sprintf "%s --target \"dotnet\" --targetargs \"test -c Release -f %s %s --no-build\" --include \"[SonOfPicasso.*]*\" --format opencover --output \"./%s\""
+            sprintf "%s --target \"dotnet\" --targetargs \"test -c Release -f %s %s --no-build\" --include \"[SonOfPicasso.*]*\" --exclude \"[SonOfPicasso.*.Tests]*\" --exclude \"[SonOfPicasso.Testing.Common]*\" --format opencover --output \"./%s\""
                 dllPath framework projectPath reportPath
             |> CreateProcess.fromRawCommandLine "coverlet"
             |> Proc.run
@@ -88,7 +88,7 @@ Target.create "Core Coverage" (fun _ ->
             Trace.publish ImportData.BuildArtifact reportPath
 
             if isAppveyor then
-                CreateProcess.fromRawCommandLine "codecov" (sprintf "-f \"%s\"" reportPath)
+                CreateProcess.fromRawCommandLine "codecov" (sprintf "-f \"%s\" --flag coretest" reportPath)
                 |> Proc.run
                 |> ignore
         )
@@ -112,14 +112,14 @@ Target.create "Coverage" (fun _ ->
                         TestRunnerExePath = "./packages/fakebuildresources/xunit.runner.console/tools/net472/xunit.console.exe";
                         Output = reportPath;
                         Register = OpenCover.RegisterUser;
-                        Filter = "+[SonOfPicasso.*]*";
+                        Filter = "+[SonOfPicasso.*]* -[SonOfPicasso.*.Tests]* -[SonOfPicasso.Testing.Common]*";
                 })
                 (sprintf "%s -noshadow" dllPath)
 
             Trace.publish ImportData.BuildArtifact reportPath
 
             if isAppveyor then
-                CreateProcess.fromRawCommandLine "codecov" (sprintf "-f \"%s\"" reportPath)
+                CreateProcess.fromRawCommandLine "codecov" (sprintf "-f \"%s\" --flag uitest" reportPath)
                 |> Proc.run
                 |> ignore
         )

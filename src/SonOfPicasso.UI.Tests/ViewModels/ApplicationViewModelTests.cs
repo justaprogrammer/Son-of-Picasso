@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Reactive.Linq;
 using System.Threading;
-using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Models;
 using SonOfPicasso.Testing.Common;
+using SonOfPicasso.Testing.Common.Scheduling;
 using SonOfPicasso.UI.Tests.Extensions;
-using SonOfPicasso.UI.Tests.Scheduling;
-using SonOfPicasso.UI.ViewModels;
 using Xunit;
 using Xunit.Abstractions;
 

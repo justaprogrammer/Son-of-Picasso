@@ -23,6 +23,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{30DC3442
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
 		Build.fsx = Build.fsx
+		codecov.yml = codecov.yml
 		.chglog\config.yml = .chglog\config.yml
 		paket.dependencies = paket.dependencies
 	EndProjectSection
