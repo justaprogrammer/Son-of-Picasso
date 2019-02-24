@@ -9,7 +9,7 @@ using SonOfPicasso.Testing.Common.Extensions;
 using SonOfPicasso.Testing.Common.Scheduling;
 using SonOfPicasso.Testing.Common.Services;
 using SonOfPicasso.UI.Interfaces;
-using SonOfPicasso.UI.Scheduling;
+using SonOfPicasso.UI.Services;
 using SonOfPicasso.UI.ViewModels;
 
 namespace SonOfPicasso.UI.Tests.Extensions
@@ -48,6 +48,24 @@ namespace SonOfPicasso.UI.Tests.Extensions
                 .BuildServiceProvider();
 
             return buildServiceProvider.MustGetService<ApplicationViewModel>();
+        }
+
+        public static ImageLoadingService CreateImageLoadingService<T>(this TestsBase<T> tests,
+            IFileSystem fileSystem = null,
+            ISchedulerProvider schedulerProvider = null)
+        {
+            fileSystem = fileSystem ?? new MockFileSystem();
+            schedulerProvider = schedulerProvider ?? new TestSchedulerProvider();
+
+            var serviceCollection = tests.GetServiceCollection()
+                .AddSingleton(fileSystem)
+                .AddSingleton(schedulerProvider)
+                .AddSingleton<ImageLoadingService>();
+
+            var buildServiceProvider = serviceCollection
+                .BuildServiceProvider();
+
+            return buildServiceProvider.MustGetService<ImageLoadingService>();
         }
     }
 }
