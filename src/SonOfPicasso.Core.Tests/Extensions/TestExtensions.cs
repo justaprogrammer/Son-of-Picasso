@@ -28,34 +28,16 @@ namespace SonOfPicasso.Core.Tests.Extensions
             return new SharedCache(serviceProvider.GetService<ILogger<SharedCache>>(), blobCache);
         }
 
-        public static ImageLoadingService CreateImageLoadingService<T>(this TestsBase<T> tests,
-            IFileSystem fileSystem = null)
-        {
-            fileSystem = fileSystem ?? new MockFileSystem();
-
-            var serviceCollection = tests.GetServiceCollection()
-                .AddSingleton(fileSystem)
-                .AddSingleton<ImageLoadingService>();
-
-            var buildServiceProvider = serviceCollection
-                .BuildServiceProvider();
-
-            return buildServiceProvider.MustGetService<ImageLoadingService>();
-        }
-
         public static ImageLocationService CreateImageLocationService<T>(this TestsBase<T> tests,
             IFileSystem fileSystem = null,
-            ISchedulerProvider schedulerProvider = null,
-            IImageLocationService imageLocationService = null)
+            ISchedulerProvider schedulerProvider = null)
         {
             fileSystem = fileSystem ?? new MockFileSystem();
-            imageLocationService = imageLocationService ?? Substitute.For<IImageLocationService>();
             schedulerProvider = schedulerProvider ?? new TestSchedulerProvider();
 
             var serviceCollection = tests.GetServiceCollection()
                 .AddSingleton(fileSystem)
                 .AddSingleton(schedulerProvider)
-                .AddSingleton(imageLocationService)
                 .AddSingleton<ImageLocationService>();
 
             var buildServiceProvider = serviceCollection

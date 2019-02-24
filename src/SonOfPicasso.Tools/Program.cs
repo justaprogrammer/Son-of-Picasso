@@ -85,7 +85,6 @@ namespace SonOfPicasso.Tools
                         .AddLogging(builder => builder.AddSerilog())
                         .AddSingleton<IFileSystem, FileSystem>()
                         .AddSingleton<ISchedulerProvider, ConsoleSchedulerProvider>()
-                        .AddSingleton<IImageLoadingService, ImageLoadingService>()
                         .AddSingleton<IImageLocationService, ImageLocationService>()
                         .AddSingleton<ISharedCache, SharedCache>()
                         .AddSingleton<IEnvironmentService, EnvironmentService>()
