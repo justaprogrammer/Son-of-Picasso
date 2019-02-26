@@ -293,5 +293,46 @@ namespace SonOfPicasso.Core.Tests.Services
             output.Path.Should().Be(path);
             output.Images.Should().BeEmpty();
         }
+
+        [Fact]
+        public void CanGetImageFolderExists()
+        {
+            Logger.LogDebug("CanGetImageFolderExists");
+
+            var autoResetEvent = new AutoResetEvent(false);
+
+            var inMemoryBlobCache = new InMemoryBlobCache();
+
+            var imageFolderPath = Faker.System.DirectoryPathWindows();
+            bool? exists = null;
+
+            var sharedCache = this.CreateSharedCache(inMemoryBlobCache);
+            sharedCache.FolderExists(imageFolderPath)
+                .Subscribe(result =>
+                {
+                    exists = result;
+                    autoResetEvent.Set();
+                });
+
+            autoResetEvent.WaitOne();
+
+            exists.Should().BeFalse();
+
+            sharedCache.SetFolder(new ImageFolder {Path = imageFolderPath })
+                .Subscribe(_ => autoResetEvent.Set());
+
+            autoResetEvent.WaitOne();
+
+            sharedCache.FolderExists(imageFolderPath)
+                .Subscribe(result =>
+                {
+                    exists = result;
+                    autoResetEvent.Set();
+                });
+
+            autoResetEvent.WaitOne();
+
+            exists.Should().BeTrue();
+        }
     }
 }

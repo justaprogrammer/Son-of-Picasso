@@ -5,6 +5,6 @@ namespace SonOfPicasso.Core.Interfaces
 {
     public interface IImageLocationService
     {
-        IObservable<FileInfoBase[]> GetImages(string path);
+        IObservable<string[]> GetImages(string path);
     }
 }

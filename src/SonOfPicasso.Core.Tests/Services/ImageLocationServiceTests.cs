@@ -56,7 +56,7 @@ namespace SonOfPicasso.Core.Tests.Services
 
             var autoResetEvent = new AutoResetEvent(false);
 
-            FileInfoBase[] fileInfos = null;
+            string[] fileInfos = null;
 
             var testSchedulerProvider = new TestSchedulerProvider();
 

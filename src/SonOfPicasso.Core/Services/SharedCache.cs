@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reactive;
+using System.Reactive.Linq;
 using Akavache;
 using Microsoft.Extensions.Logging;
 using SonOfPicasso.Core.Interfaces;
@@ -27,21 +29,21 @@ namespace SonOfPicasso.Core.Services
         internal SharedCache(ILogger<SharedCache> logger,
             IBlobCache blobCache)
         {
-            IBlobCache GetBlobCacheOrFallback(Func<IBlobCache> blobCacheFunc, string cacheName)
+            _logger = logger;
+            if (blobCache == null)
             {
                 try
                 {
-                    return blobCacheFunc();
+                    blobCache = Akavache.BlobCache.UserAccount;
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError(e, "Failed to set the {CacheName} cache", cacheName);
-                    return new InMemoryBlobCache();
+                    _logger.LogError(e, "Failed to get the UserAccount cache");
+                    throw;
                 }
             }
 
-            _logger = logger;
-            BlobCache = blobCache ?? GetBlobCacheOrFallback(() => Akavache.BlobCache.UserAccount, "UserAccount");
+            BlobCache = blobCache;
         }
 
         public IObservable<Unit> Clear()
@@ -78,10 +80,19 @@ namespace SonOfPicasso.Core.Services
             return BlobCache.InsertObject(ImageFoldersKey, paths);
         }
 
+        public IObservable<bool> FolderExists(string path)
+        {
+            _logger.LogDebug("FolderExists");
+
+            return BlobCache.Get(GetImageFolderKey(path))
+                .Select(_ => true)
+                .Catch<bool, KeyNotFoundException>(_ => Observable.Return(false));
+        }
+
         public IObservable<ImageFolder> GetFolder(string path)
         {
             _logger.LogDebug("GetFolder");
-            return BlobCache.GetOrCreateObject(GetImageFolderDetailKey(path), () => CreateImageFolder(path));
+            return BlobCache.GetOrCreateObject(GetImageFolderKey(path), () => CreateImageFolder(path));
         }
 
         private static ImageFolder CreateImageFolder(string path)
@@ -95,9 +106,9 @@ namespace SonOfPicasso.Core.Services
         public IObservable<Unit> SetFolder(ImageFolder imageFolder)
         {
             _logger.LogDebug("SetFolder");
-            return BlobCache.InsertObject(GetImageFolderDetailKey(imageFolder.Path), imageFolder);
+            return BlobCache.InsertObject(GetImageFolderKey(imageFolder.Path), imageFolder);
         }
 
-        private static string GetImageFolderDetailKey(string path) => $"ImageFolder {path}";
+        private static string GetImageFolderKey(string path) => $"ImageFolder {path}";
     }
 }

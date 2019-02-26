@@ -13,6 +13,7 @@ namespace SonOfPicasso.Core.Interfaces
         IObservable<string[]> GetFolderList();
         IObservable<Unit> SetFolderList(string[] paths);
 
+        IObservable<bool> FolderExists(string path);
         IObservable<ImageFolder> GetFolder(string path);
         IObservable<Unit> SetFolder(ImageFolder imageFolder);
 
