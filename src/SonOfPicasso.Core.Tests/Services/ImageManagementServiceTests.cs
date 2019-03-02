@@ -148,6 +148,9 @@ namespace SonOfPicasso.Core.Tests.Services
             sharedCache.SetFolder(Arg.Any<ImageFolderModel>())
                 .Returns(Observable.Return(Unit.Default));
 
+            sharedCache.SetImage(Arg.Any<ImageModel>())
+                .Returns(Observable.Return(Unit.Default));
+
             imageLocationService.GetImages(Arg.Any<string>())
                 .Returns(Observable.Return(imagePaths));
 
@@ -156,8 +159,15 @@ namespace SonOfPicasso.Core.Tests.Services
 
             var autoResetEvent = new AutoResetEvent(false);
 
+            ImageFolderModel imageFolderModel = null;
+            ImageModel[] imageModels = null;
+
             imageLoadingService.AddFolder(imageFolderPath)
-                .Subscribe(_ => autoResetEvent.Set());
+                .Subscribe(tuple =>
+                {
+                    (imageFolderModel, imageModels) = tuple;
+                    autoResetEvent.Set();
+                });
 
             autoResetEvent.WaitOne();
 
@@ -171,6 +181,21 @@ namespace SonOfPicasso.Core.Tests.Services
                 folder.Path == imageFolderPath &&
                 folder.Images.OrderBy(s => s)
                     .SequenceEqual(imagePaths.OrderBy(s => s))));
+
+            sharedCache.Received(5).SetImage(Arg.Any<ImageModel>());
+
+            sharedCache.ReceivedCalls()
+                .Where(call => call.GetMethodInfo().Name == "SetImage")
+                .Select(call => (ImageModel) call.GetArguments()[0])
+                .Select(model => model.Path)
+                .Should()
+                .BeEquivalentTo(imagePaths);
+
+            imageFolderModel.Should().NotBeNull();
+            imageFolderModel.Path.Should().Be(imageFolderPath);
+
+            imageModels.Select(model => model.Path)
+                .Should().BeEquivalentTo(imagePaths);
         }
 
         [Fact(Timeout = 1000)]

@@ -23,7 +23,7 @@ namespace SonOfPicasso.Core.Services
             _logger = logger;
         }
 
-        public IObservable<Unit> AddFolder(string path)
+        public IObservable<(ImageFolderModel, ImageModel[])> AddFolder(string path)
         {
             if (path == null) throw new ArgumentNullException(nameof(path));
 
@@ -45,16 +45,24 @@ namespace SonOfPicasso.Core.Services
                 .SelectMany(elements =>
                 {
                     var currentFolders = elements.Item1;
-                    var folderImages = elements.Item2;
+                    var imagePaths = elements.Item2;
 
-                    var setFolderList = _dataCache.SetFolderList(currentFolders.Append(path).ToArray());
-                    var setFolder = _dataCache.SetFolder(
-                        new ImageFolderModel {Path = path, Images = folderImages});
+                    var imageFolderModel = new ImageFolderModel { Path = path, Images = imagePaths };
 
-                    return setFolderList
-                        .SelectMany(setFolder)
+                    var imageModels = imagePaths
+                        .Select(imagePath => new ImageModel{Path = imagePath})
+                        .ToArray();
+
+                    var setImages = imageModels.ToObservable()
+                        .SelectMany(model => _dataCache.SetImage(model))
                         .ToArray()
                         .Select(_ => Unit.Default);
+
+                    var setFolderList = _dataCache.SetFolderList(currentFolders.Append(path).ToArray());
+                    var setFolder = _dataCache.SetFolder(imageFolderModel);
+
+                    return Observable.Zip(setFolder, setFolderList, setImages)
+                        .Select(_ => (imageFolderModel, imageModels));
                 });
         }
 
