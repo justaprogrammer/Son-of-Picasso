@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Splat;
 
 namespace SonOfPicasso.UI.Injection
 {
+    [ExcludeFromCodeCoverage]
     public class SplatDependencyResolver : IMutableDependencyResolver
     {
         private readonly HashSet<Type> _serviceProviderLookup;
