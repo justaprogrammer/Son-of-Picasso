@@ -20,7 +20,7 @@ namespace SonOfPicasso.UI.Views
             this.WhenActivated(disposable =>
             {
                 this.OneWayBind(ViewModel,
-                        model => model.Image,
+                        model => model.ImageModel,
                         window => window.ImageLabel.Content,
                         image => image.Path)
                     .DisposeWith(disposable);

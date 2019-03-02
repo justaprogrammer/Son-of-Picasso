@@ -24,22 +24,22 @@ namespace SonOfPicasso.UI.ViewModels
             _schedulerProvider = schedulerProvider;
         }
 
-        public void Initialize(Image image)
+        public void Initialize(ImageModel imageModel)
         {
-            this.Image = image;
+            this.ImageModel = imageModel;
         }
 
-        private Image _image;
+        private ImageModel _imageModel;
 
-        public Image Image
+        public ImageModel ImageModel
         {
-            get => _image;
-            set => this.RaiseAndSetIfChanged(ref _image, value);
+            get => _imageModel;
+            set => this.RaiseAndSetIfChanged(ref _imageModel, value);
         }
 
         public IObservable<IBitmap> GetImage()
         {
-            return _imageLoadingService.LoadImageFromPath(Image.Path)
+            return _imageLoadingService.LoadImageFromPath(ImageModel.Path)
                 .ObserveOn(_schedulerProvider.MainThreadScheduler);
         }
     }

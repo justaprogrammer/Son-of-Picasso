@@ -16,7 +16,7 @@ namespace SonOfPicasso.Core.Tests.Extensions
 {
     public static class TestExtensions
     {
-        public static SharedCache CreateSharedCache<T>(this TestsBase<T> tests, IBlobCache blobCache = null)
+        public static DataCache CreateDataCache<T>(this TestsBase<T> tests, IBlobCache blobCache = null)
         {
             var serviceCollection = tests.GetServiceCollection();
 
@@ -25,7 +25,7 @@ namespace SonOfPicasso.Core.Tests.Extensions
 
             blobCache = blobCache ?? new InMemoryBlobCache();
 
-            return new SharedCache(serviceProvider.GetService<ILogger<SharedCache>>(), blobCache);
+            return new DataCache(serviceProvider.GetService<ILogger<DataCache>>(), blobCache);
         }
 
         public static ImageLocationService CreateImageLocationService<T>(this TestsBase<T> tests,
@@ -47,7 +47,7 @@ namespace SonOfPicasso.Core.Tests.Extensions
         }
 
         public static ImageManagementService CreateImageManagementService<T>(this TestsBase<T> tests,
-            ISharedCache sharedCache = null,
+            IDataCache dataCache = null,
             IImageLocationService imageLocationService = null)
         {
             imageLocationService = imageLocationService ?? Substitute.For<IImageLocationService>();
@@ -56,13 +56,13 @@ namespace SonOfPicasso.Core.Tests.Extensions
                 .AddSingleton(imageLocationService)
                 .AddSingleton<ImageManagementService>();
 
-            if (sharedCache != null)
+            if (dataCache != null)
             {
-                serviceCollection.AddSingleton(sharedCache);
+                serviceCollection.AddSingleton(dataCache);
             }
             else
             {
-                serviceCollection.AddSingleton<ISharedCache, TestCache>();
+                serviceCollection.AddSingleton<IDataCache, TestCache>();
             }
 
             var buildServiceProvider = serviceCollection

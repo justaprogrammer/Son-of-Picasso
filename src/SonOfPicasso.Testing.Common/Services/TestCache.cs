@@ -4,9 +4,9 @@ using SonOfPicasso.Core.Services;
 
 namespace SonOfPicasso.Testing.Common.Services
 {
-    public class TestCache : SharedCache
+    public class TestCache : DataCache
     {
-        public TestCache(ILogger<SharedCache> logger) : base(logger, new InMemoryBlobCache())
+        public TestCache(ILogger<DataCache> logger) : base(logger, new InMemoryBlobCache())
         {
         }
 

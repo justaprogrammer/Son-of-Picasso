@@ -18,7 +18,7 @@ namespace SonOfPicasso.UI.Tests.Extensions
     {
         public static ApplicationViewModel CreateApplicationViewModel<T>(this TestsBase<T> tests,
             IFileSystem fileSystem = null,
-            ISharedCache sharedCache = null,
+            IDataCache dataCache = null,
             IImageLocationService imageLocationService = null,
             ISchedulerProvider schedulerProvider = null,
             IImageFolderViewModel imageFolderViewModel = null)
@@ -35,13 +35,13 @@ namespace SonOfPicasso.UI.Tests.Extensions
                 .AddSingleton(imageFolderViewModel)
                 .AddSingleton(typeof(ApplicationViewModel));
 
-            if (sharedCache != null)
+            if (dataCache != null)
             {
-                serviceCollection.AddSingleton(sharedCache);
+                serviceCollection.AddSingleton(dataCache);
             }
             else
             {
-                serviceCollection.AddSingleton<ISharedCache, TestCache>();
+                serviceCollection.AddSingleton<IDataCache, TestCache>();
             }
 
             var buildServiceProvider = serviceCollection

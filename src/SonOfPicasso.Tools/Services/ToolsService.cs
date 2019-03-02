@@ -19,13 +19,13 @@ namespace SonOfPicasso.Tools.Services
 
         private readonly ILogger<ToolsService> _logger;
         private readonly IFileSystem _fileSystem;
-        private readonly ISharedCache _sharedCache;
+        private readonly IDataCache _dataCache;
 
-        public ToolsService(ILogger<ToolsService> logger, IFileSystem fileSystem, ISharedCache sharedCache)
+        public ToolsService(ILogger<ToolsService> logger, IFileSystem fileSystem, IDataCache dataCache)
         {
             _logger = logger;
             _fileSystem = fileSystem;
-            _sharedCache = sharedCache;
+            _dataCache = dataCache;
         }
 
         public IObservable<string> GenerateImages(int count, string fileRoot)
@@ -151,7 +151,7 @@ namespace SonOfPicasso.Tools.Services
 
         public IObservable<Unit> ClearCache()
         {
-            return _sharedCache.Clear();
+            return _dataCache.Clear();
         }
     }
 }

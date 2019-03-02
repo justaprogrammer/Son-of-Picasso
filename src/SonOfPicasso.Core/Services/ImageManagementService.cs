@@ -10,15 +10,15 @@ namespace SonOfPicasso.Core.Services
 {
     public class ImageManagementService : IImageManagementService
     {
-        private readonly ISharedCache _sharedCache;
+        private readonly IDataCache _dataCache;
         private readonly IImageLocationService _imageLocationService;
         private readonly ILogger<ImageManagementService> _logger;
 
-        public ImageManagementService(ISharedCache sharedCache,
+        public ImageManagementService(IDataCache dataCache,
             IImageLocationService imageLocationService,
             ILogger<ImageManagementService>logger)
         {
-            _sharedCache = sharedCache ?? throw new ArgumentNullException(nameof(sharedCache));
+            _dataCache = dataCache ?? throw new ArgumentNullException(nameof(dataCache));
             _imageLocationService = imageLocationService ?? throw new ArgumentNullException(nameof(imageLocationService));
             _logger = logger;
         }
@@ -29,7 +29,7 @@ namespace SonOfPicasso.Core.Services
 
             _logger.LogDebug("AddFolder {Path}", path);
 
-            return _sharedCache.GetFolderList()
+            return _dataCache.GetFolderList()
                 .Select(folders =>
                 {
                     if (folders.Contains(path))
@@ -47,9 +47,9 @@ namespace SonOfPicasso.Core.Services
                     var currentFolders = elements.Item1;
                     var folderImages = elements.Item2;
 
-                    var setFolderList = _sharedCache.SetFolderList(currentFolders.Append(path).ToArray());
-                    var setFolder = _sharedCache.SetFolder(
-                        new ImageFolder {Path = path, Images = folderImages});
+                    var setFolderList = _dataCache.SetFolderList(currentFolders.Append(path).ToArray());
+                    var setFolder = _dataCache.SetFolder(
+                        new ImageFolderModel {Path = path, Images = folderImages});
 
                     return setFolderList
                         .SelectMany(setFolder)
@@ -62,7 +62,41 @@ namespace SonOfPicasso.Core.Services
         {
             if (path == null) throw new ArgumentNullException(nameof(path));
 
-            throw new NotImplementedException();
+            _logger.LogDebug("RemoveFolder {Path}", path);
+
+            return _dataCache.GetFolderList()
+                .Select(folders =>
+                {
+                    if (!folders.Contains(path))
+                    {
+                        throw new SonOfPicassoException("Folder does not exist");
+                    }
+
+                    var currentFolders = folders.Where(s => s != path).ToArray();
+
+                    var setFolderList = _dataCache.SetFolderList(currentFolders);
+                    var setFolder = _dataCache.DeleteFolder(path);
+
+                    return setFolderList
+                        .SelectMany(setFolder)
+                        .ToArray()
+                        .Select(_ => Unit.Default);
+                })
+                .SelectMany(observable => observable);
+        }
+
+        public IObservable<ImageFolderModel> GetAllImageFolders()
+        {
+            return _dataCache.GetFolderList()
+                .SelectMany(strings => strings)
+                .SelectMany(s => _dataCache.GetFolder(s));
+        }
+
+        public IObservable<ImageModel> GetAllImages()
+        {
+            return this.GetAllImageFolders()
+                .SelectMany(imageFolder => imageFolder.Images)
+                .SelectMany(imagePath => _dataCache.GetImage(imagePath));
         }
     }
 }

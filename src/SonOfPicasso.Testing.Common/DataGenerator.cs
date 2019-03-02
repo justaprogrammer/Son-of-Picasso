@@ -9,11 +9,11 @@ namespace SonOfPicasso.Testing.Common
     {
         static DataGenerator()
         {
-            ImageFolderFaker = new AutoFaker<ImageFolder>()
+            ImageFolderFaker = new AutoFaker<ImageFolderModel>()
                 .RuleFor(folder => folder.Path, 
                     faker => faker.System.DirectoryPathWindows());
         }
 
-        public static Faker<ImageFolder> ImageFolderFaker { get; }
+        public static Faker<ImageFolderModel> ImageFolderFaker { get; }
     }
 }

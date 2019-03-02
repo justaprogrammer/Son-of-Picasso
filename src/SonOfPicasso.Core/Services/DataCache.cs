@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Reactive;
-using System.Reactive.Linq;
 using Akavache;
 using Microsoft.Extensions.Logging;
 using SonOfPicasso.Core.Interfaces;
@@ -9,24 +7,24 @@ using SonOfPicasso.Core.Models;
 
 namespace SonOfPicasso.Core.Services
 {
-    public class SharedCache : ISharedCache
+    public class DataCache : IDataCache
     {
         private const string UserSettingsKey = "UserSettings";
         private const string ImageFoldersKey = "ImageFolders";
 
-        private readonly ILogger<SharedCache> _logger;
+        private readonly ILogger<DataCache> _logger;
         protected readonly IBlobCache BlobCache;
 
-        static SharedCache()
+        static DataCache()
         {
             Akavache.BlobCache.ApplicationName = "SonOfPicasso";
         }
 
-        public SharedCache(ILogger<SharedCache> logger) : this(logger, null)
+        public DataCache(ILogger<DataCache> logger) : this(logger, null)
         {
         }
 
-        internal SharedCache(ILogger<SharedCache> logger,
+        internal DataCache(ILogger<DataCache> logger,
             IBlobCache blobCache)
         {
             _logger = logger;
@@ -44,6 +42,11 @@ namespace SonOfPicasso.Core.Services
             }
 
             BlobCache = blobCache;
+        }
+
+        public IObservable<Unit> DeleteImage(string path)
+        {
+            throw new NotImplementedException();
         }
 
         public IObservable<Unit> Clear()
@@ -80,35 +83,45 @@ namespace SonOfPicasso.Core.Services
             return BlobCache.InsertObject(ImageFoldersKey, paths);
         }
 
-        public IObservable<bool> FolderExists(string path)
+        public IObservable<Unit> DeleteFolder(string path)
         {
-            _logger.LogDebug("FolderExists");
-
-            return BlobCache.Get(GetImageFolderKey(path))
-                .Select(_ => true)
-                .Catch<bool, KeyNotFoundException>(_ => Observable.Return(false));
+            _logger.LogDebug("GetFolder");
+            return BlobCache.Invalidate(GetImageFolderKey(path));
         }
 
-        public IObservable<ImageFolder> GetFolder(string path)
+        public IObservable<ImageModel> GetImage(string path)
+        {
+            _logger.LogDebug("GetFolder");
+            return BlobCache.GetObject<ImageModel>(GetImageKey(path));
+        }
+
+        public IObservable<Unit> SetImage(ImageModel image)
+        {
+            _logger.LogDebug("SetImage");
+            return BlobCache.InsertObject(GetImageKey(image.Path), image);
+        }
+
+        public IObservable<ImageFolderModel> GetFolder(string path)
         {
             _logger.LogDebug("GetFolder");
             return BlobCache.GetOrCreateObject(GetImageFolderKey(path), () => CreateImageFolder(path));
         }
 
-        private static ImageFolder CreateImageFolder(string path)
+        private static ImageFolderModel CreateImageFolder(string path)
         {
-            return new ImageFolder
+            return new ImageFolderModel
             {
                 Path = path
             };
         }
 
-        public IObservable<Unit> SetFolder(ImageFolder imageFolder)
+        public IObservable<Unit> SetFolder(ImageFolderModel imageFolder)
         {
             _logger.LogDebug("SetFolder");
             return BlobCache.InsertObject(GetImageFolderKey(imageFolder.Path), imageFolder);
         }
 
         private static string GetImageFolderKey(string path) => $"ImageFolder {path}";
+        private static string GetImageKey(string path) => $"Image {path}";
     }
 }

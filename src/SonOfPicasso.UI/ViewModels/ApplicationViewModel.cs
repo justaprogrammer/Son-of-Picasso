@@ -21,19 +21,19 @@ namespace SonOfPicasso.UI.ViewModels
     {
         private readonly ILogger<ApplicationViewModel> _logger;
         private readonly ISchedulerProvider _schedulerProvider;
-        private readonly ISharedCache _sharedCache;
+        private readonly IDataCache _dataCache;
         private readonly IImageLocationService _imageLocationService;
         private readonly IServiceProvider _serviceProvider;
 
         public ApplicationViewModel(ILogger<ApplicationViewModel> logger,
             ISchedulerProvider schedulerProvider,
-            ISharedCache sharedCache,
+            IDataCache dataCache,
             IImageLocationService imageLocationService,
             IServiceProvider serviceProvider)
         {
             _logger = logger;
             _schedulerProvider = schedulerProvider;
-            _sharedCache = sharedCache;
+            _dataCache = dataCache;
             _imageLocationService = imageLocationService;
             _serviceProvider = serviceProvider;
 
@@ -60,7 +60,7 @@ namespace SonOfPicasso.UI.ViewModels
 
         private IObservable<Unit> ExecuteAddFolder(string addPath)
         {
-            return _sharedCache.GetFolderList()
+            return _dataCache.GetFolderList()
                 .ObserveOn(_schedulerProvider.TaskPool)
                 .SelectMany(paths =>
                 {
@@ -69,7 +69,7 @@ namespace SonOfPicasso.UI.ViewModels
                         paths = paths.Append(addPath).ToArray();
                     }
 
-                    return _sharedCache.SetFolderList(paths);
+                    return _dataCache.SetFolderList(paths);
                 })
                 .SelectMany(_ => LoadImageFolders());
         }
@@ -101,7 +101,7 @@ namespace SonOfPicasso.UI.ViewModels
         {
             _logger.LogDebug("LoadImageFolders");
 
-            return _sharedCache.GetFolderList()
+            return _dataCache.GetFolderList()
                 .ObserveOn(_schedulerProvider.MainThreadScheduler)
                 .Select(imageFolders =>
                 {

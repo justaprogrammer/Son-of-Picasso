@@ -14,9 +14,9 @@ using Xunit.Abstractions;
 
 namespace SonOfPicasso.Core.Tests.Services
 {
-    public class SharedCacheTests : TestsBase<SharedCacheTests>
+    public class DataCacheTests : TestsBase<DataCacheTests>
     {
-        public SharedCacheTests(ITestOutputHelper testOutputHelper)
+        public DataCacheTests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {
         }
@@ -27,7 +27,7 @@ namespace SonOfPicasso.Core.Tests.Services
             Logger.LogDebug("CanInitialize");
 
             var inMemoryBlobCache = new InMemoryBlobCache();
-            var sharedCache = this.CreateSharedCache(inMemoryBlobCache);
+            var dataCache = this.CreateDataCache(inMemoryBlobCache);
         }
 
         [Fact]
@@ -38,9 +38,9 @@ namespace SonOfPicasso.Core.Tests.Services
             var autoResetEvent = new AutoResetEvent(false);
 
             var inMemoryBlobCache = new InMemoryBlobCache();
-            var sharedCache = this.CreateSharedCache(inMemoryBlobCache);
+            var dataCache = this.CreateDataCache(inMemoryBlobCache);
 
-            sharedCache.SetUserSettings(new UserSettings())
+            dataCache.SetUserSettings(new UserSettings())
                 .Subscribe(_ => autoResetEvent.Set());
 
             autoResetEvent.WaitOne();
@@ -68,17 +68,17 @@ namespace SonOfPicasso.Core.Tests.Services
             var autoResetEvent = new AutoResetEvent(false);
 
             var inMemoryBlobCache = new InMemoryBlobCache();
-            var sharedCache = this.CreateSharedCache(inMemoryBlobCache);
+            var dataCache = this.CreateDataCache(inMemoryBlobCache);
 
             var input = new UserSettings();
-            sharedCache.SetUserSettings(input)
+            dataCache.SetUserSettings(input)
                 .Subscribe(_ => autoResetEvent.Set());
 
             autoResetEvent.WaitOne();
 
             UserSettings output = null;
 
-            sharedCache.GetUserSettings()
+            dataCache.GetUserSettings()
                 .Subscribe(settings =>
                 {
                     output = settings;
@@ -99,11 +99,11 @@ namespace SonOfPicasso.Core.Tests.Services
             var autoResetEvent = new AutoResetEvent(false);
 
             var inMemoryBlobCache = new InMemoryBlobCache();
-            var sharedCache = this.CreateSharedCache(inMemoryBlobCache);
+            var dataCache = this.CreateDataCache(inMemoryBlobCache);
 
             UserSettings userSettings = null;
 
-            sharedCache.GetUserSettings()
+            dataCache.GetUserSettings()
                 .Subscribe(settings =>
                 {
                     userSettings = settings;
@@ -123,9 +123,9 @@ namespace SonOfPicasso.Core.Tests.Services
             var autoResetEvent = new AutoResetEvent(false);
 
             var inMemoryBlobCache = new InMemoryBlobCache();
-            var sharedCache = this.CreateSharedCache(inMemoryBlobCache);
+            var dataCache = this.CreateDataCache(inMemoryBlobCache);
 
-            sharedCache.SetFolderList(new string[0])
+            dataCache.SetFolderList(new string[0])
                 .Subscribe(_ => autoResetEvent.Set());
 
             autoResetEvent.WaitOne();
@@ -153,18 +153,18 @@ namespace SonOfPicasso.Core.Tests.Services
             var autoResetEvent = new AutoResetEvent(false);
 
             var inMemoryBlobCache = new InMemoryBlobCache();
-            var sharedCache = this.CreateSharedCache(inMemoryBlobCache);
+            var dataCache = this.CreateDataCache(inMemoryBlobCache);
 
             var input = Faker.Lorem.Words();
 
-            sharedCache.SetFolderList(input)
+            dataCache.SetFolderList(input)
                 .Subscribe(_ => autoResetEvent.Set());
 
             autoResetEvent.WaitOne();
 
             string[] output = null;
 
-            sharedCache.GetFolderList()
+            dataCache.GetFolderList()
                 .Subscribe(folders =>
                 {
                     output = folders;
@@ -185,11 +185,11 @@ namespace SonOfPicasso.Core.Tests.Services
             var autoResetEvent = new AutoResetEvent(false);
 
             var inMemoryBlobCache = new InMemoryBlobCache();
-            var sharedCache = this.CreateSharedCache(inMemoryBlobCache);
+            var dataCache = this.CreateDataCache(inMemoryBlobCache);
 
             string[] output = null;
 
-            sharedCache.GetFolderList()
+            dataCache.GetFolderList()
                 .Subscribe(folders =>
                 {
                     output = folders;
@@ -210,11 +210,11 @@ namespace SonOfPicasso.Core.Tests.Services
             var autoResetEvent = new AutoResetEvent(false);
 
             var inMemoryBlobCache = new InMemoryBlobCache();
-            var sharedCache = this.CreateSharedCache(inMemoryBlobCache);
+            var dataCache = this.CreateDataCache(inMemoryBlobCache);
 
             var imageFolder = DataGenerator.ImageFolderFaker.Generate();
 
-            sharedCache.SetFolder(imageFolder)
+            dataCache.SetFolder(imageFolder)
                 .Subscribe(_ => autoResetEvent.Set());
 
             autoResetEvent.WaitOne();
@@ -242,18 +242,18 @@ namespace SonOfPicasso.Core.Tests.Services
             var autoResetEvent = new AutoResetEvent(false);
 
             var inMemoryBlobCache = new InMemoryBlobCache();
-            var sharedCache = this.CreateSharedCache(inMemoryBlobCache);
+            var dataCache = this.CreateDataCache(inMemoryBlobCache);
 
             var input = DataGenerator.ImageFolderFaker.Generate();
 
-            sharedCache.SetFolder(input)
+            dataCache.SetFolder(input)
                 .Subscribe(_ => autoResetEvent.Set());
 
             autoResetEvent.WaitOne();
 
-            ImageFolder output = null;
+            ImageFolderModel output = null;
 
-            sharedCache.GetFolder(input.Path)
+            dataCache.GetFolder(input.Path)
                 .Subscribe(folder =>
                 {
                     output = folder;
@@ -274,13 +274,13 @@ namespace SonOfPicasso.Core.Tests.Services
             var autoResetEvent = new AutoResetEvent(false);
 
             var inMemoryBlobCache = new InMemoryBlobCache();
-            var sharedCache = this.CreateSharedCache(inMemoryBlobCache);
+            var dataCache = this.CreateDataCache(inMemoryBlobCache);
 
-            ImageFolder output = null;
+            ImageFolderModel output = null;
 
             var path = Faker.System.DirectoryPathWindows();
 
-            sharedCache.GetFolder(path)
+            dataCache.GetFolder(path)
                 .Subscribe(folder =>
                 {
                     output = folder;
@@ -292,47 +292,6 @@ namespace SonOfPicasso.Core.Tests.Services
             output.Should().NotBeNull();
             output.Path.Should().Be(path);
             output.Images.Should().BeEmpty();
-        }
-
-        [Fact]
-        public void CanGetImageFolderExists()
-        {
-            Logger.LogDebug("CanGetImageFolderExists");
-
-            var autoResetEvent = new AutoResetEvent(false);
-
-            var inMemoryBlobCache = new InMemoryBlobCache();
-
-            var imageFolderPath = Faker.System.DirectoryPathWindows();
-            bool? exists = null;
-
-            var sharedCache = this.CreateSharedCache(inMemoryBlobCache);
-            sharedCache.FolderExists(imageFolderPath)
-                .Subscribe(result =>
-                {
-                    exists = result;
-                    autoResetEvent.Set();
-                });
-
-            autoResetEvent.WaitOne();
-
-            exists.Should().BeFalse();
-
-            sharedCache.SetFolder(new ImageFolder {Path = imageFolderPath })
-                .Subscribe(_ => autoResetEvent.Set());
-
-            autoResetEvent.WaitOne();
-
-            sharedCache.FolderExists(imageFolderPath)
-                .Subscribe(result =>
-                {
-                    exists = result;
-                    autoResetEvent.Set();
-                });
-
-            autoResetEvent.WaitOne();
-
-            exists.Should().BeTrue();
         }
     }
 }

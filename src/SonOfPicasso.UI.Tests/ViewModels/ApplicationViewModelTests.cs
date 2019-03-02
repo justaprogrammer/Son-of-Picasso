@@ -26,14 +26,14 @@ namespace SonOfPicasso.UI.Tests.ViewModels
 
             var testSchedulerProvider = new TestSchedulerProvider();
             var imageLocationService = Substitute.For<IImageLocationService>();
-            var sharedCache = Substitute.For<ISharedCache>();
+            var sharedCache = Substitute.For<IDataCache>();
 
             sharedCache.GetFolderList()
                 .Returns(Observable.Return(Array.Empty<string>()));
 
             var applicationViewModel = this.CreateApplicationViewModel(
                 imageLocationService: imageLocationService,
-                sharedCache: sharedCache,
+                dataCache: sharedCache,
                 schedulerProvider: testSchedulerProvider);
 
             var autoResetEvent = new AutoResetEvent(false);
@@ -57,14 +57,14 @@ namespace SonOfPicasso.UI.Tests.ViewModels
 
             var testSchedulerProvider = new TestSchedulerProvider();
             var imageLocationService = Substitute.For<IImageLocationService>();
-            var sharedCache = Substitute.For<ISharedCache>();
+            var sharedCache = Substitute.For<IDataCache>();
 
             sharedCache.GetFolderList()
                 .Returns(Observable.Return(Array.Empty<string>()));
 
             var applicationViewModel = this.CreateApplicationViewModel(
                 imageLocationService: imageLocationService,
-                sharedCache: sharedCache,
+                dataCache: sharedCache,
                 schedulerProvider: testSchedulerProvider);
 
             var autoResetEvent = new AutoResetEvent(false);
