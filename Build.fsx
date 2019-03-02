@@ -110,6 +110,7 @@ Target.create "Coverage" (fun _ ->
                 { p with
                         ExePath = "./packages/fakebuildresources/OpenCover/tools/OpenCover.Console.exe"
                         TestRunnerExePath = "./packages/fakebuildresources/xunit.runner.console/tools/net472/xunit.console.exe";
+                        ExcludeByAttribute = ["*.ExcludeFromCodeCoverage"];
                         Output = reportPath;
                         Register = OpenCover.RegisterUser;
                         Filter = "+[SonOfPicasso.*]* -[SonOfPicasso.*.Tests]* -[SonOfPicasso.Testing.Common]*";
