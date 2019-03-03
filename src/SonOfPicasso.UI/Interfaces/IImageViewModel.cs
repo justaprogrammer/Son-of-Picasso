@@ -7,7 +7,7 @@ namespace SonOfPicasso.UI.Interfaces
     public interface IImageViewModel
     {
         void Initialize(ImageModel imageModel);
-        ImageModel ImageModel { get; }
         IObservable<IBitmap> GetImage();
+        string Path { get; }
     }
 }
