@@ -79,31 +79,31 @@ namespace SonOfPicasso.Core.Services
 
         public IObservable<Unit> SetFolderList(string[] paths)
         {
-            _logger.LogDebug("SetFolderList");
+            _logger.LogDebug("SetFolderList: {PathCount}", paths.Length);
             return BlobCache.InsertObject(ImageFoldersKey, paths);
         }
 
         public IObservable<Unit> DeleteFolder(string path)
         {
-            _logger.LogDebug("GetFolder");
+            _logger.LogDebug("DeleteFolder: {Path}", path);
             return BlobCache.Invalidate(GetImageFolderKey(path));
         }
 
         public IObservable<ImageModel> GetImage(string path)
         {
-            _logger.LogDebug("GetFolder");
+            _logger.LogDebug("GetImage: {Path}", path);
             return BlobCache.GetObject<ImageModel>(GetImageKey(path));
         }
 
         public IObservable<Unit> SetImage(ImageModel image)
         {
-            _logger.LogDebug("SetImage");
+            _logger.LogDebug("SetImage: {Path}", image.Path);
             return BlobCache.InsertObject(GetImageKey(image.Path), image);
         }
 
         public IObservable<ImageFolderModel> GetFolder(string path)
         {
-            _logger.LogDebug("GetFolder");
+            _logger.LogDebug("GetFolder: {Path}", path);
             return BlobCache.GetOrCreateObject(GetImageFolderKey(path), () => CreateImageFolder(path));
         }
 
