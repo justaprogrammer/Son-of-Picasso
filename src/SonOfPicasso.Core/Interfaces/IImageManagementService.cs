@@ -2,7 +2,7 @@
 using System.Reactive;
 using SonOfPicasso.Core.Models;
 
-namespace SonOfPicasso.Core.Services
+namespace SonOfPicasso.Core.Interfaces
 {
     public interface IImageManagementService
     {

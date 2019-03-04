@@ -7,8 +7,8 @@ using DynamicData;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
+using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
-using SonOfPicasso.Core.Services;
 using SonOfPicasso.UI.Interfaces;
 
 namespace SonOfPicasso.UI.ViewModels
