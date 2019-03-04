@@ -1,4 +1,5 @@
-﻿using System.IO.Abstractions;
+﻿using System;
+using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
@@ -18,31 +19,32 @@ namespace SonOfPicasso.UI.Tests.Extensions
     {
         public static ApplicationViewModel CreateApplicationViewModel<T>(this TestsBase<T> tests,
             IFileSystem fileSystem = null,
-            IDataCache dataCache = null,
-            IImageLocationService imageLocationService = null,
+            IImageManagementService imageManagementService = null,
             ISchedulerProvider schedulerProvider = null,
-            IImageFolderViewModel imageFolderViewModel = null)
+            IImageFolderViewModel imageFolderViewModel = null,
+            Func<IImageViewModel> imageViewModelFactory = null,
+            Func<IImageFolderViewModel> imageFolderViewModelFactory = null)
         {
+            TService UseFactoryIfExists<TService>(Func<TService> factory) where TService : class
+            {
+                return factory != null
+                    ? factory() ?? throw new InvalidOperationException()
+                    : Substitute.For<TService>();
+            }
+
             fileSystem = fileSystem ?? new MockFileSystem();
-            imageLocationService = imageLocationService ?? Substitute.For<IImageLocationService>();
+            imageManagementService = imageManagementService ?? Substitute.For<IImageManagementService>();
             schedulerProvider = schedulerProvider ?? new TestSchedulerProvider();
             imageFolderViewModel = imageFolderViewModel ?? new ImageFolderViewModel();
 
             var serviceCollection = tests.GetServiceCollection()
                 .AddSingleton(fileSystem)
                 .AddSingleton(schedulerProvider)
-                .AddSingleton(imageLocationService)
+                .AddSingleton(imageManagementService)
                 .AddSingleton(imageFolderViewModel)
-                .AddSingleton(typeof(ApplicationViewModel));
-
-            if (dataCache != null)
-            {
-                serviceCollection.AddSingleton(dataCache);
-            }
-            else
-            {
-                serviceCollection.AddSingleton<IDataCache, TestCache>();
-            }
+                .AddSingleton(typeof(ApplicationViewModel))
+                .AddTransient(_ => UseFactoryIfExists(imageViewModelFactory))
+                .AddTransient(_ => UseFactoryIfExists(imageFolderViewModelFactory));
 
             var buildServiceProvider = serviceCollection
                 .BuildServiceProvider();
