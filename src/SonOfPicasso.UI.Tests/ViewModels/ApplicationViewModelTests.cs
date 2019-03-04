@@ -1,12 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading;
+using DynamicData;
+using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Models;
 using SonOfPicasso.Testing.Common;
 using SonOfPicasso.Testing.Common.Scheduling;
+using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.Tests.Extensions;
 using Xunit;
 using Xunit.Abstractions;
@@ -26,27 +33,27 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             Logger.LogDebug("CanInitialize");
 
             var testSchedulerProvider = new TestSchedulerProvider();
-            var imageLocationService = Substitute.For<IImageLocationService>();
-            var sharedCache = Substitute.For<ISharedCache>();
+            var imageManagementService = Substitute.For<IImageManagementService>();
 
-            sharedCache.GetImageFolders()
-                .Returns(Observable.Return(new ImageFolderDictionary()));
+            imageManagementService.GetAllImages()
+                .Returns(Observable.Empty<ImageModel>());
+
+            imageManagementService.GetAllImageFolders()
+                .Returns(Observable.Empty<ImageFolderModel>());
 
             var applicationViewModel = this.CreateApplicationViewModel(
-                imageLocationService: imageLocationService,
-                sharedCache: sharedCache,
-                schedulerProvider: testSchedulerProvider);
+                schedulerProvider: testSchedulerProvider, 
+                imageManagementService: imageManagementService);
 
             var autoResetEvent = new AutoResetEvent(false);
 
             applicationViewModel.Initialize()
                 .Subscribe(_ => autoResetEvent.Set());
 
-            sharedCache.Received().GetImageFolders();
+            imageManagementService.Received().GetAllImages();
+            imageManagementService.Received().GetAllImageFolders();
 
             testSchedulerProvider.MainThreadScheduler.AdvanceBy(1);
-            testSchedulerProvider.TaskPool.AdvanceBy(1);
-            testSchedulerProvider.TaskPool.AdvanceBy(1);
 
             autoResetEvent.WaitOne();
         }
@@ -57,26 +64,59 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             Logger.LogDebug("CanAddPath");
 
             var testSchedulerProvider = new TestSchedulerProvider();
-            var imageLocationService = Substitute.For<IImageLocationService>();
-            var sharedCache = Substitute.For<ISharedCache>();
+            var imageManagementService = Substitute.For<IImageManagementService>();
 
-            sharedCache.GetImageFolders()
-                .Returns(Observable.Return(new ImageFolderDictionary()));
+            var directoryPath = Faker.System.DirectoryPath();
+
+            var imageFiles = Faker.Make(5, () => Path.Combine(directoryPath, Faker.System.FileName("png")))
+                .ToArray();
+
+            var imageFolderModel = new ImageFolderModel {Path = directoryPath, Images = imageFiles};
+
+            var imageModels = imageFiles
+                .Select(path => new ImageModel { Path = path })
+                .ToArray();
+
+            imageManagementService.AddFolder(directoryPath)
+                .Returns(_ => Observable.Return((imageFolderModel, imageModels)));
+
+            var imageViewModels = new List<IImageViewModel>();
+            var imageFolderViewModels = new List<IImageFolderViewModel>();
 
             var applicationViewModel = this.CreateApplicationViewModel(
-                imageLocationService: imageLocationService,
-                sharedCache: sharedCache,
-                schedulerProvider: testSchedulerProvider);
+                schedulerProvider: testSchedulerProvider,
+                imageManagementService: imageManagementService,
+                imageViewModelFactory: () =>
+                {
+                    var imageViewModel = Substitute.For<IImageViewModel>();
+                    imageViewModels.Add(imageViewModel);
+                    return imageViewModel;
+                },
+                imageFolderViewModelFactory: () =>
+                {
+                    var imageFolderViewModel = Substitute.For<IImageFolderViewModel>();
+                    imageFolderViewModels.Add(imageFolderViewModel);
+                    return imageFolderViewModel;
+                });
 
             var autoResetEvent = new AutoResetEvent(false);
 
-            applicationViewModel.AddFolder.Execute(Faker.System.DirectoryPath())
-                .Subscribe(unit => { autoResetEvent.Set(); });
+            applicationViewModel.AddFolder.Execute(directoryPath)
+                .Subscribe(_ => autoResetEvent.Set());
 
-            testSchedulerProvider.TaskPool.AdvanceBy(1);
             testSchedulerProvider.MainThreadScheduler.AdvanceBy(1);
             testSchedulerProvider.MainThreadScheduler.AdvanceBy(1);
-            testSchedulerProvider.TaskPool.AdvanceBy(1);
+
+            imageManagementService.Received().AddFolder(directoryPath);
+
+            imageViewModels.Should().HaveCount(5);
+            for (int i = 0; i < imageViewModels.Count; i++)
+            {
+                imageViewModels[i].Received().Initialize(imageModels[i]);
+            }
+
+            imageFolderViewModels.Should().HaveCount(1);
+            imageFolderViewModels.First().Received().Initialize(imageFolderModel);
 
             autoResetEvent.WaitOne();
         }

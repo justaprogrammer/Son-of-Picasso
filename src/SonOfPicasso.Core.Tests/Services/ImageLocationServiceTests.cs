@@ -56,23 +56,23 @@ namespace SonOfPicasso.Core.Tests.Services
 
             var autoResetEvent = new AutoResetEvent(false);
 
-            FileInfoBase[] fileInfos = null;
+            string[] imagePaths = null;
 
             var testSchedulerProvider = new TestSchedulerProvider();
 
             var imageLocationService = this.CreateImageLocationService(mockFileSystem, testSchedulerProvider);
             imageLocationService.GetImages(directory)
-                .Subscribe(infos =>
+                .Subscribe(paths =>
                 {
-                    fileInfos = infos;
+                    imagePaths = paths;
                     autoResetEvent.Set();
                 });
 
             testSchedulerProvider.TaskPool.AdvanceBy(1);
             autoResetEvent.WaitOne();
 
-            fileInfos.Should().NotBeNull();
-            fileInfos.Select(fileInfo => fileInfo.ToString())
+            imagePaths.Should().NotBeNull();
+            imagePaths.Select(fileInfo => fileInfo)
                 .Should().BeEquivalentTo(files);
         }
     }

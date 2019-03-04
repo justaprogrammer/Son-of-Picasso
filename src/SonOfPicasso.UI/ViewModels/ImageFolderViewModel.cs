@@ -1,4 +1,5 @@
-﻿using ReactiveUI;
+﻿using System;
+using ReactiveUI;
 using SonOfPicasso.Core.Models;
 using SonOfPicasso.UI.Injection;
 using SonOfPicasso.UI.Interfaces;
@@ -9,11 +10,13 @@ namespace SonOfPicasso.UI.ViewModels
     [ViewModelView(typeof(ImageFolderViewControl))]
     public class ImageFolderViewModel : ReactiveObject, IImageFolderViewModel
     {
-        public ImageFolder ImageFolder { get; private set; }
+        private ImageFolderModel _imageFolderModel;
 
-        public void Initialize(ImageFolder imageFolder)
+        public string Path => _imageFolderModel.Path;
+
+        public void Initialize(ImageFolderModel imageFolderModel)
         {
-            ImageFolder = imageFolder;
+            _imageFolderModel = imageFolderModel ?? throw new ArgumentNullException(nameof(imageFolderModel));
         }
     }
 }

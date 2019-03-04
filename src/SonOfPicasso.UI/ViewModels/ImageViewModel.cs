@@ -18,28 +18,24 @@ namespace SonOfPicasso.UI.ViewModels
         private readonly IImageLoadingService _imageLoadingService;
         private readonly ISchedulerProvider _schedulerProvider;
 
+        public string Path => _imageModel.Path;
+
         public ImageViewModel(IImageLoadingService imageLoadingService, ISchedulerProvider schedulerProvider)
         {
             _imageLoadingService = imageLoadingService;
             _schedulerProvider = schedulerProvider;
         }
 
-        public void Initialize(Image image)
+        public void Initialize(ImageModel imageModel)
         {
-            this.Image = image;
+            _imageModel = imageModel ?? throw new ArgumentNullException(nameof(imageModel));
         }
 
-        private Image _image;
-
-        public Image Image
-        {
-            get => _image;
-            set => this.RaiseAndSetIfChanged(ref _image, value);
-        }
+        private ImageModel _imageModel;
 
         public IObservable<IBitmap> GetImage()
         {
-            return _imageLoadingService.LoadImageFromPath(Image.Path)
+            return _imageLoadingService.LoadImageFromPath(Path)
                 .ObserveOn(_schedulerProvider.MainThreadScheduler);
         }
     }

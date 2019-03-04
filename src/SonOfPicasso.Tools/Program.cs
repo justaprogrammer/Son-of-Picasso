@@ -86,7 +86,7 @@ namespace SonOfPicasso.Tools
                         .AddSingleton<IFileSystem, FileSystem>()
                         .AddSingleton<ISchedulerProvider, ConsoleSchedulerProvider>()
                         .AddSingleton<IImageLocationService, ImageLocationService>()
-                        .AddSingleton<ISharedCache, SharedCache>()
+                        .AddSingleton<IDataCache, DataCache>()
                         .AddSingleton<IEnvironmentService, EnvironmentService>()
                         .AddSingleton<ToolsService>();
 
