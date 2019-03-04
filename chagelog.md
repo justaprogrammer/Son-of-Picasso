@@ -1,4 +1,27 @@
 
+<a name="v0.0.3"></a>
+## [v0.0.3] - 2019-03-04
+### Chores
+- Moving and adding tests for ImageLoadingService
+- Functionality to generate some exif data with genreated images
+- Adding tests for the ImageLocationService
+- Exclude designer files from codecov
+- Adding codecov reach graph
+- Excluding xaml and xaml.cs from codecov
+- Adding codecov coverage flags
+- Tweaking how code coverage is computed
+
+### Features
+- Created ImageManagementService to handle data operations
+
+### Pull Requests
+- Merge pull request [#16](https://github.com/justaprogrammer/Son-of-Picasso/issues/16) from justaprogrammer/image-management
+- Merge pull request [#17](https://github.com/justaprogrammer/Son-of-Picasso/issues/17) from justaprogrammer/more-tests
+- Merge pull request [#18](https://github.com/justaprogrammer/Son-of-Picasso/issues/18) from justaprogrammer/exif-data
+- Merge pull request [#15](https://github.com/justaprogrammer/Son-of-Picasso/issues/15) from justaprogrammer/codecov-tweak
+- Merge pull request [#14](https://github.com/justaprogrammer/Son-of-Picasso/issues/14) from justaprogrammer/adding-tests
+
+
 <a name="v0.0.2"></a>
 ## [v0.0.2] - 2019-02-20
 ### Bug Fixes
@@ -49,4 +72,5 @@
 - Merge pull request [#6](https://github.com/justaprogrammer/Son-of-Picasso/issues/6) from justaprogrammer/fix-test
 
 
+[v0.0.3]: https://github.com/justaprogrammer/Son-of-Picasso/compare/v0.0.2...v0.0.3
 [v0.0.2]: https://github.com/justaprogrammer/Son-of-Picasso/compare/v0.0.1...v0.0.2
