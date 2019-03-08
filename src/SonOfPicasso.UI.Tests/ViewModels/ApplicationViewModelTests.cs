@@ -5,7 +5,6 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading;
-using DynamicData;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
