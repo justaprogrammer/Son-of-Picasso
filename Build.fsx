@@ -37,9 +37,16 @@ Target.create "Build" (fun _ ->
   |> Proc.run
   |> ignore
 
+  let logger : MSBuildDistributedLoggerConfig = { 
+        ClassName = None ; 
+        AssemblyPath = "../packages/fakebuildresources/BCC-MSBuildLog/tools/net472/BCCMSBuildLog.dll" ;
+        Parameters = None
+    }
+
   let configuration = (fun p -> { p with 
                                     DoRestore = true
-                                    Verbosity = Some MSBuildVerbosity.Minimal })
+                                    Verbosity = Some MSBuildVerbosity.Minimal
+                                    Loggers = Some([logger])})
 
   !! "SonOfPicasso.sln"
   |> MSBuild.runRelease configuration null "Build"
