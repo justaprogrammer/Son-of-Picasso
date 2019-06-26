@@ -39,7 +39,7 @@ Target.create "Build" (fun _ ->
 
   let logger : MSBuildDistributedLoggerConfig = { 
         ClassName = None ; 
-        AssemblyPath = "../packages/fakebuildresources/BCC-MSBuildLog/tools/net472/BCCMSBuildLog.dll" ;
+        AssemblyPath = "packages\\fakebuildresources\\BCC-MSBuildLog\\tools\\net472\\BCCMSBuildLog.dll" ;
         Parameters = None
     }
 
