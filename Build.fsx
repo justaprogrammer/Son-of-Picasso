@@ -31,6 +31,8 @@ Target.create "Clean" (fun _ ->
 )
 
 Target.create "Build" (fun _ ->
+  NuGet.Restore.RestoreMSSolutionPackages (fun p -> {p with ToolPath = "packages\\fakebuildresources\\NuGet.CommandLine\\tools\\nuget.exe"}) "SonOfPicasso.sln"
+
   CreateProcess.fromRawCommandLine "gitversion" "/updateassemblyinfo src\common\SharedAssemblyInfo.cs /ensureassemblyinfo"
   |> Proc.run
   |> ignore
