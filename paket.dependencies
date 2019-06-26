@@ -11,6 +11,7 @@ group FakeBuild
   nuget Fake.BuildServer.AppVeyor
   nuget Fake.DotNet.Cli
   nuget Fake.DotNet.MSBuild
+  nuget Fake.DotNet.NuGet
   nuget Fake.DotNet.Testing.OpenCover
   nuget Fake.IO.FileSystem
   nuget Fake.IO.Zip
@@ -23,3 +24,4 @@ group FakeBuildResources
 
   nuget xunit.runner.console
   nuget OpenCover
+  nuget NuGet.CommandLine
