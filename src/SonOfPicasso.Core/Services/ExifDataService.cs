@@ -16,6 +16,7 @@ namespace SonOfPicasso.Core.Services
 
     public class ExifDataService: IExifDataService
     {
+        private IFileSystem _fileSystem2;
         private readonly IFileSystem _fileSystem;
 
         public ExifDataService(IFileSystem fileSystem)
