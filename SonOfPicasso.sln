@@ -5,10 +5,6 @@ VisualStudioVersion = 15.0.28307.168
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{12E2CEF6-EB9D-412F-98E3-ECBBBD00A29A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Submodules", "Submodules", "{614E8446-254E-48B0-885C-2555D6F1DEF1}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Splat.Serilog", "src\submodules\splat.serilog\Source\Splat.Serilog\Splat.Serilog.csproj", "{90E0176E-66C4-4AB2-834B-ADC8887C0BC8}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SonOfPicasso.Testing.Common", "src\SonOfPicasso.Testing.Common\SonOfPicasso.Testing.Common.csproj", "{0D73C26E-D1F1-4DE7-8354-9C9549FD2F93}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SonOfPicasso.Core.Tests", "src\SonOfPicasso.Core.Tests\SonOfPicasso.Core.Tests.csproj", "{BB58C648-8910-4106-AEEB-98E37B6C5559}"
@@ -38,10 +34,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{90E0176E-66C4-4AB2-834B-ADC8887C0BC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{90E0176E-66C4-4AB2-834B-ADC8887C0BC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{90E0176E-66C4-4AB2-834B-ADC8887C0BC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{90E0176E-66C4-4AB2-834B-ADC8887C0BC8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0D73C26E-D1F1-4DE7-8354-9C9549FD2F93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0D73C26E-D1F1-4DE7-8354-9C9549FD2F93}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0D73C26E-D1F1-4DE7-8354-9C9549FD2F93}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -71,7 +63,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{90E0176E-66C4-4AB2-834B-ADC8887C0BC8} = {614E8446-254E-48B0-885C-2555D6F1DEF1}
 		{0D73C26E-D1F1-4DE7-8354-9C9549FD2F93} = {12E2CEF6-EB9D-412F-98E3-ECBBBD00A29A}
 		{BB58C648-8910-4106-AEEB-98E37B6C5559} = {12E2CEF6-EB9D-412F-98E3-ECBBBD00A29A}
 		{95CCEAEE-8A44-40D2-975A-DEFDAED35523} = {12E2CEF6-EB9D-412F-98E3-ECBBBD00A29A}
