@@ -85,15 +85,22 @@ namespace SonOfPicasso.Tools.Services
                 }
 
                 bitmap.Save(path, System.Drawing.Imaging.ImageFormat.Jpeg);
-
-                var imageFile = ImageFile.FromFile(path);
-                imageFile.Properties.Add(ExifTag.DateTime, time);
-                imageFile.Properties.Add(ExifTag.GPSLongitude, Faker.Address.Longitude());
-                imageFile.Properties.Add(ExifTag.GPSLatitude, Faker.Address.Latitude());
-                imageFile.Properties.Add(ExifTag.GPSAltitude, Faker.Random.Double());
-
-                imageFile.Save(path);
             }
+
+            var imageFile = ImageFile.FromFile(path);
+            imageFile.Properties.Add(ExifTag.DateTime, time);
+
+            var longitude = Faker.Address.Longitude();
+            imageFile.Properties.Add(ExifTag.GPSLongitude, Math.Abs(longitude));
+            imageFile.Properties.Add(ExifTag.GPSLongitudeRef, longitude > 0 ? "E" : "W");
+
+            var latitude = Faker.Address.Latitude();
+            imageFile.Properties.Add(ExifTag.GPSLatitude, Math.Abs(latitude));
+            imageFile.Properties.Add(ExifTag.GPSLatitudeRef, latitude > 0 ? "N" : "S");
+
+            imageFile.Properties.Add(ExifTag.GPSAltitude, Faker.Random.Double());
+
+            imageFile.Save(path);
         }
 
         private static Color GetColor(Color[] colors, int x, int y)

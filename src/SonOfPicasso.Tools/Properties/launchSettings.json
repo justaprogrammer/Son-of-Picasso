@@ -1,0 +1,15 @@
+{
+  "profiles": {
+    "SonOfPicasso.Tools": {
+      "commandName": "Project"
+    },
+    "Clear Cache": {
+      "commandName": "Project",
+      "commandLineArgs": "cache clear"
+    },
+    "Generate Images": {
+      "commandName": "Project",
+      "commandLineArgs": "images generate 1000 ..\\..\\..\\..\\..\\images"
+    }
+  }
+}
