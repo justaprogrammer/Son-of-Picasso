@@ -62,8 +62,7 @@ namespace SonOfPicasso.UI
 
             CustomViewLocator.ServiceProvider = serviceProvider;
 
-            Locator.CurrentMutable = new SplatDependencyResolver(serviceCollection, serviceProvider);
-            Registration.Register(Log.Logger);
+            Locator.CurrentMutable.UseSerilogFullLogger(Log.Logger);
 
             var mainWindow = serviceProvider.GetService<MainWindow>();
             mainWindow.ViewModel = serviceProvider.GetService<IApplicationViewModel>();
