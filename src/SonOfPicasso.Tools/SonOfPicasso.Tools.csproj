@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Autofac" Version="4.9.4" />
     <PackageReference Include="Bogus" Version="28.0.3" />
     <PackageReference Include="ExifLibNet" Version="1.2.37" />
     <PackageReference Include="FluentColorConsole" Version="2.0.1" />
