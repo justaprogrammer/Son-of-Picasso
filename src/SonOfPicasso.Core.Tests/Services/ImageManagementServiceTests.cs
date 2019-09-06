@@ -28,26 +28,16 @@ namespace SonOfPicasso.Core.Tests.Services
         }
 
         [Fact]
-        public void CanInitialize()
-        {
-            Logger.Debug("CanInitialize");
-            using (var autoSub = new AutoSubstitute())
-            {
-                var imageManagementService = autoSub.Resolve<ImageManagementService>();
-            }
-        }
-
-        [Fact]
         public void CantAddNullFolder()
         {
             Logger.Debug("CantAddNullFolder");
             using (var autoSub = new AutoSubstitute())
             {
-                var imageLoadingService = autoSub.Resolve<ImageManagementService>();
+                var imageManagementService = autoSub.Resolve<ImageManagementService>();
 
                 var folder = Faker.System.DirectoryPathWindows();
 
-                Assert.Throws<ArgumentNullException>(() => imageLoadingService.AddFolder(null));
+                Assert.Throws<ArgumentNullException>(() => imageManagementService.AddFolder(null));
             }
         }
 
@@ -57,11 +47,11 @@ namespace SonOfPicasso.Core.Tests.Services
             Logger.Debug("CantRemoveNullFolder");
             using (var autoSub = new AutoSubstitute())
             {
-                var imageLoadingService = autoSub.Resolve<ImageManagementService>();
+                var imageManagementService = autoSub.Resolve<ImageManagementService>();
 
                 var folder = Faker.System.DirectoryPathWindows();
 
-                Assert.Throws<ArgumentNullException>(() => imageLoadingService.AddFolder(null));
+                Assert.Throws<ArgumentNullException>(() => imageManagementService.AddFolder(null));
             }
         }
 
@@ -71,14 +61,14 @@ namespace SonOfPicasso.Core.Tests.Services
             Logger.Debug("CantRemoveFolderThatDoesntExist");
             using (var autoSub = new AutoSubstitute())
             {
-                var imageLoadingService = autoSub.Resolve<ImageManagementService>();
+                var imageManagementService = autoSub.Resolve<ImageManagementService>();
 
                 var folder = Faker.System.DirectoryPathWindows();
                 SonOfPicassoException exception = null;
 
                 var autoResetEvent = new AutoResetEvent(false);
 
-                imageLoadingService.RemoveFolder(folder)
+                imageManagementService.RemoveFolder(folder)
                     .Subscribe(_ => { },
                         ex =>
                         {
@@ -99,7 +89,7 @@ namespace SonOfPicasso.Core.Tests.Services
             Logger.Debug("CanRemoveFolder");
             using (var autoSub = new AutoSubstitute())
             {
-                var sharedCache = autoSub.Resolve<IDataCache>();
+                var dataCache = autoSub.Resolve<IDataCache>();
                 var testPaths = Faker.Make(5, Faker.System.DirectoryPathWindows)
                     .Distinct()
                     .ToArray();
@@ -107,28 +97,28 @@ namespace SonOfPicasso.Core.Tests.Services
                 var imageFolderPath = testPaths.First();
                 var remainingPaths = testPaths.Skip(1).ToArray();
 
-                sharedCache.GetFolderList()
+                dataCache.GetFolderList()
                     .Returns(Observable.Return(testPaths));
 
-                sharedCache.SetFolderList(Arg.Any<string[]>())
+                dataCache.SetFolderList(Arg.Any<string[]>())
                     .Returns(Observable.Return(Unit.Default));
 
-                sharedCache.DeleteFolder(Arg.Any<string>())
+                dataCache.DeleteFolder(Arg.Any<string>())
                     .Returns(Observable.Return(Unit.Default));
 
-                var imageLoadingService = autoSub.Resolve<ImageManagementService>();
+                var imageManagementService = autoSub.Resolve<ImageManagementService>();
 
                 var autoResetEvent = new AutoResetEvent(false);
 
-                imageLoadingService.RemoveFolder(imageFolderPath)
+                imageManagementService.RemoveFolder(imageFolderPath)
                     .Subscribe(_ => autoResetEvent.Set());
 
                 autoResetEvent.WaitOne();
 
-                sharedCache.Received().SetFolderList(Arg.Is<string[]>(strings =>
+                dataCache.Received().SetFolderList(Arg.Is<string[]>(strings =>
                     strings.SequenceEqual(remainingPaths)));
 
-                sharedCache.Received().DeleteFolder(imageFolderPath);
+                dataCache.Received().DeleteFolder(imageFolderPath);
             }
         }
 
@@ -138,7 +128,7 @@ namespace SonOfPicasso.Core.Tests.Services
             Logger.Debug("CanAddFolder");
             using (var autoSub = new AutoSubstitute())
             {
-                var sharedCache = autoSub.Resolve<IDataCache>();
+                var dataCache = autoSub.Resolve<IDataCache>();
                 var imageLocationService = autoSub.Resolve<IImageLocationService>();
 
                 var testPaths = Faker.Make(5, Faker.System.DirectoryPathWindows)
@@ -151,29 +141,29 @@ namespace SonOfPicasso.Core.Tests.Services
                     .Select(s => Path.Combine(imageFolderPath, s))
                     .ToArray();
 
-                sharedCache.GetFolderList()
+                dataCache.GetFolderList()
                     .Returns(Observable.Return(testPaths.Skip(1).ToArray()));
 
-                sharedCache.SetFolderList(Arg.Any<string[]>())
+                dataCache.SetFolderList(Arg.Any<string[]>())
                     .Returns(Observable.Return(Unit.Default));
 
-                sharedCache.SetFolder(Arg.Any<ImageFolderModel>())
+                dataCache.SetFolder(Arg.Any<ImageFolderModel>())
                     .Returns(Observable.Return(Unit.Default));
 
-                sharedCache.SetImage(Arg.Any<ImageModel>())
+                dataCache.SetImage(Arg.Any<ImageModel>())
                     .Returns(Observable.Return(Unit.Default));
 
                 imageLocationService.GetImages(Arg.Any<string>())
                     .Returns(Observable.Return(imagePaths));
 
-                var imageLoadingService = autoSub.Resolve<ImageManagementService>();
+                var imageManagementService = autoSub.Resolve<ImageManagementService>();
 
                 var autoResetEvent = new AutoResetEvent(false);
 
                 ImageFolderModel imageFolderModel = null;
                 ImageModel[] imageModels = null;
 
-                imageLoadingService.AddFolder(imageFolderPath)
+                imageManagementService.AddFolder(imageFolderPath)
                     .Subscribe(tuple =>
                     {
                         (imageFolderModel, imageModels) = tuple;
@@ -184,18 +174,18 @@ namespace SonOfPicasso.Core.Tests.Services
 
                 imageLocationService.Received().GetImages(imageFolderPath);
 
-                sharedCache.Received().SetFolderList(Arg.Is<string[]>(strings =>
+                dataCache.Received().SetFolderList(Arg.Is<string[]>(strings =>
                     strings.OrderBy(s => s)
                         .SequenceEqual(testPaths.OrderBy(s => s))));
 
-                sharedCache.Received().SetFolder(Arg.Is<ImageFolderModel>(folder =>
+                dataCache.Received().SetFolder(Arg.Is<ImageFolderModel>(folder =>
                     folder.Path == imageFolderPath &&
                     folder.Images.OrderBy(s => s)
                         .SequenceEqual(imagePaths.OrderBy(s => s))));
 
-                sharedCache.Received(5).SetImage(Arg.Any<ImageModel>());
+                dataCache.Received(5).SetImage(Arg.Any<ImageModel>());
 
-                sharedCache.ReceivedCalls()
+                dataCache.ReceivedCalls()
                     .Where(call => call.GetMethodInfo().Name == "SetImage")
                     .Select(call => (ImageModel)call.GetArguments()[0])
                     .Select(model => model.Path)
@@ -216,7 +206,7 @@ namespace SonOfPicasso.Core.Tests.Services
             Logger.Debug("CantAddFolderASecondTime");
             using (var autoSub = new AutoSubstitute())
             {
-                var sharedCache = autoSub.Resolve<IDataCache>();
+                var dataCache = autoSub.Resolve<IDataCache>();
                 var imageLocationService = autoSub.Resolve<IImageLocationService>();
 
 
@@ -230,25 +220,25 @@ namespace SonOfPicasso.Core.Tests.Services
                     .Select(s => Path.Combine(imageFolderPath, s))
                     .ToArray();
 
-                sharedCache.GetFolderList()
+                dataCache.GetFolderList()
                     .Returns(Observable.Return(testPaths));
 
-                sharedCache.SetFolderList(Arg.Any<string[]>())
+                dataCache.SetFolderList(Arg.Any<string[]>())
                     .Returns(Observable.Return(Unit.Default));
 
-                sharedCache.SetFolder(Arg.Any<ImageFolderModel>())
+                dataCache.SetFolder(Arg.Any<ImageFolderModel>())
                     .Returns(Observable.Return(Unit.Default));
 
                 imageLocationService.GetImages(Arg.Any<string>())
                     .Returns(Observable.Return(imagePaths));
 
-                var imageLoadingService = autoSub.Resolve<ImageManagementService>();
+                var imageManagementService = autoSub.Resolve<ImageManagementService>();
 
                 var autoResetEvent = new AutoResetEvent(false);
 
                 SonOfPicassoException exception = null;
 
-                imageLoadingService.AddFolder(imageFolderPath)
+                imageManagementService.AddFolder(imageFolderPath)
                     .Subscribe(
                         _ => { },
                         ex =>
@@ -260,8 +250,8 @@ namespace SonOfPicasso.Core.Tests.Services
                 autoResetEvent.WaitOne();
 
                 imageLocationService.DidNotReceiveWithAnyArgs().GetImages(Arg.Any<string>());
-                sharedCache.DidNotReceiveWithAnyArgs().SetFolderList(Arg.Any<string[]>());
-                sharedCache.DidNotReceiveWithAnyArgs().SetFolder(Arg.Any<ImageFolderModel>());
+                dataCache.DidNotReceiveWithAnyArgs().SetFolderList(Arg.Any<string[]>());
+                dataCache.DidNotReceiveWithAnyArgs().SetFolder(Arg.Any<ImageFolderModel>());
 
                 exception.Should().NotBeNull();
                 exception.Message.Should().Be("Folder already exists");
@@ -274,7 +264,7 @@ namespace SonOfPicasso.Core.Tests.Services
             Logger.Debug("CanGetImageFolders");
             using (var autoSub = new AutoSubstitute())
             {
-                var sharedCache = autoSub.Resolve<IDataCache>();
+                var dataCache = autoSub.Resolve<IDataCache>();
 
                 var testPaths = Faker.Make(5, Faker.System.DirectoryPathWindows)
                     .Distinct()
@@ -287,19 +277,19 @@ namespace SonOfPicasso.Core.Tests.Services
                 var imageFolderDictionary = imageFolders
                     .ToDictionary(s => s.Path);
 
-                sharedCache.GetFolderList()
+                dataCache.GetFolderList()
                     .Returns(Observable.Return(testPaths.ToArray()));
 
-                sharedCache.GetFolder(Arg.Any<string>())
+                dataCache.GetFolder(Arg.Any<string>())
                     .Returns(info => Observable.Return(imageFolderDictionary[info.Arg<string>()]));
 
-                var imageLoadingService = autoSub.Resolve<ImageManagementService>();
+                var imageManagementService = autoSub.Resolve<ImageManagementService>();
 
                 var autoResetEvent = new AutoResetEvent(false);
 
                 var results = new List<ImageFolderModel>();
 
-                imageLoadingService.GetAllImageFolders()
+                imageManagementService.GetAllImageFolders()
                     .Subscribe(
                         imageFolder => results.Add(imageFolder),
                         () => autoResetEvent.Set());
@@ -316,7 +306,7 @@ namespace SonOfPicasso.Core.Tests.Services
             Logger.Debug("CanGetImages");
             using (var autoSub = new AutoSubstitute())
             {
-                var sharedCache = autoSub.Resolve<IDataCache>();
+                var dataCache = autoSub.Resolve<IDataCache>();
 
                 var testPaths = Faker.Make(5, Faker.System.DirectoryPathWindows)
                     .Distinct()
@@ -348,22 +338,22 @@ namespace SonOfPicasso.Core.Tests.Services
                 var imageFoldersByPath = imageFolders
                     .ToDictionary(s => s.Path);
 
-                sharedCache.GetFolderList()
+                dataCache.GetFolderList()
                     .Returns(Observable.Return(testPaths.ToArray()));
 
-                sharedCache.GetFolder(Arg.Any<string>())
+                dataCache.GetFolder(Arg.Any<string>())
                     .Returns(info => Observable.Return(imageFoldersByPath[info.Arg<string>()]));
 
-                sharedCache.GetImage(Arg.Any<string>())
+                dataCache.GetImage(Arg.Any<string>())
                     .Returns(info => Observable.Return(imagesByPath[info.Arg<string>()]));
 
-                var imageLoadingService = autoSub.Resolve<ImageManagementService>();
+                var imageManagementService = autoSub.Resolve<ImageManagementService>();
 
                 var autoResetEvent = new AutoResetEvent(false);
 
                 var results = new List<ImageModel>();
 
-                imageLoadingService.GetAllImages()
+                imageManagementService.GetAllImages()
                     .Subscribe(
                         image => results.Add(image),
                         () => autoResetEvent.Set());
