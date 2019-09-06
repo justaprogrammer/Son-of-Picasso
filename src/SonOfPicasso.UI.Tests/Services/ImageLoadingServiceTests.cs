@@ -4,7 +4,6 @@ using System.IO.Abstractions.TestingHelpers;
 using System.Reflection;
 using System.Threading;
 using FluentAssertions;
-using Microsoft.Extensions.Logging;
 using SonOfPicasso.Testing.Common;
 using SonOfPicasso.Testing.Common.Extensions;
 using SonOfPicasso.Testing.Common.Scheduling;
@@ -25,7 +24,7 @@ namespace SonOfPicasso.UI.Tests.Services
         [Fact]
         public void CanInitialize()
         {
-            Logger.LogDebug("CanInitialize");
+            Logger.Debug("CanInitialize");
 
             var imageLoadingService = this.CreateImageLoadingService();
         }
@@ -33,7 +32,7 @@ namespace SonOfPicasso.UI.Tests.Services
         [Fact(Timeout = 500)]
         public void CanLoadImage()
         {
-            Logger.LogDebug("CanLoadImage");
+            Logger.Debug("CanLoadImage");
 
             var mockFileSystem = new MockFileSystem();
             var resourceAssembly = Assembly.GetAssembly(typeof(ImageLoadingServiceTests));

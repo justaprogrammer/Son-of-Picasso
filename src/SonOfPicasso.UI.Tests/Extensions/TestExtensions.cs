@@ -37,19 +37,21 @@ namespace SonOfPicasso.UI.Tests.Extensions
             schedulerProvider = schedulerProvider ?? new TestSchedulerProvider();
             imageFolderViewModel = imageFolderViewModel ?? new ImageFolderViewModel();
 
-            var serviceCollection = tests.GetServiceCollection()
-                .AddSingleton(fileSystem)
-                .AddSingleton(schedulerProvider)
-                .AddSingleton(imageManagementService)
-                .AddSingleton(imageFolderViewModel)
-                .AddSingleton(typeof(ApplicationViewModel))
-                .AddTransient(_ => UseFactoryIfExists(imageViewModelFactory))
-                .AddTransient(_ => UseFactoryIfExists(imageFolderViewModelFactory));
+            throw new NotImplementedException();
 
-            var buildServiceProvider = serviceCollection
-                .BuildServiceProvider();
-
-            return buildServiceProvider.MustGetService<ApplicationViewModel>();
+//            var serviceCollection = tests.GetServiceCollection()
+//                .AddSingleton(fileSystem)
+//                .AddSingleton(schedulerProvider)
+//                .AddSingleton(imageManagementService)
+//                .AddSingleton(imageFolderViewModel)
+//                .AddSingleton(typeof(ApplicationViewModel))
+//                .AddTransient(_ => UseFactoryIfExists(imageViewModelFactory))
+//                .AddTransient(_ => UseFactoryIfExists(imageFolderViewModelFactory));
+//
+//            var buildServiceProvider = serviceCollection
+//                .BuildServiceProvider();
+//
+//            return buildServiceProvider.MustGetService<ApplicationViewModel>();
         }
 
         public static ImageLoadingService CreateImageLoadingService<T>(this TestsBase<T> tests,
@@ -59,15 +61,17 @@ namespace SonOfPicasso.UI.Tests.Extensions
             fileSystem = fileSystem ?? new MockFileSystem();
             schedulerProvider = schedulerProvider ?? new TestSchedulerProvider();
 
-            var serviceCollection = tests.GetServiceCollection()
-                .AddSingleton(fileSystem)
-                .AddSingleton(schedulerProvider)
-                .AddSingleton<ImageLoadingService>();
+            throw new NotImplementedException();
 
-            var buildServiceProvider = serviceCollection
-                .BuildServiceProvider();
-
-            return buildServiceProvider.MustGetService<ImageLoadingService>();
+//            var serviceCollection = tests.GetServiceCollection()
+//                .AddSingleton(fileSystem)
+//                .AddSingleton(schedulerProvider)
+//                .AddSingleton<ImageLoadingService>();
+//
+//            var buildServiceProvider = serviceCollection
+//                .BuildServiceProvider();
+//
+//            return buildServiceProvider.MustGetService<ImageLoadingService>();
         }
     }
 }

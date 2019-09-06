@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reactive;
 using Akavache;
-using Microsoft.Extensions.Logging;
+using Serilog;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Models;
 
@@ -12,7 +12,7 @@ namespace SonOfPicasso.Core.Services
         private const string UserSettingsKey = "UserSettings";
         private const string ImageFoldersKey = "ImageFolders";
 
-        private readonly ILogger<DataCache> _logger;
+        private readonly ILogger _logger;
         protected readonly IBlobCache BlobCache;
 
         static DataCache()
@@ -20,11 +20,11 @@ namespace SonOfPicasso.Core.Services
             Akavache.BlobCache.ApplicationName = "SonOfPicasso";
         }
 
-        public DataCache(ILogger<DataCache> logger) : this(logger, null)
+        public DataCache(ILogger logger) : this(logger, null)
         {
         }
 
-        internal DataCache(ILogger<DataCache> logger,
+        internal DataCache(ILogger logger,
             IBlobCache blobCache)
         {
             _logger = logger;
@@ -36,7 +36,7 @@ namespace SonOfPicasso.Core.Services
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError(e, "Failed to get the UserAccount cache");
+                    _logger.Error(e, "Failed to get the UserAccount cache");
                     throw;
                 }
             }
@@ -56,13 +56,13 @@ namespace SonOfPicasso.Core.Services
 
         public IObservable<UserSettings> GetUserSettings()
         {
-            _logger.LogDebug("GetUserSettings");
+            _logger.Debug("GetUserSettings");
             return BlobCache.GetOrCreateObject(UserSettingsKey, CreateUserSettings);
         }
 
         public IObservable<Unit> SetUserSettings(UserSettings userSettings)
         {
-            _logger.LogDebug("SetUserSettings");
+            _logger.Debug("SetUserSettings");
             return BlobCache.InsertObject(UserSettingsKey, userSettings);
         }
 
@@ -73,37 +73,37 @@ namespace SonOfPicasso.Core.Services
 
         public IObservable<string[]> GetFolderList()
         {
-            _logger.LogDebug("GetFolderList");
+            _logger.Debug("GetFolderList");
             return BlobCache.GetOrCreateObject(ImageFoldersKey, Array.Empty<string>);
         }
 
         public IObservable<Unit> SetFolderList(string[] paths)
         {
-            _logger.LogDebug("SetFolderList: {PathCount}", paths.Length);
+            _logger.Debug("SetFolderList: {PathCount}", paths.Length);
             return BlobCache.InsertObject(ImageFoldersKey, paths);
         }
 
         public IObservable<Unit> DeleteFolder(string path)
         {
-            _logger.LogDebug("DeleteFolder: {Path}", path);
+            _logger.Debug("DeleteFolder: {Path}", path);
             return BlobCache.Invalidate(GetImageFolderKey(path));
         }
 
         public IObservable<ImageModel> GetImage(string path)
         {
-            _logger.LogDebug("GetImage: {Path}", path);
+            _logger.Debug("GetImage: {Path}", path);
             return BlobCache.GetObject<ImageModel>(GetImageKey(path));
         }
 
         public IObservable<Unit> SetImage(ImageModel image)
         {
-            _logger.LogDebug("SetImage: {Path}", image.Path);
+            _logger.Debug("SetImage: {Path}", image.Path);
             return BlobCache.InsertObject(GetImageKey(image.Path), image);
         }
 
         public IObservable<ImageFolderModel> GetFolder(string path)
         {
-            _logger.LogDebug("GetFolder: {Path}", path);
+            _logger.Debug("GetFolder: {Path}", path);
             return BlobCache.GetOrCreateObject(GetImageFolderKey(path), () => CreateImageFolder(path));
         }
 
@@ -117,7 +117,7 @@ namespace SonOfPicasso.Core.Services
 
         public IObservable<Unit> SetFolder(ImageFolderModel imageFolder)
         {
-            _logger.LogDebug("SetFolder");
+            _logger.Debug("SetFolder");
             return BlobCache.InsertObject(GetImageFolderKey(imageFolder.Path), imageFolder);
         }
 

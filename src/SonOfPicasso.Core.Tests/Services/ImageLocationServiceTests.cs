@@ -5,7 +5,6 @@ using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Threading;
 using FluentAssertions;
-using Microsoft.Extensions.Logging;
 using MoreLinq;
 using SonOfPicasso.Core.Tests.Extensions;
 using SonOfPicasso.Testing.Common;
@@ -26,14 +25,14 @@ namespace SonOfPicasso.Core.Tests.Services
         [Fact]
         public void CanInitialize()
         {
-            Logger.LogDebug("CanInitialize");
+            Logger.Debug("CanInitialize");
             var imageLocationService = this.CreateImageLocationService();
         }
 
         [Fact(Timeout = 1000)]
         public void CanGetImages()
         {
-            Logger.LogDebug("CanGetImages");
+            Logger.Debug("CanGetImages");
 
             var directory = Faker.System.DirectoryPathWindows();
 

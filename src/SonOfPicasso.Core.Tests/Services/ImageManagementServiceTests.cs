@@ -7,7 +7,6 @@ using System.Reactive.Linq;
 using System.Threading;
 using Bogus.Extensions;
 using FluentAssertions;
-using Microsoft.Extensions.Logging;
 using NSubstitute;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Models;
@@ -31,14 +30,14 @@ namespace SonOfPicasso.Core.Tests.Services
         [Fact]
         public void CanInitialize()
         {
-            Logger.LogDebug("CanInitialize");
+            Logger.Debug("CanInitialize");
             var imageLoadingService = this.CreateImageManagementService();
         }
 
         [Fact]
         public void CantAddNullFolder()
         {
-            Logger.LogDebug("CantAddNullFolder");
+            Logger.Debug("CantAddNullFolder");
 
             var imageLoadingService = this.CreateImageManagementService();
 
@@ -50,7 +49,7 @@ namespace SonOfPicasso.Core.Tests.Services
         [Fact]
         public void CantRemoveNullFolder()
         {
-            Logger.LogDebug("CantRemoveNullFolder");
+            Logger.Debug("CantRemoveNullFolder");
 
             var imageLoadingService = this.CreateImageManagementService();
 
@@ -60,7 +59,7 @@ namespace SonOfPicasso.Core.Tests.Services
         [Fact]
         public void CantRemoveFolderThatDoesntExist()
         {
-            Logger.LogDebug("CantRemoveFolderThatDoesntExist");
+            Logger.Debug("CantRemoveFolderThatDoesntExist");
 
             var imageLoadingService = this.CreateImageManagementService();
 
@@ -86,7 +85,7 @@ namespace SonOfPicasso.Core.Tests.Services
         [Fact(Timeout = 1000)]
         public void CanRemoveFolder()
         {
-            Logger.LogDebug("CanRemoveFolder");
+            Logger.Debug("CanRemoveFolder");
 
             var sharedCache = Substitute.For<IDataCache>();
 
@@ -124,7 +123,7 @@ namespace SonOfPicasso.Core.Tests.Services
         [Fact(Timeout = 1000)]
         public void CanAddFolder()
         {
-            Logger.LogDebug("CanAddFolder");
+            Logger.Debug("CanAddFolder");
 
             var sharedCache = Substitute.For<IDataCache>();
             var imageLocationService = Substitute.For<IImageLocationService>();
@@ -201,7 +200,7 @@ namespace SonOfPicasso.Core.Tests.Services
         [Fact(Timeout = 1000)]
         public void CantAddFolderASecondTime()
         {
-            Logger.LogDebug("CantAddFolderASecondTime");
+            Logger.Debug("CantAddFolderASecondTime");
 
             var sharedCache = Substitute.For<IDataCache>();
             var imageLocationService = Substitute.For<IImageLocationService>();
@@ -257,7 +256,7 @@ namespace SonOfPicasso.Core.Tests.Services
         [Fact(Timeout = 1000)]
         public void CanGetImageFolders()
         {
-            Logger.LogDebug("CanGetImageFolders");
+            Logger.Debug("CanGetImageFolders");
 
             var sharedCache = Substitute.For<IDataCache>();
 
@@ -298,7 +297,7 @@ namespace SonOfPicasso.Core.Tests.Services
         [Fact(Timeout = 1000)]
         public void CanGetImages()
         {
-            Logger.LogDebug("CanGetImages");
+            Logger.Debug("CanGetImages");
 
             var sharedCache = Substitute.For<IDataCache>();
 
