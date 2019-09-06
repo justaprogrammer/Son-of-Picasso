@@ -6,10 +6,6 @@ namespace SonOfPicasso.UI.Injection
 {
     public class CustomViewLocator : IViewLocator
     {
-        public CustomViewLocator()
-        {
-        }
-
         public IViewFor ResolveView<T>(T viewModel, string contract = null) where T : class
         {
             var type = viewModel.GetType();
