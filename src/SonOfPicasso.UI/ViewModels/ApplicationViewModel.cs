@@ -18,17 +18,20 @@ namespace SonOfPicasso.UI.ViewModels
         private readonly ILogger _logger;
         private readonly ISchedulerProvider _schedulerProvider;
         private readonly IImageManagementService _imageManagementService;
-        private readonly IContainer _serviceProvider;
+        private readonly Func<IImageViewModel> _imageViewModelFactory;
+        private readonly Func<IImageFolderViewModel> _imageFolderViewModelFactory;
 
         public ApplicationViewModel(ILogger logger,
             ISchedulerProvider schedulerProvider,
             IImageManagementService imageManagementService,
-            IContainer serviceProvider)
+            Func<IImageViewModel> imageViewModelFactory,
+            Func<IImageFolderViewModel> imageFolderViewModelFactory)
         {
             _logger = logger;
             _schedulerProvider = schedulerProvider;
             _imageManagementService = imageManagementService;
-            _serviceProvider = serviceProvider;
+            _imageViewModelFactory = imageViewModelFactory;
+            _imageFolderViewModelFactory = imageFolderViewModelFactory;
 
             Images = new ObservableCollection<IImageViewModel>();
             ImageFolders = new ObservableCollection<IImageFolderViewModel>();
@@ -48,7 +51,7 @@ namespace SonOfPicasso.UI.ViewModels
             var getImagesObservable = _imageManagementService.GetAllImages()
                 .Select(model =>
                 {
-                    var imageViewModel = _serviceProvider.Resolve<IImageViewModel>();
+                    var imageViewModel = _imageViewModelFactory();
                     imageViewModel.Initialize(model);
                     return imageViewModel;
                 })
@@ -63,7 +66,7 @@ namespace SonOfPicasso.UI.ViewModels
             var getImageFoldersObservable = _imageManagementService.GetAllImageFolders()
                 .Select(model =>
                 {
-                    var imageFolderViewModel = _serviceProvider.Resolve<IImageFolderViewModel>();
+                    var imageFolderViewModel = _imageFolderViewModelFactory();
                     imageFolderViewModel.Initialize(model);
                     return imageFolderViewModel;
                 })
@@ -85,12 +88,12 @@ namespace SonOfPicasso.UI.ViewModels
                 .Select(tuple =>
                 {
                     var (imageFolderModel, imageModels) = tuple;
-                    var imageFolderViewModel = _serviceProvider.Resolve<IImageFolderViewModel>();
+                    var imageFolderViewModel = _imageFolderViewModelFactory();
                     imageFolderViewModel.Initialize(imageFolderModel);
 
                     var imageViewModels = imageModels.Select(model =>
                     {
-                        var imageViewModel = _serviceProvider.Resolve<IImageViewModel>();
+                        var imageViewModel = _imageViewModelFactory();
                         imageViewModel.Initialize(model);
                         return imageViewModel;
                     }).ToArray();
