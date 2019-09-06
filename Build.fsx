@@ -55,7 +55,7 @@ Target.create "Build" (fun _ ->
 
 Target.create "Test" (fun _ ->
     [
-        ("SonOfPicasso.Core.Tests", "netcoreapp2.1");
+        ("SonOfPicasso.Core.Tests", "net472");
         ("SonOfPicasso.UI.Tests", "net472");
     ]
     |> Seq.iter (fun (proj, framework) ->
@@ -77,34 +77,9 @@ Target.create "Test" (fun _ ->
         ))
 )
 
-Target.create "Core Coverage" (fun _ ->
-    [
-        ("SonOfPicasso.Core.Tests", "netcoreapp2.1");
-    ]
-    |> Seq.iter (fun (proj, framework) -> 
-            let dllPath = sprintf "src\\%s\\bin\\Release\\%s\\%s.dll" proj framework proj
-            let projectPath = sprintf "src\\%s\\%s.csproj" proj proj
-            let reportPath = sprintf "reports/%s-%s.coverage.xml" proj framework
-
-            Directory.ensure "reports"
-          
-            sprintf "%s --target \"dotnet\" --targetargs \"test -c Release -f %s %s --no-build\" --include \"[SonOfPicasso.*]*\" --exclude \"[SonOfPicasso.*.Tests]*\" --exclude \"[SonOfPicasso.Testing.Common]*\" --format opencover --output \"./%s\""
-                dllPath framework projectPath reportPath
-            |> CreateProcess.fromRawCommandLine "coverlet"
-            |> Proc.run
-            |> ignore
-
-            Trace.publish ImportData.BuildArtifact reportPath
-
-            if isAppveyor then
-                CreateProcess.fromRawCommandLine "codecov" (sprintf "-f \"%s\" --flag coretest" reportPath)
-                |> Proc.run
-                |> ignore
-        )
-)
-
 Target.create "Coverage" (fun _ ->
     [
+        ("SonOfPicasso.Core.Tests", "net472");
         ("SonOfPicasso.UI.Tests", "net472");
     ]
     |> Seq.iter (fun (proj, framework) -> 
@@ -154,7 +129,6 @@ open Fake.Core.TargetOperators
 "Clean" ==> "Build"
 
 "Build" ==> "Test" ==> "Default"
-"Build" ==> "Core Coverage" ==> "Default"
 "Build" ==> "Coverage" ==> "Default"
 "Build" ==> "Package" ==> "Default"
 
