@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using Autofac;
 using DynamicData;
 using ReactiveUI;
 using Serilog;
@@ -17,12 +18,12 @@ namespace SonOfPicasso.UI.ViewModels
         private readonly ILogger _logger;
         private readonly ISchedulerProvider _schedulerProvider;
         private readonly IImageManagementService _imageManagementService;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IContainer _serviceProvider;
 
         public ApplicationViewModel(ILogger logger,
             ISchedulerProvider schedulerProvider,
             IImageManagementService imageManagementService,
-            IServiceProvider serviceProvider)
+            IContainer serviceProvider)
         {
             _logger = logger;
             _schedulerProvider = schedulerProvider;
@@ -44,70 +45,66 @@ namespace SonOfPicasso.UI.ViewModels
         {
             _logger.Debug("Initializing");
 
-            throw new NotImplementedException();
+            var getImagesObservable = _imageManagementService.GetAllImages()
+                .Select(model =>
+                {
+                    var imageViewModel = _serviceProvider.Resolve<IImageViewModel>();
+                    imageViewModel.Initialize(model);
+                    return imageViewModel;
+                })
+                .ToArray()
+                .ObserveOn(_schedulerProvider.MainThreadScheduler)
+                .Select(models =>
+                {
+                    Images.AddRange(models);
+                    return Unit.Default;
+                });
 
-//            var getImagesObservable = _imageManagementService.GetAllImages()
-//                .Select(model =>
-//                {
-//                    var imageViewModel = _serviceProvider.GetService<IImageViewModel>();
-//                    imageViewModel.Initialize(model);
-//                    return imageViewModel;
-//                })
-//                .ToArray()
-//                .ObserveOn(_schedulerProvider.MainThreadScheduler)
-//                .Select(models =>
-//                {
-//                    Images.AddRange(models);
-//                    return Unit.Default;
-//                });
-//
-//            var getImageFoldersObservable = _imageManagementService.GetAllImageFolders()
-//                .Select(model =>
-//                {
-//                    var imageFolderViewModel = _serviceProvider.GetService<IImageFolderViewModel>();
-//                    imageFolderViewModel.Initialize(model);
-//                    return imageFolderViewModel;
-//                })
-//                .ToArray()
-//                .ObserveOn(_schedulerProvider.MainThreadScheduler)
-//                .Select(models =>
-//                {
-//                    ImageFolders.AddRange(models);
-//                    return Unit.Default;
-//                });
-//
-//            return Observable.Zip(getImagesObservable, getImageFoldersObservable)
-//                .Select(_ => Unit.Default);
+            var getImageFoldersObservable = _imageManagementService.GetAllImageFolders()
+                .Select(model =>
+                {
+                    var imageFolderViewModel = _serviceProvider.Resolve<IImageFolderViewModel>();
+                    imageFolderViewModel.Initialize(model);
+                    return imageFolderViewModel;
+                })
+                .ToArray()
+                .ObserveOn(_schedulerProvider.MainThreadScheduler)
+                .Select(models =>
+                {
+                    ImageFolders.AddRange(models);
+                    return Unit.Default;
+                });
+
+            return Observable.Zip(getImagesObservable, getImageFoldersObservable)
+                .Select(_ => Unit.Default);
         }
 
         private IObservable<Unit> ExecuteAddFolder(string addPath)
         {
-            throw new NotImplementedException();
+            return _imageManagementService.AddFolder(addPath)
+                .Select(tuple =>
+                {
+                    var (imageFolderModel, imageModels) = tuple;
+                    var imageFolderViewModel = _serviceProvider.Resolve<IImageFolderViewModel>();
+                    imageFolderViewModel.Initialize(imageFolderModel);
 
-//            return _imageManagementService.AddFolder(addPath)
-//                .Select(tuple =>
-//                {
-//                    var (imageFolderModel, imageModels) = tuple;
-//                    var imageFolderViewModel = _serviceProvider.GetService<IImageFolderViewModel>();
-//                    imageFolderViewModel.Initialize(imageFolderModel);
-//
-//                    var imageViewModels = imageModels.Select(model =>
-//                    {
-//                        var imageViewModel = _serviceProvider.GetService<IImageViewModel>();
-//                        imageViewModel.Initialize(model);
-//                        return imageViewModel;
-//                    }).ToArray();
-//
-//                    return (imageFolderViewModel, imageViewModels);
-//                })
-//                .ObserveOn(_schedulerProvider.MainThreadScheduler)
-//                .Select(tuple =>
-//                {
-//                    var (imageFolderModel, imageModels) = tuple;
-//                    ImageFolders.Add(imageFolderModel);
-//                    Images.AddRange(imageModels);
-//                    return Unit.Default;
-//                });
+                    var imageViewModels = imageModels.Select(model =>
+                    {
+                        var imageViewModel = _serviceProvider.Resolve<IImageViewModel>();
+                        imageViewModel.Initialize(model);
+                        return imageViewModel;
+                    }).ToArray();
+
+                    return (imageFolderViewModel, imageViewModels);
+                })
+                .ObserveOn(_schedulerProvider.MainThreadScheduler)
+                .Select(tuple =>
+                {
+                    var (imageFolderModel, imageModels) = tuple;
+                    ImageFolders.Add(imageFolderModel);
+                    Images.AddRange(imageModels);
+                    return Unit.Default;
+                });
         }
     }
 }

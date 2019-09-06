@@ -24,7 +24,7 @@ namespace SonOfPicasso.Core.Services
         {
         }
 
-        internal DataCache(ILogger logger,
+        public DataCache(ILogger logger,
             IBlobCache blobCache)
         {
             _logger = logger;

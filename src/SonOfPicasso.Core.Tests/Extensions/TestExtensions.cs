@@ -14,20 +14,6 @@ namespace SonOfPicasso.Core.Tests.Extensions
 {
     public static class TestExtensions
     {
-        public static DataCache CreateDataCache<T>(this TestsBase<T> tests, IBlobCache blobCache = null)
-        {
-            throw new NotImplementedException();
-
-//            var serviceCollection = tests.GetServiceCollection();
-//
-//            var serviceProvider = serviceCollection
-//                .BuildServiceProvider();
-//
-//            blobCache = blobCache ?? new InMemoryBlobCache();
-//
-//            return new DataCache(serviceProvider.GetService<ILogger<DataCache>>(), blobCache);
-        }
-
         public static ImageLocationService CreateImageLocationService<T>(this TestsBase<T> tests,
             IFileSystem fileSystem = null,
             ISchedulerProvider schedulerProvider = null)

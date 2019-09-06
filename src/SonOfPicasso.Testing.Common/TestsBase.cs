@@ -1,4 +1,7 @@
 ﻿using System;
+using Autofac;
+using Autofac.Core.Registration;
+using AutofacSerilogIntegration;
 using Bogus;
 using Serilog;
 using Xunit.Abstractions;
@@ -20,18 +23,11 @@ namespace SonOfPicasso.Testing.Common
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Verbose()
                 .Enrich.WithThreadId()
-                .Enrich.With<CustomEnrichers>()
+                .Enrich.With<CustomEnrichers>() 
                 .WriteTo.TestOutput(testOutputHelper, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u4}] ({PaddedThreadId}) {ShortSourceContext} {Message}{NewLineIfException}{Exception}")
                 .CreateLogger();
 
-//            var serviceProvider = GetServiceCollection().BuildServiceProvider();
-//            Logger = serviceProvider.GetRequiredService<ILogger<T>>();
+            Logger = Log.Logger.ForContext(GetType());
         }
-
-//        public IServiceCollection GetServiceCollection()
-//        {
-//            return new ServiceCollection()
-//                .AddLogging(builder => builder.AddSerilog());
-//        }
     }
 }
