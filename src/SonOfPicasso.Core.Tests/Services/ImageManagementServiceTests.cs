@@ -135,7 +135,7 @@ namespace SonOfPicasso.Core.Tests.Services
             var imageFolderPath = testPaths.First();
 
             var imagePaths = Faker.Make(5, () => Faker.System.FileName("png"))
-                .Select(s => Path.Join(imageFolderPath, s))
+                .Select(s => Path.Combine(imageFolderPath, s))
                 .ToArray();
 
             sharedCache.GetFolderList()
@@ -212,7 +212,7 @@ namespace SonOfPicasso.Core.Tests.Services
             var imageFolderPath = testPaths.First();
 
             var imagePaths = Faker.Make(5, () => Faker.System.FileName("png"))
-                .Select(s => Path.Join(imageFolderPath, s))
+                .Select(s => Path.Combine(imageFolderPath, s))
                 .ToArray();
 
             sharedCache.GetFolderList()
@@ -309,7 +309,7 @@ namespace SonOfPicasso.Core.Tests.Services
                 .ToDictionary(
                     testPath => testPath,
                     testPath => Faker
-                        .Make(5, () => Path.Join(testPath, Faker.System.FileName("png")))
+                        .Make(5, () => Path.Combine(testPath, Faker.System.FileName("png")))
                         .ToArray());
 
             var images = imagePathsByPath
