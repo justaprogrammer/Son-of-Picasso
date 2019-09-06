@@ -16,7 +16,7 @@ using Xunit.Abstractions;
 
 namespace SonOfPicasso.Core.Tests.Services
 {
-    public class DataCacheTests : TestsBase<DataCacheTests>
+    public class DataCacheTests : TestsBase
     {
         private const string DataCacheBlobCacheParameter = "blobCache";
 
