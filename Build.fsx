@@ -79,10 +79,10 @@ Target.create "Test" (fun _ ->
 
 Target.create "Coverage" (fun _ ->
     [
-        ("SonOfPicasso.Core.Tests", "net472");
-        ("SonOfPicasso.UI.Tests", "net472");
+        ("SonOfPicasso.Core.Tests", "net472", "coretest");
+        ("SonOfPicasso.UI.Tests", "net472", "uitest");
     ]
-    |> Seq.iter (fun (proj, framework) -> 
+    |> Seq.iter (fun (proj, framework, flag) -> 
             let dllPath = sprintf "src\\%s\\bin\\Release\\%s\\%s.dll" proj framework proj
             let reportPath = sprintf "reports/%s-%s.coverage.xml" proj framework
 
@@ -103,7 +103,7 @@ Target.create "Coverage" (fun _ ->
             Trace.publish ImportData.BuildArtifact reportPath
 
             if isAppveyor then
-                CreateProcess.fromRawCommandLine "codecov" (sprintf "-f \"%s\" --flag uitest" reportPath)
+                CreateProcess.fromRawCommandLine "codecov" (sprintf "-f \"%s\" --flag %s" reportPath flag)
                 |> Proc.run
                 |> ignore
         )
