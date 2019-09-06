@@ -36,16 +36,16 @@ namespace SonOfPicasso.Core.Tests.Services
 
             var directory = Faker.System.DirectoryPathWindows();
 
-            var subDirectory = Path.Join(directory, Faker.Random.Word());
+            var subDirectory = Path.Combine(directory, Faker.Random.Word());
 
             var mockFileSystem = new MockFileSystem();
 
             var files = new[] { "jpg", "jpeg", "png", "tiff", "tif", "bmp" }
-                .Select(ext => Path.Join(subDirectory, Faker.System.FileName(ext)))
+                .Select(ext => Path.Combine(subDirectory, Faker.System.FileName(ext)))
                 .ToArray();
 
             var otherFiles = new[] { "txt", "doc" }
-                .Select(ext => Path.Join(subDirectory, Faker.System.FileName(ext)))
+                .Select(ext => Path.Combine(subDirectory, Faker.System.FileName(ext)))
                 .ToArray();
 
             foreach (var file in files.Concat(otherFiles))

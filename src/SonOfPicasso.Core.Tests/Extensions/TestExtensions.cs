@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO.Abstractions;
-using System.IO.Abstractions.TestingHelpers;
 using Akavache;
 using NSubstitute;
 using SonOfPicasso.Core.Interfaces;
