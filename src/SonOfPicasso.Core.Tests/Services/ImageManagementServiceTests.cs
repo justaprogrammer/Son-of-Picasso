@@ -12,7 +12,6 @@ using NSubstitute;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Models;
 using SonOfPicasso.Core.Services;
-using SonOfPicasso.Core.Tests.Extensions;
 using SonOfPicasso.Testing.Common;
 using SonOfPicasso.Testing.Common.Extensions;
 using SonOfPicasso.Testing.Common.Services;

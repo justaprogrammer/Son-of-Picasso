@@ -9,7 +9,6 @@ using NSubstitute;
 using Serilog;
 using SonOfPicasso.Core.Models;
 using SonOfPicasso.Core.Services;
-using SonOfPicasso.Core.Tests.Extensions;
 using SonOfPicasso.Testing.Common;
 using SonOfPicasso.Testing.Common.Extensions;
 using Xunit;
