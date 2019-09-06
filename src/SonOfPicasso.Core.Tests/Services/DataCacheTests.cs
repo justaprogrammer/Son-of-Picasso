@@ -26,20 +26,6 @@ namespace SonOfPicasso.Core.Tests.Services
         }
 
         [Fact]
-        public void CanInitialize()
-        {
-            Logger.Debug("CanInitialize");
-
-            using (var autoSub = new AutoSubstitute())
-            {
-                var inMemoryBlobCache = new InMemoryBlobCache();
-                autoSub.Provide<IBlobCache>(inMemoryBlobCache);
-
-                var dataCache = autoSub.Resolve<DataCache>();
-            }
-        }
-
-        [Fact]
         public void CanSetUserSettings()
         {
             Logger.Debug("CanSetUserSettings");

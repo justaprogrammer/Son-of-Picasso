@@ -25,16 +25,6 @@ namespace SonOfPicasso.Core.Tests.Services
         {
         }
 
-        [Fact]
-        public void CanInitialize()
-        {
-            Logger.Debug("CanInitialize");
-            using (var autoSub = new AutoSubstitute())
-            {
-                var imageLocationService = autoSub.Resolve<ImageLocationService>();
-            }
-        }
-
         [Fact(Timeout = 1000)]
         public void CanGetImages()
         {
