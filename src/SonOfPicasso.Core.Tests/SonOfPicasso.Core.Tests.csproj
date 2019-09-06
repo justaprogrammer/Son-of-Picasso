@@ -205,7 +205,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Extensions\TestExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\DataCacheTests.cs" />
     <Compile Include="Services\ImageLocationServiceTests.cs" />
@@ -229,6 +228,9 @@
       <Project>{0D73C26E-D1F1-4DE7-8354-9C9549FD2F93}</Project>
       <Name>SonOfPicasso.Testing.Common</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Extensions\" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
