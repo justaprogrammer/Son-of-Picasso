@@ -18,7 +18,7 @@ using Xunit.Abstractions;
 
 namespace SonOfPicasso.Core.Tests.Services
 {
-    public class ImageLocationServiceTests : TestsBase<ImageLocationServiceTests>
+    public class ImageLocationServiceTests : TestsBase
     {
         public ImageLocationServiceTests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)

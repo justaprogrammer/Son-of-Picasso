@@ -1,17 +1,11 @@
-﻿using System;
-using Autofac;
-using Autofac.Core.Registration;
-using AutofacSerilogIntegration;
-using Bogus;
+﻿using Bogus;
 using Serilog;
 using Xunit.Abstractions;
-using Serilog.Core;
-using Serilog.Events;
 using SonOfPicasso.Core.Logging;
 
 namespace SonOfPicasso.Testing.Common
 {
-    public abstract class TestsBase<T>
+    public abstract class TestsBase
     {
         protected readonly ILogger Logger;
         protected readonly Faker Faker;

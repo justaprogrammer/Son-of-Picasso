@@ -17,7 +17,7 @@ using Xunit.Abstractions;
 
 namespace SonOfPicasso.UI.Tests.Services
 {
-    public class ImageLoadingServiceTests : TestsBase<ImageLoadingServiceTests>
+    public class ImageLoadingServiceTests : TestsBase
     {
         public ImageLoadingServiceTests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
