@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO.Abstractions;
 using System.Reactive.Linq;
+using Autofac;
 using FluentColorConsole;
 using McMaster.Extensions.CommandLineUtils;
 using Serilog;
@@ -80,19 +81,35 @@ namespace SonOfPicasso.Tools
 
                     Log.Logger = loggerConfiguration.CreateLogger();
 
-                    throw new NotImplementedException();
+                    var containerBuilder = new ContainerBuilder();
 
-//                    var serviceCollection = new ServiceCollection()
-//                        .AddLogging(builder => builder.AddSerilog())
-//                        .AddSingleton<IFileSystem, FileSystem>()
-//                        .AddSingleton<ISchedulerProvider, ConsoleSchedulerProvider>()
-//                        .AddSingleton<IImageLocationService, ImageLocationService>()
-//                        .AddSingleton<IDataCache, DataCache>()
-//                        .AddSingleton<IEnvironmentService, EnvironmentService>()
-//                        .AddSingleton<ToolsService>();
+                    containerBuilder.RegisterType<EnvironmentService>()
+                        .As<IEnvironmentService>()
+                        .InstancePerLifetimeScope();
 
-//                    var serviceProvider = serviceCollection.BuildServiceProvider();
-//                    _toolsService = serviceProvider.GetService<ToolsService>();
+                    containerBuilder.RegisterType<FileSystem>()
+                        .As<IFileSystem>()
+                        .InstancePerLifetimeScope();
+
+                    containerBuilder.RegisterType<ConsoleSchedulerProvider>()
+                        .As<ISchedulerProvider>()
+                        .InstancePerLifetimeScope();
+
+                    containerBuilder.RegisterType<ImageManagementService>()
+                        .As<IImageManagementService>()
+                        .InstancePerLifetimeScope();
+
+                    containerBuilder.RegisterType<ImageLocationService>()
+                        .As<IImageLocationService>()
+                        .InstancePerLifetimeScope();
+
+                    containerBuilder.RegisterType<DataCache>()
+                        .As<IDataCache>();
+
+                    containerBuilder.RegisterType<ToolsService>();
+
+                    var container = containerBuilder.Build();
+                    _toolsService = container.Resolve<ToolsService>();
                 }
 
                 return _toolsService;
