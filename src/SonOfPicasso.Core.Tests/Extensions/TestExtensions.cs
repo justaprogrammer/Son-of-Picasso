@@ -1,8 +1,7 @@
-﻿using System.IO.Abstractions;
+﻿using System;
+using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using Akavache;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using NSubstitute;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
@@ -18,57 +17,63 @@ namespace SonOfPicasso.Core.Tests.Extensions
     {
         public static DataCache CreateDataCache<T>(this TestsBase<T> tests, IBlobCache blobCache = null)
         {
-            var serviceCollection = tests.GetServiceCollection();
+            throw new NotImplementedException();
 
-            var serviceProvider = serviceCollection
-                .BuildServiceProvider();
-
-            blobCache = blobCache ?? new InMemoryBlobCache();
-
-            return new DataCache(serviceProvider.GetService<ILogger<DataCache>>(), blobCache);
+//            var serviceCollection = tests.GetServiceCollection();
+//
+//            var serviceProvider = serviceCollection
+//                .BuildServiceProvider();
+//
+//            blobCache = blobCache ?? new InMemoryBlobCache();
+//
+//            return new DataCache(serviceProvider.GetService<ILogger<DataCache>>(), blobCache);
         }
 
         public static ImageLocationService CreateImageLocationService<T>(this TestsBase<T> tests,
             IFileSystem fileSystem = null,
             ISchedulerProvider schedulerProvider = null)
         {
-            fileSystem = fileSystem ?? new MockFileSystem();
-            schedulerProvider = schedulerProvider ?? new TestSchedulerProvider();
+            throw new NotImplementedException();
 
-            var serviceCollection = tests.GetServiceCollection()
-                .AddSingleton(fileSystem)
-                .AddSingleton(schedulerProvider)
-                .AddSingleton<ImageLocationService>();
-
-            var buildServiceProvider = serviceCollection
-                .BuildServiceProvider();
-
-            return buildServiceProvider.MustGetService<ImageLocationService>();
+//            fileSystem = fileSystem ?? new MockFileSystem();
+//            schedulerProvider = schedulerProvider ?? new TestSchedulerProvider();
+//
+//            var serviceCollection = tests.GetServiceCollection()
+//                .AddSingleton(fileSystem)
+//                .AddSingleton(schedulerProvider)
+//                .AddSingleton<ImageLocationService>();
+//
+//            var buildServiceProvider = serviceCollection
+//                .BuildServiceProvider();
+//
+//            return buildServiceProvider.MustGetService<ImageLocationService>();
         }
 
         public static ImageManagementService CreateImageManagementService<T>(this TestsBase<T> tests,
             IDataCache dataCache = null,
             IImageLocationService imageLocationService = null)
         {
-            imageLocationService = imageLocationService ?? Substitute.For<IImageLocationService>();
+            throw new NotImplementedException();
 
-            var serviceCollection = tests.GetServiceCollection()
-                .AddSingleton(imageLocationService)
-                .AddSingleton<ImageManagementService>();
-
-            if (dataCache != null)
-            {
-                serviceCollection.AddSingleton(dataCache);
-            }
-            else
-            {
-                serviceCollection.AddSingleton<IDataCache, TestCache>();
-            }
-
-            var buildServiceProvider = serviceCollection
-                .BuildServiceProvider();
-
-            return buildServiceProvider.MustGetService<ImageManagementService>();
+//            imageLocationService = imageLocationService ?? Substitute.For<IImageLocationService>();
+//
+//            var serviceCollection = tests.GetServiceCollection()
+//                .AddSingleton(imageLocationService)
+//                .AddSingleton<ImageManagementService>();
+//
+//            if (dataCache != null)
+//            {
+//                serviceCollection.AddSingleton(dataCache);
+//            }
+//            else
+//            {
+//                serviceCollection.AddSingleton<IDataCache, TestCache>();
+//            }
+//
+//            var buildServiceProvider = serviceCollection
+//                .BuildServiceProvider();
+//
+//            return buildServiceProvider.MustGetService<ImageManagementService>();
         }
     }
 }

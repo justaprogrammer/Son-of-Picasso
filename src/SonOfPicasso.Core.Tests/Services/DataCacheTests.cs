@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading;
 using Akavache;
 using FluentAssertions;
-using Microsoft.Extensions.Logging;
 using NSubstitute;
 using SonOfPicasso.Core.Models;
 using SonOfPicasso.Core.Tests.Extensions;
@@ -24,7 +23,7 @@ namespace SonOfPicasso.Core.Tests.Services
         [Fact]
         public void CanInitialize()
         {
-            Logger.LogDebug("CanInitialize");
+            Logger.Debug("CanInitialize");
 
             var inMemoryBlobCache = new InMemoryBlobCache();
             var dataCache = this.CreateDataCache(inMemoryBlobCache);
@@ -33,7 +32,7 @@ namespace SonOfPicasso.Core.Tests.Services
         [Fact]
         public void CanSetUserSettings()
         {
-            Logger.LogDebug("CanSetUserSettings");
+            Logger.Debug("CanSetUserSettings");
 
             var autoResetEvent = new AutoResetEvent(false);
 
@@ -63,7 +62,7 @@ namespace SonOfPicasso.Core.Tests.Services
         [Fact]
         public void CanRetrieveUserSettings()
         {
-            Logger.LogDebug("CanRetrieveUserSettings");
+            Logger.Debug("CanRetrieveUserSettings");
 
             var autoResetEvent = new AutoResetEvent(false);
 
@@ -94,7 +93,7 @@ namespace SonOfPicasso.Core.Tests.Services
         [Fact]
         public void CanCreateUserSettings()
         {
-            Logger.LogDebug("CanCreateUserSettings");
+            Logger.Debug("CanCreateUserSettings");
 
             var autoResetEvent = new AutoResetEvent(false);
 
@@ -118,7 +117,7 @@ namespace SonOfPicasso.Core.Tests.Services
         [Fact]
         public void CanSetFolderList()
         {
-            Logger.LogDebug("CanSetUserSettings");
+            Logger.Debug("CanSetUserSettings");
 
             var autoResetEvent = new AutoResetEvent(false);
 
@@ -148,7 +147,7 @@ namespace SonOfPicasso.Core.Tests.Services
         [Fact]
         public void CanRetrieveFolderList()
         {
-            Logger.LogDebug("CanRetrieveUserSettings");
+            Logger.Debug("CanRetrieveUserSettings");
 
             var autoResetEvent = new AutoResetEvent(false);
 
@@ -180,7 +179,7 @@ namespace SonOfPicasso.Core.Tests.Services
         [Fact]
         public void CanCreateFolderList()
         {
-            Logger.LogDebug("CanCreateUserSettings");
+            Logger.Debug("CanCreateUserSettings");
 
             var autoResetEvent = new AutoResetEvent(false);
 
@@ -205,7 +204,7 @@ namespace SonOfPicasso.Core.Tests.Services
         [Fact]
         public void CanSetImageFolder()
         {
-            Logger.LogDebug("CanSetUserSettings");
+            Logger.Debug("CanSetUserSettings");
 
             var autoResetEvent = new AutoResetEvent(false);
 
@@ -237,7 +236,7 @@ namespace SonOfPicasso.Core.Tests.Services
         [Fact]
         public void CanRetrieveImageFolder()
         {
-            Logger.LogDebug("CanRetrieveUserSettings");
+            Logger.Debug("CanRetrieveUserSettings");
 
             var autoResetEvent = new AutoResetEvent(false);
 
@@ -269,7 +268,7 @@ namespace SonOfPicasso.Core.Tests.Services
         [Fact]
         public void CanCreateImageFolder()
         {
-            Logger.LogDebug("CanCreateUserSettings");
+            Logger.Debug("CanCreateUserSettings");
 
             var autoResetEvent = new AutoResetEvent(false);
 

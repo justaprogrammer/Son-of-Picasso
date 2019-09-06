@@ -1,21 +1,21 @@
 ﻿using System;
 using System.IO.Abstractions;
 using System.Reactive.Linq;
-using Microsoft.Extensions.Logging;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
 using Splat;
+using ILogger = Serilog.ILogger;
 
 namespace SonOfPicasso.UI.Services
 {
     public class ImageLoadingService : IImageLoadingService
     {
         private readonly IFileSystem _fileSystem;
-        private readonly ILogger<ImageLoadingService> _logger;
+        private readonly ILogger _logger;
         private readonly ISchedulerProvider _schedulerProvider;
 
         public ImageLoadingService(IFileSystem fileSystem,
-            ILogger<ImageLoadingService> logger,
+            ILogger logger,
             ISchedulerProvider schedulerProvider)
         {
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
@@ -30,7 +30,7 @@ namespace SonOfPicasso.UI.Services
                 stream => Observable.FromAsync(
                     () =>
                     {
-                        _logger.LogDebug("LoadImageFromPath {Path}", path);
+                        _logger.Debug("LoadImageFromPath {Path}", path);
                         return BitmapLoader.Current.Load(stream, null, null);
                     }))
                 .SubscribeOn(_schedulerProvider.TaskPool);

@@ -6,7 +6,6 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading;
 using FluentAssertions;
-using Microsoft.Extensions.Logging;
 using NSubstitute;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Models;
@@ -29,7 +28,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
         [Fact(Timeout = 500)]
         public void CanInitialize()
         {
-            Logger.LogDebug("CanInitialize");
+            Logger.Debug("CanInitialize");
 
             var testSchedulerProvider = new TestSchedulerProvider();
             var imageManagementService = Substitute.For<IImageManagementService>();
@@ -60,7 +59,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
         [Fact(Timeout = 500)]
         public void CanAddPath()
         {
-            Logger.LogDebug("CanAddPath");
+            Logger.Debug("CanAddPath");
 
             var testSchedulerProvider = new TestSchedulerProvider();
             var imageManagementService = Substitute.For<IImageManagementService>();

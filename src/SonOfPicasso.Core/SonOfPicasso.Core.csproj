@@ -9,7 +9,7 @@
     <PackageReference Include="akavache" Version="6.5.9" />
     <PackageReference Include="akavache.core" Version="6.5.9" />
     <PackageReference Include="akavache.sqlite3" Version="6.5.9" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.2.0" />
+    <PackageReference Include="Autofac" Version="4.9.2" />
     <PackageReference Include="morelinq" Version="3.1.1" />
     <PackageReference Include="Nito.Mvvm.Async" Version="1.0.0-pre-03" />
     <PackageReference Include="Serilog" Version="2.8.0" />

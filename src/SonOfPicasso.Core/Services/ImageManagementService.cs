@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
-using Microsoft.Extensions.Logging;
+using Serilog;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Models;
 
@@ -12,11 +12,11 @@ namespace SonOfPicasso.Core.Services
     {
         private readonly IDataCache _dataCache;
         private readonly IImageLocationService _imageLocationService;
-        private readonly ILogger<ImageManagementService> _logger;
+        private readonly ILogger _logger;
 
         public ImageManagementService(IDataCache dataCache,
             IImageLocationService imageLocationService,
-            ILogger<ImageManagementService>logger)
+            ILogger logger)
         {
             _dataCache = dataCache ?? throw new ArgumentNullException(nameof(dataCache));
             _imageLocationService = imageLocationService ?? throw new ArgumentNullException(nameof(imageLocationService));
@@ -27,7 +27,7 @@ namespace SonOfPicasso.Core.Services
         {
             if (path == null) throw new ArgumentNullException(nameof(path));
 
-            _logger.LogDebug("AddFolder {Path}", path);
+            _logger.Debug("AddFolder {Path}", path);
 
             return _dataCache.GetFolderList()
                 .Select(folders =>
@@ -70,7 +70,7 @@ namespace SonOfPicasso.Core.Services
         {
             if (path == null) throw new ArgumentNullException(nameof(path));
 
-            _logger.LogDebug("RemoveFolder {Path}", path);
+            _logger.Debug("RemoveFolder {Path}", path);
 
             return _dataCache.GetFolderList()
                 .Select(folders =>

@@ -3,7 +3,6 @@ using System.IO.Abstractions;
 using System.Reactive.Linq;
 using FluentColorConsole;
 using McMaster.Extensions.CommandLineUtils;
-using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Logging;
@@ -81,17 +80,19 @@ namespace SonOfPicasso.Tools
 
                     Log.Logger = loggerConfiguration.CreateLogger();
 
-                    var serviceCollection = new ServiceCollection()
-                        .AddLogging(builder => builder.AddSerilog())
-                        .AddSingleton<IFileSystem, FileSystem>()
-                        .AddSingleton<ISchedulerProvider, ConsoleSchedulerProvider>()
-                        .AddSingleton<IImageLocationService, ImageLocationService>()
-                        .AddSingleton<IDataCache, DataCache>()
-                        .AddSingleton<IEnvironmentService, EnvironmentService>()
-                        .AddSingleton<ToolsService>();
+                    throw new NotImplementedException();
 
-                    var serviceProvider = serviceCollection.BuildServiceProvider();
-                    _toolsService = serviceProvider.GetService<ToolsService>();
+//                    var serviceCollection = new ServiceCollection()
+//                        .AddLogging(builder => builder.AddSerilog())
+//                        .AddSingleton<IFileSystem, FileSystem>()
+//                        .AddSingleton<ISchedulerProvider, ConsoleSchedulerProvider>()
+//                        .AddSingleton<IImageLocationService, ImageLocationService>()
+//                        .AddSingleton<IDataCache, DataCache>()
+//                        .AddSingleton<IEnvironmentService, EnvironmentService>()
+//                        .AddSingleton<ToolsService>();
+
+//                    var serviceProvider = serviceCollection.BuildServiceProvider();
+//                    _toolsService = serviceProvider.GetService<ToolsService>();
                 }
 
                 return _toolsService;
