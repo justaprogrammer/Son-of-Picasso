@@ -46,70 +46,53 @@ namespace SonOfPicasso.UI
 
             Log.Logger = loggerConfiguration.CreateLogger();
 
+            Akavache.Sqlite3.Registrations.Start("SonOfPicasso", () => SQLitePCL.Batteries_V2.Init());
+
             var containerBuilder = new ContainerBuilder();
-            containerBuilder.RegisterType<ApplicationViewModel>().As<IApplicationViewModel>().InstancePerLifetimeScope();
-            containerBuilder.RegisterType<MainWindow>().InstancePerLifetimeScope();
-            
-//            containerBuilder.RegisterType<NullLoggerFactory>().As<ILoggerFactory>().SingleInstance();
-//            containerBuilder.RegisterType<SerilogLoggerProvider>().As<ILoggerProvider>().SingleInstance();
+            containerBuilder.RegisterType<ApplicationViewModel>()
+                .As<IApplicationViewModel>()
+                .InstancePerLifetimeScope();
+
+            containerBuilder.RegisterType<MainWindow>()
+                .InstancePerLifetimeScope();
+
+            containerBuilder.RegisterType<EnvironmentService>()
+                .As<IEnvironmentService>()
+                .InstancePerLifetimeScope();
+
+            containerBuilder.RegisterType<FileSystem>()
+                .As<IFileSystem>()
+                .InstancePerLifetimeScope();
+
+            containerBuilder.RegisterType<SchedulerProvider>()
+                .As<ISchedulerProvider>()
+                .InstancePerLifetimeScope();
+
+            containerBuilder.RegisterType<ImageManagementService>()
+                .As<IImageManagementService>()
+                .InstancePerLifetimeScope();
+
+            containerBuilder.RegisterType<ImageLocationService>()
+                .As<IImageLocationService>()
+                .InstancePerLifetimeScope();
+
+            containerBuilder.RegisterType<DataCache>()
+                .As<IDataCache>();
+
+            containerBuilder.RegisterType<ImageViewModel>()
+                .As<IImageViewModel>();
+
+            containerBuilder.RegisterType<ImageFolderViewModel>()
+                .As<IImageFolderViewModel>();
 
             containerBuilder.RegisterLogger();
 
             var container = containerBuilder.Build();
-            var resolve = container.Resolve<MainWindow>();
+            var mainWindow = container.Resolve<MainWindow>();
 
-//            containerBuilder.UseAutofacDependencyResolver();
-//            Locator.CurrentMutable.UseMicrosoftExtensionsLoggingWithWrappingFullLogger(new LoggerFactory(new ILoggerProvider[]{new MicrosoftExtensionsLogProvider()}));
-            
-            //        .AddSingleton<IFileSystem, FileSystem>()
-            //            .AddSingleton<ISchedulerProvider, SchedulerProvider>()
-            //            .AddSingleton<IImageLoadingService, ImageLoadingService>()
-            //            .AddSingleton<IImageLocationService, ImageLocationService>()
-            //            .AddSingleton<IImageManagementService, ImageManagementService>()
-            //            .AddSingleton<IDataCache, DataCache>()
-            //            .AddSingleton<IEnvironmentService, EnvironmentService>()
-            //            .AddTransient<IApplicationViewModel, ApplicationViewModel>()
-            //            .AddTransient<IImageFolderViewModel, ImageFolderViewModel>()
-            //            .AddTransient<IImageViewModel, ImageViewModel>()
-            //            .AddTransient<ImageFolderViewControl>()
-            //            .AddTransient<ImageViewControl>()
-            //            .AddTransient<MainWindow>()
-            //            .AddTransient<IViewLocator, CustomViewLocator>();
-
-//            var mainWindow = Locator.Current.GetService<MainWindow>();
-//            mainWindow.ViewModel = Locator.Current.GetService<IApplicationViewModel>();
-//            mainWindow.Show();
-//            mainWindow.ViewModel.Initialize().Subscribe();
-
-            //            var serviceCollection = new ServiceCollection()
-//                            .AddLogging(builder => builder.AddSerilog())
-            //                .AddSingleton<IFileSystem, FileSystem>()
-            //                .AddSingleton<ISchedulerProvider, SchedulerProvider>()
-            //                .AddSingleton<IImageLoadingService, ImageLoadingService>()
-            //                .AddSingleton<IImageLocationService, ImageLocationService>()
-            //                .AddSingleton<IImageManagementService, ImageManagementService>()
-            //                .AddSingleton<IDataCache, DataCache>()
-            //                .AddSingleton<IEnvironmentService, EnvironmentService>()
-            //                .AddTransient<IApplicationViewModel, ApplicationViewModel>()
-            //                .AddTransient<IImageFolderViewModel, ImageFolderViewModel>()
-            //                .AddTransient<IImageViewModel, ImageViewModel>()
-            //                .AddTransient<ImageFolderViewControl>()
-            //                .AddTransient<ImageViewControl>()
-            //                .AddTransient<MainWindow>()
-            //                .AddTransient<IViewLocator, CustomViewLocator>();
-
-            //            var serviceProvider = serviceCollection.BuildServiceProvider();
-            //
-            //            using (Locator.SuppressResolverCallbackChangedNotifications())
-            //            {
-            //                Locator.SetLocator(new ServiceCollectionDependencyResolver(serviceCollection));
-            //                Locator.CurrentMutable.UseSerilogFullLogger(Log.Logger);    
-            //            }
-
-            //            var mainWindow = serviceProvider.GetService<MainWindow>();
-            //            mainWindow.ViewModel = serviceProvider.GetService<IApplicationViewModel>();
-            //            mainWindow.Show();
-            //            mainWindow.ViewModel.Initialize().Subscribe();
+            mainWindow.ViewModel = container.Resolve<IApplicationViewModel>();
+            mainWindow.Show();
+            mainWindow.ViewModel.Initialize().Subscribe();
         }
     }
 }
