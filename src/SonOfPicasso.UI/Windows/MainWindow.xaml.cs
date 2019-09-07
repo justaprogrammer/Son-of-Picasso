@@ -3,8 +3,8 @@ using System.IO.Abstractions;
 using System.Reactive.Disposables;
 using System.Windows;
 using System.Windows.Forms;
-using Microsoft.Extensions.Logging;
 using ReactiveUI;
+using Serilog;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.UI.Interfaces;
@@ -17,12 +17,12 @@ namespace SonOfPicasso.UI.Windows
     /// </summary>
     public partial class MainWindow : ReactiveWindow<IApplicationViewModel>
     {
-        private readonly ILogger<MainWindow> _logger;
+        private readonly ILogger _logger;
         private readonly IEnvironmentService _environmentService;
         private readonly IFileSystem _fileSystem;
         private readonly ISchedulerProvider _schedulerProvider;
 
-        public MainWindow(ILogger<MainWindow> logger, IEnvironmentService environmentService, IFileSystem fileSystem, ISchedulerProvider schedulerProvider)
+        public MainWindow(ILogger logger, IEnvironmentService environmentService, IFileSystem fileSystem, ISchedulerProvider schedulerProvider)
         {
             _logger = logger;
             _environmentService = environmentService;
@@ -55,7 +55,7 @@ namespace SonOfPicasso.UI.Windows
             if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 var selectedPath = dialog.SelectedPath;
-                _logger.LogDebug("Adding Folder {0}", selectedPath);
+                _logger.Debug("Adding Folder {0}", selectedPath);
 
                 ViewModel.AddFolder.Execute(selectedPath).Subscribe();
             }

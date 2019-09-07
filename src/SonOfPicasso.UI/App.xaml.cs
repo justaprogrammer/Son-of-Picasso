@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO.Abstractions;
+using System.Linq;
 using System.Windows;
-using Microsoft.Extensions.DependencyInjection;
+using Autofac;
+using Autofac.Builder;
+using AutofacSerilogIntegration;
 using ReactiveUI;
 using Serilog;
 using SonOfPicasso.Core.Interfaces;
@@ -16,6 +20,7 @@ using SonOfPicasso.UI.ViewModels;
 using SonOfPicasso.UI.Views;
 using SonOfPicasso.UI.Windows;
 using Splat;
+using Splat.Autofac;
 using Splat.Serilog;
 
 namespace SonOfPicasso.UI
@@ -41,32 +46,51 @@ namespace SonOfPicasso.UI
 
             Log.Logger = loggerConfiguration.CreateLogger();
 
-            var serviceCollection = new ServiceCollection()
-                .AddLogging(builder => builder.AddSerilog())
-                .AddSingleton<IFileSystem, FileSystem>()
-                .AddSingleton<ISchedulerProvider, SchedulerProvider>()
-                .AddSingleton<IImageLoadingService, ImageLoadingService>()
-                .AddSingleton<IImageLocationService, ImageLocationService>()
-                .AddSingleton<IImageManagementService, ImageManagementService>()
-                .AddSingleton<IDataCache, DataCache>()
-                .AddSingleton<IEnvironmentService, EnvironmentService>()
-                .AddTransient<IApplicationViewModel, ApplicationViewModel>()
-                .AddTransient<IImageFolderViewModel, ImageFolderViewModel>()
-                .AddTransient<IImageViewModel, ImageViewModel>()
-                .AddTransient<ImageFolderViewControl>()
-                .AddTransient<ImageViewControl>()
-                .AddTransient<MainWindow>()
-                .AddTransient<IViewLocator, CustomViewLocator>();
+            Akavache.Sqlite3.Registrations.Start("SonOfPicasso", () => SQLitePCL.Batteries_V2.Init());
 
-            var serviceProvider = serviceCollection.BuildServiceProvider();
+            var containerBuilder = new ContainerBuilder();
+            containerBuilder.RegisterType<ApplicationViewModel>()
+                .As<IApplicationViewModel>()
+                .InstancePerLifetimeScope();
 
-            CustomViewLocator.ServiceProvider = serviceProvider;
+            containerBuilder.RegisterType<MainWindow>()
+                .InstancePerLifetimeScope();
 
-            Locator.CurrentMutable = new SplatDependencyResolver(serviceCollection, serviceProvider);
-            Registration.Register(Log.Logger);
+            containerBuilder.RegisterType<EnvironmentService>()
+                .As<IEnvironmentService>()
+                .InstancePerLifetimeScope();
 
-            var mainWindow = serviceProvider.GetService<MainWindow>();
-            mainWindow.ViewModel = serviceProvider.GetService<IApplicationViewModel>();
+            containerBuilder.RegisterType<FileSystem>()
+                .As<IFileSystem>()
+                .InstancePerLifetimeScope();
+
+            containerBuilder.RegisterType<SchedulerProvider>()
+                .As<ISchedulerProvider>()
+                .InstancePerLifetimeScope();
+
+            containerBuilder.RegisterType<ImageManagementService>()
+                .As<IImageManagementService>()
+                .InstancePerLifetimeScope();
+
+            containerBuilder.RegisterType<ImageLocationService>()
+                .As<IImageLocationService>()
+                .InstancePerLifetimeScope();
+
+            containerBuilder.RegisterType<DataCache>()
+                .As<IDataCache>();
+
+            containerBuilder.RegisterType<ImageViewModel>()
+                .As<IImageViewModel>();
+
+            containerBuilder.RegisterType<ImageFolderViewModel>()
+                .As<IImageFolderViewModel>();
+
+            containerBuilder.RegisterLogger();
+
+            var container = containerBuilder.Build();
+            var mainWindow = container.Resolve<MainWindow>();
+
+            mainWindow.ViewModel = container.Resolve<IApplicationViewModel>();
             mainWindow.Show();
             mainWindow.ViewModel.Initialize().Subscribe();
         }

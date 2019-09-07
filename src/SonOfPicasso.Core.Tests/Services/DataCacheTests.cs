@@ -2,11 +2,13 @@ using System;
 using System.Linq;
 using System.Threading;
 using Akavache;
+using Autofac;
+using Autofac.Extras.NSubstitute;
 using FluentAssertions;
-using Microsoft.Extensions.Logging;
 using NSubstitute;
+using Serilog;
 using SonOfPicasso.Core.Models;
-using SonOfPicasso.Core.Tests.Extensions;
+using SonOfPicasso.Core.Services;
 using SonOfPicasso.Testing.Common;
 using SonOfPicasso.Testing.Common.Extensions;
 using Xunit;
@@ -14,284 +16,313 @@ using Xunit.Abstractions;
 
 namespace SonOfPicasso.Core.Tests.Services
 {
-    public class DataCacheTests : TestsBase<DataCacheTests>
+    public class DataCacheTests : TestsBase
     {
+        private const string DataCacheBlobCacheParameter = "blobCache";
+
         public DataCacheTests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {
         }
 
         [Fact]
-        public void CanInitialize()
-        {
-            Logger.LogDebug("CanInitialize");
-
-            var inMemoryBlobCache = new InMemoryBlobCache();
-            var dataCache = this.CreateDataCache(inMemoryBlobCache);
-        }
-
-        [Fact]
         public void CanSetUserSettings()
         {
-            Logger.LogDebug("CanSetUserSettings");
+            Logger.Debug("CanSetUserSettings");
+            using (var autoSub = new AutoSubstitute())
+            {
+                var autoResetEvent = new AutoResetEvent(false);
 
-            var autoResetEvent = new AutoResetEvent(false);
+                var inMemoryBlobCache = new InMemoryBlobCache();
+                autoSub.Provide<IBlobCache>(inMemoryBlobCache);
 
-            var inMemoryBlobCache = new InMemoryBlobCache();
-            var dataCache = this.CreateDataCache(inMemoryBlobCache);
+                var dataCache = autoSub.Resolve<DataCache>();
 
-            dataCache.SetUserSettings(new UserSettings())
-                .Subscribe(_ => autoResetEvent.Set());
+                dataCache.SetUserSettings(new UserSettings())
+                    .Subscribe(_ => autoResetEvent.Set());
 
-            autoResetEvent.WaitOne();
+                autoResetEvent.WaitOne();
 
-            string[] keys = null;
+                string[] keys = null;
 
-            inMemoryBlobCache.GetAllKeys()
-                .Subscribe(enumerable =>
-                {
-                    keys = enumerable.ToArray();
-                    autoResetEvent.Set();
-                });
+                inMemoryBlobCache.GetAllKeys()
+                    .Subscribe(enumerable =>
+                    {
+                        keys = enumerable.ToArray();
+                        autoResetEvent.Set();
+                    });
 
-            autoResetEvent.WaitOne();
+                autoResetEvent.WaitOne();
 
-            keys.Should().NotBeNull();
-            keys.Should().Contain("UserSettings");
+                keys.Should().NotBeNull();
+                keys.Should().Contain("UserSettings");
+            }
         }
 
         [Fact]
         public void CanRetrieveUserSettings()
         {
-            Logger.LogDebug("CanRetrieveUserSettings");
+            Logger.Debug("CanRetrieveUserSettings");
+            using (var autoSub = new AutoSubstitute())
+            {
+                var autoResetEvent = new AutoResetEvent(false);
 
-            var autoResetEvent = new AutoResetEvent(false);
+                var inMemoryBlobCache = new InMemoryBlobCache();
+                autoSub.Provide<IBlobCache>(inMemoryBlobCache);
 
-            var inMemoryBlobCache = new InMemoryBlobCache();
-            var dataCache = this.CreateDataCache(inMemoryBlobCache);
+                var dataCache = autoSub.Resolve<DataCache>();
 
-            var input = new UserSettings();
-            dataCache.SetUserSettings(input)
-                .Subscribe(_ => autoResetEvent.Set());
+                var input = new UserSettings();
+                dataCache.SetUserSettings(input)
+                    .Subscribe(_ => autoResetEvent.Set());
 
-            autoResetEvent.WaitOne();
+                autoResetEvent.WaitOne();
 
-            UserSettings output = null;
+                UserSettings output = null;
 
-            dataCache.GetUserSettings()
-                .Subscribe(settings =>
-                {
-                    output = settings;
-                    autoResetEvent.Set();
-                });
+                dataCache.GetUserSettings()
+                    .Subscribe(settings =>
+                    {
+                        output = settings;
+                        autoResetEvent.Set();
+                    });
 
-            autoResetEvent.WaitOne();
+                autoResetEvent.WaitOne();
 
-            output.Should().NotBeNull();
-            // output.Should().BeEquivalentTo(input);
+                output.Should().NotBeNull();
+                // output.Should().BeEquivalentTo(input);
+            }
         }
 
         [Fact]
         public void CanCreateUserSettings()
         {
-            Logger.LogDebug("CanCreateUserSettings");
+            Logger.Debug("CanCreateUserSettings");
+            using (var autoSub = new AutoSubstitute())
+            {
+                var autoResetEvent = new AutoResetEvent(false);
 
-            var autoResetEvent = new AutoResetEvent(false);
+                var inMemoryBlobCache = new InMemoryBlobCache();
+                autoSub.Provide<IBlobCache>(inMemoryBlobCache);
 
-            var inMemoryBlobCache = new InMemoryBlobCache();
-            var dataCache = this.CreateDataCache(inMemoryBlobCache);
+                var dataCache = autoSub.Resolve<DataCache>();
 
-            UserSettings userSettings = null;
+                UserSettings userSettings = null;
 
-            dataCache.GetUserSettings()
-                .Subscribe(settings =>
-                {
-                    userSettings = settings;
-                    autoResetEvent.Set();
-                });
+                dataCache.GetUserSettings()
+                    .Subscribe(settings =>
+                    {
+                        userSettings = settings;
+                        autoResetEvent.Set();
+                    });
 
-            autoResetEvent.WaitOne();
+                autoResetEvent.WaitOne();
 
-            userSettings.Should().NotBeNull();
+                userSettings.Should().NotBeNull();
+            }
         }
 
         [Fact]
         public void CanSetFolderList()
         {
-            Logger.LogDebug("CanSetUserSettings");
+            Logger.Debug("CanSetUserSettings");
+            using (var autoSub = new AutoSubstitute())
+            {
+                var autoResetEvent = new AutoResetEvent(false);
 
-            var autoResetEvent = new AutoResetEvent(false);
+                var inMemoryBlobCache = new InMemoryBlobCache();
+                autoSub.Provide<IBlobCache>(inMemoryBlobCache);
 
-            var inMemoryBlobCache = new InMemoryBlobCache();
-            var dataCache = this.CreateDataCache(inMemoryBlobCache);
+                var dataCache = autoSub.Resolve<DataCache>();
 
-            dataCache.SetFolderList(new string[0])
+                dataCache.SetFolderList(new string[0])
                 .Subscribe(_ => autoResetEvent.Set());
 
-            autoResetEvent.WaitOne();
+                autoResetEvent.WaitOne();
 
-            string[] keys = null;
+                string[] keys = null;
 
-            inMemoryBlobCache.GetAllKeys()
-                .Subscribe(enumerable =>
-                {
-                    keys = enumerable.ToArray();
-                    autoResetEvent.Set();
-                });
+                inMemoryBlobCache.GetAllKeys()
+                    .Subscribe(enumerable =>
+                    {
+                        keys = enumerable.ToArray();
+                        autoResetEvent.Set();
+                    });
 
-            autoResetEvent.WaitOne();
+                autoResetEvent.WaitOne();
 
-            keys.Should().NotBeNull();
-            keys.Should().Contain("ImageFolders");
+                keys.Should().NotBeNull();
+                keys.Should().Contain("ImageFolders");
+            }
         }
 
         [Fact]
         public void CanRetrieveFolderList()
         {
-            Logger.LogDebug("CanRetrieveUserSettings");
+            Logger.Debug("CanRetrieveUserSettings");
+            using (var autoSub = new AutoSubstitute())
+            {
+                var autoResetEvent = new AutoResetEvent(false);
 
-            var autoResetEvent = new AutoResetEvent(false);
+                var inMemoryBlobCache = new InMemoryBlobCache();
+                autoSub.Provide<IBlobCache>(inMemoryBlobCache);
 
-            var inMemoryBlobCache = new InMemoryBlobCache();
-            var dataCache = this.CreateDataCache(inMemoryBlobCache);
+                var dataCache = autoSub.Resolve<DataCache>();
 
-            var input = Faker.Lorem.Words();
+                var input = Faker.Lorem.Words();
 
-            dataCache.SetFolderList(input)
-                .Subscribe(_ => autoResetEvent.Set());
+                dataCache.SetFolderList(input)
+                    .Subscribe(_ => autoResetEvent.Set());
 
-            autoResetEvent.WaitOne();
+                autoResetEvent.WaitOne();
 
-            string[] output = null;
+                string[] output = null;
 
-            dataCache.GetFolderList()
-                .Subscribe(folders =>
-                {
-                    output = folders;
-                    autoResetEvent.Set();
-                });
+                dataCache.GetFolderList()
+                    .Subscribe(folders =>
+                    {
+                        output = folders;
+                        autoResetEvent.Set();
+                    });
 
-            autoResetEvent.WaitOne();
+                autoResetEvent.WaitOne();
 
-            output.Should().NotBeNull();
-            output.Should().BeEquivalentTo(input);
+                output.Should().NotBeNull();
+                output.Should().BeEquivalentTo(input);
+            }
         }
 
         [Fact]
         public void CanCreateFolderList()
         {
-            Logger.LogDebug("CanCreateUserSettings");
+            Logger.Debug("CanCreateUserSettings");
+            using (var autoSub = new AutoSubstitute())
+            {
+                var autoResetEvent = new AutoResetEvent(false);
 
-            var autoResetEvent = new AutoResetEvent(false);
+                var inMemoryBlobCache = new InMemoryBlobCache();
+                autoSub.Provide<IBlobCache>(inMemoryBlobCache);
 
-            var inMemoryBlobCache = new InMemoryBlobCache();
-            var dataCache = this.CreateDataCache(inMemoryBlobCache);
+                var dataCache = autoSub.Resolve<DataCache>();
 
-            string[] output = null;
+                string[] output = null;
 
-            dataCache.GetFolderList()
-                .Subscribe(folders =>
-                {
-                    output = folders;
-                    autoResetEvent.Set();
-                });
+                dataCache.GetFolderList()
+                    .Subscribe(folders =>
+                    {
+                        output = folders;
+                        autoResetEvent.Set();
+                    });
 
-            autoResetEvent.WaitOne();
+                autoResetEvent.WaitOne();
 
-            output.Should().NotBeNull();
-            output.Should().BeEmpty();
+                output.Should().NotBeNull();
+                output.Should().BeEmpty();
+            }
         }
 
         [Fact]
         public void CanSetImageFolder()
         {
-            Logger.LogDebug("CanSetUserSettings");
+            Logger.Debug("CanSetUserSettings");
+            using (var autoSub = new AutoSubstitute())
+            {
+                var autoResetEvent = new AutoResetEvent(false);
 
-            var autoResetEvent = new AutoResetEvent(false);
+                var inMemoryBlobCache = new InMemoryBlobCache();
+                autoSub.Provide<IBlobCache>(inMemoryBlobCache);
 
-            var inMemoryBlobCache = new InMemoryBlobCache();
-            var dataCache = this.CreateDataCache(inMemoryBlobCache);
+                var dataCache = autoSub.Resolve<DataCache>();
 
-            var imageFolder = DataGenerator.ImageFolderFaker.Generate();
+                var imageFolder = DataGenerator.ImageFolderFaker.Generate();
 
-            dataCache.SetFolder(imageFolder)
-                .Subscribe(_ => autoResetEvent.Set());
+                dataCache.SetFolder(imageFolder)
+                    .Subscribe(_ => autoResetEvent.Set());
 
-            autoResetEvent.WaitOne();
+                autoResetEvent.WaitOne();
 
-            string[] keys = null;
+                string[] keys = null;
 
-            inMemoryBlobCache.GetAllKeys()
-                .Subscribe(enumerable =>
-                {
-                    keys = enumerable.ToArray();
-                    autoResetEvent.Set();
-                });
+                inMemoryBlobCache.GetAllKeys()
+                    .Subscribe(enumerable =>
+                    {
+                        keys = enumerable.ToArray();
+                        autoResetEvent.Set();
+                    });
 
-            autoResetEvent.WaitOne();
+                autoResetEvent.WaitOne();
 
-            keys.Should().NotBeNull();
-            keys.Should().Contain($"ImageFolder {imageFolder.Path}");
+                keys.Should().NotBeNull();
+                keys.Should().Contain($"ImageFolder {imageFolder.Path}");
+            }
         }
 
         [Fact]
         public void CanRetrieveImageFolder()
         {
-            Logger.LogDebug("CanRetrieveUserSettings");
+            Logger.Debug("CanRetrieveUserSettings");
+            using (var autoSub = new AutoSubstitute())
+            {
+                var autoResetEvent = new AutoResetEvent(false);
 
-            var autoResetEvent = new AutoResetEvent(false);
+                var inMemoryBlobCache = new InMemoryBlobCache();
+                autoSub.Provide<IBlobCache>(inMemoryBlobCache);
 
-            var inMemoryBlobCache = new InMemoryBlobCache();
-            var dataCache = this.CreateDataCache(inMemoryBlobCache);
+                var dataCache = autoSub.Resolve<DataCache>();
 
-            var input = DataGenerator.ImageFolderFaker.Generate();
+                var input = DataGenerator.ImageFolderFaker.Generate();
 
-            dataCache.SetFolder(input)
-                .Subscribe(_ => autoResetEvent.Set());
+                dataCache.SetFolder(input)
+                    .Subscribe(_ => autoResetEvent.Set());
 
-            autoResetEvent.WaitOne();
+                autoResetEvent.WaitOne();
 
-            ImageFolderModel output = null;
+                ImageFolderModel output = null;
 
-            dataCache.GetFolder(input.Path)
-                .Subscribe(folder =>
-                {
-                    output = folder;
-                    autoResetEvent.Set();
-                });
+                dataCache.GetFolder(input.Path)
+                    .Subscribe(folder =>
+                    {
+                        output = folder;
+                        autoResetEvent.Set();
+                    });
 
-            autoResetEvent.WaitOne();
+                autoResetEvent.WaitOne();
 
-            output.Should().NotBeNull();
-            output.Should().BeEquivalentTo(input);
+                output.Should().NotBeNull();
+                output.Should().BeEquivalentTo(input);
+            }
         }
 
         [Fact]
         public void CanCreateImageFolder()
         {
-            Logger.LogDebug("CanCreateUserSettings");
+            Logger.Debug("CanCreateUserSettings");
+            using (var autoSub = new AutoSubstitute())
+            {
+                var autoResetEvent = new AutoResetEvent(false);
 
-            var autoResetEvent = new AutoResetEvent(false);
+                var inMemoryBlobCache = new InMemoryBlobCache();
+                autoSub.Provide<IBlobCache>(inMemoryBlobCache);
 
-            var inMemoryBlobCache = new InMemoryBlobCache();
-            var dataCache = this.CreateDataCache(inMemoryBlobCache);
+                var dataCache = autoSub.Resolve<DataCache>();
 
-            ImageFolderModel output = null;
+                ImageFolderModel output = null;
 
-            var path = Faker.System.DirectoryPathWindows();
+                var path = Faker.System.DirectoryPathWindows();
 
-            dataCache.GetFolder(path)
-                .Subscribe(folder =>
-                {
-                    output = folder;
-                    autoResetEvent.Set();
-                });
+                dataCache.GetFolder(path)
+                    .Subscribe(folder =>
+                    {
+                        output = folder;
+                        autoResetEvent.Set();
+                    });
 
-            autoResetEvent.WaitOne();
+                autoResetEvent.WaitOne();
 
-            output.Should().NotBeNull();
-            output.Path.Should().Be(path);
-            output.Images.Should().BeEmpty();
+                output.Should().NotBeNull();
+                output.Path.Should().Be(path);
+                output.Images.Should().BeEmpty();
+            }
         }
     }
 }

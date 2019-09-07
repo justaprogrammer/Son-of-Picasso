@@ -6,7 +6,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using Bogus;
 using ExifLibrary;
-using Microsoft.Extensions.Logging;
+using Serilog;
 using Skybrud.Colors;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Tools.Extensions;
@@ -17,11 +17,11 @@ namespace SonOfPicasso.Tools.Services
     {
         protected internal static Faker Faker = new Faker();
 
-        private readonly ILogger<ToolsService> _logger;
+        private readonly ILogger _logger;
         private readonly IFileSystem _fileSystem;
         private readonly IDataCache _dataCache;
 
-        public ToolsService(ILogger<ToolsService> logger, IFileSystem fileSystem, IDataCache dataCache)
+        public ToolsService(ILogger logger, IFileSystem fileSystem, IDataCache dataCache)
         {
             _logger = logger;
             _fileSystem = fileSystem;
@@ -30,7 +30,7 @@ namespace SonOfPicasso.Tools.Services
 
         public IObservable<string> GenerateImages(int count, string fileRoot)
         {
-            _logger.LogDebug("GenerateImages {count} {fileRoot}", count, fileRoot);
+            _logger.Debug("GenerateImages {count} {fileRoot}", count, fileRoot);
 
             return Observable.Generate(
                 initialState: 0,
@@ -53,7 +53,7 @@ namespace SonOfPicasso.Tools.Services
 
         private void GenerateImage(string path, int width, int height, DateTime time)
         {
-            _logger.LogDebug("GenerateImage {path} {width} {height}", path, width, height);
+            _logger.Debug("GenerateImage {path} {width} {height}", path, width, height);
 
             var cellHeight = height / 3;
             var cellWidth = width / 3;

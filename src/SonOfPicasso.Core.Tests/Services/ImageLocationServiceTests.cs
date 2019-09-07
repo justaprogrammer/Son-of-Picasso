@@ -4,10 +4,12 @@ using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Threading;
+using Autofac;
+using Autofac.Extras.NSubstitute;
 using FluentAssertions;
-using Microsoft.Extensions.Logging;
 using MoreLinq;
-using SonOfPicasso.Core.Tests.Extensions;
+using SonOfPicasso.Core.Scheduling;
+using SonOfPicasso.Core.Services;
 using SonOfPicasso.Testing.Common;
 using SonOfPicasso.Testing.Common.Extensions;
 using SonOfPicasso.Testing.Common.Scheduling;
@@ -16,64 +18,61 @@ using Xunit.Abstractions;
 
 namespace SonOfPicasso.Core.Tests.Services
 {
-    public class ImageLocationServiceTests : TestsBase<ImageLocationServiceTests>
+    public class ImageLocationServiceTests : TestsBase
     {
         public ImageLocationServiceTests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {
         }
 
-        [Fact]
-        public void CanInitialize()
-        {
-            Logger.LogDebug("CanInitialize");
-            var imageLocationService = this.CreateImageLocationService();
-        }
-
         [Fact(Timeout = 1000)]
         public void CanGetImages()
         {
-            Logger.LogDebug("CanGetImages");
-
-            var directory = Faker.System.DirectoryPathWindows();
-
-            var subDirectory = Path.Join(directory, Faker.Random.Word());
-
-            var mockFileSystem = new MockFileSystem();
-
-            var files = new[] { "jpg", "jpeg", "png", "tiff", "tif", "bmp" }
-                .Select(ext => Path.Join(subDirectory, Faker.System.FileName(ext)))
-                .ToArray();
-
-            var otherFiles = new[] { "txt", "doc" }
-                .Select(ext => Path.Join(subDirectory, Faker.System.FileName(ext)))
-                .ToArray();
-
-            foreach (var file in files.Concat(otherFiles))
+            Logger.Debug("CanGetImages");
+            using (var autoSub = new AutoSubstitute())
             {
-                mockFileSystem.AddFile(file, new MockFileData(new byte[0]));
-            }
+                var directory = Faker.System.DirectoryPathWindows();
 
-            var autoResetEvent = new AutoResetEvent(false);
+                var subDirectory = Path.Combine(directory, Faker.Random.Word());
 
-            string[] imagePaths = null;
+                var mockFileSystem = new MockFileSystem();
+                autoSub.Provide<IFileSystem>(mockFileSystem);
 
-            var testSchedulerProvider = new TestSchedulerProvider();
+                var files = new[] { "jpg", "jpeg", "png", "tiff", "tif", "bmp" }
+                    .Select(ext => Path.Combine(subDirectory, Faker.System.FileName(ext)))
+                    .ToArray();
 
-            var imageLocationService = this.CreateImageLocationService(mockFileSystem, testSchedulerProvider);
-            imageLocationService.GetImages(directory)
-                .Subscribe(paths =>
+                var otherFiles = new[] { "txt", "doc" }
+                    .Select(ext => Path.Combine(subDirectory, Faker.System.FileName(ext)))
+                    .ToArray();
+
+                foreach (var file in files.Concat(otherFiles))
                 {
-                    imagePaths = paths;
-                    autoResetEvent.Set();
-                });
+                    mockFileSystem.AddFile(file, new MockFileData(new byte[0]));
+                }
 
-            testSchedulerProvider.TaskPool.AdvanceBy(1);
-            autoResetEvent.WaitOne();
+                var autoResetEvent = new AutoResetEvent(false);
 
-            imagePaths.Should().NotBeNull();
-            imagePaths.Select(fileInfo => fileInfo)
-                .Should().BeEquivalentTo(files);
+                string[] imagePaths = null;
+
+                var testSchedulerProvider = new TestSchedulerProvider();
+                autoSub.Provide<ISchedulerProvider>(testSchedulerProvider);
+
+                var imageLocationService = autoSub.Resolve<ImageLocationService>();
+                imageLocationService.GetImages(directory)
+                    .Subscribe(paths =>
+                    {
+                        imagePaths = paths;
+                        autoResetEvent.Set();
+                    });
+
+                testSchedulerProvider.TaskPool.AdvanceBy(1);
+                autoResetEvent.WaitOne();
+
+                imagePaths.Should().NotBeNull();
+                imagePaths.Select(fileInfo => fileInfo)
+                    .Should().BeEquivalentTo(files);
+            }
         }
     }
 }

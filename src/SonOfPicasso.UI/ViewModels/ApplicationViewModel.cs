@@ -3,10 +3,10 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using Autofac;
 using DynamicData;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using ReactiveUI;
+using Serilog;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.UI.Interfaces;
@@ -15,20 +15,23 @@ namespace SonOfPicasso.UI.ViewModels
 {
     public class ApplicationViewModel : ReactiveObject, IApplicationViewModel
     {
-        private readonly ILogger<ApplicationViewModel> _logger;
+        private readonly ILogger _logger;
         private readonly ISchedulerProvider _schedulerProvider;
         private readonly IImageManagementService _imageManagementService;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly Func<IImageViewModel> _imageViewModelFactory;
+        private readonly Func<IImageFolderViewModel> _imageFolderViewModelFactory;
 
-        public ApplicationViewModel(ILogger<ApplicationViewModel> logger,
+        public ApplicationViewModel(ILogger logger,
             ISchedulerProvider schedulerProvider,
             IImageManagementService imageManagementService,
-            IServiceProvider serviceProvider)
+            Func<IImageViewModel> imageViewModelFactory,
+            Func<IImageFolderViewModel> imageFolderViewModelFactory)
         {
             _logger = logger;
             _schedulerProvider = schedulerProvider;
             _imageManagementService = imageManagementService;
-            _serviceProvider = serviceProvider;
+            _imageViewModelFactory = imageViewModelFactory;
+            _imageFolderViewModelFactory = imageFolderViewModelFactory;
 
             Images = new ObservableCollection<IImageViewModel>();
             ImageFolders = new ObservableCollection<IImageFolderViewModel>();
@@ -43,12 +46,12 @@ namespace SonOfPicasso.UI.ViewModels
 
         public IObservable<Unit> Initialize()
         {
-            _logger.LogDebug("Initializing");
+            _logger.Debug("Initializing");
 
             var getImagesObservable = _imageManagementService.GetAllImages()
                 .Select(model =>
                 {
-                    var imageViewModel = _serviceProvider.GetService<IImageViewModel>();
+                    var imageViewModel = _imageViewModelFactory();
                     imageViewModel.Initialize(model);
                     return imageViewModel;
                 })
@@ -63,7 +66,7 @@ namespace SonOfPicasso.UI.ViewModels
             var getImageFoldersObservable = _imageManagementService.GetAllImageFolders()
                 .Select(model =>
                 {
-                    var imageFolderViewModel = _serviceProvider.GetService<IImageFolderViewModel>();
+                    var imageFolderViewModel = _imageFolderViewModelFactory();
                     imageFolderViewModel.Initialize(model);
                     return imageFolderViewModel;
                 })
@@ -85,12 +88,12 @@ namespace SonOfPicasso.UI.ViewModels
                 .Select(tuple =>
                 {
                     var (imageFolderModel, imageModels) = tuple;
-                    var imageFolderViewModel = _serviceProvider.GetService<IImageFolderViewModel>();
+                    var imageFolderViewModel = _imageFolderViewModelFactory();
                     imageFolderViewModel.Initialize(imageFolderModel);
 
                     var imageViewModels = imageModels.Select(model =>
                     {
-                        var imageViewModel = _serviceProvider.GetService<IImageViewModel>();
+                        var imageViewModel = _imageViewModelFactory();
                         imageViewModel.Initialize(model);
                         return imageViewModel;
                     }).ToArray();
