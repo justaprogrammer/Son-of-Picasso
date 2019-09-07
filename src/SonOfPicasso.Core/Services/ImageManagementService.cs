@@ -1,25 +1,21 @@
-﻿using System;
-using System.Linq;
-using System.Reactive;
-using System.Reactive.Linq;
-using Serilog;
+﻿using Serilog;
 using SonOfPicasso.Core.Interfaces;
-using SonOfPicasso.Core.Models;
+using SonOfPicasso.Data;
 
 namespace SonOfPicasso.Core.Services
 {
     public class ImageManagementService : IImageManagementService
     {
-        private readonly IDataCache _dataCache;
+        private readonly IDataContext _dataContext;
         private readonly IImageLocationService _imageLocationService;
         private readonly ILogger _logger;
 
-        public ImageManagementService(IDataCache dataCache,
+        public ImageManagementService(IDataContext dataContext,
             IImageLocationService imageLocationService,
             ILogger logger)
         {
-            _dataCache = dataCache ?? throw new ArgumentNullException(nameof(dataCache));
-            _imageLocationService = imageLocationService ?? throw new ArgumentNullException(nameof(imageLocationService));
+            _dataContext = dataContext;
+            _imageLocationService = imageLocationService;
             _logger = logger;
         }
 
