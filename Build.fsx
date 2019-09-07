@@ -57,6 +57,7 @@ Target.create "Test" (fun _ ->
     [
         ("SonOfPicasso.Core.Tests", "net472");
         ("SonOfPicasso.UI.Tests", "net472");
+        ("SonOfPicasso.Data.Tests", "net472");
     ]
     |> Seq.iter (fun (proj, framework) ->
         (
@@ -81,6 +82,7 @@ Target.create "Coverage" (fun _ ->
     [
         ("SonOfPicasso.Core.Tests", "net472", "coretest");
         ("SonOfPicasso.UI.Tests", "net472", "uitest");
+        ("SonOfPicasso.Data.Tests", "net472", "datatest");
     ]
     |> Seq.iter (fun (proj, framework, flag) -> 
             let dllPath = sprintf "src\\%s\\bin\\Release\\%s\\%s.dll" proj framework proj
