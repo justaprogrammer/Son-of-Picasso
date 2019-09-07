@@ -7,7 +7,6 @@ install:
   - choco install dotnetcore-sdk --version 3.0.100-preview9-014004 --pre 
   - choco install codecov --no-progress --confirm
   - choco install gitversion.portable --no-progress --confirm
-  - git submodule update --init
 cache:
   - '%LOCALAPPDATA%\Temp\Chocolatey -> appveyor.yml'
   - '.fake -> Build.fsx'
