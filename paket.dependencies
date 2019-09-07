@@ -23,6 +23,5 @@ group FakeBuildResources
   storage: packages
 
   nuget xunit.runner.console
-  nuget OpenCover
   nuget NuGet.CommandLine
   nuget BCC-MSBuildLog == 1.0.1
