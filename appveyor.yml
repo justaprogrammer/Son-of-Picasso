@@ -10,6 +10,8 @@ cache:
   - C:\ProgramData\chocolatey\bin -> appveyor.yml
   - C:\ProgramData\chocolatey\lib -> appveyor.yml
   - '.fake -> Build.fsx'
+  - 'packages\cache -> paket.dependencies'
+  - 'packages\cache -> paket.lock'
 before_build:
   - ps: gitversion /output buildserver 
 build_script:
