@@ -33,13 +33,6 @@ Target.create "Build" (fun _ ->
   |> Proc.run
   |> ignore
 
-  let logger : MSBuildDistributedLoggerConfig = { 
-        ClassName = None ; 
-        AssemblyPath = "packages\\fakebuildresources\\BCC-MSBuildLog\\tools\\net472\\BCCMSBuildLog.dll" ;
-        Parameters = None
-    }
-
-
   let configuration: (DotNet.BuildOptions -> DotNet.BuildOptions)
         = (fun t -> {t with
                         Configuration = DotNet.BuildConfiguration.Release})
