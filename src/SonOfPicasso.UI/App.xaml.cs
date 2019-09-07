@@ -6,12 +6,14 @@ using System.Windows;
 using Autofac;
 using Autofac.Builder;
 using AutofacSerilogIntegration;
+using Microsoft.EntityFrameworkCore;
 using ReactiveUI;
 using Serilog;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Logging;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Core.Services;
+using SonOfPicasso.Data;
 using SonOfPicasso.UI.Injection;
 using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.Scheduling;
@@ -30,6 +32,8 @@ namespace SonOfPicasso.UI
     /// </summary>
     public partial class App : Application
     {
+        private const string ApplicationName = "SonOfPicasso";
+
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
@@ -46,7 +50,7 @@ namespace SonOfPicasso.UI
 
             Log.Logger = loggerConfiguration.CreateLogger();
 
-            Akavache.Sqlite3.Registrations.Start("SonOfPicasso", () => SQLitePCL.Batteries_V2.Init());
+            Akavache.BlobCache.ApplicationName = ApplicationName;
 
             var containerBuilder = new ContainerBuilder();
             containerBuilder.RegisterType<ApplicationViewModel>()
@@ -76,6 +80,19 @@ namespace SonOfPicasso.UI
                 .As<IImageLocationService>()
                 .InstancePerLifetimeScope();
 
+            containerBuilder.Register(context =>
+            {
+                var environmentService = context.Resolve<IEnvironmentService>();
+                var fileSystem = context.Resolve<IFileSystem>();
+
+                return BuildDbContextOptions(environmentService, fileSystem);
+            }).As<DbContextOptions<DataContext>>()
+                .InstancePerLifetimeScope();
+
+            containerBuilder.RegisterType<DataContext>()
+                .As<DataContext>()
+                .As<IDataContext>();
+
             containerBuilder.RegisterType<DataCache>()
                 .As<IDataCache>();
 
@@ -88,11 +105,29 @@ namespace SonOfPicasso.UI
             containerBuilder.RegisterLogger();
 
             var container = containerBuilder.Build();
+
+            SQLitePCL.Batteries_V2.Init();
+
+            var dataContext = container.Resolve<DataContext>();
+            dataContext.Database.EnsureCreated();
+            dataContext.Database.Migrate();
+
             var mainWindow = container.Resolve<MainWindow>();
 
             mainWindow.ViewModel = container.Resolve<IApplicationViewModel>();
             mainWindow.Show();
             mainWindow.ViewModel.Initialize().Subscribe();
+        }
+
+        internal static DbContextOptions<DataContext> BuildDbContextOptions(IEnvironmentService environmentService, IFileSystem fileSystem)
+        {
+            var appDataPath = environmentService.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var databasePath = fileSystem.Path.Combine(appDataPath, ApplicationName, $"{ApplicationName}.db");
+
+            var dbContextOptionsBuilder = new DbContextOptionsBuilder<DataContext>();
+            dbContextOptionsBuilder.UseSqlite($"Data Source={databasePath}");
+
+            return dbContextOptionsBuilder.Options;
         }
     }
 }
