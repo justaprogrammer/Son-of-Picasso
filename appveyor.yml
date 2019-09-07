@@ -10,7 +10,6 @@ install:
   - git submodule update --init
 cache:
   - '%LOCALAPPDATA%\Temp\Chocolatey -> appveyor.yml'
-  - '%USERPROFILE%\.dotnet\tools -> appveyor.yml'
   - '.fake -> Build.fsx'
   - 'packages\cache -> paket.dependencies'
   - 'packages\cache -> paket.lock'
