@@ -110,11 +110,11 @@
     <Reference Include="ReactiveUI, Version=10.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\ReactiveUI.10.0.1\lib\net461\ReactiveUI.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI.Testing, Version=9.8.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\ReactiveUI.Testing.9.8.15\lib\net461\ReactiveUI.Testing.dll</HintPath>
+    <Reference Include="ReactiveUI.Testing, Version=10.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\ReactiveUI.Testing.10.0.1\lib\net461\ReactiveUI.Testing.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI.WPF, Version=9.8.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\ReactiveUI.WPF.9.8.15\lib\net461\ReactiveUI.WPF.dll</HintPath>
+    <Reference Include="ReactiveUI.WPF, Version=10.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\ReactiveUI.WPF.10.0.1\lib\net461\ReactiveUI.WPF.dll</HintPath>
     </Reference>
     <Reference Include="Serilog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Serilog.2.8.0\lib\net46\Serilog.dll</HintPath>
@@ -189,31 +189,31 @@
       <HintPath>..\..\packages\System.Reactive.4.1.6\lib\net46\System.Reactive.dll</HintPath>
     </Reference>
     <Reference Include="System.Reactive.Core, Version=3.0.3000.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.Reactive.Core.4.1.2\lib\net46\System.Reactive.Core.dll</HintPath>
+      <HintPath>..\..\packages\System.Reactive.Core.4.1.6\lib\net46\System.Reactive.Core.dll</HintPath>
     </Reference>
     <Reference Include="System.Reactive.Experimental, Version=3.0.3000.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.Reactive.Experimental.4.1.2\lib\net46\System.Reactive.Experimental.dll</HintPath>
+      <HintPath>..\..\packages\System.Reactive.Experimental.4.1.6\lib\net46\System.Reactive.Experimental.dll</HintPath>
     </Reference>
     <Reference Include="System.Reactive.Interfaces, Version=3.0.3000.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.Reactive.Interfaces.4.1.2\lib\net46\System.Reactive.Interfaces.dll</HintPath>
+      <HintPath>..\..\packages\System.Reactive.Interfaces.4.1.6\lib\net46\System.Reactive.Interfaces.dll</HintPath>
     </Reference>
     <Reference Include="System.Reactive.Linq, Version=3.0.3000.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.Reactive.Linq.4.1.2\lib\net46\System.Reactive.Linq.dll</HintPath>
+      <HintPath>..\..\packages\System.Reactive.Linq.4.1.6\lib\net46\System.Reactive.Linq.dll</HintPath>
     </Reference>
     <Reference Include="System.Reactive.PlatformServices, Version=3.0.3000.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.Reactive.PlatformServices.4.1.2\lib\net46\System.Reactive.PlatformServices.dll</HintPath>
+      <HintPath>..\..\packages\System.Reactive.PlatformServices.4.1.6\lib\net46\System.Reactive.PlatformServices.dll</HintPath>
     </Reference>
     <Reference Include="System.Reactive.Providers, Version=3.0.3000.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.Reactive.Providers.4.1.2\lib\net46\System.Reactive.Providers.dll</HintPath>
+      <HintPath>..\..\packages\System.Reactive.Providers.4.1.6\lib\net46\System.Reactive.Providers.dll</HintPath>
     </Reference>
     <Reference Include="System.Reactive.Runtime.Remoting, Version=3.0.3000.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.Reactive.Runtime.Remoting.4.1.2\lib\net46\System.Reactive.Runtime.Remoting.dll</HintPath>
+      <HintPath>..\..\packages\System.Reactive.Runtime.Remoting.4.1.6\lib\net46\System.Reactive.Runtime.Remoting.dll</HintPath>
     </Reference>
     <Reference Include="System.Reactive.Windows.Forms, Version=3.0.3000.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.Reactive.Windows.Forms.4.1.2\lib\net46\System.Reactive.Windows.Forms.dll</HintPath>
+      <HintPath>..\..\packages\System.Reactive.Windows.Forms.4.1.6\lib\net46\System.Reactive.Windows.Forms.dll</HintPath>
     </Reference>
     <Reference Include="System.Reactive.Windows.Threading, Version=3.0.3000.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.Reactive.Windows.Threading.4.1.2\lib\net46\System.Reactive.Windows.Threading.dll</HintPath>
+      <HintPath>..\..\packages\System.Reactive.Windows.Threading.4.1.6\lib\net46\System.Reactive.Windows.Threading.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime, Version=4.1.1.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\..\packages\System.Runtime.4.3.1\lib\net462\System.Runtime.dll</HintPath>
