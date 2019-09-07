@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO.Abstractions;
 using System.Reactive.Linq;
+using Autofac;
 using FluentColorConsole;
 using McMaster.Extensions.CommandLineUtils;
-using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Logging;
@@ -81,17 +81,35 @@ namespace SonOfPicasso.Tools
 
                     Log.Logger = loggerConfiguration.CreateLogger();
 
-                    var serviceCollection = new ServiceCollection()
-                        .AddLogging(builder => builder.AddSerilog())
-                        .AddSingleton<IFileSystem, FileSystem>()
-                        .AddSingleton<ISchedulerProvider, ConsoleSchedulerProvider>()
-                        .AddSingleton<IImageLocationService, ImageLocationService>()
-                        .AddSingleton<IDataCache, DataCache>()
-                        .AddSingleton<IEnvironmentService, EnvironmentService>()
-                        .AddSingleton<ToolsService>();
+                    var containerBuilder = new ContainerBuilder();
 
-                    var serviceProvider = serviceCollection.BuildServiceProvider();
-                    _toolsService = serviceProvider.GetService<ToolsService>();
+                    containerBuilder.RegisterType<EnvironmentService>()
+                        .As<IEnvironmentService>()
+                        .InstancePerLifetimeScope();
+
+                    containerBuilder.RegisterType<FileSystem>()
+                        .As<IFileSystem>()
+                        .InstancePerLifetimeScope();
+
+                    containerBuilder.RegisterType<ConsoleSchedulerProvider>()
+                        .As<ISchedulerProvider>()
+                        .InstancePerLifetimeScope();
+
+                    containerBuilder.RegisterType<ImageManagementService>()
+                        .As<IImageManagementService>()
+                        .InstancePerLifetimeScope();
+
+                    containerBuilder.RegisterType<ImageLocationService>()
+                        .As<IImageLocationService>()
+                        .InstancePerLifetimeScope();
+
+                    containerBuilder.RegisterType<DataCache>()
+                        .As<IDataCache>();
+
+                    containerBuilder.RegisterType<ToolsService>();
+
+                    var container = containerBuilder.Build();
+                    _toolsService = container.Resolve<ToolsService>();
                 }
 
                 return _toolsService;

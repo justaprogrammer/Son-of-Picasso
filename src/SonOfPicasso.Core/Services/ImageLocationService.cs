@@ -4,7 +4,7 @@ using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
-using Microsoft.Extensions.Logging;
+using Serilog;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
 
@@ -16,9 +16,9 @@ namespace SonOfPicasso.Core.Services
 
         private readonly IFileSystem _fileSystem;
         private readonly ISchedulerProvider _schedulerProvider;
-        private readonly ILogger<ImageLocationService> _logger;
+        private readonly ILogger _logger;
 
-        public ImageLocationService(ILogger<ImageLocationService> logger, IFileSystem fileSystem, ISchedulerProvider schedulerProvider)
+        public ImageLocationService(ILogger logger, IFileSystem fileSystem, ISchedulerProvider schedulerProvider)
         {
             _logger = logger;
             _fileSystem = fileSystem;
@@ -29,7 +29,7 @@ namespace SonOfPicasso.Core.Services
         {
             return Observable.Start(() =>
             {
-                _logger.LogDebug("GetImages {Path}", path);
+                _logger.Debug("GetImages {Path}", path);
 
                 var fileInfoBases = Array.Empty<string>();
                 try
@@ -42,7 +42,7 @@ namespace SonOfPicasso.Core.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error GetImages {Path}", path);
+                    _logger.Error(ex, "Error GetImages {Path}", path);
                 }
 
                 return fileInfoBases;

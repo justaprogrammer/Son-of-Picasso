@@ -55,7 +55,7 @@ Target.create "Build" (fun _ ->
 
 Target.create "Test" (fun _ ->
     [
-        ("SonOfPicasso.Core.Tests", "netcoreapp2.1");
+        ("SonOfPicasso.Core.Tests", "net472");
         ("SonOfPicasso.UI.Tests", "net472");
     ]
     |> Seq.iter (fun (proj, framework) ->
@@ -77,11 +77,12 @@ Target.create "Test" (fun _ ->
         ))
 )
 
-Target.create "Core Coverage" (fun _ ->
+Target.create "Coverage" (fun _ ->
     [
-        ("SonOfPicasso.Core.Tests", "netcoreapp2.1");
+        ("SonOfPicasso.Core.Tests", "net472", "coretest");
+        ("SonOfPicasso.UI.Tests", "net472", "uitest");
     ]
-    |> Seq.iter (fun (proj, framework) -> 
+    |> Seq.iter (fun (proj, framework, flag) -> 
             let dllPath = sprintf "src\\%s\\bin\\Release\\%s\\%s.dll" proj framework proj
             let projectPath = sprintf "src\\%s\\%s.csproj" proj proj
             let reportPath = sprintf "reports/%s-%s.coverage.xml" proj framework
@@ -97,42 +98,12 @@ Target.create "Core Coverage" (fun _ ->
             Trace.publish ImportData.BuildArtifact reportPath
 
             if isAppveyor then
-                CreateProcess.fromRawCommandLine "codecov" (sprintf "-f \"%s\" --flag coretest" reportPath)
+                CreateProcess.fromRawCommandLine "codecov" (sprintf "-f \"%s\" --flag %s" reportPath flag)
                 |> Proc.run
                 |> ignore
         )
 )
 
-Target.create "Coverage" (fun _ ->
-    [
-        ("SonOfPicasso.UI.Tests", "net472");
-    ]
-    |> Seq.iter (fun (proj, framework) -> 
-            let dllPath = sprintf "src\\%s\\bin\\Release\\%s\\%s.dll" proj framework proj
-            let reportPath = sprintf "reports/%s-%s.coverage.xml" proj framework
-
-            Directory.ensure "reports"
-
-            OpenCover.getVersion (Some (fun p -> { p with ExePath = "./packages/fakebuildresources/OpenCover/tools/OpenCover.Console.exe" }))
-
-            OpenCover.run (fun p ->
-                { p with
-                        ExePath = "./packages/fakebuildresources/OpenCover/tools/OpenCover.Console.exe"
-                        TestRunnerExePath = "./packages/fakebuildresources/xunit.runner.console/tools/net472/xunit.console.exe";
-                        Output = reportPath;
-                        Register = OpenCover.RegisterUser;
-                        Filter = "+[SonOfPicasso.*]* -[SonOfPicasso.*.Tests]* -[SonOfPicasso.Testing.Common]*";
-                })
-                (sprintf "%s -noshadow" dllPath)
-
-            Trace.publish ImportData.BuildArtifact reportPath
-
-            if isAppveyor then
-                CreateProcess.fromRawCommandLine "codecov" (sprintf "-f \"%s\" --flag uitest" reportPath)
-                |> Proc.run
-                |> ignore
-        )
-)
 
 Target.create "Package" (fun _ -> 
     let packagePath = (sprintf "build/son-of-picasso-%s.zip" gitVersion.FullSemVer)
@@ -154,7 +125,6 @@ open Fake.Core.TargetOperators
 "Clean" ==> "Build"
 
 "Build" ==> "Test" ==> "Default"
-"Build" ==> "Core Coverage" ==> "Default"
 "Build" ==> "Coverage" ==> "Default"
 "Build" ==> "Package" ==> "Default"
 
