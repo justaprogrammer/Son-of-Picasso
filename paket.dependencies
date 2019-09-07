@@ -11,10 +11,6 @@ group FakeBuild
   nuget Fake.Core.Target 
   nuget Fake.BuildServer.AppVeyor
   nuget Fake.DotNet.Cli
-  nuget Fake.DotNet.MSBuild
-  nuget Fake.DotNet.NuGet
-  nuget Fake.IO.FileSystem
-  nuget Fake.IO.Zip
   nuget Fake.Tools.GitVersion
   groupref FakeBuildResources
 
@@ -24,5 +20,4 @@ group FakeBuildResources
   cache ./packages/cache versions: current
 
   nuget xunit.runner.console
-  nuget NuGet.CommandLine
   nuget BCC-MSBuildLog == 1.0.1
