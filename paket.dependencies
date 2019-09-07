@@ -6,14 +6,11 @@ group FakeBuild
   source https://www.nuget.org/api/v2
   framework: netstandard2.0
   storage:none
+  cache ./packages/cache versions: current
 
   nuget Fake.Core.Target 
   nuget Fake.BuildServer.AppVeyor
   nuget Fake.DotNet.Cli
-  nuget Fake.DotNet.MSBuild
-  nuget Fake.DotNet.NuGet
-  nuget Fake.DotNet.Testing.OpenCover
-  nuget Fake.IO.FileSystem
   nuget Fake.IO.Zip
   nuget Fake.Tools.GitVersion
   groupref FakeBuildResources
@@ -21,7 +18,7 @@ group FakeBuild
 group FakeBuildResources
   source https://www.nuget.org/api/v2
   storage: packages
+  cache ./packages/cache versions: current
 
   nuget xunit.runner.console
-  nuget NuGet.CommandLine
   nuget BCC-MSBuildLog == 1.0.1

@@ -3,14 +3,14 @@ image: Visual Studio 2017
 install:
   - dotnet tool install fake-cli -g
   - dotnet tool install coverlet.console -g
+  - choco config set cacheLocation %LOCALAPPDATA%\Temp\Chocolatey
+  - choco install dotnetcore-sdk --version 3.0.100-preview9-014004 --pre 
   - choco install codecov --no-progress --confirm
   - choco install gitversion.portable --no-progress --confirm
-  - git submodule update --init
-  - nuget restore
 cache:
-  - C:\ProgramData\chocolatey\bin -> appveyor.yml
-  - C:\ProgramData\chocolatey\lib -> appveyor.yml
+  - '%LOCALAPPDATA%\Temp\Chocolatey -> appveyor.yml'
   - '.fake -> Build.fsx'
+  - 'packages\cache -> paket.*'
 before_build:
   - ps: gitversion /output buildserver 
 build_script:

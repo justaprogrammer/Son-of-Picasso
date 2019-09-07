@@ -18,8 +18,6 @@ namespace SonOfPicasso.Core.Tests.Services
 {
     public class DataCacheTests : TestsBase
     {
-        private const string DataCacheBlobCacheParameter = "blobCache";
-
         public DataCacheTests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {

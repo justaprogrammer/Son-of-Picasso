@@ -15,11 +15,6 @@ namespace SonOfPicasso.Core.Services
         private readonly ILogger _logger;
         protected readonly IBlobCache BlobCache;
 
-        static DataCache()
-        {
-            Akavache.BlobCache.ApplicationName = "SonOfPicasso";
-        }
-
         public DataCache(ILogger logger) : this(logger, null)
         {
         }

@@ -5,7 +5,6 @@ open Fake.IO
 open Fake.BuildServer
 open Fake.IO.Globbing.Operators
 open Fake.DotNet
-open Fake.DotNet.Testing
 open Fake.Core
 open Fake.Tools
 
@@ -20,90 +19,77 @@ Target.create "Clean" (fun _ ->
   ["reports" ; "build" ; "src/common"]
   |> Seq.iter Directory.delete
 
-  let configuration = 
-    (fun p -> { p with 
-                  Properties = ["Configuration", "Release"]
-                  Verbosity = Some MSBuildVerbosity.Minimal })
+  
+  let configuration: (DotNet.Options -> DotNet.Options) = (fun t -> {t with
+                                                                        Verbosity = Some DotNet.Verbosity.Minimal})
 
-  !! "SonOfPicasso.sln"
-  |> MSBuild.run configuration null "Clean" list.Empty
-  |> Trace.logItems "Clean-Output: "
+  DotNet.exec configuration "clean" "SonOfPicasso.sln"
+  |> ignore
 )
 
 Target.create "Build" (fun _ ->
-  NuGet.Restore.RestoreMSSolutionPackages (fun p -> {p with ToolPath = "packages\\fakebuildresources\\NuGet.CommandLine\\tools\\nuget.exe"}) "SonOfPicasso.sln"
-
   CreateProcess.fromRawCommandLine "gitversion" "/updateassemblyinfo src\common\SharedAssemblyInfo.cs /ensureassemblyinfo"
   |> Proc.run
   |> ignore
 
-  let logger : MSBuildDistributedLoggerConfig = { 
-        ClassName = None ; 
-        AssemblyPath = "packages\\fakebuildresources\\BCC-MSBuildLog\\tools\\net472\\BCCMSBuildLog.dll" ;
-        Parameters = None
-    }
-
-  let configuration = (fun p -> { p with 
-                                    DoRestore = true
-                                    Verbosity = Some MSBuildVerbosity.Minimal
-                                    Loggers = Some([logger])})
-
-  !! "SonOfPicasso.sln"
-  |> MSBuild.runRelease configuration null "Build"
-  |> Trace.logItems "Build-Output: "
+  let configuration: (DotNet.BuildOptions -> DotNet.BuildOptions)
+        = (fun t -> {t with
+                        Configuration = DotNet.BuildConfiguration.Release})
+  
+  DotNet.build configuration "SonOfPicasso.sln"
 )
 
-Target.create "Test" (fun _ ->
-    [
-        ("SonOfPicasso.Core.Tests", "net472");
-        ("SonOfPicasso.UI.Tests", "net472");
-    ]
-    |> Seq.iter (fun (proj, framework) ->
-        (
-            let projectPath = sprintf "src\\%s\\%s.csproj" proj proj
-            let reportFile = sprintf "%s-%s.results.trx" proj framework
+let test proj framework flag =
+    let projectPath = sprintf "src\\%s\\%s.csproj" proj proj
+    let reportFile = sprintf "%s-%s.results.trx" proj framework
 
-            let configuration: (DotNet.TestOptions -> DotNet.TestOptions)
-                = (fun t -> {t with
-                                Configuration = DotNet.BuildConfiguration.Release
-                                NoBuild = true
-                                Framework = Some framework
-                                Logger = Some (sprintf "trx;LogFileName=%s" reportFile)
-                                ResultsDirectory = Some "../../reports"})
+    let configuration: (DotNet.TestOptions -> DotNet.TestOptions)
+        = (fun t -> {t with
+                        Configuration = DotNet.BuildConfiguration.Release
+                        NoBuild = true
+                        Framework = Some framework
+                        Logger = Some (sprintf "trx;LogFileName=%s" reportFile)
+                        ResultsDirectory = Some "../../reports"
+                        })
 
-            DotNet.test configuration projectPath
-            
-            Trace.publish ImportData.BuildArtifact (sprintf "reports/%s" reportFile)
-        ))
-)
+    DotNet.test configuration projectPath
 
-Target.create "Coverage" (fun _ ->
-    [
-        ("SonOfPicasso.Core.Tests", "net472", "coretest");
-        ("SonOfPicasso.UI.Tests", "net472", "uitest");
-    ]
-    |> Seq.iter (fun (proj, framework, flag) -> 
-            let dllPath = sprintf "src\\%s\\bin\\Release\\%s\\%s.dll" proj framework proj
-            let projectPath = sprintf "src\\%s\\%s.csproj" proj proj
-            let reportPath = sprintf "reports/%s-%s.coverage.xml" proj framework
+    let dllPath = sprintf "src\\%s\\bin\\Release\\%s\\%s.dll" proj framework proj
+    let projectPath = sprintf "src\\%s\\%s.csproj" proj proj
+    let reportPath = sprintf "reports/%s-%s.coverage.xml" proj framework
 
-            Directory.ensure "reports"
+    Directory.ensure "reports"
           
-            sprintf "%s --target \"dotnet\" --targetargs \"test -c Release -f %s %s --no-build\" --include \"[SonOfPicasso.*]*\" --exclude \"[SonOfPicasso.*.Tests]*\" --exclude \"[SonOfPicasso.Testing.Common]*\" --format opencover --output \"./%s\""
-                dllPath framework projectPath reportPath
-            |> CreateProcess.fromRawCommandLine "coverlet"
-            |> Proc.run
-            |> ignore
+    sprintf "%s --target \"dotnet\" --targetargs \"test -c Release -f %s %s --no-build\" --include \"[SonOfPicasso.*]*\" --exclude \"[SonOfPicasso.*.Tests]*\" --exclude \"[SonOfPicasso.Testing.Common]*\" --format opencover --output \"./%s\""
+        dllPath framework projectPath reportPath
+    |> CreateProcess.fromRawCommandLine "coverlet"
+    |> Proc.run
+    |> ignore
 
-            Trace.publish ImportData.BuildArtifact reportPath
+    Trace.publish ImportData.BuildArtifact reportPath
 
-            if isAppveyor then
-                CreateProcess.fromRawCommandLine "codecov" (sprintf "-f \"%s\" --flag %s" reportPath flag)
-                |> Proc.run
-                |> ignore
-        )
+    if isAppveyor then
+        CreateProcess.fromRawCommandLine "codecov" (sprintf "-f \"%s\" --flag %s" reportPath flag)
+        |> Proc.run
+        |> ignore
+        
+    Trace.publish ImportData.BuildArtifact (sprintf "reports/%s" reportFile)
+
+Target.create "Test" (fun _ -> 
+    ()
 )
 
+Target.create "TestCore" (fun _ -> 
+    test "SonOfPicasso.Core.Tests" "netcoreapp3.0" "coretest"
+)
+
+Target.create "TestUI" (fun _ -> 
+    test "SonOfPicasso.UI.Tests" "netcoreapp3.0" "uitest"
+)
+
+Target.create "TestData" (fun _ -> 
+    test "SonOfPicasso.Data.Tests" "netcoreapp3.0" "datatest"
+)
 
 Target.create "Package" (fun _ -> 
     let packagePath = (sprintf "build/son-of-picasso-%s.zip" gitVersion.FullSemVer)
@@ -124,8 +110,11 @@ Target.create "Default" (fun _ ->
 open Fake.Core.TargetOperators
 "Clean" ==> "Build"
 
+"Build" ==> "TestCore" ==> "Test"
+"Build" ==> "TestUI" ==> "Test"
+"Build" ==> "TestData" ==> "Test"
+
 "Build" ==> "Test" ==> "Default"
-"Build" ==> "Coverage" ==> "Default"
 "Build" ==> "Package" ==> "Default"
 
 // start build
