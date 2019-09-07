@@ -84,21 +84,16 @@ Target.create "Coverage" (fun _ ->
     ]
     |> Seq.iter (fun (proj, framework, flag) -> 
             let dllPath = sprintf "src\\%s\\bin\\Release\\%s\\%s.dll" proj framework proj
+            let projectPath = sprintf "src\\%s\\%s.csproj" proj proj
             let reportPath = sprintf "reports/%s-%s.coverage.xml" proj framework
 
             Directory.ensure "reports"
-
-            OpenCover.getVersion (Some (fun p -> { p with ExePath = "./packages/fakebuildresources/OpenCover/tools/OpenCover.Console.exe" }))
-
-            OpenCover.run (fun p ->
-                { p with
-                        ExePath = "./packages/fakebuildresources/OpenCover/tools/OpenCover.Console.exe"
-                        TestRunnerExePath = "./packages/fakebuildresources/xunit.runner.console/tools/net472/xunit.console.exe";
-                        Output = reportPath;
-                        Register = OpenCover.RegisterUser;
-                        Filter = "+[SonOfPicasso.*]* -[SonOfPicasso.*.Tests]* -[SonOfPicasso.Testing.Common]*";
-                })
-                (sprintf "%s -noshadow" dllPath)
+          
+            sprintf "%s --target \"dotnet\" --targetargs \"test -c Release -f %s %s --no-build\" --include \"[SonOfPicasso.*]*\" --exclude \"[SonOfPicasso.*.Tests]*\" --exclude \"[SonOfPicasso.Testing.Common]*\" --format opencover --output \"./%s\""
+                dllPath framework projectPath reportPath
+            |> CreateProcess.fromRawCommandLine "coverlet"
+            |> Proc.run
+            |> ignore
 
             Trace.publish ImportData.BuildArtifact reportPath
 
@@ -108,6 +103,7 @@ Target.create "Coverage" (fun _ ->
                 |> ignore
         )
 )
+
 
 Target.create "Package" (fun _ -> 
     let packagePath = (sprintf "build/son-of-picasso-%s.zip" gitVersion.FullSemVer)
