@@ -10,6 +10,7 @@ install:
 cache:
   - C:\ProgramData\chocolatey\bin -> appveyor.yml
   - C:\ProgramData\chocolatey\lib -> appveyor.yml
+  - '%USERPROFILE%\.dotnet\tools -> appveyor.yml'
   - '.fake -> Build.fsx'
   - 'packages\cache -> paket.dependencies'
   - 'packages\cache -> paket.lock'
