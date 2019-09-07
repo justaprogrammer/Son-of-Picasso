@@ -245,3 +245,5 @@ reports/
 SharedAssemblyInfo.cs
 nuget/*
 /images
+
+*.db
