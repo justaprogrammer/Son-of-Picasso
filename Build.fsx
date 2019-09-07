@@ -5,7 +5,6 @@ open Fake.IO
 open Fake.BuildServer
 open Fake.IO.Globbing.Operators
 open Fake.DotNet
-open Fake.DotNet.Testing
 open Fake.Core
 open Fake.Tools
 
