@@ -11,8 +11,7 @@ install:
 cache:
   - '%LOCALAPPDATA%\Temp\Chocolatey -> appveyor.yml'
   - '.fake -> Build.fsx'
-  - 'packages\cache -> paket.dependencies'
-  - 'packages\cache -> paket.lock'
+  - 'packages\cache -> paket.*'
 before_build:
   - ps: gitversion /output buildserver 
 build_script:
