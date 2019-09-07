@@ -7,7 +7,6 @@ using System.Threading;
 using Autofac;
 using Autofac.Extras.NSubstitute;
 using FluentAssertions;
-using MoreLinq;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Core.Services;
 using SonOfPicasso.Testing.Common;
