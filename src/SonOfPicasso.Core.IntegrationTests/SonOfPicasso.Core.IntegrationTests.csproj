@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\SonOfPicasso.Data.Tests\SonOfPicasso.Data.Tests.csproj" />
+    <ProjectReference Include="..\SonOfPicasso.Data.Tests\SonOfPicasso.Data.Tests.csproj" />
   </ItemGroup>
 
 </Project>
