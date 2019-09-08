@@ -1,110 +1,146 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using Serilog;
 using SonOfPicasso.Core.Interfaces;
-using SonOfPicasso.Core.Models;
+using SonOfPicasso.Core.Scheduling;
+using SonOfPicasso.Data.Model;
+using SonOfPicasso.Data.Repository;
 
 namespace SonOfPicasso.Core.Services
 {
     public class ImageManagementService : IImageManagementService
     {
-        private readonly IDataCache _dataCache;
+        private readonly IFileSystem _fileSystem;
         private readonly IImageLocationService _imageLocationService;
         private readonly ILogger _logger;
+        private readonly ISchedulerProvider _schedulerProvider;
+        private readonly Func<IUnitOfWork> _unitOfWorkFactory;
 
-        public ImageManagementService(IDataCache dataCache,
+        public ImageManagementService(ILogger logger,
+            IFileSystem fileSystem,
             IImageLocationService imageLocationService,
-            ILogger logger)
+            Func<IUnitOfWork> unitOfWorkFactory,
+            ISchedulerProvider schedulerProvider)
         {
-            _dataCache = dataCache ?? throw new ArgumentNullException(nameof(dataCache));
-            _imageLocationService = imageLocationService ?? throw new ArgumentNullException(nameof(imageLocationService));
             _logger = logger;
+            _fileSystem = fileSystem;
+            _imageLocationService = imageLocationService;
+            _unitOfWorkFactory = unitOfWorkFactory;
+            _schedulerProvider = schedulerProvider;
         }
 
-        public IObservable<(ImageFolderModel, ImageModel[])> AddFolder(string path)
+        public IObservable<Image[]> ScanFolder(string path)
         {
-            if (path == null) throw new ArgumentNullException(nameof(path));
+            return Observable.StartAsync(async task =>
+            {
+                using var unitOfWork = _unitOfWorkFactory();
 
-            _logger.Debug("AddFolder {Path}", path);
+                if (!_fileSystem.Directory.Exists(path))
+                    throw new SonOfPicassoException($"Path: `{path}` does not exist");
 
-            return _dataCache.GetFolderList()
-                .Select(folders =>
-                {
-                    if (folders.Contains(path))
+                var images = await _imageLocationService.GetImages(path)
+                    .SelectMany(locatedImages => locatedImages)
+                    .Where(s => !unitOfWork.ImageRepository.Get(image => image.Path == path).Any())
+                    .GroupBy(s => _fileSystem.FileInfo.FromFileName(s).DirectoryName)
+                    .SelectMany(groupedObservable =>
                     {
-                        throw new SonOfPicassoException("Folder already exists");
-                    }
+                        var directory = unitOfWork.DirectoryRepository
+                            .Get(directory => directory.Path == groupedObservable.Key)
+                            .FirstOrDefault();
 
-                    return _imageLocationService
-                        .GetImages(path)
-                        .Select(images => (folders, images));
-                })
-                .SelectMany(obs => obs)
-                .SelectMany(elements =>
-                {
-                    var currentFolders = elements.Item1;
-                    var imagePaths = elements.Item2;
+                        if (directory == null)
+                        {
+                            directory = new Directory { Path = groupedObservable.Key, Images = new List<Image>() };
+                            unitOfWork.DirectoryRepository.Insert(directory);
+                        }
 
-                    var imageFolderModel = new ImageFolderModel { Path = path, Images = imagePaths };
+                        return groupedObservable.Select(imagePath =>
+                        {
+                            var image = new Image
+                            {
+                                Path = imagePath
+                            };
 
-                    var imageModels = imagePaths
-                        .Select(imagePath => new ImageModel{Path = imagePath})
-                        .ToArray();
+                            unitOfWork.ImageRepository.Insert(image);
+                            directory.Images.Add(image);
 
-                    var setImages = imageModels.ToObservable()
-                        .SelectMany(model => _dataCache.SetImage(model))
-                        .ToArray()
-                        .Select(_ => Unit.Default);
+                            return image;
+                        });
+                    }).ToArray();
 
-                    var setFolderList = _dataCache.SetFolderList(currentFolders.Append(path).ToArray());
-                    var setFolder = _dataCache.SetFolder(imageFolderModel);
+                unitOfWork.Save();
 
-                    return Observable.Zip(setFolder, setFolderList, setImages)
-                        .Select(_ => (imageFolderModel, imageModels));
-                });
+                return images;
+            }, _schedulerProvider.TaskPool);
         }
 
-        public IObservable<Unit> RemoveFolder(string path)
+        public IObservable<Album> CreateAlbum(string name)
         {
-            if (path == null) throw new ArgumentNullException(nameof(path));
+            return Observable.Start(() =>
+            {
+                using var unitOfWork = _unitOfWorkFactory();
 
-            _logger.Debug("RemoveFolder {Path}", path);
+                var album = new Album { Name = name };
 
-            return _dataCache.GetFolderList()
-                .Select(folders =>
+                unitOfWork.AlbumRepository.Insert(album);
+                unitOfWork.Save();
+
+                return album;
+            }, _schedulerProvider.TaskPool);
+        }
+
+        public IObservable<Album[]> GetAlbums()
+        {
+            return Observable.Start(() =>
+            {
+                using var unitOfWork = _unitOfWorkFactory();
+
+                var albums = unitOfWork.AlbumRepository.Get()
+                    .ToArray();
+
+                return albums;
+            }, _schedulerProvider.TaskPool);
+        }
+
+        public IObservable<Unit> DeleteAlbum(int id)
+        {
+            return Observable.Start(() =>
+            {
+                using var unitOfWork = _unitOfWorkFactory();
+
+                unitOfWork.AlbumRepository.Delete(id);
+                unitOfWork.Save();
+
+                return Unit.Default;
+            }, _schedulerProvider.TaskPool);
+        }
+
+        public IObservable<Image> AddImagesToAlbum(int albumId, IEnumerable<int> imageIds)
+        {
+            return Observable.Start(() =>
                 {
-                    if (!folders.Contains(path))
+                    using var unitOfWork = _unitOfWorkFactory();
+                
+                    var album = unitOfWork.AlbumRepository.GetById(albumId);
+
+                    var images = imageIds.Select(imageid =>
                     {
-                        throw new SonOfPicassoException("Folder does not exist");
-                    }
+                        var image = unitOfWork.ImageRepository.GetById(imageid);
 
-                    var currentFolders = folders.Where(s => s != path).ToArray();
+                        unitOfWork.AlbumImageRepository.Insert(new AlbumImage { Album = album, Image = image });
 
-                    var setFolderList = _dataCache.SetFolderList(currentFolders);
-                    var setFolder = _dataCache.DeleteFolder(path);
+                        return image;
+                    }).ToArray();
 
-                    return setFolderList
-                        .SelectMany(setFolder)
-                        .ToArray()
-                        .Select(_ => Unit.Default);
-                })
+                    unitOfWork.Save();
+
+                    return images;
+                }, _schedulerProvider.TaskPool)
                 .SelectMany(observable => observable);
-        }
-
-        public IObservable<ImageFolderModel> GetAllImageFolders()
-        {
-            return _dataCache.GetFolderList()
-                .SelectMany(strings => strings)
-                .SelectMany(s => _dataCache.GetFolder(s));
-        }
-
-        public IObservable<ImageModel> GetAllImages()
-        {
-            return this.GetAllImageFolders()
-                .SelectMany(imageFolder => imageFolder.Images)
-                .SelectMany(imagePath => _dataCache.GetImage(imagePath));
         }
     }
 }

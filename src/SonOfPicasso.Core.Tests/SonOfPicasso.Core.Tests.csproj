@@ -29,6 +29,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SonOfPicasso.Core\SonOfPicasso.Core.csproj" />
+    <ProjectReference Include="..\SonOfPicasso.Data.Tests\SonOfPicasso.Data.Tests.csproj" />
     <ProjectReference Include="..\SonOfPicasso.Testing.Common\SonOfPicasso.Testing.Common.csproj" />
   </ItemGroup>
 

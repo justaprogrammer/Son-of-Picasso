@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using SonOfPicasso.Data.Context;
 
-namespace SonOfPicasso.Data
+namespace SonOfPicasso.Data.Repository
 {
-    public class GenericRepository<TEntity> where TEntity : class
+    public class GenericRepository<TEntity>: IGenericRepository<TEntity> where TEntity : class
     {
         private readonly IDataContext _context;
         private readonly DbSet<TEntity> _dbSet;

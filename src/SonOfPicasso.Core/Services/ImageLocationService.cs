@@ -18,7 +18,9 @@ namespace SonOfPicasso.Core.Services
         private readonly ISchedulerProvider _schedulerProvider;
         private readonly ILogger _logger;
 
-        public ImageLocationService(ILogger logger, IFileSystem fileSystem, ISchedulerProvider schedulerProvider)
+        public ImageLocationService(ILogger logger, 
+            IFileSystem fileSystem, 
+            ISchedulerProvider schedulerProvider)
         {
             _logger = logger;
             _fileSystem = fileSystem;

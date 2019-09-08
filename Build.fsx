@@ -120,6 +120,10 @@ Target.create "TestData" (fun _ ->
     test "SonOfPicasso.Data.Tests" "netcoreapp3.0" "datatest"
 )
 
+Target.create "TestIntegration" (fun _ -> 
+    test "SonOfPicasso.Core.IntegrationTests" "netcoreapp3.0" "integration"
+)
+
 Target.create "Package" (fun _ -> 
     let packagePath = (sprintf "build/son-of-picasso-%s.zip" fullSemver)
 
@@ -142,6 +146,7 @@ open Fake.Core.TargetOperators
 "Build" ==> "TestCore" ==> "Test"
 "Build" ==> "TestUI" ==> "Test"
 "Build" ==> "TestData" ==> "Test"
+"Build" ==> "TestIntegration" ==> "Test"
 
 "Build" ==> "Test" ==> "Default"
 "Build" ==> "Package" ==> "Default"

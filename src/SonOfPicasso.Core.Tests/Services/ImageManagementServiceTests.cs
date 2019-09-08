@@ -1,367 +1,157 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Abstractions;
+using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
-using System.Reactive;
+using System.Linq.Expressions;
 using System.Reactive.Linq;
 using System.Threading;
 using Autofac.Extras.NSubstitute;
-using Bogus.Extensions;
 using FluentAssertions;
 using NSubstitute;
 using SonOfPicasso.Core.Interfaces;
-using SonOfPicasso.Core.Models;
+using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Core.Services;
+using SonOfPicasso.Data.Model;
+using SonOfPicasso.Data.Repository;
 using SonOfPicasso.Testing.Common;
 using SonOfPicasso.Testing.Common.Extensions;
-using SonOfPicasso.Testing.Common.Services;
+using SonOfPicasso.Testing.Common.Scheduling;
 using Xunit;
 using Xunit.Abstractions;
+using Directory = SonOfPicasso.Data.Model.Directory;
 
 namespace SonOfPicasso.Core.Tests.Services
 {
-    public class ImageManagementServiceTests : TestsBase
+    public class ImageManagementServiceTests : TestsBase, IDisposable
     {
         public ImageManagementServiceTests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {
+            _autoSubstitute = new AutoSubstitute();
+
+            _testSchedulerProvider = new TestSchedulerProvider();
+            _autoSubstitute.Provide<ISchedulerProvider>(_testSchedulerProvider);
+
+            _unitOfWorkQueue = new Queue<IUnitOfWork>();
+            _autoSubstitute.Provide<Func<IUnitOfWork>>(() => _unitOfWorkQueue.Dequeue());
+
+            _mockFileSystem = new MockFileSystem();
+            _autoSubstitute.Provide<IFileSystem>(_mockFileSystem);
+        }
+
+        public void Dispose()
+        {
+            _autoSubstitute.Dispose();
+        }
+
+        private readonly AutoSubstitute _autoSubstitute;
+        private readonly Queue<IUnitOfWork> _unitOfWorkQueue;
+        private readonly MockFileSystem _mockFileSystem;
+        private readonly TestSchedulerProvider _testSchedulerProvider;
+
+        [Fact]
+        public void AddImageToAlbum()
+        {
+            var directoryPath = Faker.System.DirectoryPathWindows();
+            var directory = new Directory
+            {
+                Id = Faker.Random.Int(1),
+                Path = directoryPath,
+                Images = new List<Image>()
+            };
+
+            var images = Faker.Make(Faker.Random.Int(3, 5), () => new Image
+            {
+                Path = Path.Join(directoryPath) + Faker.System.FileName("jpg"),
+                DirectoryId = directory.Id
+            });
+
+            directory.Images.AddRange(images);
+
+            var unitOfWork = Substitute.For<IUnitOfWork>();
+            unitOfWork.DirectoryRepository.Get()
+                .ReturnsForAnyArgs(new[] {directory, FakerProfiles.FakeNewDirectory});
+
+            _unitOfWorkQueue.Enqueue(unitOfWork);
+
+            var autoResetEvent = new AutoResetEvent(false);
+
+            var imageManagementService = _autoSubstitute.Resolve<ImageManagementService>();
+
+            var albumName = Faker.Random.Words(2);
+            var albumId = Faker.Random.Int(1);
+
+            unitOfWork.AlbumRepository.Get().ReturnsForAnyArgs(new[] {new Album {Id = albumId, Name = albumName}});
+
+            unitOfWork.ImageRepository.GetById(Arg.Any<int>())
+                .ReturnsForAnyArgs(info =>
+                {
+                    return images.First(i => i.Id == (int) info.Arg<object>());
+                });
+
+            imageManagementService.AddImagesToAlbum(albumId, images.Select(image => image.Id))
+                .Subscribe(unit => autoResetEvent.Set());
+
+            _testSchedulerProvider.TaskPool.AdvanceBy(1);
+
+            autoResetEvent.WaitOne(10).Should().BeTrue();
+
+            unitOfWork.AlbumImageRepository.ReceivedWithAnyArgs(images.Count)
+                .Insert(null);
+
+            unitOfWork.Received(1).Save();
+
+            unitOfWork.Received(1).Dispose();
         }
 
         [Fact]
-        public void CantAddNullFolder()
+        public void ScanFolder()
         {
-            Logger.Debug("CantAddNullFolder");
-            using (var autoSub = new AutoSubstitute())
+            var directoryPath = Faker.System.DirectoryPathWindows();
+            var imagePath = Path.Join(directoryPath, Faker.System.FileName("jpg"));
+
+            var directory = new Directory
             {
-                var imageManagementService = autoSub.Resolve<ImageManagementService>();
+                Id = Faker.Random.Int(1),
+                Path = directoryPath,
+                Images = new List<Image>()
+            };
 
-                var folder = Faker.System.DirectoryPathWindows();
+            var unitOfWork = Substitute.For<IUnitOfWork>();
+            unitOfWork.DirectoryRepository.Get()
+                .ReturnsForAnyArgs(new[] {directory, FakerProfiles.FakeNewDirectory});
 
-                Assert.Throws<ArgumentNullException>(() => imageManagementService.AddFolder(null));
-            }
-        }
+            _unitOfWorkQueue.Enqueue(unitOfWork);
 
-        [Fact]
-        public void CantRemoveNullFolder()
-        {
-            Logger.Debug("CantRemoveNullFolder");
-            using (var autoSub = new AutoSubstitute())
-            {
-                var imageManagementService = autoSub.Resolve<ImageManagementService>();
+            _mockFileSystem.AddDirectory(directoryPath);
+            _mockFileSystem.AddFile(imagePath, new MockFileData(new byte[0]));
 
-                var folder = Faker.System.DirectoryPathWindows();
+            var autoResetEvent = new AutoResetEvent(false);
 
-                Assert.Throws<ArgumentNullException>(() => imageManagementService.AddFolder(null));
-            }
-        }
+            _autoSubstitute.Resolve<IImageLocationService>()
+                .GetImages(Arg.Any<string>())
+                .Returns(Observable.Return(new[] {imagePath}));
 
-        [Fact]
-        public void CantRemoveFolderThatDoesntExist()
-        {
-            Logger.Debug("CantRemoveFolderThatDoesntExist");
-            using (var autoSub = new AutoSubstitute())
-            {
-                var imageManagementService = autoSub.Resolve<ImageManagementService>();
+            var imageManagementService = _autoSubstitute.Resolve<ImageManagementService>();
+            imageManagementService.ScanFolder(directoryPath)
+                .Subscribe(unit => autoResetEvent.Set());
 
-                var folder = Faker.System.DirectoryPathWindows();
-                SonOfPicassoException exception = null;
+            _testSchedulerProvider.TaskPool.AdvanceBy(1);
 
-                var autoResetEvent = new AutoResetEvent(false);
+            autoResetEvent.WaitOne(10).Should().BeTrue();
 
-                imageManagementService.RemoveFolder(folder)
-                    .Subscribe(_ => { },
-                        ex =>
-                        {
-                            exception = ex as SonOfPicassoException;
-                            autoResetEvent.Set();
-                        });
+            unitOfWork.ImageRepository.Received(1)
+                .Insert(Arg.Any<Image>());
 
-                autoResetEvent.WaitOne();
+            unitOfWork.Received(1)
+                .Save();
 
-                exception.Should().NotBeNull();
-                exception.Message.Should().Be("Folder does not exist");
-            }
-        }
+            unitOfWork.Received(1)
+                .Dispose();
 
-        [Fact(Timeout = 1000)]
-        public void CanRemoveFolder()
-        {
-            Logger.Debug("CanRemoveFolder");
-            using (var autoSub = new AutoSubstitute())
-            {
-                var dataCache = autoSub.Resolve<IDataCache>();
-                var testPaths = Faker.Make(5, Faker.System.DirectoryPathWindows)
-                    .Distinct()
-                    .ToArray();
-
-                var imageFolderPath = testPaths.First();
-                var remainingPaths = testPaths.Skip(1).ToArray();
-
-                dataCache.GetFolderList()
-                    .Returns(Observable.Return(testPaths));
-
-                dataCache.SetFolderList(Arg.Any<string[]>())
-                    .Returns(Observable.Return(Unit.Default));
-
-                dataCache.DeleteFolder(Arg.Any<string>())
-                    .Returns(Observable.Return(Unit.Default));
-
-                var imageManagementService = autoSub.Resolve<ImageManagementService>();
-
-                var autoResetEvent = new AutoResetEvent(false);
-
-                imageManagementService.RemoveFolder(imageFolderPath)
-                    .Subscribe(_ => autoResetEvent.Set());
-
-                autoResetEvent.WaitOne();
-
-                dataCache.Received().SetFolderList(Arg.Is<string[]>(strings =>
-                    strings.SequenceEqual(remainingPaths)));
-
-                dataCache.Received().DeleteFolder(imageFolderPath);
-            }
-        }
-
-        [Fact(Timeout = 1000)]
-        public void CanAddFolder()
-        {
-            Logger.Debug("CanAddFolder");
-            using (var autoSub = new AutoSubstitute())
-            {
-                var dataCache = autoSub.Resolve<IDataCache>();
-                var imageLocationService = autoSub.Resolve<IImageLocationService>();
-
-                var testPaths = Faker.Make(5, Faker.System.DirectoryPathWindows)
-                    .Distinct()
-                    .ToArray();
-
-                var imageFolderPath = testPaths.First();
-
-                var imagePaths = Faker.Make(5, () => Faker.System.FileName("png"))
-                    .Select(s => Path.Combine(imageFolderPath, s))
-                    .ToArray();
-
-                dataCache.GetFolderList()
-                    .Returns(Observable.Return(testPaths.Skip(1).ToArray()));
-
-                dataCache.SetFolderList(Arg.Any<string[]>())
-                    .Returns(Observable.Return(Unit.Default));
-
-                dataCache.SetFolder(Arg.Any<ImageFolderModel>())
-                    .Returns(Observable.Return(Unit.Default));
-
-                dataCache.SetImage(Arg.Any<ImageModel>())
-                    .Returns(Observable.Return(Unit.Default));
-
-                imageLocationService.GetImages(Arg.Any<string>())
-                    .Returns(Observable.Return(imagePaths));
-
-                var imageManagementService = autoSub.Resolve<ImageManagementService>();
-
-                var autoResetEvent = new AutoResetEvent(false);
-
-                ImageFolderModel imageFolderModel = null;
-                ImageModel[] imageModels = null;
-
-                imageManagementService.AddFolder(imageFolderPath)
-                    .Subscribe(tuple =>
-                    {
-                        (imageFolderModel, imageModels) = tuple;
-                        autoResetEvent.Set();
-                    });
-
-                autoResetEvent.WaitOne();
-
-                imageLocationService.Received().GetImages(imageFolderPath);
-
-                dataCache.Received().SetFolderList(Arg.Is<string[]>(strings =>
-                    strings.OrderBy(s => s)
-                        .SequenceEqual(testPaths.OrderBy(s => s))));
-
-                dataCache.Received().SetFolder(Arg.Is<ImageFolderModel>(folder =>
-                    folder.Path == imageFolderPath &&
-                    folder.Images.OrderBy(s => s)
-                        .SequenceEqual(imagePaths.OrderBy(s => s))));
-
-                dataCache.Received(5).SetImage(Arg.Any<ImageModel>());
-
-                dataCache.ReceivedCalls()
-                    .Where(call => call.GetMethodInfo().Name == "SetImage")
-                    .Select(call => (ImageModel)call.GetArguments()[0])
-                    .Select(model => model.Path)
-                    .Should()
-                    .BeEquivalentTo(imagePaths);
-
-                imageFolderModel.Should().NotBeNull();
-                imageFolderModel.Path.Should().Be(imageFolderPath);
-
-                imageModels.Select(model => model.Path)
-                    .Should().BeEquivalentTo(imagePaths);
-            }
-        }
-
-        [Fact(Timeout = 1000)]
-        public void CantAddFolderASecondTime()
-        {
-            Logger.Debug("CantAddFolderASecondTime");
-            using (var autoSub = new AutoSubstitute())
-            {
-                var dataCache = autoSub.Resolve<IDataCache>();
-                var imageLocationService = autoSub.Resolve<IImageLocationService>();
-
-
-                var testPaths = Faker.Make(5, Faker.System.DirectoryPathWindows)
-                    .Distinct()
-                    .ToArray();
-
-                var imageFolderPath = testPaths.First();
-
-                var imagePaths = Faker.Make(5, () => Faker.System.FileName("png"))
-                    .Select(s => Path.Combine(imageFolderPath, s))
-                    .ToArray();
-
-                dataCache.GetFolderList()
-                    .Returns(Observable.Return(testPaths));
-
-                dataCache.SetFolderList(Arg.Any<string[]>())
-                    .Returns(Observable.Return(Unit.Default));
-
-                dataCache.SetFolder(Arg.Any<ImageFolderModel>())
-                    .Returns(Observable.Return(Unit.Default));
-
-                imageLocationService.GetImages(Arg.Any<string>())
-                    .Returns(Observable.Return(imagePaths));
-
-                var imageManagementService = autoSub.Resolve<ImageManagementService>();
-
-                var autoResetEvent = new AutoResetEvent(false);
-
-                SonOfPicassoException exception = null;
-
-                imageManagementService.AddFolder(imageFolderPath)
-                    .Subscribe(
-                        _ => { },
-                        ex =>
-                        {
-                            exception = ex as SonOfPicassoException;
-                            autoResetEvent.Set();
-                        });
-
-                autoResetEvent.WaitOne();
-
-                imageLocationService.DidNotReceiveWithAnyArgs().GetImages(Arg.Any<string>());
-                dataCache.DidNotReceiveWithAnyArgs().SetFolderList(Arg.Any<string[]>());
-                dataCache.DidNotReceiveWithAnyArgs().SetFolder(Arg.Any<ImageFolderModel>());
-
-                exception.Should().NotBeNull();
-                exception.Message.Should().Be("Folder already exists");
-            }
-        }
-
-        [Fact(Timeout = 1000)]
-        public void CanGetImageFolders()
-        {
-            Logger.Debug("CanGetImageFolders");
-            using (var autoSub = new AutoSubstitute())
-            {
-                var dataCache = autoSub.Resolve<IDataCache>();
-
-                var testPaths = Faker.Make(5, Faker.System.DirectoryPathWindows)
-                    .Distinct()
-                    .ToArray();
-
-                var imageFolders = testPaths
-                    .Select(s => new ImageFolderModel { Path = s })
-                    .ToArray();
-
-                var imageFolderDictionary = imageFolders
-                    .ToDictionary(s => s.Path);
-
-                dataCache.GetFolderList()
-                    .Returns(Observable.Return(testPaths.ToArray()));
-
-                dataCache.GetFolder(Arg.Any<string>())
-                    .Returns(info => Observable.Return(imageFolderDictionary[info.Arg<string>()]));
-
-                var imageManagementService = autoSub.Resolve<ImageManagementService>();
-
-                var autoResetEvent = new AutoResetEvent(false);
-
-                var results = new List<ImageFolderModel>();
-
-                imageManagementService.GetAllImageFolders()
-                    .Subscribe(
-                        imageFolder => results.Add(imageFolder),
-                        () => autoResetEvent.Set());
-
-                autoResetEvent.WaitOne();
-
-                results.Should().BeEquivalentTo(imageFolders);
-            }
-        }
-
-        [Fact(Timeout = 1000)]
-        public void CanGetImages()
-        {
-            Logger.Debug("CanGetImages");
-            using (var autoSub = new AutoSubstitute())
-            {
-                var dataCache = autoSub.Resolve<IDataCache>();
-
-                var testPaths = Faker.Make(5, Faker.System.DirectoryPathWindows)
-                    .Distinct()
-                    .ToArray();
-
-                var imagePathsByPath = testPaths
-                    .ToDictionary(
-                        testPath => testPath,
-                        testPath => Faker
-                            .Make(5, () => Path.Combine(testPath, Faker.System.FileName("png")))
-                            .ToArray());
-
-                var images = imagePathsByPath
-                    .SelectMany(pair => pair.Value)
-                    .Select(imagePath => new ImageModel { Path = imagePath })
-                    .ToArray();
-
-                var imagesByPath = images
-                    .ToDictionary(image => image.Path);
-
-                var imageFolders = testPaths
-                    .Select(testPath => new ImageFolderModel
-                    {
-                        Path = testPath,
-                        Images = imagePathsByPath[testPath]
-                    })
-                    .ToArray();
-
-                var imageFoldersByPath = imageFolders
-                    .ToDictionary(s => s.Path);
-
-                dataCache.GetFolderList()
-                    .Returns(Observable.Return(testPaths.ToArray()));
-
-                dataCache.GetFolder(Arg.Any<string>())
-                    .Returns(info => Observable.Return(imageFoldersByPath[info.Arg<string>()]));
-
-                dataCache.GetImage(Arg.Any<string>())
-                    .Returns(info => Observable.Return(imagesByPath[info.Arg<string>()]));
-
-                var imageManagementService = autoSub.Resolve<ImageManagementService>();
-
-                var autoResetEvent = new AutoResetEvent(false);
-
-                var results = new List<ImageModel>();
-
-                imageManagementService.GetAllImages()
-                    .Subscribe(
-                        image => results.Add(image),
-                        () => autoResetEvent.Set());
-
-                autoResetEvent.WaitOne();
-
-                results.Should().BeEquivalentTo(images);
-            }
+            directory.Images.Count.Should().Be(1);
         }
     }
 }
