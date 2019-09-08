@@ -13,6 +13,5 @@ namespace SonOfPicasso.Data.Model
 
     public interface IDirectory: IModel
     {
-
     }
 }
