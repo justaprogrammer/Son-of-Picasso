@@ -1,18 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
-using System.Reactive;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
 using Serilog;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Data.Model;
 using SonOfPicasso.Data.Repository;
-using Directory = SonOfPicasso.Data.Model.Directory;
 
 namespace SonOfPicasso.Core.Services
 {
@@ -39,10 +34,10 @@ namespace SonOfPicasso.Core.Services
 
         public IObservable<Image[]> ScanFolder(string path)
         {
-            return Observable.StartAsync<Image[]>(async task =>
+            return Observable.StartAsync(async task =>
             {
                 using var unitOfWork = _unitOfWorkFactory();
-                
+
                 if (!_fileSystem.Directory.Exists(path))
                     throw new SonOfPicassoException($"Path: `{path}` does not exist");
 
@@ -52,18 +47,19 @@ namespace SonOfPicasso.Core.Services
                     .GroupBy(s => _fileSystem.FileInfo.FromFileName(s).DirectoryName)
                     .SelectMany(groupedObservable =>
                     {
-                        var directory = unitOfWork.DirectoryRepository.Get(directory => directory.Path == groupedObservable.Key)
+                        var directory = unitOfWork.DirectoryRepository
+                            .Get(directory => directory.Path == groupedObservable.Key)
                             .FirstOrDefault();
 
                         if (directory == null)
                         {
-                            directory = new Directory { Path = groupedObservable.Key, Images = new List<Image>()};
+                            directory = new Directory {Path = groupedObservable.Key, Images = new List<Image>()};
                             unitOfWork.DirectoryRepository.Insert(directory);
                         }
 
                         return groupedObservable.Select(imagePath =>
                         {
-                            var image = new Image()
+                            var image = new Image
                             {
                                 Path = imagePath
                             };

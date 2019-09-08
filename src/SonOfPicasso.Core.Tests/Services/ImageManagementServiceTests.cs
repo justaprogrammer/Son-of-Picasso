@@ -90,7 +90,7 @@ namespace SonOfPicasso.Core.Tests.Services
 
             unitOfWork.Received(1)
                 .Save();
-            
+
             unitOfWork.Received(1)
                 .Dispose();
 
