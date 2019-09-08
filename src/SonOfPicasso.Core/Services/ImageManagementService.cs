@@ -82,34 +82,56 @@ namespace SonOfPicasso.Core.Services
         {
             return Observable.Start(() =>
             {
-                var unitOfWorkFactory = _unitOfWorkFactory();
+                using var unitOfWork = _unitOfWorkFactory();
 
                 var album = new Album { Name = name };
 
-                unitOfWorkFactory.AlbumRepository.Insert(album);
-                unitOfWorkFactory.Save();
+                unitOfWork.AlbumRepository.Insert(album);
+                unitOfWork.Save();
 
                 return album;
             }, _schedulerProvider.TaskPool);
         }
 
-        public IObservable<Image> AddImagesToAlbum(string albumName, IEnumerable<string> imagePaths)
+        public IObservable<Album[]> GetAlbums()
+        {
+            return Observable.Start(() =>
+            {
+                using var unitOfWork = _unitOfWorkFactory();
+
+                var albums = unitOfWork.AlbumRepository.Get()
+                    .ToArray();
+
+                return albums;
+            }, _schedulerProvider.TaskPool);
+        }
+
+        public IObservable<Unit> DeleteAlbum(int id)
+        {
+            return Observable.Start(() =>
+            {
+                using var unitOfWork = _unitOfWorkFactory();
+
+                unitOfWork.AlbumRepository.Delete(id);
+                unitOfWork.Save();
+
+                return Unit.Default;
+            }, _schedulerProvider.TaskPool);
+        }
+
+        public IObservable<Image> AddImagesToAlbum(int albumId, IEnumerable<int> imageIds)
         {
             return Observable.Start(() =>
                 {
                     using var unitOfWork = _unitOfWorkFactory();
                 
-                    var albumId1 = unitOfWork.AlbumRepository.Get(a => a.Name == albumName)
-                        .Select(a => a.Id)
-                        .First();
+                    var album = unitOfWork.AlbumRepository.GetById(albumId);
 
-                    var images = imagePaths.Select(imagePath =>
+                    var images = imageIds.Select(imageid =>
                     {
-                        var image = unitOfWork.ImageRepository
-                            .Get(i => i.Path == imagePath)
-                            .First();
+                        var image = unitOfWork.ImageRepository.GetById(imageid);
 
-                        unitOfWork.AlbumImageRepository.Insert(new AlbumImage { AlbumId = albumId1, ImageId = image.Id });
+                        unitOfWork.AlbumImageRepository.Insert(new AlbumImage { Album = album, Image = image });
 
                         return image;
                     }).ToArray();

@@ -85,16 +85,13 @@ namespace SonOfPicasso.Core.Tests.Services
 
             unitOfWork.AlbumRepository.Get().ReturnsForAnyArgs(new[] {new Album {Id = albumId, Name = albumName}});
 
-            unitOfWork.ImageRepository.Get()
+            unitOfWork.ImageRepository.GetById(Arg.Any<int>())
                 .ReturnsForAnyArgs(info =>
                 {
-                    var arg = info.Arg<Expression<Func<Image, bool>>>();
-                    var image = images.Where(arg.Compile()).First();
-
-                    return new[] {image};
+                    return images.First(i => i.Id == (int) info.Arg<object>());
                 });
 
-            imageManagementService.AddImagesToAlbum(albumName, images.Select(image => image.Path))
+            imageManagementService.AddImagesToAlbum(albumId, images.Select(image => image.Id))
                 .Subscribe(unit => autoResetEvent.Set());
 
             _testSchedulerProvider.TaskPool.AdvanceBy(1);
