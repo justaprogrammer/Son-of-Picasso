@@ -1,9 +1,13 @@
 ﻿namespace SonOfPicasso.Data.Model
 {
-    public class Album
+    public class Album: IAlbum
     {
-        public int AlbumId { get; set; }
+        public int Id { get; set; }
 
         public string Name { get; set; }
+    }
+
+    public interface IAlbum: IModel
+    {
     }
 }

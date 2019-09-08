@@ -2,7 +2,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
-namespace SonOfPicasso.Data
+namespace SonOfPicasso.Data.Context
 {
     public interface IDataContext: IDisposable
     {

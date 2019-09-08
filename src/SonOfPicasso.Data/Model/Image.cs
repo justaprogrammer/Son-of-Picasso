@@ -2,14 +2,18 @@
 
 namespace SonOfPicasso.Data.Model
 {
-    public class Image
+    public class Image: IImage
     {
-        public int ImageId { get; set; }
+        public int Id { get; set; }
 
         public int DirectoryId { get; set; }
 
         public string Path { get; set; }
 
         public Directory Directory { get; set; }
+    }
+
+    public interface IImage: IModel
+    {
     }
 }
