@@ -2,10 +2,11 @@ using System;
 using Autofac.Extras.NSubstitute;
 using SonOfPicasso.Data.Repository;
 using SonOfPicasso.Data.Tests;
+using SonOfPicasso.Testing.Common;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace SonOfPicasso.Core.Tests.IntegrationTests.Services
+namespace SonOfPicasso.Core.IntegrationTests.Services
 {
     public class ImageManagementServiceTests : DataTestsBase, IDisposable
     {
@@ -19,7 +20,7 @@ namespace SonOfPicasso.Core.Tests.IntegrationTests.Services
         }
 
         [Fact]
-        public void Blah()
+        public void CanInitialize()
         {
             var imageManagementService = _autoSubstitute.Resolve<Core.Services.ImageManagementService>();
         }
