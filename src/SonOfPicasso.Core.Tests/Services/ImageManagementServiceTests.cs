@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Reactive.Linq;
 using System.Threading;
 using Autofac.Extras.NSubstitute;
@@ -50,10 +52,68 @@ namespace SonOfPicasso.Core.Tests.Services
         private readonly TestSchedulerProvider _testSchedulerProvider;
 
         [Fact]
+        public void AddImageToAlbum()
+        {
+            var directoryPath = Faker.System.DirectoryPathWindows();
+            var directory = new Directory
+            {
+                Id = Faker.Random.Int(1),
+                Path = directoryPath,
+                Images = new List<Image>()
+            };
+
+            var images = Faker.Make(Faker.Random.Int(3, 5), () => new Image
+            {
+                Path = Path.Join(directoryPath) + Faker.System.FileName("jpg"),
+                DirectoryId = directory.Id
+            });
+
+            directory.Images.AddRange(images);
+
+            var unitOfWork = Substitute.For<IUnitOfWork>();
+            unitOfWork.DirectoryRepository.Get()
+                .ReturnsForAnyArgs(new[] {directory, FakerProfiles.FakeNewDirectory});
+
+            _unitOfWorkQueue.Enqueue(unitOfWork);
+
+            var autoResetEvent = new AutoResetEvent(false);
+
+            var imageManagementService = _autoSubstitute.Resolve<ImageManagementService>();
+
+            var albumName = Faker.Random.Words(2);
+            var albumId = Faker.Random.Int(1);
+
+            unitOfWork.AlbumRepository.Get().ReturnsForAnyArgs(new[] {new Album {Id = albumId, Name = albumName}});
+
+            unitOfWork.ImageRepository.Get()
+                .ReturnsForAnyArgs(info =>
+                {
+                    var arg = info.Arg<Expression<Func<Image, bool>>>();
+                    var image = images.Where(arg.Compile()).First();
+
+                    return new[] {image};
+                });
+
+            imageManagementService.AddImagesToAlbum(albumName, images.Select(image => image.Path))
+                .Subscribe(unit => autoResetEvent.Set());
+
+            _testSchedulerProvider.TaskPool.AdvanceBy(1);
+
+            autoResetEvent.WaitOne(10).Should().BeTrue();
+
+            unitOfWork.AlbumImageRepository.ReceivedWithAnyArgs(images.Count)
+                .Insert(null);
+
+            unitOfWork.Received(1).Save();
+
+            unitOfWork.Received(1).Dispose();
+        }
+
+        [Fact]
         public void ScanFolder()
         {
             var directoryPath = Faker.System.DirectoryPathWindows();
-            var imagePath = Path.Join(directoryPath, Faker.System.FileName(".jpg"));
+            var imagePath = Path.Join(directoryPath, Faker.System.FileName("jpg"));
 
             var directory = new Directory
             {

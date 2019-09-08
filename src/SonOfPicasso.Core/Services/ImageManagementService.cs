@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO.Abstractions;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using Serilog;
 using SonOfPicasso.Core.Interfaces;
@@ -53,7 +54,7 @@ namespace SonOfPicasso.Core.Services
 
                         if (directory == null)
                         {
-                            directory = new Directory {Path = groupedObservable.Key, Images = new List<Image>()};
+                            directory = new Directory { Path = groupedObservable.Key, Images = new List<Image>() };
                             unitOfWork.DirectoryRepository.Insert(directory);
                         }
 
@@ -75,6 +76,49 @@ namespace SonOfPicasso.Core.Services
 
                 return images;
             }, _schedulerProvider.TaskPool);
+        }
+
+        public IObservable<Album> CreateAlbum(string name)
+        {
+            return Observable.Start(() =>
+            {
+                var unitOfWorkFactory = _unitOfWorkFactory();
+
+                var album = new Album { Name = name };
+
+                unitOfWorkFactory.AlbumRepository.Insert(album);
+                unitOfWorkFactory.Save();
+
+                return album;
+            }, _schedulerProvider.TaskPool);
+        }
+
+        public IObservable<Image> AddImagesToAlbum(string albumName, IEnumerable<string> imagePaths)
+        {
+            return Observable.Start(() =>
+                {
+                    using var unitOfWork = _unitOfWorkFactory();
+                
+                    var albumId1 = unitOfWork.AlbumRepository.Get(a => a.Name == albumName)
+                        .Select(a => a.Id)
+                        .First();
+
+                    var images = imagePaths.Select(imagePath =>
+                    {
+                        var image = unitOfWork.ImageRepository
+                            .Get(i => i.Path == imagePath)
+                            .First();
+
+                        unitOfWork.AlbumImageRepository.Insert(new AlbumImage { AlbumId = albumId1, ImageId = image.Id });
+
+                        return image;
+                    }).ToArray();
+
+                    unitOfWork.Save();
+
+                    return images;
+                }, _schedulerProvider.TaskPool)
+                .SelectMany(observable => observable);
         }
     }
 }
