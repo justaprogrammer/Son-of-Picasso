@@ -13,6 +13,7 @@
   <ItemGroup>
     <PackageReference Include="akavache.core" Version="6.8.1" />
     <PackageReference Include="Autofac" Version="4.9.4" />
+    <PackageReference Include="ExifLibNet" Version="1.2.37" />
     <PackageReference Include="Serilog" Version="2.8.0" />
     <PackageReference Include="Splat.Autofac" Version="8.3.1" />
     <PackageReference Include="System.IO.Abstractions" Version="6.0.27" />
