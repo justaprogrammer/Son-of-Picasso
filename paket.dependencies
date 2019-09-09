@@ -12,6 +12,7 @@ group FakeBuild
   nuget Fake.BuildServer.AppVeyor
   nuget Fake.DotNet.Cli
   nuget Fake.IO.Zip
+  nuget Fake.Tools.Git
   nuget Fake.Tools.GitVersion
   groupref FakeBuildResources
 

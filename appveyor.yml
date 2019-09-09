@@ -7,7 +7,7 @@ install:
   - choco install dotnetcore-sdk --version 3.0.100-preview9-014004 --pre 
   - choco install codecov --no-progress --confirm
   - choco install gitversion.portable --no-progress --confirm
-  - npm install -g semantic-release @semantic-release/changelog @semantic-release/git
+  - npm install -g semantic-release @semantic-release/changelog @semantic-release/git commit-analyzer-cli
 cache:
   - '%LOCALAPPDATA%\Temp\Chocolatey -> appveyor.yml'
   - '.fake -> Build.fsx'

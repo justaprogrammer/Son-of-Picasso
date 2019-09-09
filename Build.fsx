@@ -1,6 +1,7 @@
 #r "paket: groupref FakeBuild //"
 #load "./.fake/build.fsx/intellisense.fsx"
 
+open System.Text.RegularExpressions
 open Fake.IO
 open Fake.BuildServer
 open Fake.IO.Globbing.Operators
@@ -15,6 +16,20 @@ BuildServer.install [
 let isAppveyor = AppVeyor.detect()
 let gitVersion = GitVersion.generateProperties id
 
+let replacementVersion, fullSemver = 
+    if (Git.Information.getBranchName(Shell.pwd()) = "master") then
+      CreateProcess.fromRawCommandLine "node" (sprintf "%s\\npm\\node_modules\\commit-analyzer-cli\\bin\\index.js" (Environment.environVarOrFail "APPDATA"))
+      |> CreateProcess.redirectOutput
+      |> CreateProcess.map (fun t -> 
+          Trace.log t.Result.Error
+          t.Result.Output.Trim()
+          |> function
+                | x when String.isNullOrWhiteSpace(x) -> None, gitVersion.FullSemVer
+                | x -> Some(x), x
+      )
+      |> Proc.run
+    else None, gitVersion.FullSemVer
+
 Target.create "Clean" (fun _ ->
   ["reports" ; "build" ; "src/common"]
   |> Seq.iter Directory.delete
@@ -22,7 +37,7 @@ Target.create "Clean" (fun _ ->
   
   let configuration: (DotNet.Options -> DotNet.Options) = (fun t -> {t with
                                                                         Verbosity = Some DotNet.Verbosity.Minimal})
-
+                                                                        
   DotNet.exec configuration "clean" "SonOfPicasso.sln"
   |> ignore
 )
@@ -31,6 +46,20 @@ Target.create "Build" (fun _ ->
   CreateProcess.fromRawCommandLine "gitversion" "/updateassemblyinfo src\common\SharedAssemblyInfo.cs /ensureassemblyinfo"
   |> Proc.run
   |> ignore
+
+  match replacementVersion with
+    | None -> ()
+    | Some version -> 
+        let sha = Git.Information.getCurrentSHA1(Shell.pwd())
+
+        Fake.IO.File.readAsString "./src/common/SharedAssemblyInfo.cs"
+        |> (fun t -> Regex.Replace(t, "AssemblyFileVersion\\(\"(.*?)\"\\)", sprintf "AssemblyFileVersion(\"%s.0\")" version))
+        |> (fun t -> Regex.Replace(t, "AssemblyVersion\\(\"(.*?)\"\\)", sprintf "AssemblyVersion(\"%s.0\")" version))
+        |> (fun t -> Regex.Replace(t, "AssemblyInformationalVersion\\(\"(.*?)\"\\)", sprintf "AssemblyInformationalVersion(\"%s+Branch.master.Sha.%s\")" version sha))
+        |> Fake.IO.File.writeString false "./src/common/SharedAssemblyInfo.cs"
+
+        if isAppveyor then
+          AppVeyor.updateBuild (fun t -> {t with Version = (sprintf "%s" version)})
 
   let configuration: (DotNet.BuildOptions -> DotNet.BuildOptions)
         = (fun t -> {t with
@@ -92,7 +121,7 @@ Target.create "TestData" (fun _ ->
 )
 
 Target.create "Package" (fun _ -> 
-    let packagePath = (sprintf "build/son-of-picasso-%s.zip" gitVersion.FullSemVer)
+    let packagePath = (sprintf "build/son-of-picasso-%s.zip" fullSemver)
 
     Directory.ensure "build"
   
