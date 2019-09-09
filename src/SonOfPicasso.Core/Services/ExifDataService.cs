@@ -12,6 +12,8 @@ namespace SonOfPicasso.Core.Services
         public string Software { get; set; }
         public string UserComment { get; set; }
         public string FileSource { get; set; }
+        public string ImageDescription { get; set; }
+        public string DocumentName { get; set; }
     }
 
     public class ExifDataService: IExifDataService
@@ -65,8 +67,10 @@ namespace SonOfPicasso.Core.Services
                     case ExifTag.FillOrder:
                         break;
                     case ExifTag.DocumentName:
+                        exifData.DocumentName = exifAscii?.Value;
                         break;
                     case ExifTag.ImageDescription:
+                        exifData.ImageDescription = exifAscii?.Value;
                         break;
                     case ExifTag.Make:
                         exifData.Make = exifAscii?.Value;

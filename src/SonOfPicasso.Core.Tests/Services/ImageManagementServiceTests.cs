@@ -4,10 +4,11 @@ using System.IO;
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reactive.Linq;
 using System.Threading;
+using AutoBogus;
 using Autofac.Extras.NSubstitute;
+using Bogus;
 using FluentAssertions;
 using NSubstitute;
 using SonOfPicasso.Core.Interfaces;
@@ -39,6 +40,7 @@ namespace SonOfPicasso.Core.Tests.Services
 
             _mockFileSystem = new MockFileSystem();
             _autoSubstitute.Provide<IFileSystem>(_mockFileSystem);
+            _autoResetEvent = new AutoResetEvent(false);
         }
 
         public void Dispose()
@@ -46,10 +48,16 @@ namespace SonOfPicasso.Core.Tests.Services
             _autoSubstitute.Dispose();
         }
 
+        private static readonly Faker<Directory> FakeNewDirectory
+            = new AutoFaker<Directory>().RuleFor(directory1 => directory1.Id, 0)
+                .RuleFor(directory1 => directory1.Images, (List<Image>) null)
+                .RuleFor(directory1 => directory1.Path, faker => faker.System.DirectoryPathWindows());
+
         private readonly AutoSubstitute _autoSubstitute;
         private readonly Queue<IUnitOfWork> _unitOfWorkQueue;
         private readonly MockFileSystem _mockFileSystem;
         private readonly TestSchedulerProvider _testSchedulerProvider;
+        private readonly AutoResetEvent _autoResetEvent;
 
         [Fact]
         public void AddImageToAlbum()
@@ -72,11 +80,9 @@ namespace SonOfPicasso.Core.Tests.Services
 
             var unitOfWork = Substitute.For<IUnitOfWork>();
             unitOfWork.DirectoryRepository.Get()
-                .ReturnsForAnyArgs(new[] {directory, FakerProfiles.FakeNewDirectory});
+                .ReturnsForAnyArgs(new[] {directory, FakeNewDirectory});
 
             _unitOfWorkQueue.Enqueue(unitOfWork);
-
-            var autoResetEvent = new AutoResetEvent(false);
 
             var imageManagementService = _autoSubstitute.Resolve<ImageManagementService>();
 
@@ -86,17 +92,14 @@ namespace SonOfPicasso.Core.Tests.Services
             unitOfWork.AlbumRepository.Get().ReturnsForAnyArgs(new[] {new Album {Id = albumId, Name = albumName}});
 
             unitOfWork.ImageRepository.GetById(Arg.Any<int>())
-                .ReturnsForAnyArgs(info =>
-                {
-                    return images.First(i => i.Id == (int) info.Arg<object>());
-                });
+                .ReturnsForAnyArgs(info => { return images.First(i => i.Id == (int) info.Arg<object>()); });
 
             imageManagementService.AddImagesToAlbum(albumId, images.Select(image => image.Id))
-                .Subscribe(unit => autoResetEvent.Set());
+                .Subscribe(unit => _autoResetEvent.Set());
 
             _testSchedulerProvider.TaskPool.AdvanceBy(1);
 
-            autoResetEvent.WaitOne(10).Should().BeTrue();
+            _autoResetEvent.WaitOne(10).Should().BeTrue();
 
             unitOfWork.AlbumImageRepository.ReceivedWithAnyArgs(images.Count)
                 .Insert(null);
@@ -121,14 +124,12 @@ namespace SonOfPicasso.Core.Tests.Services
 
             var unitOfWork = Substitute.For<IUnitOfWork>();
             unitOfWork.DirectoryRepository.Get()
-                .ReturnsForAnyArgs(new[] {directory, FakerProfiles.FakeNewDirectory});
+                .ReturnsForAnyArgs(new[] {directory, FakeNewDirectory});
 
             _unitOfWorkQueue.Enqueue(unitOfWork);
 
             _mockFileSystem.AddDirectory(directoryPath);
             _mockFileSystem.AddFile(imagePath, new MockFileData(new byte[0]));
-
-            var autoResetEvent = new AutoResetEvent(false);
 
             _autoSubstitute.Resolve<IImageLocationService>()
                 .GetImages(Arg.Any<string>())
@@ -136,11 +137,11 @@ namespace SonOfPicasso.Core.Tests.Services
 
             var imageManagementService = _autoSubstitute.Resolve<ImageManagementService>();
             imageManagementService.ScanFolder(directoryPath)
-                .Subscribe(unit => autoResetEvent.Set());
+                .Subscribe(unit => _autoResetEvent.Set());
 
             _testSchedulerProvider.TaskPool.AdvanceBy(1);
 
-            autoResetEvent.WaitOne(10).Should().BeTrue();
+            _autoResetEvent.WaitOne(10).Should().BeTrue();
 
             unitOfWork.ImageRepository.Received(1)
                 .Insert(Arg.Any<Image>());

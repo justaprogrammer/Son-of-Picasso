@@ -47,6 +47,8 @@ namespace SonOfPicasso.Core.Tests.Services
 
             exifData.Make.Should().Be("SONY");
             exifData.Model.Should().Be("DSC-RX100M3");
+            exifData.DocumentName.Should().Be(new String(' ', 31));
+            exifData.ImageDescription.Should().Be(new String(' ', 31));
             exifData.UserComment.Should().Be(string.Empty);
             exifData.FileSource.Should().Be("DSC");
             exifData.Software.Should().Be("DSC-RX100M3 v1.20");
