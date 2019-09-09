@@ -33,10 +33,10 @@ namespace SonOfPicasso.UI.Tests.Services
                 var mockFileSystem = new MockFileSystem();
                 autoSub.Provide<IFileSystem>(mockFileSystem);
 
-                var resourceAssembly = Assembly.GetAssembly(typeof(ImageLoadingServiceTests));
+                var resourceAssembly = Assembly.GetAssembly(typeof(TestsBase));
 
                 var filePath = Path.Combine(Faker.System.DirectoryPathWindows(), Faker.System.FileName("jpg"));
-                mockFileSystem.AddFileFromEmbeddedResource(filePath, resourceAssembly, "SonOfPicasso.UI.Tests.Resources.DSC04085.JPG");
+                mockFileSystem.AddFileFromEmbeddedResource(filePath, resourceAssembly, "SonOfPicasso.Testing.Common.Resources.DSC04085.JPG");
 
                 var autoResetEvent = new AutoResetEvent(false);
 

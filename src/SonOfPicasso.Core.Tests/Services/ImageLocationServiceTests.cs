@@ -16,7 +16,7 @@ using Xunit.Abstractions;
 
 namespace SonOfPicasso.Core.Tests.Services
 {
-    public class ImageLocationServiceTests : TestsBase
+    public class ImageLocationServiceTests : TestsBase, IDisposable
     {
         private readonly AutoSubstitute _autoSub;
 
@@ -24,6 +24,11 @@ namespace SonOfPicasso.Core.Tests.Services
             : base(testOutputHelper)
         {
             _autoSub = new AutoSubstitute();
+        }
+
+        public void Dispose()
+        {
+            _autoSub.Dispose();
         }
 
         [Fact(Timeout = 1000)]
