@@ -1,3 +1,12 @@
+# [1.1.0](https://github.com/justaprogrammer/Son-of-Picasso/compare/v1.0.0...v1.1.0) (2019-09-09)
+
+
+### Features
+
+* Core functionality to create album and add images ([f473bb0](https://github.com/justaprogrammer/Son-of-Picasso/commit/f473bb0))
+* Core functionality to CRUD albums ([3ad96f2](https://github.com/justaprogrammer/Son-of-Picasso/commit/3ad96f2))
+* Core functionality to scan for images ([7dfe7e8](https://github.com/justaprogrammer/Son-of-Picasso/commit/7dfe7e8))
+
 # 1.0.0 (2019-09-08)
 
 
