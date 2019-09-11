@@ -18,7 +18,7 @@ namespace SonOfPicasso.Testing.Common
                 .MinimumLevel.Verbose()
                 .Enrich.WithThreadId()
                 .Enrich.With<CustomEnrichers>() 
-                .WriteTo.TestOutput(testOutputHelper, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u4}] ({PaddedThreadId}) {ShortSourceContext} {Message}{NewLineIfException}{Exception}")
+                .WriteTo.TestOutput(testOutputHelper, outputTemplate: "{Timestamp:HH:mm:ss} [{Level:u4}] ({PaddedThreadId}) {ShortSourceContext} {Message}{NewLineIfException}{Exception}")
                 .CreateLogger();
 
             Logger = Log.Logger.ForContext(GetType());
