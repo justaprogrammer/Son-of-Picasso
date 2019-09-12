@@ -4,7 +4,9 @@ using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Reflection;
 using System.Threading;
+using Autofac;
 using Autofac.Extras.NSubstitute;
+using AutofacSerilogIntegration;
 using FluentAssertions;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Testing.Common;
@@ -22,21 +24,28 @@ namespace SonOfPicasso.UI.Tests.Services
         private readonly AutoSubstitute _autoSubstitute;
         private readonly MockFileSystem _mockFileSystem;
         private readonly AutoResetEvent _autoResetEvent;
+        private readonly TestSchedulerProvider _testSchedulerProvider;
 
         public ImageLoadingServiceTests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {
-            _autoSubstitute = new AutoSubstitute();
+            var builder = new ContainerBuilder();
+            builder.RegisterLogger();
+
+            _testSchedulerProvider = new TestSchedulerProvider();
+            builder.RegisterInstance(_testSchedulerProvider).As<ISchedulerProvider>();
 
             _mockFileSystem = new MockFileSystem();
-            _autoSubstitute.Provide<IFileSystem>(_mockFileSystem);
+            builder.RegisterInstance(_mockFileSystem).As<IFileSystem>();
 
+            _autoSubstitute = new AutoSubstitute(builder);
             _autoResetEvent = new AutoResetEvent(false);
         }
 
         public void Dispose()
         {
             _autoSubstitute.Dispose();
+            _autoResetEvent.Dispose();
         }
 
         [Fact]
@@ -52,9 +61,6 @@ namespace SonOfPicasso.UI.Tests.Services
 
             IBitmap bitmap = null;
 
-            var testSchedulerProvider = new TestSchedulerProvider();
-            _autoSubstitute.Provide<ISchedulerProvider>(testSchedulerProvider);
-
             var imageLoadingService = _autoSubstitute.Resolve<ImageLoadingService>();
 
             imageLoadingService.LoadImageFromPath(filePath).Subscribe(b =>
@@ -63,7 +69,7 @@ namespace SonOfPicasso.UI.Tests.Services
                 _autoResetEvent.Set();
             });
 
-            testSchedulerProvider.TaskPool.AdvanceBy(1);
+            _testSchedulerProvider.TaskPool.AdvanceBy(1);
 
             _autoResetEvent.WaitOne();
 

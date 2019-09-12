@@ -10,6 +10,7 @@ using AutoBogus;
 using Autofac.Extras.NSubstitute;
 using Bogus;
 using FluentAssertions;
+using FluentAssertions.Execution;
 using NSubstitute;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
@@ -52,6 +53,9 @@ namespace SonOfPicasso.Core.Tests.Services
             = new AutoFaker<Directory>().RuleFor(directory1 => directory1.Id, 0)
                 .RuleFor(directory1 => directory1.Images, (List<Image>) null)
                 .RuleFor(directory1 => directory1.Path, faker => faker.System.DirectoryPathWindows());
+
+        private static readonly Faker<ExifData> FakeNewExifData
+            = new AutoFaker<ExifData>().RuleFor(exifData => exifData.Id, 0);
 
         private readonly AutoSubstitute _autoSubstitute;
         private readonly Queue<IUnitOfWork> _unitOfWorkQueue;
@@ -135,6 +139,10 @@ namespace SonOfPicasso.Core.Tests.Services
                 .GetImages(Arg.Any<string>())
                 .Returns(Observable.Return(new[] {imagePath}));
 
+            var newExifData = (ExifData) FakeNewExifData;
+            _autoSubstitute.Resolve<IExifDataService>().GetExifData(imagePath)
+                .Returns(Observable.Return(newExifData));
+
             var imageManagementService = _autoSubstitute.Resolve<ImageManagementService>();
             imageManagementService.ScanFolder(directoryPath)
                 .Subscribe(unit => _autoResetEvent.Set());
@@ -143,16 +151,26 @@ namespace SonOfPicasso.Core.Tests.Services
 
             _autoResetEvent.WaitOne(10).Should().BeTrue();
 
-            unitOfWork.ImageRepository.Received(1)
-                .Insert(Arg.Any<Image>());
+            unitOfWork.ImageRepository.ReceivedWithAnyArgs(1).Insert(Arg.Any<Image>());
+
+            var insertedImage = (Image) unitOfWork.ImageRepository.ReceivedCalls()
+                .First(call => call.GetMethodInfo().Name == "Insert")
+                .GetArguments()
+                .First();
+
+            using (var assertionScope = new AssertionScope())
+            {
+                insertedImage.Path.Should().Be(imagePath);
+                insertedImage.ExifData.Should().Be(newExifData);
+            }
+
+            directory.Images.Count.Should().Be(1);
 
             unitOfWork.Received(1)
                 .Save();
 
             unitOfWork.Received(1)
                 .Dispose();
-
-            directory.Images.Count.Should().Be(1);
         }
     }
 }
