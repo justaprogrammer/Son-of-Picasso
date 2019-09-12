@@ -18,19 +18,22 @@ namespace SonOfPicasso.Core.Services
         private readonly IImageLocationService _imageLocationService;
         private readonly ILogger _logger;
         private readonly ISchedulerProvider _schedulerProvider;
+        private readonly IExifDataService _exifDataService;
         private readonly Func<IUnitOfWork> _unitOfWorkFactory;
 
         public ImageManagementService(ILogger logger,
             IFileSystem fileSystem,
             IImageLocationService imageLocationService,
             Func<IUnitOfWork> unitOfWorkFactory,
-            ISchedulerProvider schedulerProvider)
+            ISchedulerProvider schedulerProvider,
+            IExifDataService exifDataService)
         {
             _logger = logger;
             _fileSystem = fileSystem;
             _imageLocationService = imageLocationService;
             _unitOfWorkFactory = unitOfWorkFactory;
             _schedulerProvider = schedulerProvider;
+            _exifDataService = exifDataService;
         }
 
         public IObservable<Image[]> ScanFolder(string path)
@@ -58,18 +61,31 @@ namespace SonOfPicasso.Core.Services
                             unitOfWork.DirectoryRepository.Insert(directory);
                         }
 
-                        return groupedObservable.Select(imagePath =>
-                        {
-                            var image = new Image
+                        return groupedObservable
+                            .Select(imagePath =>
                             {
-                                Path = imagePath
-                            };
+                                var observable = _exifDataService
+                                    .GetExifData(imagePath)
+                                    .Select(exifData =>
+                                    {
+                                        return (imagePath, exifData);
+                                    });
+                                return observable;
+                            })
+                            .SelectMany(observable => observable)
+                            .Select(tuple =>
+                            {
+                                var image = new Image
+                                {
+                                    Path = tuple.imagePath,
+                                    ExifData = tuple.exifData
+                                };
 
-                            unitOfWork.ImageRepository.Insert(image);
-                            directory.Images.Add(image);
+                                unitOfWork.ImageRepository.Insert(image);
+                                directory.Images.Add(image);
 
-                            return image;
-                        });
+                                return image;
+                            });
                     }).ToArray();
 
                 unitOfWork.Save();
