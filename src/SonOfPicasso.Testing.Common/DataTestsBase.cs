@@ -7,7 +7,7 @@ using Xunit.Abstractions;
 
 namespace SonOfPicasso.Testing.Common
 {
-    public class DataTestsBase : TestsBase, IDisposable
+    public abstract class DataTestsBase : TestsBase, IDisposable
     {
         private readonly string _databasePath;
         private readonly DbContextOptions<DataContext> _dbContextOptions;
