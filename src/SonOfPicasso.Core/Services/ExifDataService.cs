@@ -37,130 +37,133 @@ namespace SonOfPicasso.Core.Services
 
                 var exifData = new ExifData();
                 foreach (var imageFileProperty in imageFile.Properties)
-                    if (imageFileProperty.Tag == ExifTag.DocumentName)
+                {
+                    var tag = imageFileProperty.Tag;
+                    if (tag == ExifTag.DocumentName)
                         exifData.DocumentName = ReadAscii(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.ImageDescription)
+                    else if (tag == ExifTag.ImageDescription)
                         exifData.ImageDescription = ReadAscii(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.Make)
+                    else if (tag == ExifTag.Make)
                         exifData.Make = ReadAscii(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.Model)
+                    else if (tag == ExifTag.Model)
                         exifData.Model = ReadAscii(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.ThumbnailImageDescription)
+                    else if (tag == ExifTag.ThumbnailImageDescription)
                         exifData.ThumbnailImageDescription = ReadAscii(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.DateTime)
+                    else if (tag == ExifTag.DateTime)
                         exifData.DateTime = ReadDateTime(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.DateTimeDigitized)
+                    else if (tag == ExifTag.DateTimeDigitized)
                         exifData.DateTimeDigitized = ReadDateTime(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.DateTimeOriginal)
+                    else if (tag == ExifTag.DateTimeOriginal)
                         exifData.DateTimeOriginal = ReadDateTime(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.ThumbnailDateTime)
+                    else if (tag == ExifTag.ThumbnailDateTime)
                         exifData.ThumbnailDateTime = ReadDateTime(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.ThumbnailMake)
+                    else if (tag == ExifTag.ThumbnailMake)
                         exifData.ThumbnailMake = ReadAscii(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.ThumbnailModel)
+                    else if (tag == ExifTag.ThumbnailModel)
                         exifData.ThumbnailModel = ReadAscii(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.ThumbnailSoftware)
+                    else if (tag == ExifTag.ThumbnailSoftware)
                         exifData.ThumbnailSoftware = ReadAscii(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.InteroperabilityIndex)
+                    else if (tag == ExifTag.InteroperabilityIndex)
                         exifData.InteroperabilityIndex = ReadAscii(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.PixelXDimension)
+                    else if (tag == ExifTag.PixelXDimension)
                         exifData.PixelXDimension = ReadUint(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.EXIFIFDPointer)
+                    else if (tag == ExifTag.EXIFIFDPointer)
                         exifData.EXIFIFDPointer = ReadUint(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.PixelYDimension)
+                    else if (tag == ExifTag.PixelYDimension)
                         exifData.PixelYDimension = ReadUint(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.InteroperabilityIFDPointer)
+                    else if (tag == ExifTag.InteroperabilityIFDPointer)
                         exifData.InteroperabilityIFDPointer = ReadUint(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.ThumbnailJPEGInterchangeFormat)
+                    else if (tag == ExifTag.ThumbnailJPEGInterchangeFormat)
                         exifData.ThumbnailJPEGInterchangeFormat = ReadUint(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.ThumbnailJPEGInterchangeFormatLength)
+                    else if (tag == ExifTag.ThumbnailJPEGInterchangeFormatLength)
                         exifData.ThumbnailJPEGInterchangeFormatLength = ReadUint(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.FNumber)
+                    else if (tag == ExifTag.FNumber)
                         exifData.FNumber = ReadURational(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.MaxApertureValue)
+                    else if (tag == ExifTag.MaxApertureValue)
                         exifData.MaxApertureValue = ReadURational(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.DigitalZoomRatio)
+                    else if (tag == ExifTag.DigitalZoomRatio)
                         exifData.DigitalZoomRatio = ReadURational(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.XResolution)
+                    else if (tag == ExifTag.XResolution)
                         exifData.XResolution = ReadURational(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.YResolution)
+                    else if (tag == ExifTag.YResolution)
                         exifData.YResolution = ReadURational(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.ThumbnailXResolution)
+                    else if (tag == ExifTag.ThumbnailXResolution)
                         exifData.ThumbnailXResolution = ReadURational(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.ThumbnailYResolution)
+                    else if (tag == ExifTag.ThumbnailYResolution)
                         exifData.ThumbnailYResolution = ReadURational(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.ExposureTime)
+                    else if (tag == ExifTag.ExposureTime)
                         exifData.ExposureTime = ReadURational(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.CompressedBitsPerPixel)
+                    else if (tag == ExifTag.CompressedBitsPerPixel)
                         exifData.CompressedBitsPerPixel = ReadURational(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.FocalLength)
+                    else if (tag == ExifTag.FocalLength)
                         exifData.FocalLength = ReadURational(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.Orientation)
+                    else if (tag == ExifTag.Orientation)
                         exifData.Orientation = ReadEnumProperty<Orientation>(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.Software)
+                    else if (tag == ExifTag.Software)
                         exifData.Software = ReadAscii(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.UserComment)
+                    else if (tag == ExifTag.UserComment)
                         exifData.UserComment = ReadEncodedString(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.FileSource)
+                    else if (tag == ExifTag.FileSource)
                         exifData.FileSource = ReadEnumProperty<FileSource>(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.ColorSpace)
+                    else if (tag == ExifTag.ColorSpace)
                         exifData.ColorSpace = ReadEnumProperty<ColorSpace>(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.ExposureMode)
+                    else if (tag == ExifTag.ExposureMode)
                         exifData.ExposureMode = ReadEnumProperty<ExposureMode>(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.MeteringMode)
+                    else if (tag == ExifTag.MeteringMode)
                         exifData.MeteringMode = ReadEnumProperty<MeteringMode>(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.LightSource)
+                    else if (tag == ExifTag.LightSource)
                         exifData.LightSource = ReadEnumProperty<LightSource>(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.SceneCaptureType)
+                    else if (tag == ExifTag.SceneCaptureType)
                         exifData.SceneCaptureType = ReadEnumProperty<SceneCaptureType>(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.ResolutionUnit)
+                    else if (tag == ExifTag.ResolutionUnit)
                         exifData.ResolutionUnit = ReadEnumProperty<ResolutionUnit>(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.YCbCrPositioning)
+                    else if (tag == ExifTag.YCbCrPositioning)
                         exifData.YCbCrPositioning = ReadEnumProperty<YCbCrPositioning>(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.ExposureProgram)
+                    else if (tag == ExifTag.ExposureProgram)
                         exifData.ExposureProgram = ReadEnumProperty<ExposureProgram>(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.Flash)
+                    else if (tag == ExifTag.Flash)
                         exifData.Flash = ReadEnumProperty<Flash>(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.SceneType)
+                    else if (tag == ExifTag.SceneType)
                         exifData.SceneType = ReadEnumProperty<SceneType>(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.CustomRendered)
+                    else if (tag == ExifTag.CustomRendered)
                         exifData.CustomRendered = ReadEnumProperty<CustomRendered>(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.WhiteBalance)
+                    else if (tag == ExifTag.WhiteBalance)
                         exifData.WhiteBalance = ReadEnumProperty<WhiteBalance>(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.Contrast)
+                    else if (tag == ExifTag.Contrast)
                         exifData.Contrast = ReadEnumProperty<Contrast>(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.Saturation)
+                    else if (tag == ExifTag.Saturation)
                         exifData.Saturation = ReadEnumProperty<Saturation>(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.Sharpness)
+                    else if (tag == ExifTag.Sharpness)
                         exifData.Sharpness = ReadEnumProperty<Sharpness>(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.ThumbnailCompression)
+                    else if (tag == ExifTag.ThumbnailCompression)
                         exifData.ThumbnailCompression = ReadEnumProperty<Compression>(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.ThumbnailOrientation)
+                    else if (tag == ExifTag.ThumbnailOrientation)
                         exifData.ThumbnailOrientation = ReadEnumProperty<Orientation>(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.ThumbnailResolutionUnit)
+                    else if (tag == ExifTag.ThumbnailResolutionUnit)
                         exifData.ThumbnailResolutionUnit = ReadEnumProperty<ResolutionUnit>(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.ThumbnailYCbCrPositioning)
+                    else if (tag == ExifTag.ThumbnailYCbCrPositioning)
                         exifData.ThumbnailYCbCrPositioning = ReadEnumProperty<YCbCrPositioning>(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.ISOSpeedRatings)
+                    else if (tag == ExifTag.ISOSpeedRatings)
                         exifData.ISOSpeedRatings = ReadUshort(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.FocalLengthIn35mmFilm)
+                    else if (tag == ExifTag.FocalLengthIn35mmFilm)
                         exifData.FocalLengthIn35mmFilm = ReadUshort(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.ExifVersion)
+                    else if (tag == ExifTag.ExifVersion)
                         exifData.ExifVersion = ReadExifVersion(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.FlashpixVersion)
+                    else if (tag == ExifTag.FlashpixVersion)
                         exifData.FlashpixVersion = ReadExifVersion(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.InteroperabilityVersion)
+                    else if (tag == ExifTag.InteroperabilityVersion)
                         exifData.InteroperabilityVersion = ReadExifVersion(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.BrightnessValue)
+                    else if (tag == ExifTag.BrightnessValue)
                         exifData.BrightnessValue = ReadSRational(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.ExposureBiasValue)
+                    else if (tag == ExifTag.ExposureBiasValue)
                         exifData.ExposureBiasValue = ReadSRational(imageFileProperty);
-                    else if (imageFileProperty.Tag == ExifTag.LensSpecification)
+                    else if (tag == ExifTag.LensSpecification)
                         exifData.LensSpecification = ReadLensSpecification(imageFileProperty);
                     else
-                        _logger.Verbose("Unhandled Exif Property {Tag} {Type}", imageFileProperty.Tag,
+                        _logger.Verbose("Unhandled Exif Property {Tag} {Type}", tag,
                             imageFileProperty.GetType().Name);
-
+                }
+                
                 return exifData;
             }, _schedulerProvider.TaskPool);
         }
@@ -168,70 +171,70 @@ namespace SonOfPicasso.Core.Services
         private string ReadLensSpecification(ExifProperty imageFileProperty)
         {
             Guard.Against.Null(imageFileProperty, nameof(imageFileProperty));
-            var lensSpecification = (LensSpecification) imageFileProperty;
+            var lensSpecification = (LensSpecification)imageFileProperty;
             return lensSpecification.ToString();
         }
 
         private string ReadExifVersion(ExifProperty imageFileProperty)
         {
             Guard.Against.Null(imageFileProperty, nameof(imageFileProperty));
-            var exifVersion = (ExifVersion) imageFileProperty;
+            var exifVersion = (ExifVersion)imageFileProperty;
             return exifVersion.Value;
         }
 
         private string ReadEncodedString(ExifProperty imageFileProperty)
         {
             Guard.Against.Null(imageFileProperty, nameof(imageFileProperty));
-            var exifEncodedString = (ExifEncodedString) imageFileProperty;
+            var exifEncodedString = (ExifEncodedString)imageFileProperty;
             return exifEncodedString.Value;
         }
 
         private static string ReadURational(ExifProperty imageFileProperty)
         {
             Guard.Against.Null(imageFileProperty, nameof(imageFileProperty));
-            var exifURational = (ExifURational) imageFileProperty;
+            var exifURational = (ExifURational)imageFileProperty;
             return exifURational.Value.ToString();
         }
 
         private static string ReadSRational(ExifProperty imageFileProperty)
         {
             Guard.Against.Null(imageFileProperty, nameof(imageFileProperty));
-            var exifSRational = (ExifSRational) imageFileProperty;
+            var exifSRational = (ExifSRational)imageFileProperty;
             return exifSRational.Value.ToString();
         }
 
         private static uint ReadUint(ExifProperty imageFileProperty)
         {
             Guard.Against.Null(imageFileProperty, nameof(imageFileProperty));
-            var exifUInt = (ExifUInt) imageFileProperty;
+            var exifUInt = (ExifUInt)imageFileProperty;
             return exifUInt.Value;
         }
 
         private static ushort ReadUshort(ExifProperty imageFileProperty)
         {
             Guard.Against.Null(imageFileProperty, nameof(imageFileProperty));
-            var exifUShort = (ExifUShort) imageFileProperty;
+            var exifUShort = (ExifUShort)imageFileProperty;
             return exifUShort.Value;
         }
 
         private static DateTime ReadDateTime(ExifProperty imageFileProperty)
         {
             Guard.Against.Null(imageFileProperty, nameof(imageFileProperty));
-            var exifDateTime = (ExifDateTime) imageFileProperty;
+            var exifDateTime = (ExifDateTime)imageFileProperty;
             return exifDateTime.Value;
         }
 
         private static string ReadAscii(ExifProperty imageFileProperty)
         {
             Guard.Against.Null(imageFileProperty, nameof(imageFileProperty));
-            var exifAscii = (ExifAscii) imageFileProperty;
+            var exifAscii = (ExifAscii)imageFileProperty;
             return exifAscii.Value;
         }
 
         private static string ReadEnumProperty<T>(ExifProperty exifProperty)
         {
             Guard.Against.Null(exifProperty, nameof(exifProperty));
-            var exifEnumProperty = (ExifEnumProperty<T>) exifProperty;
+            var exifEnumProperty = (ExifEnumProperty<T>)exifProperty;
             return exifEnumProperty.Value.ToString();
         }
     }

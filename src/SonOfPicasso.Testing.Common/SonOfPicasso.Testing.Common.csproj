@@ -21,6 +21,7 @@
     <PackageReference Include="Serilog" Version="2.8.0" />
     <PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0" />
     <PackageReference Include="Serilog.Sinks.XUnit" Version="1.0.21" />
+    <PackageReference Include="Skybrud.Colors" Version="1.0.2" />
   </ItemGroup>
   
   <ItemGroup>

@@ -1,5 +1,5 @@
 ﻿using System;
-using System.IO;
+using System.IO.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using SonOfPicasso.Data.Context;
 using SonOfPicasso.Data.Repository;
@@ -9,40 +9,47 @@ namespace SonOfPicasso.Testing.Common
 {
     public class DataTestsBase : TestsBase, IDisposable
     {
-        private readonly string _databasePath;
-        private readonly DbContextOptions<DataContext> _dbContextOptions;
+        protected readonly string DatabasePath;
+        protected readonly DbContextOptions<DataContext> DbContextOptions;
+        protected readonly string TestRoot;
+        protected readonly FileSystem FileSystem;
 
         public DataTestsBase(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {
-            var databaseRoot = Path.Join(Path.GetTempPath(), "SonOfPicasso.Data.Tests");
-            var directoryInfo = new DirectoryInfo(databaseRoot);
-            if (!directoryInfo.Exists)
-            {
-                directoryInfo.Create();
-            }
+            FileSystem = new FileSystem();
 
-            _databasePath = Path.Join(databaseRoot, $"{Guid.NewGuid()}.db");
+            TestRoot = FileSystem.Path.Combine(FileSystem.Path.GetTempPath(), "SonOfPicasso.Data.Tests", Guid.NewGuid().ToString());
+            FileSystem.Directory.CreateDirectory(TestRoot);
 
-            _dbContextOptions =
+            DatabasePath = FileSystem.Path.Combine(TestRoot, $"database.db");
+
+            DbContextOptions =
                 new DbContextOptionsBuilder<DataContext>()
-                    .UseSqlite($"Data Source={_databasePath}")
+                    .UseSqlite($"Data Source={DatabasePath}")
                     .Options;
 
-            using var dataContext = new DataContext(_dbContextOptions);
+            using var dataContext = new DataContext(DbContextOptions);
             dataContext.Database.EnsureCreated();
         }
 
         protected UnitOfWork CreateUnitOfWork()
         {
-            return new UnitOfWork(_dbContextOptions);
+            return new UnitOfWork(DbContextOptions);
         }
 
         public void Dispose()
         {
-            if (File.Exists(_databasePath))
+            if (FileSystem.File.Exists(TestRoot))
             {
-                File.Delete(_databasePath);
+                try
+                {
+                    FileSystem.File.Delete(TestRoot);
+                }
+                catch (Exception e)
+                {
+                    Logger.Error(e, "Unable to delete test directory {TestRoot}", TestRoot);
+                }
             }
         }
     }
