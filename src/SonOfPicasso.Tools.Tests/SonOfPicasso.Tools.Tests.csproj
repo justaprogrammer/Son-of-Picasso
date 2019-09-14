@@ -11,7 +11,7 @@
     <PackageReference Include="Autofac" Version="4.9.4" />
     <PackageReference Include="Autofac.Extras.NSubstitute" Version="1.1.0" />
     <PackageReference Include="AutofacSerilogIntegration" Version="2.0.0" />
-    <PackageReference Include="Bogus" Version="28.0.3" />
+    <PackageReference Include="Bogus" Version="28.2.1" />
     <PackageReference Include="FluentAssertions" Version="5.9.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.0.0-preview9.19423.6" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.3.0-preview-20190828-03" />

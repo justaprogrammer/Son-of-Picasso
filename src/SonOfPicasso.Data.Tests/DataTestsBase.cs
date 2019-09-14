@@ -10,7 +10,6 @@ namespace SonOfPicasso.Testing.Common
 {
     public abstract class DataTestsBase : TestsBase, IDisposable
     {
-        protected readonly string DatabasePath;
         protected readonly DbContextOptions<DataContext> DbContextOptions;
         protected readonly string TestRoot;
         protected readonly FileSystem FileSystem;
@@ -23,11 +22,9 @@ namespace SonOfPicasso.Testing.Common
             TestRoot = FileSystem.Path.Combine(FileSystem.Path.GetTempPath(), "SonOfPicasso.Data.Tests", Guid.NewGuid().ToString());
             FileSystem.Directory.CreateDirectory(TestRoot);
 
-            DatabasePath = FileSystem.Path.Combine(TestRoot, $"database.db");
-
             DbContextOptions =
                 new DbContextOptionsBuilder<DataContext>()
-                    .UseSqlite($"Data Source={DatabasePath}")
+                    .UseInMemoryDatabase($"{Guid.NewGuid().ToString()}")
                     .Options;
 
             using var dataContext = new DataContext(DbContextOptions);

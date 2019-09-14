@@ -9,12 +9,9 @@ using Xunit.Abstractions;
 
 namespace SonOfPicasso.Core.IntegrationTests.Services
 {
-    public class ImageManagementServiceTests : TestsBase
+    public class ImageGenerationServiceTests : IntegrationTestsBase
     {
-        private readonly AutoSubstitute _autoSubstitute;
-        private readonly string _imagesPath;
-
-        public ImageManagementServiceTests(ITestOutputHelper testOutputHelper)
+        public ImageGenerationServiceTests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {
         }
@@ -22,7 +19,6 @@ namespace SonOfPicasso.Core.IntegrationTests.Services
         [Fact]
         public void CanInitialize()
         {
-            var imageManagementService = _autoSubstitute.Resolve<Core.Services.ImageManagementService>();
         }
     }
 }
