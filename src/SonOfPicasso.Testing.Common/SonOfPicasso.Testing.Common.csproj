@@ -15,13 +15,14 @@
   <ItemGroup>
     <PackageReference Include="AutoBogus" Version="2.6.0" />
     <PackageReference Include="Autofac" Version="4.9.4" />
+    <PackageReference Include="Autofac.Extras.NSubstitute" Version="1.1.0" />
     <PackageReference Include="AutofacSerilogIntegration" Version="2.0.0" />
     <PackageReference Include="Bogus" Version="28.0.3" />
     <PackageReference Include="Microsoft.Reactive.Testing" Version="4.2.0-preview.625" />
     <PackageReference Include="Serilog" Version="2.8.0" />
     <PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0" />
     <PackageReference Include="Serilog.Sinks.XUnit" Version="1.0.21" />
-    <PackageReference Include="Skybrud.Colors" Version="1.0.2" />
+    <PackageReference Include="System.IO.Abstractions.TestingHelpers" Version="6.0.27" />
   </ItemGroup>
   
   <ItemGroup>
