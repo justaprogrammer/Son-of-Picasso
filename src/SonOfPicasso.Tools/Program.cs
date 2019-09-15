@@ -9,7 +9,6 @@ using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Logging;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Core.Services;
-using SonOfPicasso.Testing.Common.Services;
 using SonOfPicasso.Tools.Extensions;
 using SonOfPicasso.Tools.Services;
 

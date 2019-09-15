@@ -14,7 +14,7 @@ using Xunit.Abstractions;
 
 namespace SonOfPicasso.Testing.Common
 {
-    public abstract class UnitTestsBase : TestsBase, IDisposable
+    public abstract class UnitTestsBase : TestsBase
     {
         protected UnitTestsBase(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
         {
@@ -31,24 +31,17 @@ namespace SonOfPicasso.Testing.Common
 
             MockFileSystem = new MockFileSystem();
             AutoSubstitute.Provide<IFileSystem>(MockFileSystem);
-            AutoResetEvent = new AutoResetEvent(false);
         }
 
         protected readonly AutoSubstitute AutoSubstitute;
         protected readonly Queue<IUnitOfWork> UnitOfWorkQueue;
         protected readonly MockFileSystem MockFileSystem;
         protected readonly TestSchedulerProvider TestSchedulerProvider;
-        protected readonly AutoResetEvent AutoResetEvent;
 
-        public void Dispose()
+        public override void Dispose()
         {
+            base.Dispose();
             AutoSubstitute?.Dispose();
-            AutoResetEvent?.Dispose();
-        }
-
-        protected void WaitOne(int timeout = 500)
-        {
-            AutoResetEvent.WaitOne(timeout).Should().BeTrue();
         }
     }
 }
