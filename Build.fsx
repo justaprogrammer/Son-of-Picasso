@@ -121,7 +121,7 @@ Target.create "TestData" (fun _ ->
 )
 
 Target.create "TestIntegration" (fun _ -> 
-    test "SonOfPicasso.Core.IntegrationTests" "netcoreapp3.0" "integration"
+    test "SonOfPicasso.Integration.Tests" "netcoreapp3.0" "integration"
 )
 
 Target.create "TestTools" (fun _ -> 
