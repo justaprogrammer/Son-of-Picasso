@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Threading;
+using Autofac;
 using Autofac.Extras.NSubstitute;
+using AutofacSerilogIntegration;
+using FluentAssertions;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Data.Repository;
 using SonOfPicasso.Testing.Common.Scheduling;
@@ -15,7 +18,10 @@ namespace SonOfPicasso.Testing.Common
     {
         protected UnitTestsBase(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
         {
-            AutoSubstitute = new AutoSubstitute();
+            var containerBuilder = new ContainerBuilder();
+            containerBuilder.RegisterLogger();
+
+            AutoSubstitute = new AutoSubstitute(containerBuilder);
 
             TestSchedulerProvider = new TestSchedulerProvider();
             AutoSubstitute.Provide<ISchedulerProvider>(TestSchedulerProvider);
@@ -38,6 +44,11 @@ namespace SonOfPicasso.Testing.Common
         {
             AutoSubstitute?.Dispose();
             AutoResetEvent?.Dispose();
+        }
+
+        protected void WaitOne(int timeout = 500)
+        {
+            AutoResetEvent.WaitOne(timeout).Should().BeTrue();
         }
     }
 }

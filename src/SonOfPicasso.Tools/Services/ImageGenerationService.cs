@@ -1,28 +1,32 @@
 ﻿using System;
+using System.Collections;
+using System.ComponentModel.Design;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using AutoBogus;
 using Bogus;
 using ExifLibrary;
+using Serilog;
 using Skybrud.Colors;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Data.Model;
 using SonOfPicasso.Tools.Extensions;
-using ILogger = Serilog.ILogger;
 
 namespace SonOfPicasso.Tools.Services
 {
     public class ImageGenerationService
     {
         protected internal static Faker Faker = new Faker();
+        private readonly IFileSystem _fileSystem;
 
         private readonly ILogger _logger;
-        private readonly IFileSystem _fileSystem;
         private readonly ISchedulerProvider _schedulerProvider;
 
         public ImageGenerationService(ILogger logger, IFileSystem fileSystem, ISchedulerProvider schedulerProvider)
@@ -32,30 +36,7 @@ namespace SonOfPicasso.Tools.Services
             _schedulerProvider = schedulerProvider;
         }
 
-        public IObservable<string> GenerateImages(int count, string fileRoot)
-        {
-            _logger.Debug("GenerateImages {Count} {FileRoot}", count, fileRoot);
-
-            return Observable.Generate(
-                initialState: 0,
-                condition: value => value < count,
-                iterate: value => value + 1,
-                resultSelector: value =>
-                {
-                    var time = Faker.Date.Between(DateTime.Now, DateTime.Now.AddDays(-30));
-                    var directory = _fileSystem.Path.Combine(fileRoot, time.ToString("yyyy-MM-dd"));
-                    var directoryInfoBase = _fileSystem.Directory.CreateDirectory(directory);
-
-                    var fileName = $"{time.ToString("s").Replace("-", "_").Replace(":", "_")}.jpg";
-                    var filePath = _fileSystem.Path.Combine(directoryInfoBase.ToString(), fileName);
-
-                    GenerateImage(filePath, 1024, 768, time);
-
-                    return filePath;
-                }, _schedulerProvider.TaskPool);
-        }
-
-        private IObservable<Unit> GenerateImage(string path, int width, int height, DateTime time)
+        public IObservable<string> GenerateImage(string path, int width, int height, ExifData exifData)
         {
             return Observable.Start(() =>
             {
@@ -71,8 +52,7 @@ namespace SonOfPicasso.Tools.Services
                 var colors = SimilarColors(red, green, blue);
 
                 ImageFile imageFile;
-                ExifData exifData;
-                
+
                 using (var imageStream = new MemoryStream())
                 {
                     using (var bitmap = new Bitmap(width, height))
@@ -80,33 +60,28 @@ namespace SonOfPicasso.Tools.Services
                         using (var graphics = Graphics.FromImage(bitmap))
                         {
                             for (var x = 0; x < 3; x++)
+                            for (var y = 0; y < 3; y++)
                             {
-                                for (var y = 0; y < 3; y++)
-                                {
-                                    var xPos = x * cellWidth;
-                                    var yPos = y * cellHeight;
+                                var xPos = x * cellWidth;
+                                var yPos = y * cellHeight;
 
-                                    using (var brush = new SolidBrush(GetColor(colors, x, y)))
-                                    {
-                                        var rectangle = new Rectangle(xPos, yPos, cellWidth, cellHeight);
-                                        graphics.FillRectangle(brush, rectangle);
-                                    }
+                                using (var brush = new SolidBrush(GetColor(colors, x, y)))
+                                {
+                                    var rectangle = new Rectangle(xPos, yPos, cellWidth, cellHeight);
+                                    graphics.FillRectangle(brush, rectangle);
                                 }
                             }
                         }
 
-                        bitmap.Save(imageStream, System.Drawing.Imaging.ImageFormat.Jpeg);
+                        bitmap.Save(imageStream, ImageFormat.Jpeg);
                     }
 
                     imageStream.Position = 0;
 
-                    var autoFaker = new AutoFaker<ExifData>();
-                    exifData = autoFaker.Generate();
-
                     imageFile = ImageFile.FromStream(imageStream);
                 }
 
-                ExifDataToImageFile(exifData, imageFile);
+                CopyExifDataToImageFile(exifData, imageFile);
 
                 using (var imageWithExifStream = new MemoryStream())
                 {
@@ -114,11 +89,18 @@ namespace SonOfPicasso.Tools.Services
                     _fileSystem.File.WriteAllBytes(path, imageWithExifStream.ToArray());
                 }
 
-                return Unit.Default;
+                return path;
             }, _schedulerProvider.TaskPool);
         }
 
-        private void ExifDataToImageFile(ExifData exifData, ImageFile imageFile)
+        public ExifData FakeExifData()
+        {
+            var autoFaker = new AutoFaker<ExifData>();
+            var exifData = autoFaker.Generate();
+            return exifData;
+        }
+
+        internal void CopyExifDataToImageFile(ExifData exifData, ImageFile imageFile)
         {
             var properties = exifData.GetType().GetProperties()
                 .Where(info => !info.Name.Equals("id", StringComparison.InvariantCultureIgnoreCase))
@@ -126,17 +108,95 @@ namespace SonOfPicasso.Tools.Services
 
             foreach (var propertyInfo in properties)
             {
-                var value = propertyInfo.GetValue(exifData);
-                var exifTag = (ExifTag)Enum.Parse(typeof(ExifTag), propertyInfo.Name, true);
+                try
+                {
+                    var exifTag = (ExifTag) Enum.Parse(typeof(ExifTag), propertyInfo.Name, true);
 
-                var exifTagType = GetExifTagType(exifTag);
-                if (exifTagType == typeof(ExifAscii))
-                {
-                    imageFile.Properties.Set(new ExifAscii(exifTag, (string) value, Encoding.Default));
+                    var exifTagType = GetExifTagType(exifTag);
+                    if (exifTagType == typeof(ExifAscii))
+                    {
+                        var value = (string) propertyInfo.GetValue(exifData);
+                        var exifProperty = new ExifAscii(exifTag, value, Encoding.Default);
+                        imageFile.Properties.Set(exifProperty);
+                    }
+                    else if (exifTagType == typeof(ExifEncodedString))
+                    {
+                        var value = (string) propertyInfo.GetValue(exifData);
+                        var exifProperty = new ExifEncodedString(exifTag, value, Encoding.Default);
+                        imageFile.Properties.Set(exifProperty);
+                    }
+                    else if (exifTagType == typeof(ExifUShort))
+                    {
+                        var value = (ushort) propertyInfo.GetValue(exifData);
+                        var exifProperty = new ExifUShort(exifTag, value);
+                        imageFile.Properties.Set(exifProperty);
+                    }
+                    else if (exifTagType == typeof(ExifUInt))
+                    {
+                        var value = (uint) propertyInfo.GetValue(exifData);
+                        var exifProperty = new ExifUInt(exifTag, value);
+                        imageFile.Properties.Set(exifProperty);
+                    }
+                    else if (exifTagType == typeof(ExifDateTime))
+                    {
+                        var value = (DateTime) propertyInfo.GetValue(exifData);
+                        var exifProperty = new ExifDateTime(exifTag, value);
+                        imageFile.Properties.Set(exifProperty);
+                    }
+                    else if (exifTagType == typeof(ExifVersion))
+                    {
+                        var value = (string) propertyInfo.GetValue(exifData);
+                        var exifProperty = new ExifVersion(exifTag, value);
+                        imageFile.Properties.Set(exifProperty);
+                    }
+                    else if (exifTagType == typeof(ExifURational))
+                    {
+                        var value = (string) propertyInfo.GetValue(exifData);
+                        var uFraction = MathEx.UFraction32.Parse(value);
+                        var exifProperty = new ExifURational(exifTag, uFraction);
+                        imageFile.Properties.Set(exifProperty);
+                    }
+                    else if (exifTagType == typeof(ExifSRational))
+                    {
+                        var value = (string) propertyInfo.GetValue(exifData);
+                        var fraction = MathEx.Fraction32.Parse(value);
+                        var exifProperty = new ExifSRational(exifTag, fraction);
+                        imageFile.Properties.Set(exifProperty);
+                    }
+                    else if (exifTagType == typeof(LensSpecification))
+                    {
+                        var value = (string) propertyInfo.GetValue(exifData);
+                        var regex = new Regex("^(.*?) F(.*?), (.*?) F(.*?)$");
+                        var match = regex.Match(value);
+                        var fractions = match.Groups.Values.Skip(1)
+                            .Select(group => MathEx.UFraction32.Parse(group.Value))
+                            .ToArray();
+                        var exifProperty = new LensSpecification(exifTag, new []{fractions[0], fractions[2], fractions[1], fractions[3]});
+                        imageFile.Properties.Set(exifProperty);
+                    }
+                    else if (exifTagType.IsGenericType && exifTagType.GetGenericTypeDefinition() == typeof(ExifEnumProperty<>))
+                    {
+                        var enumType = exifTagType.GenericTypeArguments.First();
+                        var value = (string) propertyInfo.GetValue(exifData);
+                        var enumValue = Enum.Parse(enumType, value, true);
+                        var constructorInfo = typeof(ExifEnumProperty<>).MakeGenericType(enumType)
+                            .GetConstructor(new[] {typeof(ExifTag), enumType});
+
+                        if (constructorInfo == null)
+                        {
+                            throw new InvalidOperationException("Contructor not found");
+                        }
+
+                        var exitProperty = (ExifProperty) constructorInfo.Invoke(new object[] {exifTag, enumValue});
+                        imageFile.Properties.Add(exitProperty);
+                    }
+                    else
+                        _logger.Warning("Exif Tag {Tag} Type {Type} not supported", exifTag, exifTagType.Name);
+
                 }
-                else
+                catch (Exception e)
                 {
-                    _logger.Warning("Exif Tag {Tag} Type {Type} not supported", exifTag, exifTagType.Name);
+                    throw new InvalidOperationException($"Error Processing Exif Data Field '{propertyInfo.Name}'", e);
                 }
             }
         }
@@ -145,125 +205,125 @@ namespace SonOfPicasso.Tools.Services
         {
             if (tag == ExifTag.DocumentName)
                 return typeof(ExifAscii);
-            else if (tag == ExifTag.ImageDescription)
+            if (tag == ExifTag.ImageDescription)
                 return typeof(ExifAscii);
-            else if (tag == ExifTag.Make)
+            if (tag == ExifTag.Make)
                 return typeof(ExifAscii);
-            else if (tag == ExifTag.Model)
+            if (tag == ExifTag.Model)
                 return typeof(ExifAscii);
-            else if (tag == ExifTag.ThumbnailImageDescription)
+            if (tag == ExifTag.ThumbnailImageDescription)
                 return typeof(ExifAscii);
-            else if (tag == ExifTag.DateTime)
+            if (tag == ExifTag.DateTime)
                 return typeof(ExifDateTime);
-            else if (tag == ExifTag.DateTimeDigitized)
+            if (tag == ExifTag.DateTimeDigitized)
                 return typeof(ExifDateTime);
-            else if (tag == ExifTag.DateTimeOriginal)
+            if (tag == ExifTag.DateTimeOriginal)
                 return typeof(ExifDateTime);
-            else if (tag == ExifTag.ThumbnailDateTime)
+            if (tag == ExifTag.ThumbnailDateTime)
                 return typeof(ExifDateTime);
-            else if (tag == ExifTag.ThumbnailMake)
+            if (tag == ExifTag.ThumbnailMake)
                 return typeof(ExifAscii);
-            else if (tag == ExifTag.ThumbnailModel)
+            if (tag == ExifTag.ThumbnailModel)
                 return typeof(ExifAscii);
-            else if (tag == ExifTag.ThumbnailSoftware)
+            if (tag == ExifTag.ThumbnailSoftware)
                 return typeof(ExifAscii);
-            else if (tag == ExifTag.InteroperabilityIndex)
+            if (tag == ExifTag.InteroperabilityIndex)
                 return typeof(ExifAscii);
-            else if (tag == ExifTag.PixelXDimension)
+            if (tag == ExifTag.PixelXDimension)
                 return typeof(ExifUInt);
-            else if (tag == ExifTag.EXIFIFDPointer)
+            if (tag == ExifTag.EXIFIFDPointer)
                 return typeof(ExifUInt);
-            else if (tag == ExifTag.PixelYDimension)
+            if (tag == ExifTag.PixelYDimension)
                 return typeof(ExifUInt);
-            else if (tag == ExifTag.InteroperabilityIFDPointer)
+            if (tag == ExifTag.InteroperabilityIFDPointer)
                 return typeof(ExifUInt);
-            else if (tag == ExifTag.ThumbnailJPEGInterchangeFormat)
+            if (tag == ExifTag.ThumbnailJPEGInterchangeFormat)
                 return typeof(ExifUInt);
-            else if (tag == ExifTag.ThumbnailJPEGInterchangeFormatLength)
+            if (tag == ExifTag.ThumbnailJPEGInterchangeFormatLength)
                 return typeof(ExifUInt);
-            else if (tag == ExifTag.FNumber)
+            if (tag == ExifTag.FNumber)
                 return typeof(ExifURational);
-            else if (tag == ExifTag.MaxApertureValue)
+            if (tag == ExifTag.MaxApertureValue)
                 return typeof(ExifURational);
-            else if (tag == ExifTag.DigitalZoomRatio)
+            if (tag == ExifTag.DigitalZoomRatio)
                 return typeof(ExifURational);
-            else if (tag == ExifTag.XResolution)
+            if (tag == ExifTag.XResolution)
                 return typeof(ExifURational);
-            else if (tag == ExifTag.YResolution)
+            if (tag == ExifTag.YResolution)
                 return typeof(ExifURational);
-            else if (tag == ExifTag.ThumbnailXResolution)
+            if (tag == ExifTag.ThumbnailXResolution)
                 return typeof(ExifURational);
-            else if (tag == ExifTag.ThumbnailYResolution)
+            if (tag == ExifTag.ThumbnailYResolution)
                 return typeof(ExifURational);
-            else if (tag == ExifTag.ExposureTime)
+            if (tag == ExifTag.ExposureTime)
                 return typeof(ExifURational);
-            else if (tag == ExifTag.CompressedBitsPerPixel)
+            if (tag == ExifTag.CompressedBitsPerPixel)
                 return typeof(ExifURational);
-            else if (tag == ExifTag.FocalLength)
+            if (tag == ExifTag.FocalLength)
                 return typeof(ExifURational);
-            else if (tag == ExifTag.Orientation)
+            if (tag == ExifTag.Orientation)
                 return typeof(ExifEnumProperty<Orientation>);
-            else if (tag == ExifTag.Software)
+            if (tag == ExifTag.Software)
                 return typeof(ExifAscii);
-            else if (tag == ExifTag.UserComment)
+            if (tag == ExifTag.UserComment)
                 return typeof(ExifEncodedString);
-            else if (tag == ExifTag.FileSource)
+            if (tag == ExifTag.FileSource)
                 return typeof(ExifEnumProperty<FileSource>);
-            else if (tag == ExifTag.ColorSpace)
+            if (tag == ExifTag.ColorSpace)
                 return typeof(ExifEnumProperty<ColorSpace>);
-            else if (tag == ExifTag.ExposureMode)
+            if (tag == ExifTag.ExposureMode)
                 return typeof(ExifEnumProperty<ExposureMode>);
-            else if (tag == ExifTag.MeteringMode)
+            if (tag == ExifTag.MeteringMode)
                 return typeof(ExifEnumProperty<MeteringMode>);
-            else if (tag == ExifTag.LightSource)
+            if (tag == ExifTag.LightSource)
                 return typeof(ExifEnumProperty<LightSource>);
-            else if (tag == ExifTag.SceneCaptureType)
+            if (tag == ExifTag.SceneCaptureType)
                 return typeof(ExifEnumProperty<SceneCaptureType>);
-            else if (tag == ExifTag.ResolutionUnit)
+            if (tag == ExifTag.ResolutionUnit)
                 return typeof(ExifEnumProperty<ResolutionUnit>);
-            else if (tag == ExifTag.YCbCrPositioning)
+            if (tag == ExifTag.YCbCrPositioning)
                 return typeof(ExifEnumProperty<YCbCrPositioning>);
-            else if (tag == ExifTag.ExposureProgram)
+            if (tag == ExifTag.ExposureProgram)
                 return typeof(ExifEnumProperty<ExposureProgram>);
-            else if (tag == ExifTag.Flash)
+            if (tag == ExifTag.Flash)
                 return typeof(ExifEnumProperty<Flash>);
-            else if (tag == ExifTag.SceneType)
+            if (tag == ExifTag.SceneType)
                 return typeof(ExifEnumProperty<SceneType>);
-            else if (tag == ExifTag.CustomRendered)
+            if (tag == ExifTag.CustomRendered)
                 return typeof(ExifEnumProperty<CustomRendered>);
-            else if (tag == ExifTag.WhiteBalance)
+            if (tag == ExifTag.WhiteBalance)
                 return typeof(ExifEnumProperty<WhiteBalance>);
-            else if (tag == ExifTag.Contrast)
+            if (tag == ExifTag.Contrast)
                 return typeof(ExifEnumProperty<Contrast>);
-            else if (tag == ExifTag.Saturation)
+            if (tag == ExifTag.Saturation)
                 return typeof(ExifEnumProperty<Saturation>);
-            else if (tag == ExifTag.Sharpness)
+            if (tag == ExifTag.Sharpness)
                 return typeof(ExifEnumProperty<Sharpness>);
-            else if (tag == ExifTag.ThumbnailCompression)
+            if (tag == ExifTag.ThumbnailCompression)
                 return typeof(ExifEnumProperty<Compression>);
-            else if (tag == ExifTag.ThumbnailOrientation)
+            if (tag == ExifTag.ThumbnailOrientation)
                 return typeof(ExifEnumProperty<Orientation>);
-            else if (tag == ExifTag.ThumbnailResolutionUnit)
+            if (tag == ExifTag.ThumbnailResolutionUnit)
                 return typeof(ExifEnumProperty<ResolutionUnit>);
-            else if (tag == ExifTag.ThumbnailYCbCrPositioning)
+            if (tag == ExifTag.ThumbnailYCbCrPositioning)
                 return typeof(ExifEnumProperty<YCbCrPositioning>);
-            else if (tag == ExifTag.ISOSpeedRatings)
+            if (tag == ExifTag.ISOSpeedRatings)
                 return typeof(ExifUShort);
-            else if (tag == ExifTag.FocalLengthIn35mmFilm)
+            if (tag == ExifTag.FocalLengthIn35mmFilm)
                 return typeof(ExifUShort);
-            else if (tag == ExifTag.ExifVersion)
+            if (tag == ExifTag.ExifVersion)
                 return typeof(ExifVersion);
-            else if (tag == ExifTag.FlashpixVersion)
+            if (tag == ExifTag.FlashpixVersion)
                 return typeof(ExifVersion);
-            else if (tag == ExifTag.InteroperabilityVersion)
+            if (tag == ExifTag.InteroperabilityVersion)
                 return typeof(ExifVersion);
-            else if (tag == ExifTag.BrightnessValue)
+            if (tag == ExifTag.BrightnessValue)
                 return typeof(ExifSRational);
-            else if (tag == ExifTag.ExposureBiasValue)
+            if (tag == ExifTag.ExposureBiasValue)
                 return typeof(ExifSRational);
-            else if (tag == ExifTag.LensSpecification)
+            if (tag == ExifTag.LensSpecification)
                 return typeof(LensSpecification);
-            else return null;
+            return null;
         }
 
         private static Color GetColor(Color[] colors, int x, int y)
@@ -280,6 +340,7 @@ namespace SonOfPicasso.Tools.Services
                         case 2:
                             return colors[0];
                     }
+
                     break;
                 case 1:
                     switch (y)
@@ -291,6 +352,7 @@ namespace SonOfPicasso.Tools.Services
                         case 2:
                             return colors[1];
                     }
+
                     break;
                 case 2:
                     switch (y)
@@ -302,6 +364,7 @@ namespace SonOfPicasso.Tools.Services
                         case 2:
                             return colors[0];
                     }
+
                     break;
             }
 
@@ -316,7 +379,11 @@ namespace SonOfPicasso.Tools.Services
             var color1 = new HslColor((color0.H + delta) % 1.0, color0.S, color0.L);
             var color2 = new HslColor((color0.H - delta) % 1.0, color0.S, color0.L);
 
-            return new[] { HslColorExtensions.ToColor(color0), HslColorExtensions.ToColor(color1), HslColorExtensions.ToColor(color2) };
+            return new[]
+            {
+                HslColorExtensions.ToColor(color0), HslColorExtensions.ToColor(color1),
+                HslColorExtensions.ToColor(color2)
+            };
         }
     }
 }

@@ -30,6 +30,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SonOfPicasso.Testing.Common\SonOfPicasso.Testing.Common.csproj" />
+    <ProjectReference Include="..\SonOfPicasso.Tools\SonOfPicasso.Tools.csproj" />
   </ItemGroup>
 
 </Project>
