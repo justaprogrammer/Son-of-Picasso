@@ -47,12 +47,13 @@ namespace SonOfPicasso.Core.Services
 
                 var images = await _imageLocationService.GetImages(path)
                     .SelectMany(locatedImages => locatedImages)
-                    .Where(s => !unitOfWork.ImageRepository.Get(image => image.Path == path).Any())
+                    .Where(s => !unitOfWork.ImageRepository.Get(image => image.Path == path).ToArray().Any())
                     .GroupBy(s => _fileSystem.FileInfo.FromFileName(s).DirectoryName)
                     .SelectMany(groupedObservable =>
                     {
                         var directory = unitOfWork.DirectoryRepository
                             .Get(directory => directory.Path == groupedObservable.Key)
+                            .ToArray()
                             .FirstOrDefault();
 
                         if (directory == null)
@@ -81,7 +82,6 @@ namespace SonOfPicasso.Core.Services
                                     ExifData = tuple.exifData
                                 };
 
-                                unitOfWork.ImageRepository.Insert(image);
                                 directory.Images.Add(image);
 
                                 return image;

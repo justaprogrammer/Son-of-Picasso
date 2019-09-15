@@ -16,27 +16,11 @@ using Xunit.Abstractions;
 
 namespace SonOfPicasso.Core.Tests.Services
 {
-    public class ImageLocationServiceTests : TestsBase, IDisposable
+    public class ImageLocationServiceTests : UnitTestsBase
     {
-        private readonly AutoSubstitute _autoSub;
-        private readonly AutoResetEvent _autoResetEvent;
-        private readonly MockFileSystem _mockFileSystem;
-
         public ImageLocationServiceTests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {
-            _autoSub = new AutoSubstitute();
-            _autoResetEvent = new AutoResetEvent(false);
-
-
-            _mockFileSystem = new MockFileSystem();
-            _autoSub.Provide<IFileSystem>(_mockFileSystem);
-        }
-
-        public void Dispose()
-        {
-            _autoSub.Dispose();
-            _autoResetEvent.Dispose();
         }
 
         [Fact(Timeout = 1000)]
@@ -57,24 +41,21 @@ namespace SonOfPicasso.Core.Tests.Services
 
             foreach (var file in files.Concat(otherFiles))
             {
-                _mockFileSystem.AddFile(file, new MockFileData(new byte[0]));
+                MockFileSystem.AddFile(file, new MockFileData(new byte[0]));
             }
 
             string[] imagePaths = null;
 
-            var testSchedulerProvider = new TestSchedulerProvider();
-            _autoSub.Provide<ISchedulerProvider>(testSchedulerProvider);
-
-            var imageLocationService = _autoSub.Resolve<ImageLocationService>();
+            var imageLocationService = AutoSubstitute.Resolve<ImageLocationService>();
             imageLocationService.GetImages(directory)
                 .Subscribe(paths =>
                 {
                     imagePaths = paths;
-                    _autoResetEvent.Set();
+                    AutoResetEvent.Set();
                 });
 
-            testSchedulerProvider.TaskPool.AdvanceBy(1);
-            _autoResetEvent.WaitOne();
+            TestSchedulerProvider.TaskPool.AdvanceBy(1);
+            AutoResetEvent.WaitOne();
 
             imagePaths.Should().NotBeNull();
             imagePaths.Select(fileInfo => fileInfo)

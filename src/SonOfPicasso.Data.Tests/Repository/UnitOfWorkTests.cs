@@ -8,7 +8,7 @@ using SonOfPicasso.Testing.Common.Extensions;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace SonOfPicasso.Data.Tests
+namespace SonOfPicasso.Data.Tests.Repository
 {
     public class UnitOfWorkTests : DataTestsBase
     {

@@ -26,27 +26,11 @@ using Directory = SonOfPicasso.Data.Model.Directory;
 
 namespace SonOfPicasso.Core.Tests.Services
 {
-    public class ImageManagementServiceTests : TestsBase, IDisposable
+    public class ImageManagementServiceTests : UnitTestsBase, IDisposable
     {
         public ImageManagementServiceTests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {
-            _autoSubstitute = new AutoSubstitute();
-
-            _testSchedulerProvider = new TestSchedulerProvider();
-            _autoSubstitute.Provide<ISchedulerProvider>(_testSchedulerProvider);
-
-            _unitOfWorkQueue = new Queue<IUnitOfWork>();
-            _autoSubstitute.Provide<Func<IUnitOfWork>>(() => _unitOfWorkQueue.Dequeue());
-
-            _mockFileSystem = new MockFileSystem();
-            _autoSubstitute.Provide<IFileSystem>(_mockFileSystem);
-            _autoResetEvent = new AutoResetEvent(false);
-        }
-
-        public void Dispose()
-        {
-            _autoSubstitute.Dispose();
         }
 
         private static readonly Faker<Directory> FakeNewDirectory
@@ -56,12 +40,6 @@ namespace SonOfPicasso.Core.Tests.Services
 
         private static readonly Faker<ExifData> FakeNewExifData
             = new AutoFaker<ExifData>().RuleFor(exifData => exifData.Id, 0);
-
-        private readonly AutoSubstitute _autoSubstitute;
-        private readonly Queue<IUnitOfWork> _unitOfWorkQueue;
-        private readonly MockFileSystem _mockFileSystem;
-        private readonly TestSchedulerProvider _testSchedulerProvider;
-        private readonly AutoResetEvent _autoResetEvent;
 
         [Fact]
         public void AddImageToAlbum()
@@ -86,9 +64,9 @@ namespace SonOfPicasso.Core.Tests.Services
             unitOfWork.DirectoryRepository.Get()
                 .ReturnsForAnyArgs(new[] {directory, FakeNewDirectory});
 
-            _unitOfWorkQueue.Enqueue(unitOfWork);
+            UnitOfWorkQueue.Enqueue(unitOfWork);
 
-            var imageManagementService = _autoSubstitute.Resolve<ImageManagementService>();
+            var imageManagementService = AutoSubstitute.Resolve<ImageManagementService>();
 
             var albumName = Faker.Random.Words(2);
             var albumId = Faker.Random.Int(1);
@@ -99,11 +77,11 @@ namespace SonOfPicasso.Core.Tests.Services
                 .ReturnsForAnyArgs(info => { return images.First(i => i.Id == (int) info.Arg<object>()); });
 
             imageManagementService.AddImagesToAlbum(albumId, images.Select(image => image.Id))
-                .Subscribe(unit => _autoResetEvent.Set());
+                .Subscribe(unit => AutoResetEvent.Set());
 
-            _testSchedulerProvider.TaskPool.AdvanceBy(1);
+            TestSchedulerProvider.TaskPool.AdvanceBy(1);
 
-            _autoResetEvent.WaitOne(10).Should().BeTrue();
+            AutoResetEvent.WaitOne(10).Should().BeTrue();
 
             unitOfWork.AlbumImageRepository.ReceivedWithAnyArgs(images.Count)
                 .Insert(null);
@@ -114,7 +92,7 @@ namespace SonOfPicasso.Core.Tests.Services
         }
 
         [Fact]
-        public void ScanFolder()
+        public void ShouldScanFolderWhenDirectoryModelExists()
         {
             var directoryPath = Faker.System.DirectoryPathWindows();
             var imagePath = Path.Join(directoryPath, Faker.System.FileName("jpg"));
@@ -130,41 +108,37 @@ namespace SonOfPicasso.Core.Tests.Services
             unitOfWork.DirectoryRepository.Get()
                 .ReturnsForAnyArgs(new[] {directory, FakeNewDirectory});
 
-            _unitOfWorkQueue.Enqueue(unitOfWork);
+            UnitOfWorkQueue.Enqueue(unitOfWork);
 
-            _mockFileSystem.AddDirectory(directoryPath);
-            _mockFileSystem.AddFile(imagePath, new MockFileData(new byte[0]));
+            MockFileSystem.AddDirectory(directoryPath);
+            MockFileSystem.AddFile(imagePath, new MockFileData(new byte[0]));
 
-            _autoSubstitute.Resolve<IImageLocationService>()
+            AutoSubstitute.Resolve<IImageLocationService>()
                 .GetImages(Arg.Any<string>())
                 .Returns(Observable.Return(new[] {imagePath}));
 
             var newExifData = (ExifData) FakeNewExifData;
-            _autoSubstitute.Resolve<IExifDataService>().GetExifData(imagePath)
+            AutoSubstitute.Resolve<IExifDataService>().GetExifData(imagePath)
                 .Returns(Observable.Return(newExifData));
 
-            var imageManagementService = _autoSubstitute.Resolve<ImageManagementService>();
+            var imageManagementService = AutoSubstitute.Resolve<ImageManagementService>();
             imageManagementService.ScanFolder(directoryPath)
-                .Subscribe(unit => _autoResetEvent.Set());
+                .Subscribe(unit => AutoResetEvent.Set());
 
-            _testSchedulerProvider.TaskPool.AdvanceBy(1);
+            TestSchedulerProvider.TaskPool.AdvanceBy(1);
 
-            _autoResetEvent.WaitOne(10).Should().BeTrue();
+            AutoResetEvent.WaitOne(10).Should().BeTrue();
 
-            unitOfWork.ImageRepository.ReceivedWithAnyArgs(1).Insert(Arg.Any<Image>());
+            unitOfWork.ImageRepository.DidNotReceive().Insert(Arg.Any<Image>());
 
-            var insertedImage = (Image) unitOfWork.ImageRepository.ReceivedCalls()
-                .First(call => call.GetMethodInfo().Name == "Insert")
-                .GetArguments()
-                .First();
+            directory.Images.Count.Should().Be(1);
 
             using (var assertionScope = new AssertionScope())
             {
-                insertedImage.Path.Should().Be(imagePath);
-                insertedImage.ExifData.Should().Be(newExifData);
+                var image = directory.Images.First();
+                image.Path.Should().Be(imagePath);
+                image.ExifData.Should().Be(newExifData);
             }
-
-            directory.Images.Count.Should().Be(1);
 
             unitOfWork.Received(1)
                 .Save();
