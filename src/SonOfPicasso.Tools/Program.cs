@@ -39,7 +39,7 @@ namespace SonOfPicasso.Tools
                     var count = setCmd.Argument<int>("count", "The number of images to generate").IsRequired();
                     var path = setCmd.Argument<string>("path", "The location for these images").IsRequired();
 
-                    // setCmd.OnExecute(() => ImageGenerationService.GenerateImages(count.ParsedValue, path.ParsedValue).LastAsync().Wait());
+                    setCmd.OnExecute(() => ImageGenerationService.GenerateImages(count.ParsedValue, path.ParsedValue).LastAsync().Wait());
                 });
             });
 
