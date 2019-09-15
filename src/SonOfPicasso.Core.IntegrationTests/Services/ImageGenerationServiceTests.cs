@@ -1,17 +1,17 @@
 using System;
+using System.Reactive.Linq;
 using Autofac.Extras.NSubstitute;
 using SonOfPicasso.Data.Repository;
 using SonOfPicasso.Testing.Common;
+using SonOfPicasso.Testing.Common.Services;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace SonOfPicasso.Core.IntegrationTests.Services
 {
-    public class ImageManagementServiceTests : TestsBase
+    public class ImageGenerationServiceTests : IntegrationTestsBase
     {
-        private readonly AutoSubstitute _autoSubstitute;
-
-        public ImageManagementServiceTests(ITestOutputHelper testOutputHelper)
+        public ImageGenerationServiceTests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {
         }
@@ -19,7 +19,6 @@ namespace SonOfPicasso.Core.IntegrationTests.Services
         [Fact]
         public void CanInitialize()
         {
-            var imageManagementService = _autoSubstitute.Resolve<Core.Services.ImageManagementService>();
         }
     }
 }

@@ -9,6 +9,7 @@ using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Logging;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Core.Services;
+using SonOfPicasso.Testing.Common.Services;
 using SonOfPicasso.Tools.Extensions;
 using SonOfPicasso.Tools.Services;
 
@@ -38,7 +39,7 @@ namespace SonOfPicasso.Tools
                     var count = setCmd.Argument<int>("count", "The number of images to generate").IsRequired();
                     var path = setCmd.Argument<string>("path", "The location for these images").IsRequired();
 
-                    setCmd.OnExecute(() => ToolsService.GenerateImages(count.ParsedValue, path.ParsedValue).LastAsync().Wait());
+                    setCmd.OnExecute(() => ImageGenerationService.GenerateImages(count.ParsedValue, path.ParsedValue).LastAsync().Wait());
                 });
             });
 
@@ -61,13 +62,13 @@ namespace SonOfPicasso.Tools
             return app.Execute(args);
         }
 
-        private static ToolsService _toolsService;
+        private static IContainer _container;
 
-        private static ToolsService ToolsService
+        private static IContainer Container
         {
             get
             {
-                if(_toolsService == null)
+                if (_container == null)
                 {
                     var loggerConfiguration = new LoggerConfiguration()
                         .MinimumLevel.Verbose()
@@ -108,11 +109,40 @@ namespace SonOfPicasso.Tools
 
                     containerBuilder.RegisterType<ToolsService>();
 
-                    var container = containerBuilder.Build();
-                    _toolsService = container.Resolve<ToolsService>();
+                    _container = containerBuilder.Build();
+                }
+
+                return _container;
+            }
+        }
+
+        private static ToolsService _toolsService;
+
+        private static ToolsService ToolsService
+        {
+            get
+            {
+                if(_toolsService == null)
+                {
+                    _toolsService = Container.Resolve<ToolsService>();
                 }
 
                 return _toolsService;
+            }
+        }
+
+        private static ImageGenerationService _imageGenerationService;
+
+        private static ImageGenerationService ImageGenerationService
+        {
+            get
+            {
+                if(_imageGenerationService == null)
+                {
+                    _imageGenerationService = Container.Resolve<ImageGenerationService>();
+                }
+
+                return _imageGenerationService;
             }
         }
     }

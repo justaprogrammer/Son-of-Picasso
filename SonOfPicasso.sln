@@ -35,6 +35,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SonOfPicasso.UI.Tests", "sr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SonOfPicasso.Core.IntegrationTests", "src\SonOfPicasso.Core.IntegrationTests\SonOfPicasso.Core.IntegrationTests.csproj", "{B86E824C-FAAA-4DBC-B6A9-292D0CEC5797}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SonOfPicasso.Tools.Tests", "src\SonOfPicasso.Tools.Tests\SonOfPicasso.Tools.Tests.csproj", "{46317863-37D4-46EB-AEBD-57AD986F8EEB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,6 +79,10 @@ Global
 		{B86E824C-FAAA-4DBC-B6A9-292D0CEC5797}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B86E824C-FAAA-4DBC-B6A9-292D0CEC5797}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B86E824C-FAAA-4DBC-B6A9-292D0CEC5797}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46317863-37D4-46EB-AEBD-57AD986F8EEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46317863-37D4-46EB-AEBD-57AD986F8EEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46317863-37D4-46EB-AEBD-57AD986F8EEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46317863-37D4-46EB-AEBD-57AD986F8EEB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -88,6 +94,7 @@ Global
 		{2F6B9B2C-D228-4563-B74C-12C18E753361} = {12E2CEF6-EB9D-412F-98E3-ECBBBD00A29A}
 		{9D06ACFE-6ECD-4EC9-9CA9-8D6CCC5C362A} = {12E2CEF6-EB9D-412F-98E3-ECBBBD00A29A}
 		{B86E824C-FAAA-4DBC-B6A9-292D0CEC5797} = {12E2CEF6-EB9D-412F-98E3-ECBBBD00A29A}
+		{46317863-37D4-46EB-AEBD-57AD986F8EEB} = {12E2CEF6-EB9D-412F-98E3-ECBBBD00A29A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2C01583D-05D7-4F03-A86C-ECF79DA041D0}

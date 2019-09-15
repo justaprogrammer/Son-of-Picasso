@@ -13,6 +13,7 @@
     <Compile Include="..\common\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="AutoBogus" Version="2.6.0" />
     <PackageReference Include="Autofac" Version="4.9.4" />
     <PackageReference Include="Bogus" Version="28.2.1" />
     <PackageReference Include="ExifLibNet" Version="2.0.0" />
@@ -27,6 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SonOfPicasso.Core.IntegrationTests\SonOfPicasso.Core.IntegrationTests.csproj" />
     <ProjectReference Include="..\SonOfPicasso.Core\SonOfPicasso.Core.csproj" />
   </ItemGroup>
 
