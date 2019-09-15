@@ -6,7 +6,7 @@ using SonOfPicasso.Data.Repository;
 using SonOfPicasso.Testing.Common;
 using Xunit.Abstractions;
 
-namespace SonOfPicasso.Core.IntegrationTests
+namespace SonOfPicasso.Integration.Tests
 {
     public abstract class IntegrationTestsBase : TestsBase, IDisposable
     {
@@ -20,7 +20,7 @@ namespace SonOfPicasso.Core.IntegrationTests
         {
             FileSystem = new FileSystem();
 
-            TestRoot = FileSystem.Path.Combine(FileSystem.Path.GetTempPath(), "SonOfPicasso.Data.Tests", Guid.NewGuid().ToString());
+            TestRoot = FileSystem.Path.Combine(FileSystem.Path.GetTempPath(), "SonOfPicasso.IntegrationTests", Guid.NewGuid().ToString());
             FileSystem.Directory.CreateDirectory(TestRoot);
 
             DatabasePath = FileSystem.Path.Combine(TestRoot, $"database.db");
