@@ -92,7 +92,7 @@ namespace SonOfPicasso.Core.Tests.Services
         }
 
         [Fact]
-        public void ScanFolder()
+        public void ShouldScanFolderWhenDirectoryModelExists()
         {
             var directoryPath = Faker.System.DirectoryPathWindows();
             var imagePath = Path.Join(directoryPath, Faker.System.FileName("jpg"));
@@ -129,20 +129,16 @@ namespace SonOfPicasso.Core.Tests.Services
 
             AutoResetEvent.WaitOne(10).Should().BeTrue();
 
-            unitOfWork.ImageRepository.ReceivedWithAnyArgs(1).Insert(Arg.Any<Image>());
+            unitOfWork.ImageRepository.DidNotReceive().Insert(Arg.Any<Image>());
 
-            var insertedImage = (Image) unitOfWork.ImageRepository.ReceivedCalls()
-                .First(call => call.GetMethodInfo().Name == "Insert")
-                .GetArguments()
-                .First();
+            directory.Images.Count.Should().Be(1);
 
             using (var assertionScope = new AssertionScope())
             {
-                insertedImage.Path.Should().Be(imagePath);
-                insertedImage.ExifData.Should().Be(newExifData);
+                var image = directory.Images.First();
+                image.Path.Should().Be(imagePath);
+                image.ExifData.Should().Be(newExifData);
             }
-
-            directory.Images.Count.Should().Be(1);
 
             unitOfWork.Received(1)
                 .Save();
