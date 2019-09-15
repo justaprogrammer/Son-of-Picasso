@@ -93,13 +93,6 @@ namespace SonOfPicasso.Tools.Services
             }, _schedulerProvider.TaskPool);
         }
 
-        public ExifData FakeExifData()
-        {
-            var autoFaker = new AutoFaker<ExifData>();
-            var exifData = autoFaker.Generate();
-            return exifData;
-        }
-
         internal void CopyExifDataToImageFile(ExifData exifData, ImageFile imageFile)
         {
             var properties = exifData.GetType().GetProperties()
@@ -184,7 +177,8 @@ namespace SonOfPicasso.Tools.Services
 
                         if (constructorInfo == null)
                         {
-                            throw new InvalidOperationException("Contructor not found");
+                            throw new InvalidOperationException(
+                                $"Constructor not found for enum type: '{enumType.Name}'");
                         }
 
                         var exitProperty = (ExifProperty) constructorInfo.Invoke(new object[] {exifTag, enumValue});
