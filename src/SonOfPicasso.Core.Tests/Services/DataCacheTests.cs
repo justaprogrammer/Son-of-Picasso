@@ -28,8 +28,9 @@ namespace SonOfPicasso.Core.Tests.Services
             _autoResetEvent = new AutoResetEvent(false);
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
+            base.Dispose();
             _autoSub.Dispose();
         }
 

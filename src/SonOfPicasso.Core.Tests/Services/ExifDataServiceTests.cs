@@ -25,33 +25,11 @@ using Xunit.Abstractions;
 
 namespace SonOfPicasso.Core.Tests.Services
 {
-    public class ExifDataServiceTests : TestsBase, IDisposable
+    public class ExifDataServiceTests : UnitTestsBase
     {
-        private readonly AutoSubstitute _autoSubstitute;
-        private readonly MockFileSystem _mockFileSystem;
-        private readonly AutoResetEvent _autoResetEvent;
-        private readonly TestSchedulerProvider _testSchedulerProvider;
-
         public ExifDataServiceTests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {
-            var builder = new ContainerBuilder();
-            builder.RegisterLogger();
-
-            _testSchedulerProvider = new TestSchedulerProvider();
-            builder.RegisterInstance(_testSchedulerProvider).As<ISchedulerProvider>();
-
-            _mockFileSystem = new MockFileSystem();
-            builder.RegisterInstance(_mockFileSystem).As<IFileSystem>();
-
-            _autoSubstitute = new AutoSubstitute(builder);
-            _autoResetEvent = new AutoResetEvent(false);
-        }
-
-        public void Dispose()
-        {
-            _autoSubstitute.Dispose();
-            _autoResetEvent.Dispose();
         }
 
         [Fact]
@@ -62,21 +40,21 @@ namespace SonOfPicasso.Core.Tests.Services
             var resourceAssembly = Assembly.GetAssembly(typeof(TestsBase));
 
             var filePath = Path.Combine(Faker.System.DirectoryPathWindows(), Faker.System.FileName("jpg"));
-            _mockFileSystem.AddFileFromEmbeddedResource(filePath, resourceAssembly, "SonOfPicasso.Testing.Common.Resources.DSC04085.JPG");
+            MockFileSystem.AddFileFromEmbeddedResource(filePath, resourceAssembly, "SonOfPicasso.Testing.Common.Resources.DSC04085.JPG");
 
-            var exifDataService = _autoSubstitute.Resolve<ExifDataService>();
+            var exifDataService = AutoSubstitute.Resolve<ExifDataService>();
 
             ExifData exifData = null;
             exifDataService.GetExifData(filePath)
                 .Subscribe(data =>
                 {
                     exifData = data;
-                    _autoResetEvent.Set();
+                    AutoResetEvent.Set();
                 });
             
-            _testSchedulerProvider.TaskPool.AdvanceBy(1);
+            TestSchedulerProvider.TaskPool.AdvanceBy(1);
 
-            _autoResetEvent.WaitOne(1000).Should().BeTrue();
+            AutoResetEvent.WaitOne(1000).Should().BeTrue();
 
             exifData.Should().NotBeNull();
 
