@@ -19,7 +19,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.3.0-preview-20190828-03" />
     <PackageReference Include="Microsoft.Reactive.Testing" Version="4.2.0-preview.625" />
     <PackageReference Include="NSubstitute" Version="4.2.1" />
-    <PackageReference Include="ReactiveUI" Version="10.1.6" />
+    <PackageReference Include="ReactiveUI" Version="10.1.7" />
     <PackageReference Include="Serilog" Version="2.8.0" />
     <PackageReference Include="Splat" Version="8.3.1" />
     <PackageReference Include="System.IO.Abstractions.TestingHelpers" Version="6.0.27" />
