@@ -122,20 +122,20 @@ namespace SonOfPicasso.Core.Services
             }, _schedulerProvider.TaskPool);
         }
 
-        public IObservable<Unit> DeleteAlbum(int id)
+        public IObservable<Image[]> GetImages()
         {
             return Observable.Start(() =>
             {
                 using var unitOfWork = _unitOfWorkFactory();
 
-                unitOfWork.AlbumRepository.Delete(id);
-                unitOfWork.Save();
+                var images = unitOfWork.ImageRepository.Get()
+                    .ToArray();
 
-                return Unit.Default;
+                return images;
             }, _schedulerProvider.TaskPool);
         }
 
-        public IObservable<Image> AddImagesToAlbum(int albumId, IEnumerable<int> imageIds)
+        public IObservable<Image> AddImagesToAlbum(int albumId, IList<int> imageIds)
         {
             return Observable.Start(() =>
                 {
@@ -157,6 +157,57 @@ namespace SonOfPicasso.Core.Services
                     return images;
                 }, _schedulerProvider.TaskPool)
                 .SelectMany(observable => observable);
+        }
+
+        public IObservable<Unit> DeleteImages(IList<int> imageIds)
+        {
+            return Observable.Start(() =>
+                {
+                    using var unitOfWork = _unitOfWorkFactory();
+
+                    foreach (var imageId in imageIds)
+                    {
+                        unitOfWork.ImageRepository.Delete(imageId);
+                    }
+
+                    unitOfWork.Save();
+
+                    return Unit.Default;
+                }, _schedulerProvider.TaskPool);
+        }
+
+        public IObservable<Unit> DeleteAlbums(IList<int> albumIds)
+        {
+            return Observable.Start(() =>
+                {
+                    using var unitOfWork = _unitOfWorkFactory();
+
+                    foreach (var albumId in albumIds)
+                    {
+                        unitOfWork.AlbumRepository.Delete(albumId);
+                    }
+
+                    unitOfWork.Save();
+
+                    return Unit.Default;
+                }, _schedulerProvider.TaskPool);
+        }
+
+        public IObservable<Unit> RemoveImageFromAlbum(IList<int> albumImageIds)
+        {
+            return Observable.Start(() =>
+                {
+                    using var unitOfWork = _unitOfWorkFactory();
+
+                    foreach (var albumImageId in albumImageIds)
+                    {
+                        unitOfWork.AlbumImageRepository.Delete(albumImageId);
+                    }
+
+                    unitOfWork.Save();
+
+                    return Unit.Default;
+                }, _schedulerProvider.TaskPool);
         }
     }
 }
