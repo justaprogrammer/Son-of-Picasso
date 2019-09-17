@@ -76,7 +76,7 @@ namespace SonOfPicasso.Core.Tests.Services
             unitOfWork.ImageRepository.GetById(Arg.Any<int>())
                 .ReturnsForAnyArgs(info => { return images.First(i => i.Id == (int) info.Arg<object>()); });
 
-            imageManagementService.AddImagesToAlbum(albumId, images.Select(image => image.Id))
+            imageManagementService.AddImagesToAlbum(albumId, images.Select(image => image.Id).ToArray())
                 .Subscribe(unit => AutoResetEvent.Set());
 
             TestSchedulerProvider.TaskPool.AdvanceBy(1);

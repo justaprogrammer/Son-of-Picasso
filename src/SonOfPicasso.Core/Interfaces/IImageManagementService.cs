@@ -10,8 +10,11 @@ namespace SonOfPicasso.Core.Interfaces
     {
         IObservable<Image[]> ScanFolder(string path);
         IObservable<Album> CreateAlbum(string name);
-        IObservable<Image> AddImagesToAlbum(int albumId, IEnumerable<int> imageIds);
+        IObservable<Image> AddImagesToAlbum(int albumId, IList<int> imageIds);
         IObservable<Album[]> GetAlbums();
-        IObservable<Unit> DeleteAlbum(int id);
+        IObservable<Image[]> GetImages();
+        IObservable<Unit> RemoveImageFromAlbum(IList<int> albumImageIds);
+        IObservable<Unit> DeleteImages(IList<int> imageIds);
+        IObservable<Unit> DeleteAlbums(IList<int> albumIds);
     }
 }
