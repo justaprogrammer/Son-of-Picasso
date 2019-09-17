@@ -18,19 +18,22 @@ namespace SonOfPicasso.Core.Services
         private readonly IImageLocationService _imageLocationService;
         private readonly ILogger _logger;
         private readonly ISchedulerProvider _schedulerProvider;
+        private readonly IExifDataService _exifDataService;
         private readonly Func<IUnitOfWork> _unitOfWorkFactory;
 
         public ImageManagementService(ILogger logger,
             IFileSystem fileSystem,
             IImageLocationService imageLocationService,
             Func<IUnitOfWork> unitOfWorkFactory,
-            ISchedulerProvider schedulerProvider)
+            ISchedulerProvider schedulerProvider,
+            IExifDataService exifDataService)
         {
             _logger = logger;
             _fileSystem = fileSystem;
             _imageLocationService = imageLocationService;
             _unitOfWorkFactory = unitOfWorkFactory;
             _schedulerProvider = schedulerProvider;
+            _exifDataService = exifDataService;
         }
 
         public IObservable<Image[]> ScanFolder(string path)
@@ -44,12 +47,13 @@ namespace SonOfPicasso.Core.Services
 
                 var images = await _imageLocationService.GetImages(path)
                     .SelectMany(locatedImages => locatedImages)
-                    .Where(s => !unitOfWork.ImageRepository.Get(image => image.Path == path).Any())
+                    .Where(s => !unitOfWork.ImageRepository.Get(image => image.Path == path).ToArray().Any())
                     .GroupBy(s => _fileSystem.FileInfo.FromFileName(s).DirectoryName)
                     .SelectMany(groupedObservable =>
                     {
                         var directory = unitOfWork.DirectoryRepository
                             .Get(directory => directory.Path == groupedObservable.Key)
+                            .ToArray()
                             .FirstOrDefault();
 
                         if (directory == null)
@@ -58,18 +62,30 @@ namespace SonOfPicasso.Core.Services
                             unitOfWork.DirectoryRepository.Insert(directory);
                         }
 
-                        return groupedObservable.Select(imagePath =>
-                        {
-                            var image = new Image
+                        return groupedObservable
+                            .Select(imagePath =>
                             {
-                                Path = imagePath
-                            };
+                                var observable = _exifDataService
+                                    .GetExifData(imagePath)
+                                    .Select(exifData =>
+                                    {
+                                        return (imagePath, exifData);
+                                    });
+                                return observable;
+                            })
+                            .SelectMany(observable => observable)
+                            .Select(tuple =>
+                            {
+                                var image = new Image
+                                {
+                                    Path = tuple.imagePath,
+                                    ExifData = tuple.exifData
+                                };
 
-                            unitOfWork.ImageRepository.Insert(image);
-                            directory.Images.Add(image);
+                                directory.Images.Add(image);
 
-                            return image;
-                        });
+                                return image;
+                            });
                     }).ToArray();
 
                 unitOfWork.Save();

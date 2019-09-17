@@ -16,14 +16,11 @@ using Xunit.Abstractions;
 
 namespace SonOfPicasso.Core.Tests.Services
 {
-    public class ImageLocationServiceTests : TestsBase
+    public class ImageLocationServiceTests : UnitTestsBase
     {
-        private readonly AutoSubstitute _autoSub;
-
         public ImageLocationServiceTests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {
-            _autoSub = new AutoSubstitute();
         }
 
         [Fact(Timeout = 1000)]
@@ -33,9 +30,6 @@ namespace SonOfPicasso.Core.Tests.Services
             var directory = Faker.System.DirectoryPathWindows();
 
             var subDirectory = Path.Combine(directory, Faker.Random.Word());
-
-            var mockFileSystem = new MockFileSystem();
-            _autoSub.Provide<IFileSystem>(mockFileSystem);
 
             var files = new[] {"jpg", "jpeg", "png", "tiff", "tif", "bmp"}
                 .Select(ext => Path.Combine(subDirectory, Faker.System.FileName(ext)))
@@ -47,26 +41,21 @@ namespace SonOfPicasso.Core.Tests.Services
 
             foreach (var file in files.Concat(otherFiles))
             {
-                mockFileSystem.AddFile(file, new MockFileData(new byte[0]));
+                MockFileSystem.AddFile(file, new MockFileData(new byte[0]));
             }
-
-            var autoResetEvent = new AutoResetEvent(false);
 
             string[] imagePaths = null;
 
-            var testSchedulerProvider = new TestSchedulerProvider();
-            _autoSub.Provide<ISchedulerProvider>(testSchedulerProvider);
-
-            var imageLocationService = _autoSub.Resolve<ImageLocationService>();
+            var imageLocationService = AutoSubstitute.Resolve<ImageLocationService>();
             imageLocationService.GetImages(directory)
                 .Subscribe(paths =>
                 {
                     imagePaths = paths;
-                    autoResetEvent.Set();
+                    AutoResetEvent.Set();
                 });
 
-            testSchedulerProvider.TaskPool.AdvanceBy(1);
-            autoResetEvent.WaitOne();
+            TestSchedulerProvider.TaskPool.AdvanceBy(1);
+            AutoResetEvent.WaitOne();
 
             imagePaths.Should().NotBeNull();
             imagePaths.Select(fileInfo => fileInfo)

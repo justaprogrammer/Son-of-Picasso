@@ -19,15 +19,18 @@ namespace SonOfPicasso.Core.Tests.Services
     public class DataCacheTests : TestsBase, IDisposable
     {
         private readonly AutoSubstitute _autoSub;
+        private readonly AutoResetEvent _autoResetEvent;
 
         public DataCacheTests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {
             _autoSub = new AutoSubstitute();
+            _autoResetEvent = new AutoResetEvent(false);
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
+            base.Dispose();
             _autoSub.Dispose();
         }
 
@@ -35,7 +38,6 @@ namespace SonOfPicasso.Core.Tests.Services
         public void CanSetUserSettings()
         {
             Logger.Debug("CanSetUserSettings");
-            var autoResetEvent = new AutoResetEvent(false);
 
             var inMemoryBlobCache = new InMemoryBlobCache();
             _autoSub.Provide<IBlobCache>(inMemoryBlobCache);
@@ -43,9 +45,9 @@ namespace SonOfPicasso.Core.Tests.Services
             var dataCache = _autoSub.Resolve<DataCache>();
 
             dataCache.SetUserSettings(new UserSettings())
-                .Subscribe(_ => autoResetEvent.Set());
+                .Subscribe(_ => _autoResetEvent.Set());
 
-            autoResetEvent.WaitOne();
+            _autoResetEvent.WaitOne();
 
             string[] keys = null;
 
@@ -53,10 +55,10 @@ namespace SonOfPicasso.Core.Tests.Services
                 .Subscribe(enumerable =>
                 {
                     keys = enumerable.ToArray();
-                    autoResetEvent.Set();
+                    _autoResetEvent.Set();
                 });
 
-            autoResetEvent.WaitOne();
+            _autoResetEvent.WaitOne();
 
             keys.Should().NotBeNull();
             keys.Should().Contain("UserSettings");
@@ -66,7 +68,6 @@ namespace SonOfPicasso.Core.Tests.Services
         public void CanRetrieveUserSettings()
         {
             Logger.Debug("CanRetrieveUserSettings");
-            var autoResetEvent = new AutoResetEvent(false);
 
             var inMemoryBlobCache = new InMemoryBlobCache();
             _autoSub.Provide<IBlobCache>(inMemoryBlobCache);
@@ -75,9 +76,9 @@ namespace SonOfPicasso.Core.Tests.Services
 
             var input = new UserSettings();
             dataCache.SetUserSettings(input)
-                .Subscribe(_ => autoResetEvent.Set());
+                .Subscribe(_ => _autoResetEvent.Set());
 
-            autoResetEvent.WaitOne();
+            _autoResetEvent.WaitOne();
 
             UserSettings output = null;
 
@@ -85,10 +86,10 @@ namespace SonOfPicasso.Core.Tests.Services
                 .Subscribe(settings =>
                 {
                     output = settings;
-                    autoResetEvent.Set();
+                    _autoResetEvent.Set();
                 });
 
-            autoResetEvent.WaitOne();
+            _autoResetEvent.WaitOne();
 
             output.Should().NotBeNull();
             
@@ -100,7 +101,6 @@ namespace SonOfPicasso.Core.Tests.Services
         public void CanCreateUserSettings()
         {
             Logger.Debug("CanCreateUserSettings");
-            var autoResetEvent = new AutoResetEvent(false);
 
             var inMemoryBlobCache = new InMemoryBlobCache();
             _autoSub.Provide<IBlobCache>(inMemoryBlobCache);
@@ -113,10 +113,10 @@ namespace SonOfPicasso.Core.Tests.Services
                 .Subscribe(settings =>
                 {
                     userSettings = settings;
-                    autoResetEvent.Set();
+                    _autoResetEvent.Set();
                 });
 
-            autoResetEvent.WaitOne();
+            _autoResetEvent.WaitOne();
 
             userSettings.Should().NotBeNull();
         }

@@ -121,7 +121,11 @@ Target.create "TestData" (fun _ ->
 )
 
 Target.create "TestIntegration" (fun _ -> 
-    test "SonOfPicasso.Core.IntegrationTests" "netcoreapp3.0" "integration"
+    test "SonOfPicasso.Integration.Tests" "netcoreapp3.0" "integration"
+)
+
+Target.create "TestTools" (fun _ -> 
+    test "SonOfPicasso.Tools.Tests" "netcoreapp3.0" "tools"
 )
 
 Target.create "Package" (fun _ -> 
@@ -147,6 +151,7 @@ open Fake.Core.TargetOperators
 "Build" ==> "TestUI" ==> "Test"
 "Build" ==> "TestData" ==> "Test"
 "Build" ==> "TestIntegration" ==> "Test"
+"Build" ==> "TestTools" ==> "Test"
 
 "Build" ==> "Test" ==> "Default"
 "Build" ==> "Package" ==> "Default"
