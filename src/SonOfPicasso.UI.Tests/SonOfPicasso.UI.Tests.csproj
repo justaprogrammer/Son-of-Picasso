@@ -6,6 +6,10 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <UseWpf>true</UseWpf>
   </PropertyGroup>
+  
+  <PropertyGroup>
+    <MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);NETSDK1107</MSBuildWarningsAsMessages>
+  </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="..\common\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" Condition="Exists('..\common\SharedAssemblyInfo.cs')" />
@@ -15,15 +19,15 @@
     <PackageReference Include="Autofac" Version="4.9.4" />
     <PackageReference Include="Autofac.Extras.NSubstitute" Version="1.1.0" />
     <PackageReference Include="AutofacSerilogIntegration" Version="2.0.0" />
-    <PackageReference Include="Bogus" Version="28.2.1" />
+    <PackageReference Include="Bogus" Version="28.3.1" />
     <PackageReference Include="FluentAssertions" Version="5.9.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.3.0-preview-20190828-03" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.3.0" />
     <PackageReference Include="Microsoft.Reactive.Testing" Version="4.2.0-preview.625" />
     <PackageReference Include="NSubstitute" Version="4.2.1" />
-    <PackageReference Include="ReactiveUI" Version="10.1.7" />
+    <PackageReference Include="ReactiveUI" Version="10.2.2" />
     <PackageReference Include="Serilog" Version="2.8.0" />
-    <PackageReference Include="Splat" Version="8.3.1" />
-    <PackageReference Include="System.IO.Abstractions.TestingHelpers" Version="6.0.27" />
+    <PackageReference Include="Splat" Version="9.0.5" />
+    <PackageReference Include="System.IO.Abstractions.TestingHelpers" Version="6.0.32" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1">
       <PrivateAssets>all</PrivateAssets>

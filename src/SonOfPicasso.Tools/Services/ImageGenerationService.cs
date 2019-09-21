@@ -81,7 +81,7 @@ namespace SonOfPicasso.Tools.Services
 
         public IObservable<string> GenerateImages(int count, string fileRoot)
         {
-            _logger.Debug("GenerateImages {count} {fileRoot}", count, fileRoot);
+            _logger.Debug("GenerateImages {Count} {FileRoot}", count, fileRoot);
 
             return Observable.Generate(
                 initialState: 0,
