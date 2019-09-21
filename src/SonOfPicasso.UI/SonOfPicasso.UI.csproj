@@ -25,7 +25,8 @@
     <PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0" />
     <PackageReference Include="Serilog.Sinks.Debug" Version="1.0.1" />
     <PackageReference Include="SerilogAnalyzer" Version="0.15.0" />
-    <PackageReference Include="Splat.Serilog" Version="8.3.1" />
+    <PackageReference Include="Splat.Drawing" Version="9.0.5" />
+    <PackageReference Include="Splat.Serilog" Version="9.0.5" />
     <PackageReference Include="System.IO.Abstractions" Version="6.0.32" />
     <PackageReference Include="System.Reactive" Version="4.2.0-preview.625" />
   </ItemGroup>
