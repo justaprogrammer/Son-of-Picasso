@@ -36,6 +36,18 @@ namespace SonOfPicasso.Core.Services
             _exifDataService = exifDataService;
         }
 
+        public IObservable<Directory> GetAllDirectoriesWithImages()
+        {
+            return Observable.Start(() =>
+          {
+              using var unitOfWork = _unitOfWorkFactory();
+
+              return unitOfWork.DirectoryRepository.Get(includeProperties: "Images")
+                  .ToArray();
+          }, _schedulerProvider.TaskPool)
+                .SelectMany(directories => directories);
+        }
+
         public IObservable<Image[]> ScanFolder(string path)
         {
             return Observable.StartAsync(async task =>
@@ -53,7 +65,6 @@ namespace SonOfPicasso.Core.Services
                     {
                         var directory = unitOfWork.DirectoryRepository
                             .Get(directory => directory.Path == groupedObservable.Key)
-                            .ToArray()
                             .FirstOrDefault();
 
                         if (directory == null)
@@ -140,7 +151,7 @@ namespace SonOfPicasso.Core.Services
             return Observable.Start(() =>
                 {
                     using var unitOfWork = _unitOfWorkFactory();
-                
+
                     var album = unitOfWork.AlbumRepository.GetById(albumId);
 
                     var images = imageIds.Select(imageid =>

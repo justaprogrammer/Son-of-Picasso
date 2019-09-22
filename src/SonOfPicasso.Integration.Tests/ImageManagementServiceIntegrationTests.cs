@@ -1,8 +1,10 @@
 ﻿using System;
 using System.IO.Abstractions;
+using System.Linq;
 using System.Reactive.Linq;
 using Autofac;
 using AutofacSerilogIntegration;
+using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
@@ -26,7 +28,9 @@ namespace SonOfPicasso.Integration.Tests
             containerBuilder.RegisterType<FileSystem>().As<IFileSystem>();
             containerBuilder.RegisterType<ImageLocationService>().As<IImageLocationService>();
             containerBuilder.RegisterInstance(DbContextOptions).As<DbContextOptions<DataContext>>();
-            containerBuilder.RegisterType<UnitOfWork>().As<IUnitOfWork>();
+            containerBuilder.RegisterType<UnitOfWork>()
+                .As<IUnitOfWork>()
+                .AsSelf();
             containerBuilder.RegisterType<SchedulerProvider>().As<ISchedulerProvider>();
             containerBuilder.RegisterType<ExifDataService>().As<IExifDataService>();
             containerBuilder.RegisterType<ImageGenerationService>().AsSelf();
@@ -35,8 +39,14 @@ namespace SonOfPicasso.Integration.Tests
             _imagesPath = FileSystem.Path.Combine(TestRoot, "Images");
             FileSystem.Directory.CreateDirectory(_imagesPath);
 
+            _imageCount = Faker.Random.Int(50, 75);
+
             var imageGenerationService = _container.Resolve<ImageGenerationService>();
-            imageGenerationService.GenerateImages(2, _imagesPath).Wait();
+            var groupedObservable = imageGenerationService.GenerateImages(_imageCount, _imagesPath)
+                .ToArray()
+                .Wait();
+
+            _directoryCount = groupedObservable.Length;
         }
 
         public override void Dispose()
@@ -48,12 +58,31 @@ namespace SonOfPicasso.Integration.Tests
 
         private readonly IContainer _container;
         private readonly string _imagesPath;
+        private readonly int _directoryCount;
+        private readonly int _imageCount;
 
         [Fact]
-        public void ShouldScanFolder()
+        public void ShouldScanAndGetAllDirectories()
         {
             var imageManagementService = _container.Resolve<ImageManagementService>();
-            imageManagementService.ScanFolder(_imagesPath).Wait();
+            imageManagementService.ScanFolder(_imagesPath)
+                .Wait();
+
+            var unitOfWorkFactory = _container.Resolve<Func<UnitOfWork>>();
+            using (var unitOfWork = unitOfWorkFactory())
+            {
+                var i = unitOfWork.ImageRepository.Get().ToArray();
+                i.Length.Should().Be(_imageCount);
+
+                var d = unitOfWork.DirectoryRepository.Get().ToArray();
+                d.Length.Should().Be(_directoryCount);
+            }
+
+            var directories = imageManagementService.GetAllDirectoriesWithImages()
+                .ToArray()
+                .Wait();
+
+            directories.Length.Should().Be(_directoryCount);
         }
     }
 }

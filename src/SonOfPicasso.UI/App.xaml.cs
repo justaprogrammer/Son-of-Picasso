@@ -15,6 +15,7 @@ using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Core.Services;
 using SonOfPicasso.Data;
 using SonOfPicasso.Data.Context;
+using SonOfPicasso.Data.Repository;
 using SonOfPicasso.UI.Injection;
 using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.Scheduling;
@@ -97,11 +98,20 @@ namespace SonOfPicasso.UI
             containerBuilder.RegisterType<DataCache>()
                 .As<IDataCache>();
 
+            containerBuilder.RegisterType<UnitOfWork>()
+                .As<IUnitOfWork>();
+
             containerBuilder.RegisterType<ImageViewModel>()
                 .As<IImageViewModel>();
 
+            containerBuilder.RegisterType<ExifDataService>()
+                .As<IExifDataService>();
+
             containerBuilder.RegisterType<ImageFolderViewModel>()
                 .As<IImageFolderViewModel>();
+
+            containerBuilder.RegisterType<ImageLoadingService>()
+                .As<IImageLoadingService>();
 
             containerBuilder.RegisterLogger();
 
@@ -111,7 +121,6 @@ namespace SonOfPicasso.UI
 
             var dataContext = container.Resolve<DataContext>();
             dataContext.Database.EnsureCreated();
-            dataContext.Database.Migrate();
 
             var mainWindow = container.Resolve<MainWindow>();
 
