@@ -48,11 +48,66 @@ namespace SonOfPicasso.UI.ViewModels
         {
             _logger.Debug("Initializing");
             return Observable.Return(Unit.Default);
+
+//            var getImagesObservable = _imageManagementService.GetAllImages()
+//                .Select(model =>
+//                {
+//                    var imageViewModel = _imageViewModelFactory();
+//                    imageViewModel.Initialize(model);
+//                    return imageViewModel;
+//                })
+//                .ToArray()
+//                .ObserveOn(_schedulerProvider.MainThreadScheduler)
+//                .Select(models =>
+//                {
+//                    Images.AddRange(models);
+//                    return Unit.Default;
+//                });
+//
+//            var getImageFoldersObservable = _imageManagementService.GetAllImageFolders()
+//                .Select(model =>
+//                {
+//                    var imageFolderViewModel = _imageFolderViewModelFactory();
+//                    imageFolderViewModel.Initialize(model);
+//                    return imageFolderViewModel;
+//                })
+//                .ToArray()
+//                .ObserveOn(_schedulerProvider.MainThreadScheduler)
+//                .Select(models =>
+//                {
+//                    ImageFolders.AddRange(models);
+//                    return Unit.Default;
+//                });
+//            return Observable.Zip(getImagesObservable, getImageFoldersObservable)
+//                .Select(_ => Unit.Default);
         }
 
         private IObservable<Unit> ExecuteAddFolder(string addPath)
         {
             return Observable.Return(Unit.Default);
+
+//            return _imageManagementService.ScanFolder(addPath)
+//                .Select(tuple =>
+//                {
+//                    var (imageFolderModel, imageModels) = tuple;
+//                    var imageFolderViewModel = _imageFolderViewModelFactory();
+//                    imageFolderViewModel.Initialize(imageFolderModel);
+//                    var imageViewModels = imageModels.Select(model =>
+//                    {
+//                        var imageViewModel = _imageViewModelFactory();
+//                        imageViewModel.Initialize(model);
+//                        return imageViewModel;
+//                    }).ToArray();
+//                    return (imageFolderViewModel, imageViewModels);
+//                })
+//                .ObserveOn(_schedulerProvider.MainThreadScheduler)
+//                .Select(tuple =>
+//                {
+//                    var (imageFolderModel, imageModels) = tuple;
+//                    ImageFolders.Add(imageFolderModel);
+//                    Images.AddRange(imageModels);
+//                    return Unit.Default;
+//                });
         }
     }
 }
