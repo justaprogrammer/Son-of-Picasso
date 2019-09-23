@@ -117,12 +117,11 @@ namespace SonOfPicasso.UI
                 .As<IViewLocator>();
 
             containerBuilder.RegisterLogger();
-            containerBuilder.UseAutofacDependencyResolver();
+            var container = containerBuilder.Build();
 
+            Locator.SetLocator(new AutofacDependencyResolver(container));
             Locator.CurrentMutable.RegisterPlatformBitmapLoader();
             Locator.CurrentMutable.UseSerilogFullLogger();
-
-            var container = containerBuilder.Build();
 
             SQLitePCL.Batteries_V2.Init();
 
