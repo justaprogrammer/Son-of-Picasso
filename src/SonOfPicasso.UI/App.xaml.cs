@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO.Abstractions;
 using System.Linq;
+using System.Reflection;
 using System.Windows;
 using Autofac;
 using Autofac.Builder;
@@ -137,8 +138,17 @@ namespace SonOfPicasso.UI
 
         internal static DbContextOptions<DataContext> BuildDbContextOptions(IEnvironmentService environmentService, IFileSystem fileSystem)
         {
-            var appDataPath = environmentService.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            var databasePath = fileSystem.Path.Combine(appDataPath, ApplicationName, $"{ApplicationName}.db");
+            string databasePath = environmentService.GetEnvironmentVariable("SonOfPicasso_DatabasePath");
+            if (!string.IsNullOrWhiteSpace(databasePath))
+            {
+                var databaseDirectory = fileSystem.Path.GetDirectoryName(databasePath);
+                fileSystem.Directory.CreateDirectory(databaseDirectory);
+            }
+            else
+            {
+                var appDataPath = environmentService.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                databasePath = fileSystem.Path.Combine(appDataPath, ApplicationName, $"{ApplicationName}.db");
+            }
 
             var dbContextOptionsBuilder = new DbContextOptionsBuilder<DataContext>();
             dbContextOptionsBuilder.UseSqlite($"Data Source={databasePath}");
