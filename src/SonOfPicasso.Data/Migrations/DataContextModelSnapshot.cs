@@ -14,7 +14,7 @@ namespace SonOfPicasso.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.0.0-preview9.19423.6");
+                .HasAnnotation("ProductVersion", "3.0.0");
 
             modelBuilder.Entity("SonOfPicasso.Data.Model.Album", b =>
                 {

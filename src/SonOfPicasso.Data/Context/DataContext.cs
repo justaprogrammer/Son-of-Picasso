@@ -1,7 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Serilog;
-using Serilog.Extensions.Logging;
 using SonOfPicasso.Data.Model;
 
 namespace SonOfPicasso.Data.Context
@@ -27,11 +24,6 @@ namespace SonOfPicasso.Data.Context
         {
             // optionsBuilder.UseLoggerFactory(new SerilogLoggerFactory());
             // optionsBuilder.EnableSensitiveDataLogging();
-
-            if (!optionsBuilder.IsConfigured)
-            {
-                optionsBuilder.UseSqlite("Data Source=sonofpicasso.db");
-            }
         }
     }
 }

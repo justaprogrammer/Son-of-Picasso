@@ -9,14 +9,14 @@ using SonOfPicasso.Data.Context;
 namespace SonOfPicasso.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20190915212301_Initial")]
+    [Migration("20190923190606_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.0.0-preview9.19423.6");
+                .HasAnnotation("ProductVersion", "3.0.0");
 
             modelBuilder.Entity("SonOfPicasso.Data.Model.Album", b =>
                 {

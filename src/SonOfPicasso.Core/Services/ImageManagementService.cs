@@ -42,8 +42,10 @@ namespace SonOfPicasso.Core.Services
           {
               using var unitOfWork = _unitOfWorkFactory();
 
-              return unitOfWork.DirectoryRepository.Get(includeProperties: "Images")
+              var directories = unitOfWork.DirectoryRepository.Get(includeProperties: "Images")
                   .ToArray();
+
+              return directories;
           }, _schedulerProvider.TaskPool)
                 .SelectMany(directories => directories);
         }

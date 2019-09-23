@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO.Abstractions;
-using System.Linq;
-using System.Reflection;
 using System.Windows;
 using Autofac;
-using Autofac.Builder;
 using AutofacSerilogIntegration;
 using Microsoft.EntityFrameworkCore;
 using ReactiveUI;
@@ -14,7 +10,6 @@ using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Logging;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Core.Services;
-using SonOfPicasso.Data;
 using SonOfPicasso.Data.Context;
 using SonOfPicasso.Data.Repository;
 using SonOfPicasso.UI.Injection;
@@ -25,7 +20,6 @@ using SonOfPicasso.UI.ViewModels;
 using SonOfPicasso.UI.Views;
 using SonOfPicasso.UI.Windows;
 using Splat;
-using Splat.Autofac;
 using Splat.Serilog;
 
 namespace SonOfPicasso.UI
@@ -114,13 +108,26 @@ namespace SonOfPicasso.UI
             containerBuilder.RegisterType<ImageLoadingService>()
                 .As<IImageLoadingService>();
 
-            containerBuilder.RegisterType<CustomViewLocator>()
-                .As<IViewLocator>();
+            containerBuilder.RegisterType<ImageViewControl>()
+                .AsSelf();
+
+            containerBuilder.RegisterType<ImageFolderViewControl>()
+                .AsSelf();
 
             containerBuilder.RegisterLogger();
             var container = containerBuilder.Build();
+            var resolver = new AutofacDependencyResolver(container);
 
-            Locator.SetLocator(new AutofacDependencyResolver(container));
+            Locator.SetLocator(resolver);
+            Locator.CurrentMutable.InitializeReactiveUI();
+
+            var updatedBuilder = new ContainerBuilder();
+            
+            updatedBuilder.RegisterType<CustomViewLocator>()
+                .As<IViewLocator>();
+
+            resolver.UpdateComponentContext(updatedBuilder);
+
             Locator.CurrentMutable.RegisterPlatformBitmapLoader();
             Locator.CurrentMutable.UseSerilogFullLogger();
 
