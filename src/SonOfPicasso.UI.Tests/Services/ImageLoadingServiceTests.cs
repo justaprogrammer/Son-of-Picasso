@@ -6,6 +6,7 @@ using SonOfPicasso.Testing.Common;
 using SonOfPicasso.Testing.Common.Extensions;
 using SonOfPicasso.UI.Services;
 using Splat;
+using Splat.Serilog;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -16,6 +17,8 @@ namespace SonOfPicasso.UI.Tests.Services
         public ImageLoadingServiceTests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {
+            Locator.CurrentMutable.RegisterPlatformBitmapLoader();
+            Locator.CurrentMutable.UseSerilogFullLogger();
         }
 
         [Fact]
