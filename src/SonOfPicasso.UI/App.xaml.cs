@@ -127,7 +127,7 @@ namespace SonOfPicasso.UI
             SQLitePCL.Batteries_V2.Init();
 
             var dataContext = container.Resolve<DataContext>();
-            dataContext.Database.EnsureCreated();
+            dataContext.Database.Migrate();
 
             var mainWindow = container.Resolve<MainWindow>();
 

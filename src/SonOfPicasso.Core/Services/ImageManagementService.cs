@@ -59,12 +59,16 @@ namespace SonOfPicasso.Core.Services
 
                 var images = await _imageLocationService.GetImages(path)
                     .SelectMany(locatedImages => locatedImages)
-                    .Where(s => !unitOfWork.ImageRepository.Get(image => image.Path == path).ToArray().Any())
+                    .Select(s => Observable.Defer(() => Observable.Return((s, unitOfWork.ImageRepository.Get(image => image.Path == path).Any()))))
+                    .SelectMany(observable =>  observable)
+                    .Where(tuple => !tuple.Item2)
+                    .Select(tuple => tuple.Item1)
                     .GroupBy(s => _fileSystem.FileInfo.FromFileName(s).DirectoryName)
                     .SelectMany(groupedObservable =>
                     {
                         var directory = unitOfWork.DirectoryRepository
                             .Get(directory => directory.Path == groupedObservable.Key)
+                            .ToArray()
                             .FirstOrDefault();
 
                         if (directory == null)

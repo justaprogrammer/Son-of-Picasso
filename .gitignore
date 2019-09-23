@@ -247,3 +247,4 @@ nuget/*
 /images
 
 *.db
+/db
