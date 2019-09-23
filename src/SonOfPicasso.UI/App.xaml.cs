@@ -103,7 +103,14 @@ namespace SonOfPicasso.UI
             containerBuilder.RegisterType<ImageFolderViewModel>()
                 .As<IImageFolderViewModel>();
 
+            containerBuilder.RegisterType<CustomViewLocator>()
+                .As<IViewLocator>();
+
             containerBuilder.RegisterLogger();
+            containerBuilder.UseAutofacDependencyResolver();
+
+            Locator.CurrentMutable.RegisterPlatformBitmapLoader();
+            Locator.CurrentMutable.UseSerilogFullLogger();
 
             var container = containerBuilder.Build();
 
