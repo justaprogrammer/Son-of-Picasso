@@ -70,7 +70,6 @@ namespace SonOfPicasso.Core.Services
                     {
                         var directory = unitOfWork.DirectoryRepository
                             .Get(directory => directory.Path == groupedObservable.Key)
-                            .ToArray()
                             .FirstOrDefault();
 
                         if (directory == null)

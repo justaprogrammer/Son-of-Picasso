@@ -40,6 +40,7 @@ namespace SonOfPicasso.Integration.Tests
             FileSystem.Directory.CreateDirectory(_imagesPath);
 
             _imageCount = Faker.Random.Int(50, 75);
+            _imageCount = 1;
 
             var imageGenerationService = _container.Resolve<ImageGenerationService>();
             var groupedObservable = imageGenerationService.GenerateImages(_imageCount, _imagesPath)
