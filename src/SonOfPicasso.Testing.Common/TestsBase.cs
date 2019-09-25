@@ -27,7 +27,7 @@ namespace SonOfPicasso.Testing.Common
         {
             get
             {
-                var environmentVariable = Environment.GetEnvironmentVariable("SonOfPicasso.Testing_Tracing");
+                var environmentVariable = Environment.GetEnvironmentVariable("SonOfPicasso_Testing_Tracing");
                 if (string.IsNullOrWhiteSpace(environmentVariable))
                     return false;
 
