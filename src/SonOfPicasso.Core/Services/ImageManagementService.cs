@@ -14,11 +14,11 @@ namespace SonOfPicasso.Core.Services
 {
     public class ImageManagementService : IImageManagementService
     {
+        private readonly IExifDataService _exifDataService;
         private readonly IFileSystem _fileSystem;
         private readonly IImageLocationService _imageLocationService;
         private readonly ILogger _logger;
         private readonly ISchedulerProvider _schedulerProvider;
-        private readonly IExifDataService _exifDataService;
         private readonly Func<IUnitOfWork> _unitOfWorkFactory;
 
         public ImageManagementService(ILogger logger,
@@ -38,21 +38,22 @@ namespace SonOfPicasso.Core.Services
 
         public IObservable<Directory> GetAllDirectoriesWithImages()
         {
-            return Observable.Start(() =>
-          {
-              using var unitOfWork = _unitOfWorkFactory();
+            return Observable.Defer(() =>
+                {
+                    using var unitOfWork = _unitOfWorkFactory();
 
-              var directories = unitOfWork.DirectoryRepository.Get(includeProperties: "Images")
-                  .ToArray();
+                    var directories = unitOfWork.DirectoryRepository.Get(includeProperties: "Images")
+                        .ToArray();
 
-              return directories;
-          }, _schedulerProvider.TaskPool)
-                .SelectMany(directories => directories);
+                    return Observable.Return(directories);
+                })
+                .SelectMany(directories => directories)
+                .SubscribeOn(_schedulerProvider.TaskPool);
         }
 
         public IObservable<Image[]> ScanFolder(string path)
         {
-            return Observable.StartAsync(async task =>
+            return Observable.DeferAsync(async task =>
             {
                 using var unitOfWork = _unitOfWorkFactory();
 
@@ -72,7 +73,7 @@ namespace SonOfPicasso.Core.Services
 
                         if (directory == null)
                         {
-                            directory = new Directory { Path = groupedObservable.Key, Images = new List<Image>() };
+                            directory = new Directory {Path = groupedObservable.Key, Images = new List<Image>()};
                             unitOfWork.DirectoryRepository.Insert(directory);
                         }
 
@@ -81,10 +82,7 @@ namespace SonOfPicasso.Core.Services
                             {
                                 var observable = _exifDataService
                                     .GetExifData(imagePath)
-                                    .Select(exifData =>
-                                    {
-                                        return (imagePath, exifData);
-                                    });
+                                    .Select(exifData => { return (imagePath, exifData); });
                                 return observable;
                             })
                             .SelectMany(observable => observable)
@@ -104,54 +102,54 @@ namespace SonOfPicasso.Core.Services
 
                 unitOfWork.Save();
 
-                return images;
-            }, _schedulerProvider.TaskPool);
+                return Observable.Return(images);
+            }).SubscribeOn(_schedulerProvider.TaskPool);
         }
 
         public IObservable<Album> CreateAlbum(string name)
         {
-            return Observable.Start(() =>
+            return Observable.Defer(() =>
             {
                 using var unitOfWork = _unitOfWorkFactory();
 
-                var album = new Album { Name = name };
+                var album = new Album {Name = name};
 
                 unitOfWork.AlbumRepository.Insert(album);
                 unitOfWork.Save();
 
-                return album;
-            }, _schedulerProvider.TaskPool);
+                return Observable.Return(album);
+            }).SubscribeOn(_schedulerProvider.TaskPool);
         }
 
         public IObservable<Album[]> GetAlbums()
         {
-            return Observable.Start(() =>
+            return Observable.Defer(() =>
             {
                 using var unitOfWork = _unitOfWorkFactory();
 
                 var albums = unitOfWork.AlbumRepository.Get()
                     .ToArray();
 
-                return albums;
-            }, _schedulerProvider.TaskPool);
+                return Observable.Return(albums);
+            }).SubscribeOn(_schedulerProvider.TaskPool);
         }
 
         public IObservable<Image[]> GetImages()
         {
-            return Observable.Start(() =>
+            return Observable.Defer(() =>
             {
                 using var unitOfWork = _unitOfWorkFactory();
 
                 var images = unitOfWork.ImageRepository.Get()
                     .ToArray();
 
-                return images;
-            }, _schedulerProvider.TaskPool);
+                return Observable.Return(images);
+            }).SubscribeOn(_schedulerProvider.TaskPool);
         }
 
         public IObservable<Image> AddImagesToAlbum(int albumId, IList<int> imageIds)
         {
-            return Observable.Start(() =>
+            return Observable.Defer(() =>
                 {
                     using var unitOfWork = _unitOfWorkFactory();
 
@@ -161,67 +159,59 @@ namespace SonOfPicasso.Core.Services
                     {
                         var image = unitOfWork.ImageRepository.GetById(imageid);
 
-                        unitOfWork.AlbumImageRepository.Insert(new AlbumImage { Album = album, Image = image });
+                        unitOfWork.AlbumImageRepository.Insert(new AlbumImage {Album = album, Image = image});
 
                         return image;
                     }).ToArray();
 
                     unitOfWork.Save();
 
-                    return images;
-                }, _schedulerProvider.TaskPool)
-                .SelectMany(observable => observable);
+                    return Observable.Return(images);
+                })
+                .SelectMany(observable => observable)
+                .SubscribeOn(_schedulerProvider.TaskPool);
         }
 
         public IObservable<Unit> DeleteImages(IList<int> imageIds)
         {
-            return Observable.Start(() =>
-                {
-                    using var unitOfWork = _unitOfWorkFactory();
+            return Observable.Defer(() =>
+            {
+                using var unitOfWork = _unitOfWorkFactory();
 
-                    foreach (var imageId in imageIds)
-                    {
-                        unitOfWork.ImageRepository.Delete(imageId);
-                    }
+                foreach (var imageId in imageIds) unitOfWork.ImageRepository.Delete(imageId);
 
-                    unitOfWork.Save();
+                unitOfWork.Save();
 
-                    return Unit.Default;
-                }, _schedulerProvider.TaskPool);
+                return Observable.Return(Unit.Default);
+            }).SubscribeOn(_schedulerProvider.TaskPool);
         }
 
         public IObservable<Unit> DeleteAlbums(IList<int> albumIds)
         {
-            return Observable.Start(() =>
-                {
-                    using var unitOfWork = _unitOfWorkFactory();
+            return Observable.Defer(() =>
+            {
+                using var unitOfWork = _unitOfWorkFactory();
 
-                    foreach (var albumId in albumIds)
-                    {
-                        unitOfWork.AlbumRepository.Delete(albumId);
-                    }
+                foreach (var albumId in albumIds) unitOfWork.AlbumRepository.Delete(albumId);
 
-                    unitOfWork.Save();
+                unitOfWork.Save();
 
-                    return Unit.Default;
-                }, _schedulerProvider.TaskPool);
+                return Observable.Return(Unit.Default);
+            }).SubscribeOn(_schedulerProvider.TaskPool);
         }
 
         public IObservable<Unit> RemoveImageFromAlbum(IList<int> albumImageIds)
         {
-            return Observable.Start(() =>
-                {
-                    using var unitOfWork = _unitOfWorkFactory();
+            return Observable.Defer(() =>
+            {
+                using var unitOfWork = _unitOfWorkFactory();
 
-                    foreach (var albumImageId in albumImageIds)
-                    {
-                        unitOfWork.AlbumImageRepository.Delete(albumImageId);
-                    }
+                foreach (var albumImageId in albumImageIds) unitOfWork.AlbumImageRepository.Delete(albumImageId);
 
-                    unitOfWork.Save();
+                unitOfWork.Save();
 
-                    return Unit.Default;
-                }, _schedulerProvider.TaskPool);
+                return Observable.Return(Unit.Default);
+            }).SubscribeOn(_schedulerProvider.TaskPool);
         }
     }
 }

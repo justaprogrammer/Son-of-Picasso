@@ -5,6 +5,7 @@
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <UseWPF>true</UseWPF>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AssemblyName>SonOfPicasso.UI</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
