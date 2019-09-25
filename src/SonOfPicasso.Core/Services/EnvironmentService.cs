@@ -9,5 +9,10 @@ namespace SonOfPicasso.Core.Services
         {
             return Environment.GetFolderPath(folder);
         }
+
+        public string GetEnvironmentVariable(string variable)
+        {
+            return Environment.GetEnvironmentVariable(variable);
+        }
     }
 }

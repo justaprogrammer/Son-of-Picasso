@@ -10,6 +10,37 @@ namespace SonOfPicasso.Testing.Common
 {
     public abstract class TestsBase: IDisposable
     {
+
+        protected static bool IsDebug
+        {
+            get
+            {
+#if DEBUG
+                return true;
+#else
+                return false;
+#endif
+            }
+        }
+
+        protected static bool IsTracingEnabled
+        {
+            get
+            {
+                var environmentVariable = Environment.GetEnvironmentVariable("SonOfPicasso_Testing_Tracing");
+                if (string.IsNullOrWhiteSpace(environmentVariable))
+                    return false;
+
+                environmentVariable = environmentVariable.ToLower();
+                if (environmentVariable == "false" || environmentVariable == "1")
+                {
+                    return false;
+                }
+
+                return true;
+            }
+        }
+
         protected readonly ILogger Logger;
         protected readonly Faker Faker;
         protected readonly AutoResetEvent AutoResetEvent;
@@ -18,11 +49,21 @@ namespace SonOfPicasso.Testing.Common
         {
             Faker = new Faker();
 
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Verbose()
+            var loggerConfiguration = new LoggerConfiguration()
                 .Enrich.WithThreadId()
                 .Enrich.With<CustomEnrichers>() 
-                .WriteTo.TestOutput(testOutputHelper, outputTemplate: "{Timestamp:HH:mm:ss} [{Level:u4}] ({PaddedThreadId}) {ShortSourceContext} {Message}{NewLineIfException}{Exception}")
+                .WriteTo.TestOutput(testOutputHelper, outputTemplate: "{Timestamp:HH:mm:ss} [{Level:u4}] ({PaddedThreadId}) {ShortSourceContext} {Message}{NewLineIfException}{Exception}");
+
+            if (IsTracingEnabled)
+            {
+                loggerConfiguration = loggerConfiguration.MinimumLevel.Verbose();
+            }
+            else if (IsDebug)
+            {
+                loggerConfiguration = loggerConfiguration.MinimumLevel.Debug();
+            }
+
+            Log.Logger = loggerConfiguration
                 .CreateLogger();
 
             Logger = Log.Logger.ForContext(GetType());

@@ -22,7 +22,11 @@ namespace SonOfPicasso.UI.Views
                 ImageLabel.Content = ViewModel.Path;
 
                 ViewModel.GetImage()
-                    .Subscribe(bitmap => ImageBitmap.Source = bitmap.ToNative())
+                    .Subscribe(bitmap =>
+                    {
+                        var imageBitmapSource = bitmap.ToNative();
+                        ImageBitmap.Source = imageBitmapSource;
+                    })
                     .DisposeWith(disposable);
             });
         }

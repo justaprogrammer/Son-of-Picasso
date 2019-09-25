@@ -47,12 +47,61 @@ namespace SonOfPicasso.UI.ViewModels
         public IObservable<Unit> Initialize()
         {
             _logger.Debug("Initializing");
-            return Observable.Return(Unit.Default);
+
+            return LoadData();
+        }
+
+        private IObservable<Unit> LoadData()
+        {
+            var getAllDirectories = _imageManagementService.GetAllDirectoriesWithImages();
+
+            var d1 = getAllDirectories
+                .Select(directory =>
+                {
+                    var imageFolderViewModel = _imageFolderViewModelFactory();
+                    imageFolderViewModel.Initialize(directory);
+                    return imageFolderViewModel;
+                })
+                .ToArray()
+                .ObserveOn(_schedulerProvider.MainThreadScheduler)
+                .Select(models =>
+                {
+                    ImageFolders.AddRange(models);
+                    return Unit.Default;
+                });
+
+            var d2 = getAllDirectories
+                .Select(directory => directory.Images)
+                .SelectMany(observable => observable)
+                .Select(image =>
+                {
+                    var imageViewModel = _imageViewModelFactory();
+                    imageViewModel.Initialize(image);
+                    return imageViewModel;
+                })
+                .ToArray()
+                .ObserveOn(_schedulerProvider.MainThreadScheduler)
+                .Select(models =>
+                {
+                    Images.AddRange(models);
+                    return Unit.Default;
+                });
+
+            return Observable.Zip(d1, d2)
+                .Select(list => Unit.Default);
         }
 
         private IObservable<Unit> ExecuteAddFolder(string addPath)
         {
-            return Observable.Return(Unit.Default);
+            return _imageManagementService.ScanFolder(addPath)
+                .ObserveOn(_schedulerProvider.MainThreadScheduler)
+                .Select(images =>
+                {
+                    Images.Clear();
+                    ImageFolders.Clear();
+                    return LoadData();
+                })
+                .SelectMany(observable => observable);
         }
     }
 }

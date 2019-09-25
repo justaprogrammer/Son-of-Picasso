@@ -5,6 +5,7 @@ using ReactiveUI;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Models;
 using SonOfPicasso.Core.Scheduling;
+using SonOfPicasso.Data.Model;
 using SonOfPicasso.UI.Injection;
 using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.Views;
@@ -18,7 +19,7 @@ namespace SonOfPicasso.UI.ViewModels
         private readonly IImageLoadingService _imageLoadingService;
         private readonly ISchedulerProvider _schedulerProvider;
 
-        public string Path => "";
+        public string Path => _imageModel.Path;
 
         public ImageViewModel(IImageLoadingService imageLoadingService, ISchedulerProvider schedulerProvider)
         {
@@ -26,9 +27,12 @@ namespace SonOfPicasso.UI.ViewModels
             _schedulerProvider = schedulerProvider;
         }
 
-        public void Initialize()
+        public void Initialize(Image imageModel)
         {
+            _imageModel = imageModel ?? throw new ArgumentNullException(nameof(imageModel));
         }
+
+        private Image _imageModel;
 
         public IObservable<IBitmap> GetImage()
         {

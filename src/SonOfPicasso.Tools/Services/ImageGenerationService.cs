@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -79,40 +80,40 @@ namespace SonOfPicasso.Tools.Services
             _schedulerProvider = schedulerProvider;
         }
 
-        public IObservable<string> GenerateImages(int count, string fileRoot)
+        public IObservable<IGroupedObservable<string, string>> GenerateImages(int count, string fileRoot)
         {
-            _logger.Debug("GenerateImages {Count} {FileRoot}", count, fileRoot);
-
             return Observable.Generate(
                 initialState: 0,
                 condition: value => value < count,
                 iterate: value => value + 1,
                 resultSelector: value =>
                 {
+                    _logger.Debug("GenerateImages {Count} {FileRoot}", count, fileRoot);
+
                     var time = Faker.Date.Between(DateTime.Now, DateTime.Now.AddDays(-30));
-                    var directory = _fileSystem.Path.Combine(fileRoot, time.ToString("yyyy-MM-dd"));
-                    var directoryInfoBase = _fileSystem.Directory.CreateDirectory(directory);
+                    var directoryPath = _fileSystem.Path.Combine(fileRoot, time.ToString("yyyy-MM-dd"));
+                    _fileSystem.Directory.CreateDirectory(directoryPath);
 
                     var fileName = $"{time.ToString("s").Replace("-", "_").Replace(":", "_")}.jpg";
-                    var filePath = _fileSystem.Path.Combine(directoryInfoBase.ToString(), fileName);
+                    var filePath = _fileSystem.Path.Combine(directoryPath, fileName);
 
                     var exifData = (ExifData)ExifDataFaker;
                     exifData.DateTime = time;
                     exifData.DateTimeDigitized = time;
                     exifData.DateTimeOriginal = time;
 
-                    return GenerateImage(filePath, 1024, 768, exifData);
+                    return GenerateImage(filePath, 1024, 768, exifData)
+                        .Select(imagePath => (directoryPath, imagePath));
 
                 }, _schedulerProvider.TaskPool)
-                .SelectMany(observable => observable);
+                .SelectMany(observable => observable)
+                .GroupBy(tuple => tuple.directoryPath, tuple => tuple.imagePath);
         }
 
         public IObservable<string> GenerateImage(string path, int width, int height, ExifData exifData)
         {
             return Observable.Start(() =>
             {
-                _logger.Debug("GenerateImage {Path} {Width} {Height}", path, width, height);
-
                 var cellHeight = height / 3;
                 var cellWidth = width / 3;
 
@@ -390,7 +391,7 @@ namespace SonOfPicasso.Tools.Services
             return null;
         }
 
-        private static Color GetColor(Color[] colors, int x, int y)
+        private static Color GetColor(IReadOnlyList<Color> colors, int x, int y)
         {
             switch (x)
             {

@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO.Abstractions;
-using System.Linq;
 using System.Windows;
 using Autofac;
-using Autofac.Builder;
 using AutofacSerilogIntegration;
 using Microsoft.EntityFrameworkCore;
 using ReactiveUI;
@@ -13,8 +10,8 @@ using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Logging;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Core.Services;
-using SonOfPicasso.Data;
 using SonOfPicasso.Data.Context;
+using SonOfPicasso.Data.Repository;
 using SonOfPicasso.UI.Injection;
 using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.Scheduling;
@@ -23,7 +20,6 @@ using SonOfPicasso.UI.ViewModels;
 using SonOfPicasso.UI.Views;
 using SonOfPicasso.UI.Windows;
 using Splat;
-using Splat.Autofac;
 using Splat.Serilog;
 
 namespace SonOfPicasso.UI
@@ -97,20 +93,47 @@ namespace SonOfPicasso.UI
             containerBuilder.RegisterType<DataCache>()
                 .As<IDataCache>();
 
+            containerBuilder.RegisterType<UnitOfWork>()
+                .As<IUnitOfWork>();
+
             containerBuilder.RegisterType<ImageViewModel>()
                 .As<IImageViewModel>();
+
+            containerBuilder.RegisterType<ExifDataService>()
+                .As<IExifDataService>();
 
             containerBuilder.RegisterType<ImageFolderViewModel>()
                 .As<IImageFolderViewModel>();
 
-            containerBuilder.RegisterLogger();
+            containerBuilder.RegisterType<ImageLoadingService>()
+                .As<IImageLoadingService>();
 
+            containerBuilder.RegisterType<ImageViewControl>()
+                .AsSelf();
+
+            containerBuilder.RegisterType<ImageFolderViewControl>()
+                .AsSelf();
+
+            containerBuilder.RegisterLogger();
             var container = containerBuilder.Build();
+            var resolver = new AutofacDependencyResolver(container);
+
+            Locator.SetLocator(resolver);
+            Locator.CurrentMutable.InitializeReactiveUI();
+
+            var updatedBuilder = new ContainerBuilder();
+            
+            updatedBuilder.RegisterType<CustomViewLocator>()
+                .As<IViewLocator>();
+
+            resolver.UpdateComponentContext(updatedBuilder);
+
+            Locator.CurrentMutable.RegisterPlatformBitmapLoader();
+            Locator.CurrentMutable.UseSerilogFullLogger();
 
             SQLitePCL.Batteries_V2.Init();
 
             var dataContext = container.Resolve<DataContext>();
-            dataContext.Database.EnsureCreated();
             dataContext.Database.Migrate();
 
             var mainWindow = container.Resolve<MainWindow>();
@@ -122,8 +145,17 @@ namespace SonOfPicasso.UI
 
         internal static DbContextOptions<DataContext> BuildDbContextOptions(IEnvironmentService environmentService, IFileSystem fileSystem)
         {
-            var appDataPath = environmentService.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            var databasePath = fileSystem.Path.Combine(appDataPath, ApplicationName, $"{ApplicationName}.db");
+            string databasePath = environmentService.GetEnvironmentVariable("SonOfPicasso_DatabasePath");
+            if (!string.IsNullOrWhiteSpace(databasePath))
+            {
+                var databaseDirectory = fileSystem.Path.GetDirectoryName(databasePath);
+                fileSystem.Directory.CreateDirectory(databaseDirectory);
+            }
+            else
+            {
+                var appDataPath = environmentService.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                databasePath = fileSystem.Path.Combine(appDataPath, ApplicationName, $"{ApplicationName}.db");
+            }
 
             var dbContextOptionsBuilder = new DbContextOptionsBuilder<DataContext>();
             dbContextOptionsBuilder.UseSqlite($"Data Source={databasePath}");

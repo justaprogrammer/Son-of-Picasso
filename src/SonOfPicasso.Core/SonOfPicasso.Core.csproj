@@ -21,7 +21,7 @@
     </PackageReference>
     <PackageReference Include="Serilog" Version="2.8.0" />
     <PackageReference Include="SerilogAnalyzer" Version="0.15.0" />
-    <PackageReference Include="Splat.Autofac" Version="8.3.1" />
+    <PackageReference Include="Splat.Drawing" Version="9.0.5" />
     <PackageReference Include="System.IO.Abstractions" Version="6.0.32" />
     <PackageReference Include="System.Reactive" Version="4.2.0-preview.625" />
   </ItemGroup>

@@ -7,9 +7,9 @@
       "commandName": "Project",
       "commandLineArgs": "cache clear"
     },
-    "Generate Images": {
+    "Generate 100 Images": {
       "commandName": "Project",
-      "commandLineArgs": "images generate 1000 ..\\..\\..\\..\\..\\images"
+      "commandLineArgs": "images generate 100 $(SolutionDir)\\images"
     }
   }
 }

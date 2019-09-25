@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "SonOfPicasso.UI": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "SonOfPicasso_DatabasePath": "$(SolutionDir)db\\development.db"
+      }
+    }
+  }
+}

@@ -2,6 +2,7 @@
 using System.IO.Abstractions;
 using System.Reactive.Linq;
 using Autofac;
+using AutofacSerilogIntegration;
 using FluentColorConsole;
 using McMaster.Extensions.CommandLineUtils;
 using Serilog;
@@ -38,7 +39,7 @@ namespace SonOfPicasso.Tools
                     var count = setCmd.Argument<int>("count", "The number of images to generate").IsRequired();
                     var path = setCmd.Argument<string>("path", "The location for these images").IsRequired();
 
-                    setCmd.OnExecute(() => ImageGenerationService.GenerateImages(count.ParsedValue, path.ParsedValue).LastAsync().Wait());
+                    setCmd.OnExecute(() => ImageGenerationService.GenerateImages(count.ParsedValue, path.ParsedValue).Wait());
                 });
             });
 
@@ -52,7 +53,7 @@ namespace SonOfPicasso.Tools
 
                     setCmd.HandleValidationError();
 
-                    setCmd.OnExecute(() => ToolsService.ClearCache().LastAsync().Wait());
+                    setCmd.OnExecute(() => ToolsService.ClearCache().Wait());
                 });
             });
 
@@ -82,6 +83,7 @@ namespace SonOfPicasso.Tools
                     Log.Logger = loggerConfiguration.CreateLogger();
 
                     var containerBuilder = new ContainerBuilder();
+                    containerBuilder.RegisterLogger();
 
                     containerBuilder.RegisterType<EnvironmentService>()
                         .As<IEnvironmentService>()
@@ -105,6 +107,8 @@ namespace SonOfPicasso.Tools
 
                     containerBuilder.RegisterType<DataCache>()
                         .As<IDataCache>();
+
+                    containerBuilder.RegisterType<ImageGenerationService>();
 
                     containerBuilder.RegisterType<ToolsService>();
 
