@@ -17,5 +17,6 @@ namespace SonOfPicasso.Core.Interfaces
         IObservable<Unit> DeleteImages(IList<int> imageIds);
         IObservable<Unit> DeleteAlbums(IList<int> albumIds);
         IObservable<Directory> GetAllDirectoriesWithImages();
+        IObservable<Image[]> GetImagesWithDirectoryAndExif();
     }
 }

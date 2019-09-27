@@ -16,6 +16,7 @@
     <PackageReference Include="Ardalis.GuardClauses" Version="1.2.9" />
     <PackageReference Include="Autofac" Version="4.9.4" />
     <PackageReference Include="AutofacSerilogIntegration" Version="2.0.0" />
+    <PackageReference Include="DynamicData" Version="6.13.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.0.0">
       <PrivateAssets>all</PrivateAssets>
@@ -33,7 +34,7 @@
     <PackageReference Include="Splat.Autofac" Version="9.0.5" />
     <PackageReference Include="Splat.Drawing" Version="9.0.5" />
     <PackageReference Include="Splat.Serilog" Version="9.0.5" />
-    <PackageReference Include="System.IO.Abstractions" Version="6.0.32" />
+    <PackageReference Include="System.IO.Abstractions" Version="6.0.38" />
     <PackageReference Include="System.Reactive" Version="4.2.0-preview.625" />
   </ItemGroup>
 

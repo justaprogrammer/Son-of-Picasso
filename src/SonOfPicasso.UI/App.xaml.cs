@@ -114,6 +114,9 @@ namespace SonOfPicasso.UI
             containerBuilder.RegisterType<ImageFolderViewControl>()
                 .AsSelf();
 
+            containerBuilder.RegisterType<ViewModelActivator>()
+                .AsSelf();
+
             containerBuilder.RegisterLogger();
             var container = containerBuilder.Build();
             var resolver = new AutofacDependencyResolver(container);
@@ -140,7 +143,6 @@ namespace SonOfPicasso.UI
 
             mainWindow.ViewModel = container.Resolve<IApplicationViewModel>();
             mainWindow.Show();
-            mainWindow.ViewModel.Initialize().Subscribe();
         }
 
         internal static DbContextOptions<DataContext> BuildDbContextOptions(IEnvironmentService environmentService, IFileSystem fileSystem)
