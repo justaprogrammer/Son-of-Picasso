@@ -12,7 +12,7 @@ using SonOfPicasso.Core.Services;
 using SonOfPicasso.Data.Repository;
 using SonOfPicasso.Data.Services;
 using SonOfPicasso.UI.Injection;
-using SonOfPicasso.UI.Interfaces;
+using SonOfPicasso.UI.ViewModels;
 using SonOfPicasso.UI.Windows;
 using Splat;
 using Splat.Serilog;
@@ -73,16 +73,14 @@ namespace SonOfPicasso.UI
                 .AsImplementedInterfaces();
 
             containerBuilder.RegisterAssemblyTypes(GetType().Assembly)
-                .Where(type => type.Namespace.StartsWith("SonOfPicasso.UI.ViewModels"))
-                .AsImplementedInterfaces();
-
-            containerBuilder.RegisterAssemblyTypes(GetType().Assembly)
                 .Where(type => type.Namespace.StartsWith("SonOfPicasso.UI.Services"))
                 .InstancePerLifetimeScope()
                 .AsImplementedInterfaces();
 
             containerBuilder.RegisterAssemblyTypes(GetType().Assembly)
-                .Where(type => type.Namespace.StartsWith("SonOfPicasso.UI.Windows") || type.Namespace.StartsWith("SonOfPicasso.UI.Views"))
+                .Where(type => type.Namespace.StartsWith("SonOfPicasso.UI.Windows")
+                               || type.Namespace.StartsWith("SonOfPicasso.UI.ViewModels")
+                               || type.Namespace.StartsWith("SonOfPicasso.UI.Views"))
                 .AsSelf();
 
             containerBuilder.RegisterLogger();
@@ -112,7 +110,7 @@ namespace SonOfPicasso.UI
 
             var mainWindow = container.Resolve<MainWindow>();
 
-            mainWindow.ViewModel = container.Resolve<IApplicationViewModel>();
+            mainWindow.ViewModel = container.Resolve<ApplicationViewModel>();
             mainWindow.Show();
         }
 

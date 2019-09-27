@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Reactive.Disposables;
-using System.Reactive.Linq;
 using ReactiveUI;
-using SonOfPicasso.Core.Scheduling;
-using SonOfPicasso.UI.Interfaces;
+using SonOfPicasso.UI.ViewModels;
 using Splat;
 
 namespace SonOfPicasso.UI.Views
@@ -11,7 +9,7 @@ namespace SonOfPicasso.UI.Views
     /// <summary>
     /// Interaction logic for ImageViewControl.xaml
     /// </summary>
-    public partial class ImageViewControl : ReactiveUserControl<IImageViewModel>
+    public partial class ImageViewControl : ReactiveUserControl<ImageViewModel>
     {
         public ImageViewControl()
         {

@@ -7,7 +7,7 @@ using ReactiveUI;
 using Serilog;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
-using SonOfPicasso.UI.Interfaces;
+using SonOfPicasso.UI.ViewModels;
 using SonOfPicasso.UI.Windows.Dialogs;
 
 namespace SonOfPicasso.UI.Windows
@@ -15,9 +15,9 @@ namespace SonOfPicasso.UI.Windows
     /// <summary>
     ///     Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : ReactiveWindow<IApplicationViewModel>
+    public partial class MainWindow : ReactiveWindow<ApplicationViewModel>
     {
-        private readonly Func<IAddAlbumViewModel> _addAlbumViewModelFactory;
+        private readonly Func<AddAlbumViewModel> _addAlbumViewModelFactory;
         private readonly Func<AddAlbumWindow> _addAlbumWindowFactory;
         private readonly IEnvironmentService _environmentService;
         private readonly IFileSystem _fileSystem;
@@ -26,7 +26,7 @@ namespace SonOfPicasso.UI.Windows
 
         public MainWindow(ILogger logger, IEnvironmentService environmentService, IFileSystem fileSystem,
             ISchedulerProvider schedulerProvider, Func<AddAlbumWindow> addAlbumWindowFactory,
-            Func<IAddAlbumViewModel> addAlbumViewModelFactory)
+            Func<AddAlbumViewModel> addAlbumViewModelFactory)
         {
             _logger = logger;
             _environmentService = environmentService;

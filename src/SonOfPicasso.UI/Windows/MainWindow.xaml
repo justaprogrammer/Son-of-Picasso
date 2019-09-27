@@ -1,11 +1,10 @@
-﻿<reactiveUi:ReactiveWindow x:TypeArguments="interfaces:IApplicationViewModel" x:Class="SonOfPicasso.UI.Windows.MainWindow"
+﻿<reactiveUi:ReactiveWindow x:TypeArguments="viewModels:ApplicationViewModel" x:Class="SonOfPicasso.UI.Windows.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:interfaces="clr-namespace:SonOfPicasso.UI.Interfaces"
         xmlns:reactiveUi="http://reactiveui.net"
-        xmlns:views="clr-namespace:SonOfPicasso.UI.Views"
+        xmlns:viewModels="clr-namespace:SonOfPicasso.UI.ViewModels"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <DockPanel>
@@ -32,7 +31,7 @@
                       VirtualizingStackPanel.VirtualizationMode="Recycling"
                       VirtualizingStackPanel.ScrollUnit="Pixel">
                 <ListView.ItemTemplate>
-                    <DataTemplate DataType="{x:Type interfaces:IImageFolderViewModel}">
+                    <DataTemplate DataType="{x:Type viewModels:ImageFolderViewModel}">
                         <reactiveUi:ViewModelViewHost ViewModel="{Binding}" />
                     </DataTemplate>
                 </ListView.ItemTemplate>
@@ -41,7 +40,7 @@
                       VirtualizingStackPanel.VirtualizationMode="Recycling"
                       VirtualizingStackPanel.ScrollUnit="Pixel">
                 <ListView.ItemTemplate>
-                    <DataTemplate DataType="{x:Type interfaces:IImageViewModel}">
+                    <DataTemplate DataType="{x:Type viewModels:ImageViewModel}">
                         <reactiveUi:ViewModelViewHost ViewModel="{Binding}" />
                     </DataTemplate>
                 </ListView.ItemTemplate>

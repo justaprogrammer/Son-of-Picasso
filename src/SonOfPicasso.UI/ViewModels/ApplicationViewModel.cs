@@ -10,23 +10,22 @@ using Serilog;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Data.Model;
-using SonOfPicasso.UI.Interfaces;
 
 namespace SonOfPicasso.UI.ViewModels
 {
-    public class ApplicationViewModel : ReactiveObject, IApplicationViewModel
+    public class ApplicationViewModel : ReactiveObject, IActivatableViewModel
     {
-        private readonly Func<IImageFolderViewModel> _imageFolderViewModelFactory;
+        private readonly Func<ImageFolderViewModel> _imageFolderViewModelFactory;
         private readonly IImageManagementService _imageManagementService;
-        private readonly Func<IImageViewModel> _imageViewModelFactory;
+        private readonly Func<ImageViewModel> _imageViewModelFactory;
         private readonly ILogger _logger;
         private readonly ISchedulerProvider _schedulerProvider;
 
         public ApplicationViewModel(ILogger logger,
             ISchedulerProvider schedulerProvider,
             IImageManagementService imageManagementService,
-            Func<IImageViewModel> imageViewModelFactory,
-            Func<IImageFolderViewModel> imageFolderViewModelFactory, 
+            Func<ImageViewModel> imageViewModelFactory,
+            Func<ImageFolderViewModel> imageFolderViewModelFactory, 
             ViewModelActivator activator)
         {
             _logger = logger;
@@ -36,17 +35,17 @@ namespace SonOfPicasso.UI.ViewModels
             _imageFolderViewModelFactory = imageFolderViewModelFactory;
             Activator = activator;
 
-            var images = new ObservableCollectionExtended<IImageViewModel>();
+            var images = new ObservableCollectionExtended<ImageViewModel>();
             Images = images;
 
-            var imageFolders = new ObservableCollectionExtended<IImageFolderViewModel>();
+            var imageFolders = new ObservableCollectionExtended<ImageFolderViewModel>();
             ImageFolders = imageFolders;
 
             AddFolder = ReactiveCommand.CreateFromObservable<string, Unit>(ExecuteAddFolder);
             NewAlbum = ReactiveCommand.CreateFromObservable(ExecuteNewAlbum);
 
-            ImageCache = new SourceCache<IImageViewModel, string>(model => model.Path);
-            ImageFolderCache = new SourceCache<IImageFolderViewModel, string>(model => model.Path);
+            ImageCache = new SourceCache<ImageViewModel, string>(model => model.Path);
+            ImageFolderCache = new SourceCache<ImageFolderViewModel, string>(model => model.Path);
 
             this.WhenActivated(d =>
             {
@@ -81,27 +80,27 @@ namespace SonOfPicasso.UI.ViewModels
             });
         }
 
-        private IImageFolderViewModel CreateImageFolderViewModel(Folder folder)
+        private ImageFolderViewModel CreateImageFolderViewModel(Folder folder)
         {
             var imageFolderViewModel = _imageFolderViewModelFactory();
             imageFolderViewModel.Initialize(folder);
             return imageFolderViewModel;
         }
 
-        private SourceCache<IImageFolderViewModel, string> ImageFolderCache { get; set; }
+        private SourceCache<ImageFolderViewModel, string> ImageFolderCache { get; set; }
 
-        private SourceCache<IImageViewModel, string> ImageCache { get; set; }
+        private SourceCache<ImageViewModel, string> ImageCache { get; set; }
 
-        public ObservableCollection<IImageViewModel> Images { get; }
+        public ObservableCollection<ImageViewModel> Images { get; }
 
-        public ObservableCollection<IImageFolderViewModel> ImageFolders { get; }
+        public ObservableCollection<ImageFolderViewModel> ImageFolders { get; }
 
         public ReactiveCommand<string, Unit> AddFolder { get; }
         public ReactiveCommand<Unit, Unit> NewAlbum { get; }
 
         public ViewModelActivator Activator { get; }
 
-        private IImageViewModel CreateImageViewModel(Image image)
+        private ImageViewModel CreateImageViewModel(Image image)
         {
             var imageViewModel = _imageViewModelFactory();
             imageViewModel.Initialize(image);
