@@ -32,7 +32,7 @@ namespace SonOfPicasso.Core.Tests.Services
         {
         }
 
-        private static readonly Faker<Folder> FakeNewDirectory
+        private static readonly Faker<Folder> FakeNewFolder
             = new AutoFaker<Folder>().RuleFor(directory1 => directory1.Id, 0)
                 .RuleFor(directory1 => directory1.Images, (List<Image>) null)
                 .RuleFor(directory1 => directory1.Path, faker => faker.System.DirectoryPathWindows());
@@ -61,7 +61,7 @@ namespace SonOfPicasso.Core.Tests.Services
 
             var unitOfWork = Substitute.For<IUnitOfWork>();
             unitOfWork.FolderRepository.Get()
-                .ReturnsForAnyArgs(new[] {directory, FakeNewDirectory});
+                .ReturnsForAnyArgs(new[] {directory, FakeNewFolder});
 
             UnitOfWorkQueue.Enqueue(unitOfWork);
 
@@ -105,7 +105,7 @@ namespace SonOfPicasso.Core.Tests.Services
 
             var unitOfWork = Substitute.For<IUnitOfWork>();
             unitOfWork.FolderRepository.Get()
-                .ReturnsForAnyArgs(new[] {directory, FakeNewDirectory});
+                .ReturnsForAnyArgs(new[] {directory, FakeNewFolder});
 
             UnitOfWorkQueue.Enqueue(unitOfWork);
 

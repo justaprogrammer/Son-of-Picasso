@@ -81,14 +81,14 @@ namespace SonOfPicasso.Core.Services
                     .GroupBy(s => _fileSystem.FileInfo.FromFileName(s).DirectoryName)
                     .SelectMany(groupedObservable =>
                     {
-                        var directory = unitOfWork.FolderRepository
+                        var folder = unitOfWork.FolderRepository
                             .Get(d => d.Path == groupedObservable.Key)
                             .FirstOrDefault();
 
-                        if (directory == null)
+                        if (folder == null)
                         {
-                            directory = new Folder {Path = groupedObservable.Key, Images = new List<Image>()};
-                            unitOfWork.FolderRepository.Insert(directory);
+                            folder = new Folder {Path = groupedObservable.Key, Images = new List<Image>()};
+                            unitOfWork.FolderRepository.Insert(folder);
                         }
 
                         return groupedObservable
@@ -104,13 +104,13 @@ namespace SonOfPicasso.Core.Services
                                     ExifData = tuple.exifData
                                 };
 
-                                if (directory.Images == null)
+                                if (folder.Images == null)
                                 {
-                                    directory.Images = new List<Image>{ image };
+                                    folder.Images = new List<Image>{ image };
                                 }
                                 else
                                 {
-                                    directory.Images.Add(image);
+                                    folder.Images.Add(image);
                                 }
 
                                 return image;
