@@ -11,8 +11,18 @@
     <DockPanel>
         <Menu DockPanel.Dock="Top" Width="Auto" Height="20">
             <MenuItem Header="_File">
+                <MenuItem x:Name="NewAlbum" Header="New Album" Click="NewAlbum_Click"/>
+                <Separator />
                 <MenuItem x:Name="AddFolder" Header="_Add Folder" Click="AddFolder_Click"/>
+                <MenuItem x:Name="AddFile" Header="Add Folder" Click="AddFile_Click"/>
             </MenuItem>
+            <MenuItem Header="_Edit" />
+            <MenuItem Header="_View" />
+            <MenuItem Header="_Folder" />
+            <MenuItem Header="_Picture" />
+            <MenuItem Header="_Create" />
+            <MenuItem Header="_Tools" />
+            <MenuItem Header="_Help" />
         </Menu>
 
         <DockPanel>

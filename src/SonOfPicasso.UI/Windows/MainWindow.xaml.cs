@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO.Abstractions;
+using System.Reactive;
 using System.Reactive.Disposables;
 using System.Windows;
 using System.Windows.Forms;
@@ -59,6 +60,15 @@ namespace SonOfPicasso.UI.Windows
 
                 ViewModel.AddFolder.Execute(selectedPath).Subscribe();
             }
+        }
+
+        private void NewAlbum_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel.NewAlbum.Execute().Subscribe();
+        }
+
+        private void AddFile_Click(object sender, RoutedEventArgs e)
+        {
         }
     }
 }
