@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO.Abstractions;
 using Microsoft.EntityFrameworkCore;
-using SonOfPicasso.Data.Context;
+using SonOfPicasso.Data.Repository;
 using SonOfPicasso.Testing.Common;
 using Xunit.Abstractions;
 
@@ -31,7 +31,7 @@ namespace SonOfPicasso.Integration.Tests
                     .Options;
 
             using var dataContext = new DataContext(DbContextOptions);
-            dataContext.Database.EnsureCreated();
+            dataContext.Database.Migrate();
         }
 
         public override void Dispose()

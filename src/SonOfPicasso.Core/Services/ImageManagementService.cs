@@ -7,8 +7,8 @@ using System.Reactive.Linq;
 using Serilog;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
+using SonOfPicasso.Data.Interfaces;
 using SonOfPicasso.Data.Model;
-using SonOfPicasso.Data.Repository;
 
 namespace SonOfPicasso.Core.Services
 {

@@ -1,7 +1,8 @@
 using System;
 using SonOfPicasso.Data.Model;
+using SonOfPicasso.Data.Repository;
 
-namespace SonOfPicasso.Data.Repository
+namespace SonOfPicasso.Data.Interfaces
 {
     public interface IUnitOfWork : IDisposable
     {

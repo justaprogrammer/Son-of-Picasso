@@ -3,7 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using SonOfPicasso.Data.Context;
+using SonOfPicasso.Data.Repository;
 
 namespace SonOfPicasso.Data.Migrations
 {
@@ -253,7 +253,7 @@ namespace SonOfPicasso.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Directories");
+                    b.ToTable("Folders");
                 });
 
             modelBuilder.Entity("SonOfPicasso.Data.Model.Image", b =>

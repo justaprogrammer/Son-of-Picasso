@@ -1,9 +1,10 @@
 using System;
 using Microsoft.EntityFrameworkCore;
-using SonOfPicasso.Data.Context;
+using SonOfPicasso.Data.Interfaces;
 using SonOfPicasso.Data.Model;
+using SonOfPicasso.Data.Repository;
 
-namespace SonOfPicasso.Data.Repository
+namespace SonOfPicasso.Data.Services
 {
     public class UnitOfWork : IUnitOfWork
     {

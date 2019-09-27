@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO.Abstractions;
-using System.Reactive;
 using System.Reactive.Disposables;
 using System.Windows;
 using System.Windows.Forms;
@@ -9,41 +8,47 @@ using Serilog;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.UI.Interfaces;
-using SonOfPicasso.UI.ViewModels;
+using SonOfPicasso.UI.Windows.Dialogs;
 
 namespace SonOfPicasso.UI.Windows
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    ///     Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : ReactiveWindow<IApplicationViewModel>
     {
-        private readonly ILogger _logger;
+        private readonly Func<IAddAlbumViewModel> _addAlbumViewModelFactory;
+        private readonly Func<AddAlbumWindow> _addAlbumWindowFactory;
         private readonly IEnvironmentService _environmentService;
         private readonly IFileSystem _fileSystem;
+        private readonly ILogger _logger;
         private readonly ISchedulerProvider _schedulerProvider;
 
-        public MainWindow(ILogger logger, IEnvironmentService environmentService, IFileSystem fileSystem, ISchedulerProvider schedulerProvider)
+        public MainWindow(ILogger logger, IEnvironmentService environmentService, IFileSystem fileSystem,
+            ISchedulerProvider schedulerProvider, Func<AddAlbumWindow> addAlbumWindowFactory,
+            Func<IAddAlbumViewModel> addAlbumViewModelFactory)
         {
             _logger = logger;
             _environmentService = environmentService;
             _fileSystem = fileSystem;
             _schedulerProvider = schedulerProvider;
+            _addAlbumWindowFactory = addAlbumWindowFactory;
+            _addAlbumViewModelFactory = addAlbumViewModelFactory;
 
             InitializeComponent();
 
             this.WhenActivated(disposable =>
-                {
-                    this.OneWayBind(ViewModel,
-                            model => model.ImageFolders,
-                            window => window.FoldersListView.ItemsSource)
-                        .DisposeWith(disposable);
+            {
+                this.OneWayBind(ViewModel,
+                        model => model.ImageFolders,
+                        window => window.FoldersListView.ItemsSource)
+                    .DisposeWith(disposable);
 
-                    this.OneWayBind(ViewModel,
-                            model => model.Images,
-                            window => window.ImagesListView.ItemsSource)
-                        .DisposeWith(disposable);
-                });
+                this.OneWayBind(ViewModel,
+                        model => model.Images,
+                        window => window.ImagesListView.ItemsSource)
+                    .DisposeWith(disposable);
+            });
         }
 
         private void AddFolder_Click(object sender, RoutedEventArgs e)
@@ -64,7 +69,11 @@ namespace SonOfPicasso.UI.Windows
 
         private void NewAlbum_Click(object sender, RoutedEventArgs e)
         {
-            ViewModel.NewAlbum.Execute().Subscribe();
+            var addAlbumWindow = _addAlbumWindowFactory();
+            var addAlbumViewModel = _addAlbumViewModelFactory();
+
+            addAlbumWindow.ViewModel = addAlbumViewModel;
+            addAlbumWindow.ShowDialog();
         }
 
         private void AddFile_Click(object sender, RoutedEventArgs e)

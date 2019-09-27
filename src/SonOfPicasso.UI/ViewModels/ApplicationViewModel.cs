@@ -43,6 +43,7 @@ namespace SonOfPicasso.UI.ViewModels
             ImageFolders = imageFolders;
 
             AddFolder = ReactiveCommand.CreateFromObservable<string, Unit>(ExecuteAddFolder);
+            NewAlbum = ReactiveCommand.CreateFromObservable(ExecuteNewAlbum);
 
             ImageCache = new SourceCache<IImageViewModel, string>(model => model.Path);
             ImageFolderCache = new SourceCache<IImageFolderViewModel, string>(model => model.Path);
@@ -96,6 +97,7 @@ namespace SonOfPicasso.UI.ViewModels
         public ObservableCollection<IImageFolderViewModel> ImageFolders { get; }
 
         public ReactiveCommand<string, Unit> AddFolder { get; }
+        public ReactiveCommand<Unit, Unit> NewAlbum { get; }
 
         public ViewModelActivator Activator { get; }
 
@@ -104,6 +106,11 @@ namespace SonOfPicasso.UI.ViewModels
             var imageViewModel = _imageViewModelFactory();
             imageViewModel.Initialize(image);
             return imageViewModel;
+        }
+
+        private IObservable<Unit> ExecuteNewAlbum()
+        {
+            return Observable.Return(Unit.Default);
         }
 
         private IObservable<Unit> ExecuteAddFolder(string addPath)

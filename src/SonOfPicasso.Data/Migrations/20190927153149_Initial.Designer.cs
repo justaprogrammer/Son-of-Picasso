@@ -4,12 +4,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using SonOfPicasso.Data.Context;
+using SonOfPicasso.Data.Repository;
 
 namespace SonOfPicasso.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20190927131037_Initial")]
+    [Migration("20190927153149_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -255,7 +255,7 @@ namespace SonOfPicasso.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Directories");
+                    b.ToTable("Folders");
                 });
 
             modelBuilder.Entity("SonOfPicasso.Data.Model.Image", b =>

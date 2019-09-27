@@ -8,16 +8,11 @@ using ReactiveUI;
 using Serilog;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Logging;
-using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Core.Services;
-using SonOfPicasso.Data.Context;
 using SonOfPicasso.Data.Repository;
+using SonOfPicasso.Data.Services;
 using SonOfPicasso.UI.Injection;
 using SonOfPicasso.UI.Interfaces;
-using SonOfPicasso.UI.Scheduling;
-using SonOfPicasso.UI.Services;
-using SonOfPicasso.UI.ViewModels;
-using SonOfPicasso.UI.Views;
 using SonOfPicasso.UI.Windows;
 using Splat;
 using Splat.Serilog;
@@ -50,31 +45,9 @@ namespace SonOfPicasso.UI
             Akavache.BlobCache.ApplicationName = ApplicationName;
 
             var containerBuilder = new ContainerBuilder();
-            containerBuilder.RegisterType<ApplicationViewModel>()
-                .As<IApplicationViewModel>()
-                .InstancePerLifetimeScope();
-
-            containerBuilder.RegisterType<MainWindow>()
-                .InstancePerLifetimeScope();
-
-            containerBuilder.RegisterType<EnvironmentService>()
-                .As<IEnvironmentService>()
-                .InstancePerLifetimeScope();
 
             containerBuilder.RegisterType<FileSystem>()
                 .As<IFileSystem>()
-                .InstancePerLifetimeScope();
-
-            containerBuilder.RegisterType<SchedulerProvider>()
-                .As<ISchedulerProvider>()
-                .InstancePerLifetimeScope();
-
-            containerBuilder.RegisterType<ImageManagementService>()
-                .As<IImageManagementService>()
-                .InstancePerLifetimeScope();
-
-            containerBuilder.RegisterType<ImageLocationService>()
-                .As<IImageLocationService>()
                 .InstancePerLifetimeScope();
 
             containerBuilder.Register(context =>
@@ -90,31 +63,26 @@ namespace SonOfPicasso.UI
                 .As<DataContext>()
                 .As<IDataContext>();
 
-            containerBuilder.RegisterType<DataCache>()
-                .As<IDataCache>();
+            containerBuilder.RegisterAssemblyTypes(typeof(EnvironmentService).Assembly)
+                .Where(type => type.Namespace.StartsWith("SonOfPicasso.Core.Services"))
+                .InstancePerLifetimeScope()
+                .AsImplementedInterfaces();
 
-            containerBuilder.RegisterType<UnitOfWork>()
-                .As<IUnitOfWork>();
+            containerBuilder.RegisterAssemblyTypes(typeof(UnitOfWork).Assembly)
+                .Where(type => type.Namespace.StartsWith("SonOfPicasso.Data.Services"))
+                .AsImplementedInterfaces();
 
-            containerBuilder.RegisterType<ImageViewModel>()
-                .As<IImageViewModel>();
+            containerBuilder.RegisterAssemblyTypes(GetType().Assembly)
+                .Where(type => type.Namespace.StartsWith("SonOfPicasso.UI.ViewModels"))
+                .AsImplementedInterfaces();
 
-            containerBuilder.RegisterType<ExifDataService>()
-                .As<IExifDataService>();
+            containerBuilder.RegisterAssemblyTypes(GetType().Assembly)
+                .Where(type => type.Namespace.StartsWith("SonOfPicasso.UI.Services"))
+                .InstancePerLifetimeScope()
+                .AsImplementedInterfaces();
 
-            containerBuilder.RegisterType<ImageFolderViewModel>()
-                .As<IImageFolderViewModel>();
-
-            containerBuilder.RegisterType<ImageLoadingService>()
-                .As<IImageLoadingService>();
-
-            containerBuilder.RegisterType<ImageViewControl>()
-                .AsSelf();
-
-            containerBuilder.RegisterType<ImageFolderViewControl>()
-                .AsSelf();
-
-            containerBuilder.RegisterType<ViewModelActivator>()
+            containerBuilder.RegisterAssemblyTypes(GetType().Assembly)
+                .Where(type => type.Namespace.StartsWith("SonOfPicasso.UI.Windows") || type.Namespace.StartsWith("SonOfPicasso.UI.Views"))
                 .AsSelf();
 
             containerBuilder.RegisterLogger();
@@ -125,7 +93,10 @@ namespace SonOfPicasso.UI
             Locator.CurrentMutable.InitializeReactiveUI();
 
             var updatedBuilder = new ContainerBuilder();
-            
+
+            updatedBuilder.RegisterType<ViewModelActivator>()
+                .AsSelf();
+
             updatedBuilder.RegisterType<CustomViewLocator>()
                 .As<IViewLocator>();
 

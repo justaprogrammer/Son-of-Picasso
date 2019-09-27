@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Reactive;
-using DynamicData;
 using ReactiveUI;
-using SonOfPicasso.Data.Model;
 
 namespace SonOfPicasso.UI.Interfaces
 {

@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SonOfPicasso.Data.Model;
 
-namespace SonOfPicasso.Data.Context
+namespace SonOfPicasso.Data.Repository
 {
     public class DataContext : DbContext, IDataContext
     {
