@@ -26,13 +26,15 @@ namespace SonOfPicasso.UI.ViewModels
             ISchedulerProvider schedulerProvider,
             IImageManagementService imageManagementService,
             Func<IImageViewModel> imageViewModelFactory,
-            Func<IImageFolderViewModel> imageFolderViewModelFactory)
+            Func<IImageFolderViewModel> imageFolderViewModelFactory, 
+            ViewModelActivator activator)
         {
             _logger = logger;
             _schedulerProvider = schedulerProvider;
             _imageManagementService = imageManagementService;
             _imageViewModelFactory = imageViewModelFactory;
             _imageFolderViewModelFactory = imageFolderViewModelFactory;
+            Activator = activator;
 
             var images = new ObservableCollectionExtended<IImageViewModel>();
             Images = images;
@@ -45,7 +47,6 @@ namespace SonOfPicasso.UI.ViewModels
             ImageCache = new SourceCache<IImageViewModel, string>(model => model.Path);
             ImageFolderCache = new SourceCache<IImageFolderViewModel, string>(model => model.Path);
 
-            Activator = new ViewModelActivator();
             this.WhenActivated(d =>
             {
                 d(ImageCache

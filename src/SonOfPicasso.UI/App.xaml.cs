@@ -114,6 +114,9 @@ namespace SonOfPicasso.UI
             containerBuilder.RegisterType<ImageFolderViewControl>()
                 .AsSelf();
 
+            containerBuilder.RegisterType<ViewModelActivator>()
+                .AsSelf();
+
             containerBuilder.RegisterLogger();
             var container = containerBuilder.Build();
             var resolver = new AutofacDependencyResolver(container);
