@@ -62,13 +62,12 @@ namespace SonOfPicasso.Core.Services
 
                 var images = await _imageLocationService.GetImages(path)
                     .SelectMany(locatedImages => locatedImages)
-                    .Where(s => !unitOfWork.ImageRepository.Get(image => image.Path == path).ToArray().Any())
+                    .Where(s => !unitOfWork.ImageRepository.Get(image => image.Path == s).Any())
                     .GroupBy(s => _fileSystem.FileInfo.FromFileName(s).DirectoryName)
                     .SelectMany(groupedObservable =>
                     {
                         var directory = unitOfWork.DirectoryRepository
                             .Get(d => d.Path == groupedObservable.Key)
-                            .ToArray()
                             .FirstOrDefault();
 
                         if (directory == null)
@@ -94,7 +93,14 @@ namespace SonOfPicasso.Core.Services
                                     ExifData = tuple.exifData
                                 };
 
-                                directory.Images.Add(image);
+                                if (directory.Images == null)
+                                {
+                                    directory.Images = new List<Image>{ image };
+                                }
+                                else
+                                {
+                                    directory.Images.Add(image);
+                                }
 
                                 return image;
                             });
@@ -141,6 +147,20 @@ namespace SonOfPicasso.Core.Services
                 using var unitOfWork = _unitOfWorkFactory();
 
                 var images = unitOfWork.ImageRepository.Get()
+                    .ToArray();
+
+                return Observable.Return(images);
+            }).SubscribeOn(_schedulerProvider.TaskPool);
+        }
+
+        public IObservable<Image[]> GetImagesWithDirectoryAndExif()
+        {
+            return Observable.Defer(() =>
+            {
+                using var unitOfWork = _unitOfWorkFactory();
+
+                var images = unitOfWork.ImageRepository
+                    .Get(includeProperties: "Directory,ExifData")
                     .ToArray();
 
                 return Observable.Return(images);

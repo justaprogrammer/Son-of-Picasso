@@ -140,7 +140,6 @@ namespace SonOfPicasso.UI
 
             mainWindow.ViewModel = container.Resolve<IApplicationViewModel>();
             mainWindow.Show();
-            mainWindow.ViewModel.Initialize().Subscribe();
         }
 
         internal static DbContextOptions<DataContext> BuildDbContextOptions(IEnvironmentService environmentService, IFileSystem fileSystem)

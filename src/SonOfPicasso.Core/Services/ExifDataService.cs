@@ -30,7 +30,7 @@ namespace SonOfPicasso.Core.Services
                 if (path == null) throw new ArgumentNullException(nameof(path));
 
                 ImageFile imageFile;
-                using (var stream = _fileSystem.FileStream.Create(path, FileMode.Open))
+                using (var stream = _fileSystem.FileStream.Create(path, FileMode.Open, FileAccess.Read))
                 {
                     imageFile = ImageFile.FromStream(stream);
                 }
