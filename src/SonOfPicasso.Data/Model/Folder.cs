@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SonOfPicasso.Data.Model
 {
-    public class Directory: IDirectory
+    public class Folder: IDirectory
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

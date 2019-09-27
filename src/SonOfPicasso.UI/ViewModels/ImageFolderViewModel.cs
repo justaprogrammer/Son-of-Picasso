@@ -11,11 +11,11 @@ namespace SonOfPicasso.UI.ViewModels
     [ViewModelView(typeof(ImageFolderViewControl))]
     public class ImageFolderViewModel : ReactiveObject, IImageFolderViewModel
     {
-        private Directory _imageFolderModel;
+        private Folder _imageFolderModel;
 
         public string Path => _imageFolderModel.Path;
 
-        public void Initialize(Directory imageFolderModel)
+        public void Initialize(Folder imageFolderModel)
         {
             _imageFolderModel = imageFolderModel ?? throw new ArgumentNullException(nameof(imageFolderModel));
         }

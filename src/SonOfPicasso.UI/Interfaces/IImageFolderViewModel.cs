@@ -5,7 +5,7 @@ namespace SonOfPicasso.UI.Interfaces
 {
     public interface IImageFolderViewModel
     {
-        void Initialize(Directory directory);
+        void Initialize(Folder folder);
         string Path { get; }
     }
 }

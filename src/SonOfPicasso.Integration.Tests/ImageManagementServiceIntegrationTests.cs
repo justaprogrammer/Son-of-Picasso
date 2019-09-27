@@ -75,7 +75,7 @@ namespace SonOfPicasso.Integration.Tests
                 var i = unitOfWork.ImageRepository.Get().ToArray();
                 i.Length.Should().Be(_imageCount);
 
-                var d = unitOfWork.DirectoryRepository.Get().ToArray();
+                var d = unitOfWork.FolderRepository.Get().ToArray();
                 d.Length.Should().Be(_directoryCount);
             }
 

@@ -5,7 +5,7 @@ namespace SonOfPicasso.Data.Context
 {
     public class DataContext : DbContext, IDataContext
     {
-        public DbSet<Directory> Directories { get; set; }
+        public DbSet<Folder> Folders { get; set; }
 
         public DbSet<Image> Images { get; set; }
 

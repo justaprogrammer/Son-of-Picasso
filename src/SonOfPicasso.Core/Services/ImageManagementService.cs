@@ -36,13 +36,13 @@ namespace SonOfPicasso.Core.Services
             _exifDataService = exifDataService;
         }
 
-        public IObservable<Directory> GetAllDirectoriesWithImages()
+        public IObservable<Folder> GetAllDirectoriesWithImages()
         {
             return Observable.Defer(() =>
                 {
                     using var unitOfWork = _unitOfWorkFactory();
 
-                    var directories = unitOfWork.DirectoryRepository.Get(includeProperties: "Images")
+                    var directories = unitOfWork.FolderRepository.Get(includeProperties: "Images")
                         .ToArray();
 
                     return Observable.Return(directories);
@@ -81,14 +81,14 @@ namespace SonOfPicasso.Core.Services
                     .GroupBy(s => _fileSystem.FileInfo.FromFileName(s).DirectoryName)
                     .SelectMany(groupedObservable =>
                     {
-                        var directory = unitOfWork.DirectoryRepository
+                        var directory = unitOfWork.FolderRepository
                             .Get(d => d.Path == groupedObservable.Key)
                             .FirstOrDefault();
 
                         if (directory == null)
                         {
-                            directory = new Directory {Path = groupedObservable.Key, Images = new List<Image>()};
-                            unitOfWork.DirectoryRepository.Insert(directory);
+                            directory = new Folder {Path = groupedObservable.Key, Images = new List<Image>()};
+                            unitOfWork.FolderRepository.Insert(directory);
                         }
 
                         return groupedObservable
@@ -171,7 +171,7 @@ namespace SonOfPicasso.Core.Services
                 using var unitOfWork = _unitOfWorkFactory();
 
                 var images = unitOfWork.ImageRepository
-                    .Get(includeProperties: "Directory,ExifData")
+                    .Get(includeProperties: "Folder,ExifData")
                     .ToArray();
 
                 return Observable.Return(images);

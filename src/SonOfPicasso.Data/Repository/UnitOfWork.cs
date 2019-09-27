@@ -15,8 +15,8 @@ namespace SonOfPicasso.Data.Repository
         private readonly Lazy<GenericRepository<Image>> _imageRepository;
         public IGenericRepository<Image> ImageRepository => _imageRepository.Value;
 
-        private readonly Lazy<GenericRepository<Directory>> _directoryRepository;
-        public IGenericRepository<Directory> DirectoryRepository => _directoryRepository.Value;
+        private readonly Lazy<GenericRepository<Folder>> _directoryRepository;
+        public IGenericRepository<Folder> FolderRepository => _directoryRepository.Value;
 
         private readonly Lazy<GenericRepository<AlbumImage>> _albumImageRepository;
         public IGenericRepository<AlbumImage> AlbumImageRepository => _albumImageRepository.Value;
@@ -31,7 +31,7 @@ namespace SonOfPicasso.Data.Repository
             _dataContext = new DataContext(dataContextOptions);
             _albumRepository = new Lazy<GenericRepository<Album>>(() => new GenericRepository<Album>(_dataContext));
             _imageRepository = new Lazy<GenericRepository<Image>>(() => new GenericRepository<Image>(_dataContext));
-            _directoryRepository = new Lazy<GenericRepository<Directory>>(() => new GenericRepository<Directory>(_dataContext));
+            _directoryRepository = new Lazy<GenericRepository<Folder>>(() => new GenericRepository<Folder>(_dataContext));
             _albumImageRepository = new Lazy<GenericRepository<AlbumImage>>(() => new GenericRepository<AlbumImage>(_dataContext));
         }
 

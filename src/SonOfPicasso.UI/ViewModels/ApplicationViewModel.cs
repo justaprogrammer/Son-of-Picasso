@@ -72,7 +72,7 @@ namespace SonOfPicasso.UI.ViewModels
                 d(ImageFolderCache
                     .PopulateFrom(allImages
                         .SelectMany(i => i)
-                        .Select(image => image.Directory)
+                        .Select(image => image.Folder)
                         .Distinct(directory => directory.Path)
                         .Select(CreateImageFolderViewModel)));
 
@@ -80,10 +80,10 @@ namespace SonOfPicasso.UI.ViewModels
             });
         }
 
-        private IImageFolderViewModel CreateImageFolderViewModel(Directory directory)
+        private IImageFolderViewModel CreateImageFolderViewModel(Folder folder)
         {
             var imageFolderViewModel = _imageFolderViewModelFactory();
-            imageFolderViewModel.Initialize(directory);
+            imageFolderViewModel.Initialize(folder);
             return imageFolderViewModel;
         }
 
@@ -120,7 +120,7 @@ namespace SonOfPicasso.UI.ViewModels
                 });
 
             var addDirectories = scanFolder
-                    .Select(image => image.Directory)
+                    .Select(image => image.Folder)
                 .GroupBy(directory => directory.Path)
                 .Select(groupedObservable => groupedObservable.FirstAsync())
                 .SelectMany(observable1 => observable1)

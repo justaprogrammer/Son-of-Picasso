@@ -16,7 +16,7 @@ namespace SonOfPicasso.Data.Model
 
         public string Path { get; set; }
 
-        public Directory Directory { get; set; }
+        public Folder Folder { get; set; }
 
         public ExifData ExifData { get; set; }
 

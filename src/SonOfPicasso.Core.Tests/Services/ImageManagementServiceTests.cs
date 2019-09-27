@@ -22,7 +22,6 @@ using SonOfPicasso.Testing.Common.Extensions;
 using SonOfPicasso.Testing.Common.Scheduling;
 using Xunit;
 using Xunit.Abstractions;
-using Directory = SonOfPicasso.Data.Model.Directory;
 
 namespace SonOfPicasso.Core.Tests.Services
 {
@@ -33,8 +32,8 @@ namespace SonOfPicasso.Core.Tests.Services
         {
         }
 
-        private static readonly Faker<Directory> FakeNewDirectory
-            = new AutoFaker<Directory>().RuleFor(directory1 => directory1.Id, 0)
+        private static readonly Faker<Folder> FakeNewDirectory
+            = new AutoFaker<Folder>().RuleFor(directory1 => directory1.Id, 0)
                 .RuleFor(directory1 => directory1.Images, (List<Image>) null)
                 .RuleFor(directory1 => directory1.Path, faker => faker.System.DirectoryPathWindows());
 
@@ -45,7 +44,7 @@ namespace SonOfPicasso.Core.Tests.Services
         public void AddImageToAlbum()
         {
             var directoryPath = Faker.System.DirectoryPathWindows();
-            var directory = new Directory
+            var directory = new Folder
             {
                 Id = Faker.Random.Int(1),
                 Path = directoryPath,
@@ -61,7 +60,7 @@ namespace SonOfPicasso.Core.Tests.Services
             directory.Images.AddRange(images);
 
             var unitOfWork = Substitute.For<IUnitOfWork>();
-            unitOfWork.DirectoryRepository.Get()
+            unitOfWork.FolderRepository.Get()
                 .ReturnsForAnyArgs(new[] {directory, FakeNewDirectory});
 
             UnitOfWorkQueue.Enqueue(unitOfWork);
@@ -97,7 +96,7 @@ namespace SonOfPicasso.Core.Tests.Services
             var directoryPath = Faker.System.DirectoryPathWindows();
             var imagePath = Path.Join(directoryPath, Faker.System.FileName("jpg"));
 
-            var directory = new Directory
+            var directory = new Folder
             {
                 Id = Faker.Random.Int(1),
                 Path = directoryPath,
@@ -105,7 +104,7 @@ namespace SonOfPicasso.Core.Tests.Services
             };
 
             var unitOfWork = Substitute.For<IUnitOfWork>();
-            unitOfWork.DirectoryRepository.Get()
+            unitOfWork.FolderRepository.Get()
                 .ReturnsForAnyArgs(new[] {directory, FakeNewDirectory});
 
             UnitOfWorkQueue.Enqueue(unitOfWork);

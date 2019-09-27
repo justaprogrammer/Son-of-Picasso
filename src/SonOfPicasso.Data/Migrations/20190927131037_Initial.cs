@@ -113,23 +113,24 @@ namespace SonOfPicasso.Data.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     DirectoryId = table.Column<int>(nullable: false),
                     ExifDataId = table.Column<int>(nullable: false),
-                    Path = table.Column<string>(nullable: true)
+                    Path = table.Column<string>(nullable: true),
+                    FolderId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Images", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Images_Directories_DirectoryId",
-                        column: x => x.DirectoryId,
-                        principalTable: "Directories",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Images_ExifData_ExifDataId",
                         column: x => x.ExifDataId,
                         principalTable: "ExifData",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Images_Directories_FolderId",
+                        column: x => x.FolderId,
+                        principalTable: "Directories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -169,14 +170,14 @@ namespace SonOfPicasso.Data.Migrations
                 column: "ImageId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Images_DirectoryId",
-                table: "Images",
-                column: "DirectoryId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Images_ExifDataId",
                 table: "Images",
                 column: "ExifDataId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Images_FolderId",
+                table: "Images",
+                column: "FolderId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -191,10 +192,10 @@ namespace SonOfPicasso.Data.Migrations
                 name: "Images");
 
             migrationBuilder.DropTable(
-                name: "Directories");
+                name: "ExifData");
 
             migrationBuilder.DropTable(
-                name: "ExifData");
+                name: "Directories");
         }
     }
 }

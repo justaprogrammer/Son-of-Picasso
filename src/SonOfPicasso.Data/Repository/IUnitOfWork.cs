@@ -7,7 +7,7 @@ namespace SonOfPicasso.Data.Repository
     {
         IGenericRepository<Album> AlbumRepository { get; }
         IGenericRepository<Image> ImageRepository { get; }
-        IGenericRepository<Directory> DirectoryRepository { get; }
+        IGenericRepository<Folder> FolderRepository { get; }
         IGenericRepository<AlbumImage> AlbumImageRepository { get; }
         void Save();
     }

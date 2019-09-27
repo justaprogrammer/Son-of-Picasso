@@ -51,20 +51,6 @@ namespace SonOfPicasso.Data.Migrations
                     b.ToTable("AlbumImages");
                 });
 
-            modelBuilder.Entity("SonOfPicasso.Data.Model.Directory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Path")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Directories");
-                });
-
             modelBuilder.Entity("SonOfPicasso.Data.Model.ExifData", b =>
                 {
                     b.Property<int>("Id")
@@ -256,6 +242,20 @@ namespace SonOfPicasso.Data.Migrations
                     b.ToTable("ExifData");
                 });
 
+            modelBuilder.Entity("SonOfPicasso.Data.Model.Folder", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Path")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Directories");
+                });
+
             modelBuilder.Entity("SonOfPicasso.Data.Model.Image", b =>
                 {
                     b.Property<int>("Id")
@@ -268,14 +268,17 @@ namespace SonOfPicasso.Data.Migrations
                     b.Property<int>("ExifDataId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("FolderId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Path")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DirectoryId");
-
                     b.HasIndex("ExifDataId");
+
+                    b.HasIndex("FolderId");
 
                     b.ToTable("Images");
                 });
@@ -297,17 +300,15 @@ namespace SonOfPicasso.Data.Migrations
 
             modelBuilder.Entity("SonOfPicasso.Data.Model.Image", b =>
                 {
-                    b.HasOne("SonOfPicasso.Data.Model.Directory", "Directory")
-                        .WithMany("Images")
-                        .HasForeignKey("DirectoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("SonOfPicasso.Data.Model.ExifData", "ExifData")
                         .WithMany()
                         .HasForeignKey("ExifDataId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("SonOfPicasso.Data.Model.Folder", "Folder")
+                        .WithMany("Images")
+                        .HasForeignKey("FolderId");
                 });
 #pragma warning restore 612, 618
         }
