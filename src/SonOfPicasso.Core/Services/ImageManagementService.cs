@@ -51,6 +51,21 @@ namespace SonOfPicasso.Core.Services
                 .SubscribeOn(_schedulerProvider.TaskPool);
         }
 
+        public IObservable<Album> GetAllAlbumsWithAlbumImages()
+        {
+            return Observable.Defer(() =>
+                {
+                    using var unitOfWork = _unitOfWorkFactory();
+
+                    var directories = unitOfWork.AlbumRepository.Get(includeProperties: "AlbumImages")
+                        .ToArray();
+
+                    return Observable.Return(directories);
+                })
+                .SelectMany(directories => directories)
+                .SubscribeOn(_schedulerProvider.TaskPool);
+        }
+
         public IObservable<Image[]> ScanFolder(string path)
         {
             return Observable.DeferAsync(async task =>
@@ -77,13 +92,9 @@ namespace SonOfPicasso.Core.Services
                         }
 
                         return groupedObservable
-                            .Select(imagePath =>
-                            {
-                                var observable = _exifDataService
-                                    .GetExifData(imagePath)
-                                    .Select(exifData => { return (imagePath, exifData); });
-                                return observable;
-                            })
+                            .Select(imagePath => _exifDataService
+                                .GetExifData(imagePath)
+                                .Select(exifData => (imagePath, exifData)))
                             .SelectMany(observable => observable)
                             .Select(tuple =>
                             {
@@ -175,9 +186,9 @@ namespace SonOfPicasso.Core.Services
 
                     var album = unitOfWork.AlbumRepository.GetById(albumId);
 
-                    var images = imageIds.Select(imageid =>
+                    var images = imageIds.Select(imageId =>
                     {
-                        var image = unitOfWork.ImageRepository.GetById(imageid);
+                        var image = unitOfWork.ImageRepository.GetById(imageId);
 
                         unitOfWork.AlbumImageRepository.Insert(new AlbumImage {Album = album, Image = image});
 

@@ -24,6 +24,11 @@ namespace SonOfPicasso.Data.Context
         {
             // optionsBuilder.UseLoggerFactory(new SerilogLoggerFactory());
             // optionsBuilder.EnableSensitiveDataLogging();
+
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseSqlite("Data Source=sonofpicasso.db");
+            }
         }
     }
 }

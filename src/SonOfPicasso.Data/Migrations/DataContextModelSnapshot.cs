@@ -283,13 +283,13 @@ namespace SonOfPicasso.Data.Migrations
             modelBuilder.Entity("SonOfPicasso.Data.Model.AlbumImage", b =>
                 {
                     b.HasOne("SonOfPicasso.Data.Model.Album", "Album")
-                        .WithMany()
+                        .WithMany("AlbumImages")
                         .HasForeignKey("AlbumId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("SonOfPicasso.Data.Model.Image", "Image")
-                        .WithMany()
+                        .WithMany("AlbumImages")
                         .HasForeignKey("ImageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

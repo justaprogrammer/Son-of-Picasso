@@ -9,7 +9,7 @@ using SonOfPicasso.Data.Context;
 namespace SonOfPicasso.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20190923190606_Initial")]
+    [Migration("20190927123842_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -285,13 +285,13 @@ namespace SonOfPicasso.Data.Migrations
             modelBuilder.Entity("SonOfPicasso.Data.Model.AlbumImage", b =>
                 {
                     b.HasOne("SonOfPicasso.Data.Model.Album", "Album")
-                        .WithMany()
+                        .WithMany("AlbumImages")
                         .HasForeignKey("AlbumId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("SonOfPicasso.Data.Model.Image", "Image")
-                        .WithMany()
+                        .WithMany("AlbumImages")
                         .HasForeignKey("ImageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

@@ -19,6 +19,8 @@ namespace SonOfPicasso.Data.Model
         public Directory Directory { get; set; }
 
         public ExifData ExifData { get; set; }
+
+        public IList<AlbumImage> AlbumImages { get; set; }
     }
 
     public interface IImage: IModel
