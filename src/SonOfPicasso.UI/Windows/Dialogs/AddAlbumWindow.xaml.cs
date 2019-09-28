@@ -30,8 +30,7 @@ namespace SonOfPicasso.UI.Windows.Dialogs
                     view => view.LabelAlbumNameError.Content));
 
                 d(this.Bind(ViewModel, model => model.AlbumNameRule.IsValid,
-                    window => window.LabelAlbumNameError.Visibility,
-                    vmToViewConverter:new BooleanToVisibilityTypeConverter()));
+                    window => window.LabelAlbumNameError.Visibility));
 
                 d(this.BindCommand(ViewModel, 
                     model => model.Continue, 

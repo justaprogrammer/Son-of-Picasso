@@ -33,6 +33,8 @@ namespace SonOfPicasso.UI.ViewModels
 
             Continue = ReactiveCommand.CreateFromObservable(OnContinue, this.IsValid());
 
+            var observable = Observable.Return(false);
+            _displayAlbumNameError = observable.ToProperty(this, model => model.DisplayAlbumNameError, deferSubscription: true)
             this.ValidationContext.Valid.Subscribe(b =>
             {
                 ;
@@ -42,21 +44,14 @@ namespace SonOfPicasso.UI.ViewModels
             {
                 ;
             });
-
-            this.ValidationContext.Changed.Subscribe(args =>
-            {
-                ;
-            });
-
-            this.ValidationContext.Changing.Subscribe(args =>
-            {
-                ;
-            });
         }
 
         public ViewModelActivator Activator { get; }
 
         public ValidationHelper AlbumNameRule { get; }
+
+        readonly ObservableAsPropertyHelper<string> _displayAlbumNameError;
+        public string DisplayAlbumNameError => _displayAlbumNameError.Value;
 
         public string AlbumName
         {
