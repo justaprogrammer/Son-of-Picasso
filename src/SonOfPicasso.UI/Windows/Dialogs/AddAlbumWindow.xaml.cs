@@ -29,9 +29,6 @@ namespace SonOfPicasso.UI.Windows.Dialogs
                     vm => vm.AlbumNameRule,
                     view => view.LabelAlbumNameError.Content));
 
-                d(this.Bind(ViewModel, model => model.AlbumNameRule.IsValid,
-                    window => window.LabelAlbumNameError.Visibility));
-
                 d(this.BindCommand(ViewModel, 
                     model => model.Continue, 
                     window => window.OkButton));
