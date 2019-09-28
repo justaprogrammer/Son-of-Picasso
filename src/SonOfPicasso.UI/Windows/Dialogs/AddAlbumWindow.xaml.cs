@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using ReactiveUI;
 using ReactiveUI.Validation.Extensions;
 using Serilog;
@@ -36,15 +37,19 @@ namespace SonOfPicasso.UI.Windows.Dialogs
                 d(this.BindCommand(ViewModel, 
                     model => model.Continue, 
                     window => window.OkButton));
+
+                d(ViewModel.Continue.Subscribe(unit =>
+                {
+                    DialogResult = true;
+                    Close();
+                }));
+
+                d(ViewModel.Cancel.Subscribe(unit =>
+                {
+                    DialogResult = false;
+                    Close();
+                }));
             });
-        }
-
-        private void OkButton_OnClick(object sender, RoutedEventArgs e)
-        {
-        }
-
-        private void CancelButton_OnClick(object sender, RoutedEventArgs e)
-        {
         }
     }
 }

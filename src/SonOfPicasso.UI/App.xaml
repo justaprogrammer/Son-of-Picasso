@@ -5,6 +5,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary>
+
                     <Style x:Key="TextBoxError" TargetType="TextBox">
                         <Setter Property="BorderBrush" Value="Red" />
 
@@ -26,9 +27,8 @@
                         </Setter>
                     </Style>
                 </ResourceDictionary>
+
             </ResourceDictionary.MergedDictionaries>
-
-
         </ResourceDictionary>
     </Application.Resources>
 </Application>

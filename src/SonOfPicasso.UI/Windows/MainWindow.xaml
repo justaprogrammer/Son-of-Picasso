@@ -10,10 +10,10 @@
     <DockPanel>
         <Menu DockPanel.Dock="Top" Width="Auto" Height="20">
             <MenuItem Header="_File">
-                <MenuItem x:Name="NewAlbum" Header="New Album" Click="NewAlbum_Click"/>
+                <MenuItem x:Name="NewAlbum" Header="New Album"/>
                 <Separator />
-                <MenuItem x:Name="AddFolder" Header="_Add Folder" Click="AddFolder_Click"/>
-                <MenuItem x:Name="AddFile" Header="Add Folder" Click="AddFile_Click"/>
+                <MenuItem x:Name="AddFolder" Header="_Add Folder"/>
+                <MenuItem x:Name="AddFile" Header="Add File"/>
             </MenuItem>
             <MenuItem Header="_Edit" />
             <MenuItem Header="_View" />

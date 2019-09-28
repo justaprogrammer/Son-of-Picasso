@@ -36,6 +36,8 @@ namespace SonOfPicasso.UI.ViewModels
                 .ToProperty(this, model => model.DisplayAlbumNameError);
             
             Continue = ReactiveCommand.CreateFromObservable(OnContinue, this.IsValid());
+
+            Cancel = ReactiveCommand.Create(() => Unit.Default);
         }
 
         public ViewModelActivator Activator { get; }
@@ -52,6 +54,7 @@ namespace SonOfPicasso.UI.ViewModels
         public bool DisplayAlbumNameError => _displayAlbumNameError.Value;
 
         public ReactiveCommand<Unit, Unit> Continue { get; }
+        public ReactiveCommand<Unit, Unit> Cancel { get; }
 
         private IObservable<bool> OnValidationHelperChange<T>(Expression<Func<AddAlbumViewModel, T>> modelPropertyExpression,
             Expression<Func<AddAlbumViewModel, bool>> validationHelperIsValidExpression)

@@ -98,6 +98,9 @@ namespace SonOfPicasso.UI
             updatedBuilder.RegisterType<CustomViewLocator>()
                 .As<IViewLocator>();
 
+            updatedBuilder.RegisterType<CommandBinderImplementation>()
+                .AsImplementedInterfaces();
+
             resolver.UpdateComponentContext(updatedBuilder);
 
             Locator.CurrentMutable.RegisterPlatformBitmapLoader();

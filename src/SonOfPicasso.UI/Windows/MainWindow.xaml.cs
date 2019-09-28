@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO.Abstractions;
-using System.Reactive.Disposables;
-using System.Windows;
+using System.Reactive.Linq;
 using System.Windows.Forms;
 using ReactiveUI;
 using Serilog;
@@ -37,47 +36,50 @@ namespace SonOfPicasso.UI.Windows
 
             InitializeComponent();
 
-            this.WhenActivated(disposable =>
+            this.WhenActivated(d =>
             {
-                this.OneWayBind(ViewModel,
-                        model => model.ImageFolders,
-                        window => window.FoldersListView.ItemsSource)
-                    .DisposeWith(disposable);
+                d(this.OneWayBind(ViewModel,
+                    model => model.ImageFolders,
+                    window => window.FoldersListView.ItemsSource));
 
-                this.OneWayBind(ViewModel,
-                        model => model.Images,
-                        window => window.ImagesListView.ItemsSource)
-                    .DisposeWith(disposable);
+                d(this.OneWayBind(ViewModel,
+                    model => model.Images,
+                    window => window.ImagesListView.ItemsSource));
+
+                d(this.BindCommand(ViewModel, 
+                    model => model.AddFolder,
+                    window => window.AddFolder));
+
+                d(this.BindCommand(ViewModel,
+                    model => model.NewAlbum,
+                    window => window.NewAlbum));
+
+                d(ViewModel.NewAlbumInteraction.RegisterHandler(context =>
+                {
+                    var addAlbumWindow = _addAlbumWindowFactory();
+                    var addAlbumViewModel = _addAlbumViewModelFactory();
+
+                    addAlbumWindow.ViewModel = addAlbumViewModel;
+
+                    AddAlbumViewModel result = null;
+                    if (addAlbumWindow.ShowDialog() == true) result = addAlbumViewModel;
+
+                    context.SetOutput(result);
+                }));
+
+                d(ViewModel.AddFolderInteraction.RegisterHandler(context =>
+                {
+                    var dialog = new FolderBrowserDialog
+                    {
+                        SelectedPath = _environmentService.GetFolderPath(Environment.SpecialFolder.MyPictures)
+                    };
+
+                    string result = null;
+                    if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK) result = dialog.SelectedPath;
+
+                    context.SetOutput(result);
+                }));
             });
-        }
-
-        private void AddFolder_Click(object sender, RoutedEventArgs e)
-        {
-            var dialog = new FolderBrowserDialog
-            {
-                SelectedPath = _environmentService.GetFolderPath(Environment.SpecialFolder.MyPictures)
-            };
-
-            if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                var selectedPath = dialog.SelectedPath;
-                _logger.Debug("Adding Folder {0}", selectedPath);
-
-                ViewModel.AddFolder.Execute(selectedPath).Subscribe();
-            }
-        }
-
-        private void NewAlbum_Click(object sender, RoutedEventArgs e)
-        {
-            var addAlbumWindow = _addAlbumWindowFactory();
-            var addAlbumViewModel = _addAlbumViewModelFactory();
-
-            addAlbumWindow.ViewModel = addAlbumViewModel;
-            addAlbumWindow.ShowDialog();
-        }
-
-        private void AddFile_Click(object sender, RoutedEventArgs e)
-        {
         }
     }
 }
