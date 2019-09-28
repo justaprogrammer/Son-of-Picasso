@@ -25,6 +25,10 @@ namespace SonOfPicasso.UI.Windows.Dialogs
                     viewModel => viewModel.AlbumName,
                     view => view.TextAlbumName.Text));
 
+                d(this.OneWayBind(ViewModel, model => model.DisplayAlbumNameError,
+                    window => window.TextAlbumName.Style,
+                    b => b ? Styles.TextBoxError : default));
+
                 d(this.BindValidation(ViewModel,
                     vm => vm.AlbumNameRule,
                     view => view.LabelAlbumNameError.Content));

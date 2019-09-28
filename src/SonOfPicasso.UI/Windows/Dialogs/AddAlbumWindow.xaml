@@ -15,9 +15,22 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Label Name="LabelAlbumName" Grid.Column="0" Content="Name" />
-                <TextBox Name="TextAlbumName" Grid.Column="1" />
+                <TextBox Name="TextAlbumName" Grid.Column="1">
+                </TextBox>
             </Grid>
             <Label Name="LabelAlbumNameError"/>
+        </StackPanel>
+        <StackPanel DockPanel.Dock="Top" Orientation="Vertical" Grid.IsSharedSizeScope="True">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="Label"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Label Grid.Column="0" Content="Name" />
+                <TextBox Grid.Column="1">
+                </TextBox>
+            </Grid>
+            <Label/>
         </StackPanel>
 
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">

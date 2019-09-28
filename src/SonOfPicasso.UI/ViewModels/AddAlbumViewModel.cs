@@ -17,7 +17,6 @@ namespace SonOfPicasso.UI.ViewModels
         private readonly ILogger _logger;
 
         private string _albumName = string.Empty;
-        private bool _displayAlbumNameError;
 
         public AddAlbumViewModel(ViewModelActivator activator, ILogger logger,
             IImageManagementService imageManagementService, ISchedulerProvider schedulerProvider) : base(
@@ -26,32 +25,17 @@ namespace SonOfPicasso.UI.ViewModels
             _logger = logger;
             _imageManagementService = imageManagementService;
             Activator = activator;
-
-            var nameValid =
-                this.WhenAnyValue<AddAlbumViewModel, bool, string>(model => model.AlbumName,
-                    s => !string.IsNullOrWhiteSpace(s));
-
+            
             AlbumNameRule =
-                this.ValidationRule(model => nameValid, (model, b) => "Album name must be set");
+                this.ValidationRule(model => model.AlbumName, 
+                    s => !string.IsNullOrWhiteSpace(s),
+                    "Album name must be set");
 
+            _displayAlbumNameError = OnValidationHelperChange(model => model.AlbumName, model => model.AlbumNameRule.IsValid)
+                .Do(b => { ; })
+                .ToProperty(this, model => model.DisplayAlbumNameError);
+            
             Continue = ReactiveCommand.CreateFromObservable(OnContinue, this.IsValid());
-
-            GetObservable(model => model.AlbumName, model => model.AlbumNameRule.IsValid)
-                .Subscribe(b =>
-                {
-                    ;
-                });
-
-
-            ValidationContext.Valid.Subscribe(b =>
-            {
-                ;
-            });
-
-            ValidationContext.ValidationStatusChange.Subscribe(b =>
-            {
-                ;
-            });
         }
 
         public ViewModelActivator Activator { get; }
@@ -64,15 +48,12 @@ namespace SonOfPicasso.UI.ViewModels
             set => this.RaiseAndSetIfChanged(ref _albumName, value);
         }
 
-        public bool DisplayAlbumNameError
-        {
-            get => _displayAlbumNameError;
-            set => this.RaiseAndSetIfChanged(ref _displayAlbumNameError, value);
-        }
+        private readonly ObservableAsPropertyHelper<bool> _displayAlbumNameError;
+        public bool DisplayAlbumNameError => _displayAlbumNameError.Value;
 
         public ReactiveCommand<Unit, Unit> Continue { get; }
 
-        private IObservable<bool> GetObservable<T>(Expression<Func<AddAlbumViewModel, T>> modelPropertyExpression,
+        private IObservable<bool> OnValidationHelperChange<T>(Expression<Func<AddAlbumViewModel, T>> modelPropertyExpression,
             Expression<Func<AddAlbumViewModel, bool>> validationHelperIsValidExpression)
         {
             var modelPropertyHasChanged = Observable.Return(false)
