@@ -2,18 +2,19 @@
 using ReactiveUI;
 using SonOfPicasso.Data.Model;
 using SonOfPicasso.UI.Injection;
+using SonOfPicasso.UI.ViewModels.Abstract;
+using SonOfPicasso.UI.ViewModels.Interfaces;
 using SonOfPicasso.UI.Views;
 
 namespace SonOfPicasso.UI.ViewModels
 {
     [ViewModelView(typeof(ImageFolderViewControl))]
-    public class ImageFolderViewModel : ReactiveObject, IActivatableViewModel
+    public class ImageFolderViewModel : ViewModelBase, IImageContainerViewModel
     {
         private Folder _imageFolderModel;
 
-        public ImageFolderViewModel(ViewModelActivator activator)
+        public ImageFolderViewModel(ViewModelActivator activator) : base(activator)
         {
-            Activator = activator;
         }
 
         public string Path => _imageFolderModel.Path;
@@ -23,6 +24,6 @@ namespace SonOfPicasso.UI.ViewModels
             _imageFolderModel = imageFolderModel ?? throw new ArgumentNullException(nameof(imageFolderModel));
         }
 
-        public ViewModelActivator Activator { get; }
+        public string ContainerId => $"Folder{_imageFolderModel.Id}";
     }
 }

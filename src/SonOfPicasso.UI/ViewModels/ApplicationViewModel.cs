@@ -10,6 +10,7 @@ using Serilog;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Data.Model;
+using SonOfPicasso.UI.ViewModels.Interfaces;
 
 namespace SonOfPicasso.UI.ViewModels
 {
@@ -25,7 +26,7 @@ namespace SonOfPicasso.UI.ViewModels
             ISchedulerProvider schedulerProvider,
             IImageManagementService imageManagementService,
             Func<ImageViewModel> imageViewModelFactory,
-            Func<ImageFolderViewModel> imageFolderViewModelFactory, 
+            Func<ImageFolderViewModel> imageFolderViewModelFactory,
             ViewModelActivator activator)
         {
             _logger = logger;
@@ -41,14 +42,15 @@ namespace SonOfPicasso.UI.ViewModels
             var imageFolders = new ObservableCollectionExtended<ImageFolderViewModel>();
             ImageFolders = imageFolders;
 
-            AddFolder = ReactiveCommand.CreateFromObservable<Unit, Unit>(ExecuteAddFolder, outputScheduler: schedulerProvider.TaskPool);
+            AddFolder = ReactiveCommand.CreateFromObservable<Unit, Unit>(ExecuteAddFolder,
+                outputScheduler: schedulerProvider.TaskPool);
             AddFolderInteraction = new Interaction<Unit, string>();
 
             NewAlbum = ReactiveCommand.CreateFromObservable(ExecuteNewAlbum);
             NewAlbumInteraction = new Interaction<Unit, AddAlbumViewModel>();
 
             ImageCache = new SourceCache<ImageViewModel, string>(model => model.Path);
-            ImageFolderCache = new SourceCache<ImageFolderViewModel, string>(model => model.Path);
+            ImageFolderCache = new SourceCache<IImageContainerViewModel, string>(model => model.Path);
 
             this.WhenActivated(d =>
             {
@@ -87,16 +89,9 @@ namespace SonOfPicasso.UI.ViewModels
 
         public Interaction<Unit, AddAlbumViewModel> NewAlbumInteraction { get; set; }
 
-        private ImageFolderViewModel CreateImageFolderViewModel(Folder folder)
-        {
-            var imageFolderViewModel = _imageFolderViewModelFactory();
-            imageFolderViewModel.Initialize(folder);
-            return imageFolderViewModel;
-        }
+        private SourceCache<ImageFolderViewModel, string> ImageFolderCache { get; }
 
-        private SourceCache<ImageFolderViewModel, string> ImageFolderCache { get; set; }
-
-        private SourceCache<ImageViewModel, string> ImageCache { get; set; }
+        private SourceCache<ImageViewModel, string> ImageCache { get; }
 
         public ObservableCollection<ImageViewModel> Images { get; }
 
@@ -107,6 +102,13 @@ namespace SonOfPicasso.UI.ViewModels
         public ReactiveCommand<Unit, Unit> NewAlbum { get; }
 
         public ViewModelActivator Activator { get; }
+
+        private ImageFolderViewModel CreateImageFolderViewModel(Folder folder)
+        {
+            var imageFolderViewModel = _imageFolderViewModelFactory();
+            imageFolderViewModel.Initialize(folder);
+            return imageFolderViewModel;
+        }
 
         private ImageViewModel CreateImageViewModel(Image image)
         {
@@ -136,10 +138,7 @@ namespace SonOfPicasso.UI.ViewModels
                 .ObserveOn(_schedulerProvider.TaskPool)
                 .Select(s =>
                 {
-                    if (s == null)
-                    {
-                        return Observable.Return(Unit.Default);
-                    }
+                    if (s == null) return Observable.Return(Unit.Default);
 
                     var scanFolder = _imageManagementService.ScanFolder(s)
                         .AsObservable()

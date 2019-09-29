@@ -8,10 +8,11 @@ using ReactiveUI.Validation.Helpers;
 using Serilog;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
+using SonOfPicasso.UI.ViewModels.Abstract;
 
 namespace SonOfPicasso.UI.ViewModels
 {
-    public class AddAlbumViewModel : ReactiveValidationObject<AddAlbumViewModel>
+    public class AddAlbumViewModel : ValidatedViewModelBase<AddAlbumViewModel>
     {
         private readonly IImageManagementService _imageManagementService;
         private readonly ILogger _logger;
@@ -20,27 +21,24 @@ namespace SonOfPicasso.UI.ViewModels
 
         public AddAlbumViewModel(ViewModelActivator activator, ILogger logger,
             IImageManagementService imageManagementService, ISchedulerProvider schedulerProvider) : base(
-            schedulerProvider.TaskPool)
+            activator, schedulerProvider.TaskPool)
         {
             _logger = logger;
             _imageManagementService = imageManagementService;
-            Activator = activator;
-            
+
             AlbumNameRule =
-                this.ValidationRule(model => model.AlbumName, 
+                this.ValidationRule(model => model.AlbumName,
                     s => !string.IsNullOrWhiteSpace(s),
                     "Album name must be set");
 
             _displayAlbumNameError = OnValidationHelperChange(model => model.AlbumName, model => model.AlbumNameRule.IsValid)
-                .Do(b => { ; })
+                .Do(b => {; })
                 .ToProperty(this, model => model.DisplayAlbumNameError);
-            
+
             Continue = ReactiveCommand.CreateFromObservable(OnContinue, this.IsValid());
 
             Cancel = ReactiveCommand.Create(() => Unit.Default);
         }
-
-        public ViewModelActivator Activator { get; }
 
         public ValidationHelper AlbumNameRule { get; }
 
