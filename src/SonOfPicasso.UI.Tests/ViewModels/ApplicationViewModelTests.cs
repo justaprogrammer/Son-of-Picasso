@@ -14,8 +14,8 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             : base(testOutputHelper)
         {
         }
-
-        [Fact(Timeout = 500)]
+        
+        [Fact]
         public void CanInitialize()
         {
             Logger.Debug("CanInitialize");
@@ -23,7 +23,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             {
                 var testSchedulerProvider = new TestSchedulerProvider();
                 autoSub.Provide<ISchedulerProvider>(testSchedulerProvider);
-                
+
                 var applicationViewModel = autoSub.Resolve<ApplicationViewModel>();
             }
         }

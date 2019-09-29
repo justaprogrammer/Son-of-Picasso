@@ -7,8 +7,8 @@ using System.Reactive.Linq;
 using Serilog;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
+using SonOfPicasso.Data.Interfaces;
 using SonOfPicasso.Data.Model;
-using SonOfPicasso.Data.Repository;
 
 namespace SonOfPicasso.Core.Services
 {
@@ -36,13 +36,28 @@ namespace SonOfPicasso.Core.Services
             _exifDataService = exifDataService;
         }
 
-        public IObservable<Directory> GetAllDirectoriesWithImages()
+        public IObservable<Folder> GetAllDirectoriesWithImages()
         {
             return Observable.Defer(() =>
                 {
                     using var unitOfWork = _unitOfWorkFactory();
 
-                    var directories = unitOfWork.DirectoryRepository.Get(includeProperties: "Images")
+                    var directories = unitOfWork.FolderRepository.Get(includeProperties: "Images")
+                        .ToArray();
+
+                    return Observable.Return(directories);
+                })
+                .SelectMany(directories => directories)
+                .SubscribeOn(_schedulerProvider.TaskPool);
+        }
+
+        public IObservable<Album> GetAllAlbumsWithAlbumImages()
+        {
+            return Observable.Defer(() =>
+                {
+                    using var unitOfWork = _unitOfWorkFactory();
+
+                    var directories = unitOfWork.AlbumRepository.Get(includeProperties: "AlbumImages")
                         .ToArray();
 
                     return Observable.Return(directories);
@@ -66,24 +81,20 @@ namespace SonOfPicasso.Core.Services
                     .GroupBy(s => _fileSystem.FileInfo.FromFileName(s).DirectoryName)
                     .SelectMany(groupedObservable =>
                     {
-                        var directory = unitOfWork.DirectoryRepository
+                        var folder = unitOfWork.FolderRepository
                             .Get(d => d.Path == groupedObservable.Key)
                             .FirstOrDefault();
 
-                        if (directory == null)
+                        if (folder == null)
                         {
-                            directory = new Directory {Path = groupedObservable.Key, Images = new List<Image>()};
-                            unitOfWork.DirectoryRepository.Insert(directory);
+                            folder = new Folder {Path = groupedObservable.Key, Images = new List<Image>()};
+                            unitOfWork.FolderRepository.Insert(folder);
                         }
 
                         return groupedObservable
-                            .Select(imagePath =>
-                            {
-                                var observable = _exifDataService
-                                    .GetExifData(imagePath)
-                                    .Select(exifData => { return (imagePath, exifData); });
-                                return observable;
-                            })
+                            .Select(imagePath => _exifDataService
+                                .GetExifData(imagePath)
+                                .Select(exifData => (imagePath, exifData)))
                             .SelectMany(observable => observable)
                             .Select(tuple =>
                             {
@@ -93,13 +104,13 @@ namespace SonOfPicasso.Core.Services
                                     ExifData = tuple.exifData
                                 };
 
-                                if (directory.Images == null)
+                                if (folder.Images == null)
                                 {
-                                    directory.Images = new List<Image>{ image };
+                                    folder.Images = new List<Image>{ image };
                                 }
                                 else
                                 {
-                                    directory.Images.Add(image);
+                                    folder.Images.Add(image);
                                 }
 
                                 return image;
@@ -160,7 +171,7 @@ namespace SonOfPicasso.Core.Services
                 using var unitOfWork = _unitOfWorkFactory();
 
                 var images = unitOfWork.ImageRepository
-                    .Get(includeProperties: "Directory,ExifData")
+                    .Get(includeProperties: "Folder,ExifData")
                     .ToArray();
 
                 return Observable.Return(images);
@@ -175,9 +186,9 @@ namespace SonOfPicasso.Core.Services
 
                     var album = unitOfWork.AlbumRepository.GetById(albumId);
 
-                    var images = imageIds.Select(imageid =>
+                    var images = imageIds.Select(imageId =>
                     {
-                        var image = unitOfWork.ImageRepository.GetById(imageid);
+                        var image = unitOfWork.ImageRepository.GetById(imageId);
 
                         unitOfWork.AlbumImageRepository.Insert(new AlbumImage {Album = album, Image = image});
 

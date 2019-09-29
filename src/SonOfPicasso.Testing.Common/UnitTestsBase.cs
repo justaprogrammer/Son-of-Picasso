@@ -8,7 +8,7 @@ using Autofac.Extras.NSubstitute;
 using AutofacSerilogIntegration;
 using FluentAssertions;
 using SonOfPicasso.Core.Scheduling;
-using SonOfPicasso.Data.Repository;
+using SonOfPicasso.Data.Interfaces;
 using SonOfPicasso.Testing.Common.Scheduling;
 using Xunit.Abstractions;
 

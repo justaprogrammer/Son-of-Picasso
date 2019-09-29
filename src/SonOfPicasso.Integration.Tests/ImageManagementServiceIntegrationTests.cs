@@ -9,10 +9,11 @@ using Microsoft.EntityFrameworkCore;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Core.Services;
-using SonOfPicasso.Data.Context;
+using SonOfPicasso.Data.Interfaces;
 using SonOfPicasso.Data.Repository;
+using SonOfPicasso.Data.Services;
 using SonOfPicasso.Tools.Services;
-using SonOfPicasso.UI.Scheduling;
+using SonOfPicasso.UI.Services;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -75,7 +76,7 @@ namespace SonOfPicasso.Integration.Tests
                 var i = unitOfWork.ImageRepository.Get().ToArray();
                 i.Length.Should().Be(_imageCount);
 
-                var d = unitOfWork.DirectoryRepository.Get().ToArray();
+                var d = unitOfWork.FolderRepository.Get().ToArray();
                 d.Length.Should().Be(_directoryCount);
             }
 

@@ -2,8 +2,8 @@
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using Microsoft.EntityFrameworkCore;
-using SonOfPicasso.Data.Context;
 using SonOfPicasso.Data.Repository;
+using SonOfPicasso.Data.Services;
 using SonOfPicasso.Testing.Common;
 using Xunit.Abstractions;
 

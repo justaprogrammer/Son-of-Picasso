@@ -1,11 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using SonOfPicasso.Data.Model;
 
-namespace SonOfPicasso.Data.Context
+namespace SonOfPicasso.Data.Repository
 {
     public class DataContext : DbContext, IDataContext
     {
-        public DbSet<Directory> Directories { get; set; }
+        public DbSet<Folder> Folders { get; set; }
 
         public DbSet<Image> Images { get; set; }
 
@@ -24,6 +24,11 @@ namespace SonOfPicasso.Data.Context
         {
             // optionsBuilder.UseLoggerFactory(new SerilogLoggerFactory());
             // optionsBuilder.EnableSensitiveDataLogging();
+
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseSqlite("Data Source=sonofpicasso.db");
+            }
         }
     }
 }

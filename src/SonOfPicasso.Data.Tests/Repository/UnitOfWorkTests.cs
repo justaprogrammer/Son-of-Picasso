@@ -12,8 +12,8 @@ namespace SonOfPicasso.Data.Tests.Repository
 {
     public class UnitOfWorkTests : DataTestsBase
     {
-        private static readonly Faker<Directory> FakeNewDirectory
-            = new AutoFaker<Directory>().RuleFor(directory1 => directory1.Id, 0)
+        private static readonly Faker<Folder> FakeNewDirectory
+            = new AutoFaker<Folder>().RuleFor(directory1 => directory1.Id, 0)
                 .RuleFor(directory1 => directory1.Images, (List<Image>)null)
                 .RuleFor(directory1 => directory1.Path, faker => faker.System.DirectoryPathWindows());
 
@@ -29,13 +29,13 @@ namespace SonOfPicasso.Data.Tests.Repository
             
             using (var unitOfWork = CreateUnitOfWork())
             {
-                unitOfWork.DirectoryRepository.Insert(directory);
+                unitOfWork.FolderRepository.Insert(directory);
                 unitOfWork.Save();
             }
 
             using (var unitOfWork = CreateUnitOfWork())
             {
-                var dircopy = unitOfWork.DirectoryRepository.GetById(directory.Id);
+                var dircopy = unitOfWork.FolderRepository.GetById(directory.Id);
                 directory.Should().BeEquivalentTo(dircopy);
             }
         }

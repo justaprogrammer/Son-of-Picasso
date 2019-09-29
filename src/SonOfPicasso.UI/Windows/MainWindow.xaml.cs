@@ -1,64 +1,85 @@
 ﻿using System;
 using System.IO.Abstractions;
-using System.Reactive.Disposables;
-using System.Windows;
+using System.Reactive.Linq;
 using System.Windows.Forms;
 using ReactiveUI;
 using Serilog;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
-using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.ViewModels;
+using SonOfPicasso.UI.Windows.Dialogs;
 
 namespace SonOfPicasso.UI.Windows
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    ///     Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : ReactiveWindow<IApplicationViewModel>
+    public partial class MainWindow : ReactiveWindow<ApplicationViewModel>
     {
-        private readonly ILogger _logger;
+        private readonly Func<AddAlbumViewModel> _addAlbumViewModelFactory;
+        private readonly Func<AddAlbumWindow> _addAlbumWindowFactory;
         private readonly IEnvironmentService _environmentService;
         private readonly IFileSystem _fileSystem;
+        private readonly ILogger _logger;
         private readonly ISchedulerProvider _schedulerProvider;
 
-        public MainWindow(ILogger logger, IEnvironmentService environmentService, IFileSystem fileSystem, ISchedulerProvider schedulerProvider)
+        public MainWindow(ILogger logger, IEnvironmentService environmentService, IFileSystem fileSystem,
+            ISchedulerProvider schedulerProvider, Func<AddAlbumWindow> addAlbumWindowFactory,
+            Func<AddAlbumViewModel> addAlbumViewModelFactory)
         {
             _logger = logger;
             _environmentService = environmentService;
             _fileSystem = fileSystem;
             _schedulerProvider = schedulerProvider;
+            _addAlbumWindowFactory = addAlbumWindowFactory;
+            _addAlbumViewModelFactory = addAlbumViewModelFactory;
 
             InitializeComponent();
 
-            this.WhenActivated(disposable =>
+            this.WhenActivated(d =>
+            {
+                d(this.OneWayBind(ViewModel,
+                    model => model.ImageFolders,
+                    window => window.FoldersListView.ItemsSource));
+
+                d(this.OneWayBind(ViewModel,
+                    model => model.Images,
+                    window => window.ImagesListView.ItemsSource));
+
+                d(this.BindCommand(ViewModel, 
+                    model => model.AddFolder,
+                    window => window.AddFolder));
+
+                d(this.BindCommand(ViewModel,
+                    model => model.NewAlbum,
+                    window => window.NewAlbum));
+
+                d(ViewModel.NewAlbumInteraction.RegisterHandler(context =>
                 {
-                    this.OneWayBind(ViewModel,
-                            model => model.ImageFolders,
-                            window => window.FoldersListView.ItemsSource)
-                        .DisposeWith(disposable);
+                    var addAlbumWindow = _addAlbumWindowFactory();
+                    var addAlbumViewModel = _addAlbumViewModelFactory();
 
-                    this.OneWayBind(ViewModel,
-                            model => model.Images,
-                            window => window.ImagesListView.ItemsSource)
-                        .DisposeWith(disposable);
-                });
-        }
+                    addAlbumWindow.ViewModel = addAlbumViewModel;
 
-        private void AddFolder_Click(object sender, RoutedEventArgs e)
-        {
-            var dialog = new FolderBrowserDialog
-            {
-                SelectedPath = _environmentService.GetFolderPath(Environment.SpecialFolder.MyPictures)
-            };
+                    AddAlbumViewModel result = null;
+                    if (addAlbumWindow.ShowDialog() == true) result = addAlbumViewModel;
 
-            if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                var selectedPath = dialog.SelectedPath;
-                _logger.Debug("Adding Folder {0}", selectedPath);
+                    context.SetOutput(result);
+                }));
 
-                ViewModel.AddFolder.Execute(selectedPath).Subscribe();
-            }
+                d(ViewModel.AddFolderInteraction.RegisterHandler(context =>
+                {
+                    var dialog = new FolderBrowserDialog
+                    {
+                        SelectedPath = _environmentService.GetFolderPath(Environment.SpecialFolder.MyPictures)
+                    };
+
+                    string result = null;
+                    if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK) result = dialog.SelectedPath;
+
+                    context.SetOutput(result);
+                }));
+            });
         }
     }
 }

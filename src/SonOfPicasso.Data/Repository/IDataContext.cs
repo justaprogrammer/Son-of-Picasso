@@ -1,9 +1,8 @@
 using System;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
-namespace SonOfPicasso.Data.Context
+namespace SonOfPicasso.Data.Repository
 {
     public interface IDataContext: IDisposable
     {
