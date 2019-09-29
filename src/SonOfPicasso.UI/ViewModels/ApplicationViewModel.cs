@@ -45,8 +45,7 @@ namespace SonOfPicasso.UI.ViewModels
             var imageContainers = new ObservableCollectionExtended<IImageContainerViewModel>();
             ImageContainers = imageContainers;
 
-            AddFolder = ReactiveCommand.CreateFromObservable<Unit, Unit>(ExecuteAddFolder,
-                outputScheduler: schedulerProvider.TaskPool);
+            AddFolder = ReactiveCommand.CreateFromObservable<Unit, Unit>(ExecuteAddFolder);
             AddFolderInteraction = new Interaction<Unit, string>();
 
             NewAlbum = ReactiveCommand.CreateFromObservable(ExecuteNewAlbum);

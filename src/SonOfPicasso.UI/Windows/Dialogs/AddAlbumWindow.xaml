@@ -15,10 +15,21 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Label Name="LabelAlbumName" Grid.Column="0" Content="Name" />
-                <TextBox Name="TextAlbumName" Grid.Column="1">
-                </TextBox>
+                <TextBox Name="TextAlbumName" Grid.Column="1" />
             </Grid>
             <Label Name="LabelAlbumNameError"/>
+        </StackPanel>
+
+        <StackPanel DockPanel.Dock="Top" Orientation="Vertical" Grid.IsSharedSizeScope="True">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="Label"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Label Name="LabelAlbumDate" Grid.Column="0" Content="Name" />
+                <DatePicker Grid.Column="1" Name="DateAlbumDate" />
+            </Grid>
+            <Label Name="LabelAlbumDateError"/>
         </StackPanel>
 
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
