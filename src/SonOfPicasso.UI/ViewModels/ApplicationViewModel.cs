@@ -134,13 +134,17 @@ namespace SonOfPicasso.UI.ViewModels
         {
             return NewAlbumInteraction.Handle(Unit.Default)
                 .ObserveOn(_schedulerProvider.TaskPool)
-                .Select(album =>
+                .Select(model =>
                 {
-                    if (album == null)
+                    if (model == null)
                         return Observable.Return(Unit.Default);
 
-                    return _imageManagementService.CreateAlbum(album.AlbumName)
-                        .Select(album1 => Unit.Default);
+                    return _imageManagementService.CreateAlbum(model.AlbumName)
+                        .Select(album =>
+                        {
+                            ImageContainerCache.AddOrUpdate(CreateAlbumViewModel(album));
+                            return Unit.Default;
+                        });
                 })
                 .SelectMany(observable => observable);
         }
