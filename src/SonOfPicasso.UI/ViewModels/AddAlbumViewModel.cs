@@ -32,7 +32,6 @@ namespace SonOfPicasso.UI.ViewModels
                     "Album name must be set");
 
             _displayAlbumNameError = OnValidationHelperChange(model => model.AlbumName, model => model.AlbumNameRule.IsValid)
-                .Do(b => {; })
                 .ToProperty(this, model => model.DisplayAlbumNameError);
 
             Continue = ReactiveCommand.CreateFromObservable(OnContinue, this.IsValid());

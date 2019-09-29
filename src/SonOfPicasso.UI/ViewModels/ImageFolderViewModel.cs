@@ -19,13 +19,16 @@ namespace SonOfPicasso.UI.ViewModels
 
         public string Path => _imageFolderModel.Path;
 
+        public string ContainerId => GetContainerId(_imageFolderModel);
+
         public void Initialize(Folder imageFolderModel)
         {
             _imageFolderModel = imageFolderModel ?? throw new ArgumentNullException(nameof(imageFolderModel));
         }
 
-        public string ContainerId => GetContainerId(_imageFolderModel);
-
-        public static string GetContainerId(Folder imageFolderModel) => $"Folder{imageFolderModel.Id}";
+        public static string GetContainerId(Folder imageFolderModel)
+        {
+            return $"Folder{imageFolderModel.Id}";
+        }
     }
 }

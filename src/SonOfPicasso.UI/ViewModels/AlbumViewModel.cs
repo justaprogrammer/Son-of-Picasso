@@ -19,11 +19,16 @@ namespace SonOfPicasso.UI.ViewModels
 
         public string Name => _albumModel.Name;
 
+        public string ContainerId => CreateContainerId(_albumModel);
+
         public void Initialize(Album albumModel)
         {
             _albumModel = albumModel ?? throw new ArgumentNullException(nameof(albumModel));
         }
 
-        public string ContainerId => $"Album{_albumModel.Id}";
+        public static string CreateContainerId(Album albumModel)
+        {
+            return $"Album{albumModel.Id}";
+        }
     }
 }
