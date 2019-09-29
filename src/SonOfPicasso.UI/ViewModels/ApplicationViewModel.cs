@@ -41,7 +41,7 @@ namespace SonOfPicasso.UI.ViewModels
             var imageFolders = new ObservableCollectionExtended<ImageFolderViewModel>();
             ImageFolders = imageFolders;
 
-            AddFolder = ReactiveCommand.CreateFromObservable<Unit, Unit>(ExecuteAddFolder);
+            AddFolder = ReactiveCommand.CreateFromObservable<Unit, Unit>(ExecuteAddFolder, outputScheduler: schedulerProvider.TaskPool);
             AddFolderInteraction = new Interaction<Unit, string>();
 
             NewAlbum = ReactiveCommand.CreateFromObservable(ExecuteNewAlbum);
@@ -118,20 +118,22 @@ namespace SonOfPicasso.UI.ViewModels
         private IObservable<Unit> ExecuteNewAlbum()
         {
             return NewAlbumInteraction.Handle(Unit.Default)
+                .ObserveOn(_schedulerProvider.TaskPool)
                 .Select(album =>
                 {
-                    if (album != null)
-                    {
+                    if (album == null)
+                        return Observable.Return(Unit.Default);
 
-                    }
-
-                    return Unit.Default;
-                });
+                    return _imageManagementService.CreateAlbum(album.AlbumName)
+                        .Select(album1 => Unit.Default);
+                })
+                .SelectMany(observable => observable);
         }
 
         private IObservable<Unit> ExecuteAddFolder(Unit unit)
         {
             return AddFolderInteraction.Handle(Unit.Default)
+                .ObserveOn(_schedulerProvider.TaskPool)
                 .Select(s =>
                 {
                     if (s == null)
