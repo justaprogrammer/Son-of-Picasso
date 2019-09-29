@@ -9,6 +9,6 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <StackPanel>
-        <Label Name="FolderName"></Label>
+        <Label Name="AlbumName"></Label>
     </StackPanel>
 </reactiveUi:ReactiveUserControl>

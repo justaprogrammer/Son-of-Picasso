@@ -39,7 +39,7 @@ namespace SonOfPicasso.UI.Windows
             this.WhenActivated(d =>
             {
                 d(this.OneWayBind(ViewModel,
-                    model => model.ImageFolders,
+                    model => model.ImageContainers,
                     window => window.FoldersListView.ItemsSource));
 
                 d(this.OneWayBind(ViewModel,
