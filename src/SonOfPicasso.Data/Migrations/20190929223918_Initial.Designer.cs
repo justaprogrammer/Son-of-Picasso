@@ -9,7 +9,7 @@ using SonOfPicasso.Data.Repository;
 namespace SonOfPicasso.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20190927153149_Initial")]
+    [Migration("20190929223918_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -23,6 +23,9 @@ namespace SonOfPicasso.Data.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
@@ -249,6 +252,9 @@ namespace SonOfPicasso.Data.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Path")
                         .HasColumnType("TEXT");

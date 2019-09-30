@@ -112,7 +112,7 @@ namespace SonOfPicasso.Tools.Services
 
         public IObservable<string> GenerateImage(string path, int width, int height, ExifData exifData)
         {
-            return Observable.Start(() =>
+            return Observable.Defer(() =>
             {
                 var cellHeight = height / 3;
                 var cellWidth = width / 3;
@@ -161,8 +161,8 @@ namespace SonOfPicasso.Tools.Services
                     _fileSystem.File.WriteAllBytes(path, imageWithExifStream.ToArray());
                 }
 
-                return path;
-            }, _schedulerProvider.TaskPool);
+                return Observable.Return(path);
+            }).SubscribeOn(_schedulerProvider.TaskPool);
         }
 
         internal void CopyExifDataToImageFile(ExifData exifData, ImageFile imageFile)

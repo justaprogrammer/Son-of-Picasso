@@ -16,8 +16,6 @@ namespace SonOfPicasso.UI.Windows.Dialogs
     {
         public AddAlbumWindow(ISchedulerProvider schedulerProvider)
         {
-            var schedulerProvider1 = schedulerProvider;
-
             InitializeComponent();
 
             this.WhenActivated(d =>
@@ -48,22 +46,24 @@ namespace SonOfPicasso.UI.Windows.Dialogs
 
                 d(this.ViewModel.CancelInteraction.RegisterHandler(context =>
                 {
-                    return Observable.Start(() =>
+                    return Observable.Defer<Unit>(() =>
                     {
                         context.SetOutput(Unit.Default);
                         DialogResult = false;
                         Close();
-                    }, schedulerProvider1.MainThreadScheduler);
+                        return Observable.Return(Unit.Default);
+                    }).SubscribeOn(schedulerProvider.MainThreadScheduler);
                 }));
 
                 d(this.ViewModel.ContinueInteraction.RegisterHandler(context =>
                 {
-                    return Observable.Start(() =>
+                    return Observable.Defer(() =>
                     {
                         context.SetOutput(Unit.Default);
                         DialogResult = true;
                         Close();
-                    }, schedulerProvider1.MainThreadScheduler);
+                        return Observable.Return(Unit.Default);
+                    }).SubscribeOn(schedulerProvider.MainThreadScheduler);
                 }));
             });
         }

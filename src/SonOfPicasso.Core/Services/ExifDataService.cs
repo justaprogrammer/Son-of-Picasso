@@ -25,7 +25,7 @@ namespace SonOfPicasso.Core.Services
 
         public IObservable<ExifData> GetExifData(string path)
         {
-            return Observable.Start(() =>
+            return Observable.Defer(() =>
             {
                 if (path == null) throw new ArgumentNullException(nameof(path));
 
@@ -164,8 +164,8 @@ namespace SonOfPicasso.Core.Services
                             imageFileProperty.GetType().Name);
                 }
                 
-                return exifData;
-            }, _schedulerProvider.TaskPool);
+                return Observable.Return(exifData);
+            }).SubscribeOn(_schedulerProvider.TaskPool);
         }
 
         private string ReadLensSpecification(ExifProperty imageFileProperty)

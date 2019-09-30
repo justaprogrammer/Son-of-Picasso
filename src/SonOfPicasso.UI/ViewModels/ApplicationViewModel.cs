@@ -157,8 +157,7 @@ namespace SonOfPicasso.UI.ViewModels
                     if (s == null) return Observable.Return(Unit.Default);
 
                     var discoveredImages = _imageManagementService.ScanFolder(s)
-                        .AsObservable()
-                        .SelectMany(images => images);
+                        .AsObservable();
 
                     var addImages = discoveredImages
                         .ToArray()

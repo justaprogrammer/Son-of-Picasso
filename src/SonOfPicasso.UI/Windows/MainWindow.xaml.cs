@@ -57,7 +57,7 @@ namespace SonOfPicasso.UI.Windows
 
                 d(ViewModel.NewAlbumInteraction.RegisterHandler(context =>
                 {
-                    return Observable.Start(() =>
+                    return Observable.Defer(() =>
                     {
                         var addAlbumWindow = _addAlbumWindowFactory();
                         var addAlbumViewModel = _addAlbumViewModelFactory();
@@ -68,13 +68,13 @@ namespace SonOfPicasso.UI.Windows
                         if (addAlbumWindow.ShowDialog() == true) result = addAlbumWindow.ViewModel;
 
                         context.SetOutput(result);
-                        return Unit.Default;
-                    }, _schedulerProvider.MainThreadScheduler);
+                        return Observable.Return(Unit.Default);
+                    }).SubscribeOn(_schedulerProvider.MainThreadScheduler);
                 }));
 
                 d(ViewModel.AddFolderInteraction.RegisterHandler(context =>
                 {
-                    return Observable.Start(() =>
+                    return Observable.Defer(() =>
                     {
                         var dialog = new FolderBrowserDialog
                         {
@@ -85,7 +85,8 @@ namespace SonOfPicasso.UI.Windows
                         if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK) result = dialog.SelectedPath;
 
                         context.SetOutput(result);
-                    }, _schedulerProvider.MainThreadScheduler);
+                        return Observable.Return(Unit.Default);
+                    }).SubscribeOn(_schedulerProvider.MainThreadScheduler);
                 }));
             });
         }

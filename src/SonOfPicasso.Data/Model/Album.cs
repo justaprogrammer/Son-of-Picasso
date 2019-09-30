@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -11,6 +12,8 @@ namespace SonOfPicasso.Data.Model
         public int Id { get; set; }
 
         public string Name { get; set; }
+        
+        public DateTime Date { get; set; }
 
         public IList<AlbumImage> AlbumImages { get; set; }
     }
