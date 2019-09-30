@@ -1,25 +1,20 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Threading;
 using AutoBogus;
-using Autofac.Extras.NSubstitute;
 using Bogus;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using NSubstitute;
 using SonOfPicasso.Core.Interfaces;
-using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Core.Services;
 using SonOfPicasso.Data.Interfaces;
 using SonOfPicasso.Data.Model;
 using SonOfPicasso.Testing.Common;
 using SonOfPicasso.Testing.Common.Extensions;
-using SonOfPicasso.Testing.Common.Scheduling;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -114,7 +109,7 @@ namespace SonOfPicasso.Core.Tests.Services
 
             AutoSubstitute.Resolve<IImageLocationService>()
                 .GetImages(Arg.Any<string>())
-                .Returns(Observable.Return(new[] {imagePath}));
+                .Returns(Observable.Return(imagePath));
 
             var newExifData = (ExifData) FakeNewExifData;
             AutoSubstitute.Resolve<IExifDataService>().GetExifData(imagePath)
@@ -122,17 +117,17 @@ namespace SonOfPicasso.Core.Tests.Services
 
             var imageManagementService = AutoSubstitute.Resolve<ImageManagementService>();
             imageManagementService.ScanFolder(directoryPath)
-                .Subscribe(unit => AutoResetEvent.Set());
+                .Subscribe(unit => { }, () => AutoResetEvent.Set());
 
             TestSchedulerProvider.TaskPool.AdvanceBy(1);
 
-            AutoResetEvent.WaitOne(10).Should().BeTrue();
+            AutoResetEvent.WaitOne(50).Should().BeTrue();
 
             unitOfWork.ImageRepository.DidNotReceive().Insert(Arg.Any<Image>());
 
             directory.Images.Count.Should().Be(1);
 
-            using (var assertionScope = new AssertionScope())
+            using (new AssertionScope())
             {
                 var image = directory.Images.First();
                 image.Path.Should().Be(imagePath);

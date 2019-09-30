@@ -78,19 +78,15 @@ namespace SonOfPicasso.Core.Services
                 var foundImagePaths = await _imageLocationService.GetImages(path)
                     .ToArray();
 
-
                 var images = await foundImagePaths
                     .Where(s => !unitOfWork.ImageRepository.Get(image => image.Path == s).Any())
                     .ToObservable()
                     .SelectMany(imagePath =>
                         _exifDataService.GetExifData(imagePath).Select(exifData => (imagePath, exifData)))
-                    .Select(tuple =>
+                    .Select(tuple => new Image
                     {
-                        return new Image
-                        {
-                            Path = tuple.imagePath,
-                            ExifData = tuple.exifData
-                        };
+                        Path = tuple.imagePath,
+                        ExifData = tuple.exifData
                     })
                     .ToArray();
 
