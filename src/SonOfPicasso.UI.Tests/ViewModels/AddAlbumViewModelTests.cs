@@ -18,27 +18,15 @@ namespace SonOfPicasso.UI.Tests.ViewModels
         }
 
         [Fact]
-        public void CanInitialize()
+        public void CanActivate()
         {
-            Logger.Debug("CanInitialize");
             using (var autoSub = new AutoSubstitute())
             {
                 var testSchedulerProvider = new TestSchedulerProvider();
                 autoSub.Provide<ISchedulerProvider>(testSchedulerProvider);
 
                 var addAlbumViewModel = autoSub.Resolve<AddAlbumViewModel>();
-                addAlbumViewModel.AlbumNameRule.IsValid.Should().BeFalse();
-
-                addAlbumViewModel.AlbumNameRule.ValidationChanged.Subscribe(validationState =>
-                {
-                    AutoResetEvent.Set();
-                });
-
-                addAlbumViewModel.AlbumName = "Hello";
-                WaitOne();
-
-                addAlbumViewModel.AlbumName = string.Empty;
-                WaitOne();
+                addAlbumViewModel.Activator.Activate();
             }
         }
     }

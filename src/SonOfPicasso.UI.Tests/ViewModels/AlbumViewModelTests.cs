@@ -1,4 +1,6 @@
-﻿using Autofac.Extras.NSubstitute;
+﻿using System;
+using Autofac.Extras.NSubstitute;
+using FluentAssertions;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Testing.Common;
 using SonOfPicasso.Testing.Common.Scheduling;
@@ -8,13 +10,13 @@ using Xunit.Abstractions;
 
 namespace SonOfPicasso.UI.Tests.ViewModels
 {
-    public class ApplicationViewModelTests : TestsBase
+    public class AlbumViewModelTests : TestsBase
     {
-        public ApplicationViewModelTests(ITestOutputHelper testOutputHelper)
+        public AlbumViewModelTests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {
         }
-        
+
         [Fact]
         public void CanActivate()
         {
@@ -23,8 +25,8 @@ namespace SonOfPicasso.UI.Tests.ViewModels
                 var testSchedulerProvider = new TestSchedulerProvider();
                 autoSub.Provide<ISchedulerProvider>(testSchedulerProvider);
 
-                var applicationViewModel = autoSub.Resolve<ApplicationViewModel>();
-                applicationViewModel.Activator.Activate();
+                var albumViewModel = autoSub.Resolve<AlbumViewModel>();
+                albumViewModel.Activator.Activate();
             }
         }
     }

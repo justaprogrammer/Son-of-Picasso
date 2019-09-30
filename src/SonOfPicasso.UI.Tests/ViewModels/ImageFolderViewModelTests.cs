@@ -8,13 +8,13 @@ using Xunit.Abstractions;
 
 namespace SonOfPicasso.UI.Tests.ViewModels
 {
-    public class ApplicationViewModelTests : TestsBase
+    public class ImageFolderViewModelTests : TestsBase
     {
-        public ApplicationViewModelTests(ITestOutputHelper testOutputHelper)
+        public ImageFolderViewModelTests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {
         }
-        
+
         [Fact]
         public void CanActivate()
         {
@@ -23,8 +23,8 @@ namespace SonOfPicasso.UI.Tests.ViewModels
                 var testSchedulerProvider = new TestSchedulerProvider();
                 autoSub.Provide<ISchedulerProvider>(testSchedulerProvider);
 
-                var applicationViewModel = autoSub.Resolve<ApplicationViewModel>();
-                applicationViewModel.Activator.Activate();
+                var imageFolderViewModel = autoSub.Resolve<ImageFolderViewModel>();
+                imageFolderViewModel.Activator.Activate();
             }
         }
     }
