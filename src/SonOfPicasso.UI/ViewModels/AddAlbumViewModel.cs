@@ -12,7 +12,7 @@ using SonOfPicasso.UI.ViewModels.Abstract;
 
 namespace SonOfPicasso.UI.ViewModels
 {
-    public class AddAlbumViewModel : ValidatedViewModelBase<AddAlbumViewModel>
+    public class AddAlbumViewModel : ValidatedViewModelBase<AddAlbumViewModel>, ICreateAlbum
     {
         private readonly ObservableAsPropertyHelper<bool> _displayAlbumNameError;
         private readonly IImageManagementService _imageManagementService;

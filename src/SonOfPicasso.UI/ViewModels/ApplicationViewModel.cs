@@ -64,6 +64,9 @@ namespace SonOfPicasso.UI.ViewModels
 
                 d(ImageContainerCache
                     .Connect()
+                    .Sort(SortExpressionComparer<IImageContainerViewModel>
+                        .Ascending(model => model.ContainerType == ContainerTypeEnum.Folder)
+                        .ThenByDescending(model => model.Date))
                     .ObserveOn(_schedulerProvider.MainThreadScheduler)
                     .Bind(imageContainers)
                     .Subscribe());
@@ -138,7 +141,7 @@ namespace SonOfPicasso.UI.ViewModels
                     if (model == null)
                         return Observable.Return(Unit.Default);
 
-                    return _imageManagementService.CreateAlbum(model.AlbumName)
+                    return _imageManagementService.CreateAlbum(model)
                         .Select(album =>
                         {
                             ImageContainerCache.AddOrUpdate(CreateAlbumViewModel(album));

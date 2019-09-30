@@ -21,6 +21,10 @@ namespace SonOfPicasso.UI.ViewModels
 
         public string ContainerId => CreateContainerId(_albumModel);
 
+        public ContainerTypeEnum ContainerType => ContainerTypeEnum.Album;
+
+        public DateTime Date => _albumModel.Date;
+
         public void Initialize(Album albumModel)
         {
             _albumModel = albumModel ?? throw new ArgumentNullException(nameof(albumModel));

@@ -121,13 +121,13 @@ namespace SonOfPicasso.Core.Services
             .SubscribeOn(_schedulerProvider.TaskPool);
         }
 
-        public IObservable<Album> CreateAlbum(string name)
+        public IObservable<Album> CreateAlbum(ICreateAlbum createAlbum)
         {
             return Observable.Defer(() =>
             {
                 using var unitOfWork = _unitOfWorkFactory();
 
-                var album = new Album { Name = name };
+                var album = new Album { Name = createAlbum.AlbumName, Date = createAlbum.AlbumDate };
 
                 unitOfWork.AlbumRepository.Insert(album);
                 unitOfWork.Save();

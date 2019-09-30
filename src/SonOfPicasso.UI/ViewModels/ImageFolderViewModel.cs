@@ -20,6 +20,10 @@ namespace SonOfPicasso.UI.ViewModels
         public string Path => _imageFolderModel.Path;
 
         public string ContainerId => GetContainerId(_imageFolderModel);
+        
+        public ContainerTypeEnum ContainerType => ContainerTypeEnum.Folder;
+        
+        public DateTime Date => _imageFolderModel.Date;
 
         public void Initialize(Folder imageFolderModel)
         {
