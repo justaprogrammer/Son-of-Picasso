@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Reactive;
+using System.Reactive.Linq;
 using System.Windows;
 using ReactiveUI;
 using ReactiveUI.Validation.Extensions;
-using Serilog;
+using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.UI.ViewModels;
 
 namespace SonOfPicasso.UI.Windows.Dialogs
@@ -12,12 +14,8 @@ namespace SonOfPicasso.UI.Windows.Dialogs
     /// </summary>
     public partial class AddAlbumWindow : ReactiveWindow<AddAlbumViewModel>
     {
-        private readonly ILogger _logger;
-
-        public AddAlbumWindow(ILogger logger)
+        public AddAlbumWindow(ISchedulerProvider schedulerProvider)
         {
-            _logger = logger;
-
             InitializeComponent();
 
             this.WhenActivated(d =>
@@ -25,6 +23,10 @@ namespace SonOfPicasso.UI.Windows.Dialogs
                 d(this.Bind(ViewModel,
                     viewModel => viewModel.AlbumName,
                     view => view.TextAlbumName.Text));
+
+                d(this.Bind(ViewModel,
+                    viewModel => viewModel.AlbumDate,
+                    view => view.DateAlbumDate.SelectedDate));
 
                 d(this.OneWayBind(ViewModel, model => model.DisplayAlbumNameError,
                     window => window.TextAlbumName.Style,
@@ -38,16 +40,30 @@ namespace SonOfPicasso.UI.Windows.Dialogs
                     model => model.Continue, 
                     window => window.OkButton));
 
-                d(ViewModel.Continue.Subscribe(unit =>
+                d(this.BindCommand(ViewModel, 
+                    model => model.Cancel, 
+                    window => window.CancelButton));
+
+                d(this.ViewModel.CancelInteraction.RegisterHandler(context =>
                 {
-                    DialogResult = true;
-                    Close();
+                    return Observable.Defer<Unit>(() =>
+                    {
+                        context.SetOutput(Unit.Default);
+                        DialogResult = false;
+                        Close();
+                        return Observable.Return(Unit.Default);
+                    }).SubscribeOn(schedulerProvider.MainThreadScheduler);
                 }));
 
-                d(ViewModel.Cancel.Subscribe(unit =>
+                d(this.ViewModel.ContinueInteraction.RegisterHandler(context =>
                 {
-                    DialogResult = false;
-                    Close();
+                    return Observable.Defer(() =>
+                    {
+                        context.SetOutput(Unit.Default);
+                        DialogResult = true;
+                        Close();
+                        return Observable.Return(Unit.Default);
+                    }).SubscribeOn(schedulerProvider.MainThreadScheduler);
                 }));
             });
         }

@@ -9,7 +9,7 @@ using SonOfPicasso.Data.Repository;
 namespace SonOfPicasso.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20190927153149_Initial")]
+    [Migration("20190930211055_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -23,6 +23,9 @@ namespace SonOfPicasso.Data.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
@@ -250,6 +253,9 @@ namespace SonOfPicasso.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Path")
                         .HasColumnType("TEXT");
 
@@ -264,13 +270,10 @@ namespace SonOfPicasso.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("DirectoryId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("ExifDataId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("FolderId")
+                    b.Property<int>("FolderId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Path")
@@ -310,7 +313,9 @@ namespace SonOfPicasso.Data.Migrations
 
                     b.HasOne("SonOfPicasso.Data.Model.Folder", "Folder")
                         .WithMany("Images")
-                        .HasForeignKey("FolderId");
+                        .HasForeignKey("FolderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

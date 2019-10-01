@@ -15,6 +15,7 @@ using Serilog;
 using Skybrud.Colors;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Data.Model;
+using SonOfPicasso.Testing.Common;
 using SonOfPicasso.Tools.Extensions;
 
 namespace SonOfPicasso.Tools.Services
@@ -22,56 +23,10 @@ namespace SonOfPicasso.Tools.Services
     public class ImageGenerationService
     {
         protected internal static Faker Faker = new Faker();
-        internal static readonly Faker<ExifData> ExifDataFaker;
         private readonly IFileSystem _fileSystem;
 
         private readonly ILogger _logger;
         private readonly ISchedulerProvider _schedulerProvider;
-
-        static ImageGenerationService()
-        {
-            ExifDataFaker = new AutoFaker<ExifData>()
-                .RuleFor(data => data.FileSource, faker => faker.PickRandom<FileSource>().ToString())
-                .RuleFor(data => data.Orientation, faker => faker.PickRandom<Orientation>().ToString())
-                .RuleFor(data => data.ColorSpace, faker => faker.PickRandom<ColorSpace>().ToString())
-                .RuleFor(data => data.ExposureMode, faker => faker.PickRandom<ExposureMode>().ToString())
-                .RuleFor(data => data.MeteringMode, faker => faker.PickRandom<MeteringMode>().ToString())
-                .RuleFor(data => data.LightSource, faker => faker.PickRandom<LightSource>().ToString())
-                .RuleFor(data => data.SceneCaptureType, faker => faker.PickRandom<SceneCaptureType>().ToString())
-                .RuleFor(data => data.ResolutionUnit, faker => faker.PickRandom<ResolutionUnit>().ToString())
-                .RuleFor(data => data.YCbCrPositioning, faker => faker.PickRandom<YCbCrPositioning>().ToString())
-                .RuleFor(data => data.ExposureProgram, faker => faker.PickRandom<ExposureProgram>().ToString())
-                .RuleFor(data => data.Flash, faker => faker.PickRandom<Flash>().ToString())
-                .RuleFor(data => data.SceneType, faker => faker.PickRandom<SceneType>().ToString())
-                .RuleFor(data => data.CustomRendered, faker => faker.PickRandom<CustomRendered>().ToString())
-                .RuleFor(data => data.WhiteBalance, faker => faker.PickRandom<WhiteBalance>().ToString())
-                .RuleFor(data => data.Contrast, faker => faker.PickRandom<Contrast>().ToString())
-                .RuleFor(data => data.Saturation, faker => faker.PickRandom<Saturation>().ToString())
-                .RuleFor(data => data.Sharpness, faker => faker.PickRandom<Sharpness>().ToString())
-                .RuleFor(data => data.ThumbnailCompression, faker => faker.PickRandom<Compression>().ToString())
-                .RuleFor(data => data.ThumbnailOrientation, faker => faker.PickRandom<Orientation>().ToString())
-                .RuleFor(data => data.ThumbnailResolutionUnit, faker => faker.PickRandom<ResolutionUnit>().ToString())
-                .RuleFor(data => data.ThumbnailYCbCrPositioning,
-                    faker => faker.PickRandom<YCbCrPositioning>().ToString())
-                .RuleFor(data => data.XResolution, faker => $"{faker.Random.UInt()}/{faker.Random.UInt()}")
-                .RuleFor(data => data.YResolution, faker => $"{faker.Random.UInt()}/{faker.Random.UInt()}")
-                .RuleFor(data => data.ThumbnailXResolution, faker => $"{faker.Random.UInt()}/{faker.Random.UInt()}")
-                .RuleFor(data => data.ThumbnailYResolution, faker => $"{faker.Random.UInt()}/{faker.Random.UInt()}")
-                .RuleFor(data => data.ExposureTime, faker => $"{faker.Random.UInt()}/{faker.Random.UInt()}")
-                .RuleFor(data => data.CompressedBitsPerPixel, faker => $"{faker.Random.UInt()}/{faker.Random.UInt()}")
-                .RuleFor(data => data.FocalLength, faker => $"{faker.Random.UInt()}/{faker.Random.UInt()}")
-                .RuleFor(data => data.FNumber, faker => $"{faker.Random.UInt()}/{faker.Random.UInt()}")
-                .RuleFor(data => data.MaxApertureValue, faker => $"{faker.Random.UInt()}/{faker.Random.UInt()}")
-                .RuleFor(data => data.DigitalZoomRatio, faker => $"{faker.Random.UInt()}/{faker.Random.UInt()}")
-                .RuleFor(data => data.BrightnessValue, faker => $"{faker.Random.Short()}/{faker.Random.Short()}")
-                .RuleFor(data => data.ExposureBiasValue, faker => $"{faker.Random.Short()}/{faker.Random.Short()}")
-                .RuleFor(data => data.LensSpecification,
-                    faker =>
-                        $"{faker.Random.UInt()}/{faker.Random.UInt()} F{faker.Random.UInt()}/{faker.Random.UInt()}, {faker.Random.UInt()}/{faker.Random.UInt()} F{faker.Random.UInt()}/{faker.Random.UInt()}")
-                .RuleFor(data => data.ExifVersion, faker => faker.Random.Short().ToString())
-                .RuleFor(data => data.FlashpixVersion, faker => faker.Random.Short().ToString())
-                .RuleFor(data => data.InteroperabilityVersion, faker => faker.Random.Short().ToString());
-        }
 
         public ImageGenerationService(ILogger logger, IFileSystem fileSystem, ISchedulerProvider schedulerProvider)
         {
@@ -97,7 +52,7 @@ namespace SonOfPicasso.Tools.Services
                     var fileName = $"{time.ToString("s").Replace("-", "_").Replace(":", "_")}.jpg";
                     var filePath = _fileSystem.Path.Combine(directoryPath, fileName);
 
-                    var exifData = (ExifData)ExifDataFaker;
+                    var exifData = (ExifData)Fakers.ExifDataFaker;
                     exifData.DateTime = time;
                     exifData.DateTimeDigitized = time;
                     exifData.DateTimeOriginal = time;
@@ -112,7 +67,7 @@ namespace SonOfPicasso.Tools.Services
 
         public IObservable<string> GenerateImage(string path, int width, int height, ExifData exifData)
         {
-            return Observable.Start(() =>
+            return Observable.Defer(() =>
             {
                 var cellHeight = height / 3;
                 var cellWidth = width / 3;
@@ -161,8 +116,8 @@ namespace SonOfPicasso.Tools.Services
                     _fileSystem.File.WriteAllBytes(path, imageWithExifStream.ToArray());
                 }
 
-                return path;
-            }, _schedulerProvider.TaskPool);
+                return Observable.Return(path);
+            }).SubscribeOn(_schedulerProvider.TaskPool);
         }
 
         internal void CopyExifDataToImageFile(ExifData exifData, ImageFile imageFile)

@@ -27,9 +27,9 @@ namespace SonOfPicasso.Core.Services
             _schedulerProvider = schedulerProvider;
         }
 
-        public IObservable<string[]> GetImages(string path)
+        public IObservable<string> GetImages(string path)
         {
-            return Observable.Start(() =>
+            return Observable.Defer(() =>
             {
                 _logger.Debug("GetImages {Path}", path);
 
@@ -47,8 +47,9 @@ namespace SonOfPicasso.Core.Services
                     _logger.Error(ex, "Error GetImages {Path}", path);
                 }
 
-                return fileInfoBases;
-            }, _schedulerProvider.TaskPool);
+                return Observable.Return(fileInfoBases);
+            }).SelectMany(strings => strings)
+                .SubscribeOn(_schedulerProvider.TaskPool);
         }
     }
 }

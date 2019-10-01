@@ -5,9 +5,9 @@ using Xunit.Abstractions;
 
 namespace SonOfPicasso.UI.Tests.ViewModels
 {
-    public class AddAlbumViewModelTests : UnitTestsBase
+    public class ImageFolderViewModelTests : UnitTestsBase
     {
-        public AddAlbumViewModelTests(ITestOutputHelper testOutputHelper)
+        public ImageFolderViewModelTests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {
         }
@@ -15,8 +15,8 @@ namespace SonOfPicasso.UI.Tests.ViewModels
         [Fact]
         public void CanActivate()
         {
-            var addAlbumViewModel = AutoSubstitute.Resolve<AddAlbumViewModel>();
-            addAlbumViewModel.Activator.Activate();
+            var imageFolderViewModel = AutoSubstitute.Resolve<ImageFolderViewModel>();
+            imageFolderViewModel.Activator.Activate();
         }
     }
 }

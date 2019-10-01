@@ -1,28 +1,42 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using ReactiveUI;
 using SonOfPicasso.Data.Model;
 using SonOfPicasso.UI.Injection;
+using SonOfPicasso.UI.ViewModels.Abstract;
+using SonOfPicasso.UI.ViewModels.Interfaces;
 using SonOfPicasso.UI.Views;
 
 namespace SonOfPicasso.UI.ViewModels
 {
     [ViewModelView(typeof(ImageFolderViewControl))]
-    public class ImageFolderViewModel : ReactiveObject, IActivatableViewModel
+    public class ImageFolderViewModel : ViewModelBase, IImageContainerViewModel
     {
         private Folder _imageFolderModel;
 
-        public ImageFolderViewModel(ViewModelActivator activator)
+        public ImageFolderViewModel(ViewModelActivator activator) : base(activator)
         {
-            Activator = activator;
         }
 
         public string Path => _imageFolderModel.Path;
+
+        public string ContainerId => GetContainerId(_imageFolderModel);
+        
+        public ContainerTypeEnum ContainerType => ContainerTypeEnum.Folder;
+        
+        public DateTime Date => _imageFolderModel.Date;
+
+        public IList<int> ImageIds => _imageFolderModel.Images.Select(image => image.Id).ToArray();
 
         public void Initialize(Folder imageFolderModel)
         {
             _imageFolderModel = imageFolderModel ?? throw new ArgumentNullException(nameof(imageFolderModel));
         }
 
-        public ViewModelActivator Activator { get; }
+        public static string GetContainerId(Folder imageFolderModel)
+        {
+            return $"Folder{imageFolderModel.Id}";
+        }
     }
 }

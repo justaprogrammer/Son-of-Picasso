@@ -3,6 +3,7 @@ using System.IO;
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading;
 using Autofac.Extras.NSubstitute;
 using FluentAssertions;
@@ -48,6 +49,7 @@ namespace SonOfPicasso.Core.Tests.Services
 
             var imageLocationService = AutoSubstitute.Resolve<ImageLocationService>();
             imageLocationService.GetImages(directory)
+                .ToArray()
                 .Subscribe(paths =>
                 {
                     imagePaths = paths;

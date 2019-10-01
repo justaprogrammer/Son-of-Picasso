@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO.Abstractions;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Windows.Forms;
 using ReactiveUI;
@@ -39,7 +40,7 @@ namespace SonOfPicasso.UI.Windows
             this.WhenActivated(d =>
             {
                 d(this.OneWayBind(ViewModel,
-                    model => model.ImageFolders,
+                    model => model.ImageContainers,
                     window => window.FoldersListView.ItemsSource));
 
                 d(this.OneWayBind(ViewModel,
@@ -56,28 +57,36 @@ namespace SonOfPicasso.UI.Windows
 
                 d(ViewModel.NewAlbumInteraction.RegisterHandler(context =>
                 {
-                    var addAlbumWindow = _addAlbumWindowFactory();
-                    var addAlbumViewModel = _addAlbumViewModelFactory();
+                    return Observable.Defer(() =>
+                    {
+                        var addAlbumWindow = _addAlbumWindowFactory();
+                        var addAlbumViewModel = _addAlbumViewModelFactory();
 
-                    addAlbumWindow.ViewModel = addAlbumViewModel;
+                        addAlbumWindow.ViewModel = addAlbumViewModel;
 
-                    AddAlbumViewModel result = null;
-                    if (addAlbumWindow.ShowDialog() == true) result = addAlbumViewModel;
+                        AddAlbumViewModel result = null;
+                        if (addAlbumWindow.ShowDialog() == true) result = addAlbumWindow.ViewModel;
 
-                    context.SetOutput(result);
+                        context.SetOutput(result);
+                        return Observable.Return(Unit.Default);
+                    }).SubscribeOn(_schedulerProvider.MainThreadScheduler);
                 }));
 
                 d(ViewModel.AddFolderInteraction.RegisterHandler(context =>
                 {
-                    var dialog = new FolderBrowserDialog
+                    return Observable.Defer(() =>
                     {
-                        SelectedPath = _environmentService.GetFolderPath(Environment.SpecialFolder.MyPictures)
-                    };
+                        var dialog = new FolderBrowserDialog
+                        {
+                            SelectedPath = _environmentService.GetFolderPath(Environment.SpecialFolder.MyPictures)
+                        };
 
-                    string result = null;
-                    if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK) result = dialog.SelectedPath;
+                        string result = null;
+                        if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK) result = dialog.SelectedPath;
 
-                    context.SetOutput(result);
+                        context.SetOutput(result);
+                        return Observable.Return(Unit.Default);
+                    }).SubscribeOn(_schedulerProvider.MainThreadScheduler);
                 }));
             });
         }

@@ -1,31 +1,81 @@
-﻿using Autofac.Extras.NSubstitute;
-using SonOfPicasso.Core.Scheduling;
+﻿using System;
+using System.Linq;
+using System.Reactive.Linq;
+using FluentAssertions;
+using NSubstitute;
+using ReactiveUI;
+using SonOfPicasso.Core.Interfaces;
+using SonOfPicasso.Data.Model;
 using SonOfPicasso.Testing.Common;
-using SonOfPicasso.Testing.Common.Scheduling;
 using SonOfPicasso.UI.ViewModels;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace SonOfPicasso.UI.Tests.ViewModels
 {
-    public class ApplicationViewModelTests : TestsBase
+    public class ApplicationViewModelTests : UnitTestsBase
     {
         public ApplicationViewModelTests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {
         }
-        
-        [Fact]
-        public void CanInitialize()
-        {
-            Logger.Debug("CanInitialize");
-            using (var autoSub = new AutoSubstitute())
-            {
-                var testSchedulerProvider = new TestSchedulerProvider();
-                autoSub.Provide<ISchedulerProvider>(testSchedulerProvider);
 
-                var applicationViewModel = autoSub.Resolve<ApplicationViewModel>();
-            }
+        [Fact]
+        public void CanActivate()
+        {
+            AutoSubstitute.Provide<Func<ImageFolderViewModel>>(() => new ImageFolderViewModel(new ViewModelActivator()));
+            AutoSubstitute.Provide<Func<ImageViewModel>>(() => new ImageViewModel(AutoSubstitute.Resolve<IImageLoadingService>(), TestSchedulerProvider, new ViewModelActivator()));
+
+            var imageManagementService = AutoSubstitute.Resolve<IImageManagementService>();
+
+            var startDate = Faker.Date.Past(1).Date;
+
+            var images = Fakers.FolderFaker.GenerateLazy(2)
+                .Select((folder, i) =>
+                {
+                    var folderDate = startDate.AddDays(i);
+
+                    folder.Images.AddRange(Fakers.ImageFaker.GenerateLazy(4)
+                        .Select(image =>
+                        {
+                            var imageDate = Faker.Date.Between(folderDate, folderDate.AddDays(1).AddSeconds(-1));
+                            image.Path = MockFileSystem.Path.Combine(folder.Path, Faker.System.FileName("jpg"));
+                            image.ExifData.DateTime = imageDate;
+                            image.ExifData.DateTimeDigitized = imageDate;
+                            image.ExifData.DateTimeOriginal = imageDate;
+                            image.ExifData.ThumbnailDateTime = imageDate;
+                            image.Folder = folder;
+                            image.FolderId = folder.Id;
+
+                            return image;
+                        }));
+                    folder.Date = folderDate;
+
+                    return folder;
+                })
+                .SelectMany(folder => folder.Images)
+                .ToArray();
+
+            imageManagementService.GetImagesWithDirectoryAndExif()
+                .Returns(Observable.Return(images).SubscribeOn(TestSchedulerProvider.TaskPool));
+
+            imageManagementService.GetAllAlbumsWithAlbumImages()
+                .Returns(Observable.Empty<Album>().SubscribeOn(TestSchedulerProvider.TaskPool));
+
+            var applicationViewModel = AutoSubstitute.Resolve<ApplicationViewModel>();
+            applicationViewModel.Activator.Activate();
+
+            imageManagementService.Received(1)
+                .GetImagesWithDirectoryAndExif();
+
+            imageManagementService.Received(1)
+                .GetAllAlbumsWithAlbumImages();
+            
+            TestSchedulerProvider.TaskPool.AdvanceBy(2);
+            TestSchedulerProvider.MainThreadScheduler.AdvanceBy(8);
+
+            applicationViewModel.Images.Count.Should().Be(8);
+            applicationViewModel.ImageContainers.Count.Should().Be(2);
         }
     }
 }

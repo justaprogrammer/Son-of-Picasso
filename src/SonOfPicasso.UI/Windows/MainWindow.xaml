@@ -31,7 +31,7 @@
                       VirtualizingStackPanel.VirtualizationMode="Recycling"
                       VirtualizingStackPanel.ScrollUnit="Pixel">
                 <ListView.ItemTemplate>
-                    <DataTemplate DataType="{x:Type viewModels:ImageFolderViewModel}">
+                    <DataTemplate>
                         <reactiveUi:ViewModelViewHost ViewModel="{Binding}" />
                     </DataTemplate>
                 </ListView.ItemTemplate>
