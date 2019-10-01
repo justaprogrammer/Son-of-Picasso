@@ -162,7 +162,7 @@ namespace SonOfPicasso.Core.Services
             }).SubscribeOn(_schedulerProvider.TaskPool);
         }
 
-        public IObservable<Image[]> GetImagesWithDirectoryAndExif()
+        public IObservable<Image> GetImagesWithDirectoryAndExif()
         {
             return Observable.Defer(() =>
             {
@@ -172,7 +172,7 @@ namespace SonOfPicasso.Core.Services
                     .Get(includeProperties: "Folder,ExifData")
                     .ToArray();
 
-                return Observable.Return(images);
+                return images.ToObservable();
             }).SubscribeOn(_schedulerProvider.TaskPool);
         }
 

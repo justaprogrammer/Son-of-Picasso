@@ -22,7 +22,7 @@ namespace SonOfPicasso.UI.ViewModels
 
         public string Name => _albumModel.Name;
 
-        public string ContainerId => CreateContainerId(_albumModel);
+        public string ContainerId => GetContainerId(_albumModel);
 
         public ContainerTypeEnum ContainerType => ContainerTypeEnum.Album;
 
@@ -35,9 +35,9 @@ namespace SonOfPicasso.UI.ViewModels
             _albumModel = albumModel ?? throw new ArgumentNullException(nameof(albumModel));
         }
 
-        public static string CreateContainerId(Album albumModel)
+        public static string GetContainerId(Album album)
         {
-            return $"Album{albumModel.Id}";
+            return $"Album{album.Id}";
         }
     }
 }

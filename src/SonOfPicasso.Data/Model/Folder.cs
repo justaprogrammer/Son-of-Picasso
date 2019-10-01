@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SonOfPicasso.Data.Model
 {
-    public class Folder: IDirectory
+    public class Folder: IFolder
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -18,7 +18,7 @@ namespace SonOfPicasso.Data.Model
         public List<Image> Images { get; set; }
     }
 
-    public interface IDirectory: IModel
+    public interface IFolder: IModel
     {
     }
 }

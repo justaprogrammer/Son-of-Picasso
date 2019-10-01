@@ -17,20 +17,23 @@ namespace SonOfPicasso.UI.ViewModels
         private readonly IImageLoadingService _imageLoadingService;
         private readonly ISchedulerProvider _schedulerProvider;
 
-        public string Path => _imageModel.Path;
+        private Image _imageModel;
 
-        public ImageViewModel(IImageLoadingService imageLoadingService, ISchedulerProvider schedulerProvider, ViewModelActivator activator):base(activator)
+        public ImageViewModel(IImageLoadingService imageLoadingService, ISchedulerProvider schedulerProvider,
+            ViewModelActivator activator) : base(activator)
         {
             _imageLoadingService = imageLoadingService;
             _schedulerProvider = schedulerProvider;
         }
 
+        public int Id => _imageModel.Id;
+        public string Path => _imageModel.Path;
+        public ExifData ExifData => _imageModel.ExifData;
+
         public void Initialize(Image imageModel)
         {
             _imageModel = imageModel ?? throw new ArgumentNullException(nameof(imageModel));
         }
-
-        private Image _imageModel;
 
         public IObservable<IBitmap> GetImage()
         {

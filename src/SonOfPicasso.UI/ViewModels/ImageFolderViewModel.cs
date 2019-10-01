@@ -34,9 +34,9 @@ namespace SonOfPicasso.UI.ViewModels
             _imageFolderModel = imageFolderModel ?? throw new ArgumentNullException(nameof(imageFolderModel));
         }
 
-        public static string GetContainerId(Folder imageFolderModel)
+        public static string GetContainerId(Folder folder)
         {
-            return $"Folder{imageFolderModel.Id}";
+            return $"Folder{folder.Id}";
         }
     }
 }

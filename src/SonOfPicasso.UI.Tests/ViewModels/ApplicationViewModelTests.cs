@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Windows.Documents;
 using FluentAssertions;
 using NSubstitute;
 using ReactiveUI;
@@ -30,10 +32,14 @@ namespace SonOfPicasso.UI.Tests.ViewModels
 
             var startDate = Faker.Date.Past(1).Date;
 
-            var images = Fakers.FolderFaker.GenerateLazy(2)
-                .Select((folder, i) =>
+            var folderDates = Enumerable.Range(0, 2)
+                .Select(i => startDate.AddDays(i))
+                .ToArray();
+
+            var images = folderDates
+                .Select((folderDate) =>
                 {
-                    var folderDate = startDate.AddDays(i);
+                    var folder = Fakers.FolderFaker.Generate();
 
                     folder.Images.AddRange(Fakers.ImageFaker.GenerateLazy(4)
                         .Select(image =>
@@ -76,6 +82,12 @@ namespace SonOfPicasso.UI.Tests.ViewModels
 
             applicationViewModel.Images.Count.Should().Be(8);
             applicationViewModel.ImageContainers.Count.Should().Be(2);
+
+            applicationViewModel.ImageContainers.Select((model, i) => model.Date)
+                .Should().BeEquivalentTo(folderDates);
+
+            applicationViewModel.Images.Select((model, i) => model.ExifData)
+                .Should().BeEquivalentTo(folderDates);
         }
     }
 }
