@@ -113,10 +113,9 @@ namespace SonOfPicasso.Data.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    DirectoryId = table.Column<int>(nullable: false),
-                    ExifDataId = table.Column<int>(nullable: false),
+                    FolderId = table.Column<int>(nullable: false),
                     Path = table.Column<string>(nullable: true),
-                    FolderId = table.Column<int>(nullable: true)
+                    ExifDataId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -132,7 +131,7 @@ namespace SonOfPicasso.Data.Migrations
                         column: x => x.FolderId,
                         principalTable: "Folders",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(

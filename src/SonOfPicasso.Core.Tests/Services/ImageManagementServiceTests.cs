@@ -49,7 +49,7 @@ namespace SonOfPicasso.Core.Tests.Services
             var images = Faker.Make(Faker.Random.Int(3, 5), () => new Image
             {
                 Path = Path.Join(directoryPath) + Faker.System.FileName("jpg"),
-                DirectoryId = directory.Id
+                FolderId = directory.Id
             });
 
             directory.Images.AddRange(images);

@@ -6,21 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Migrations\20190915210813_Initial.cs" />
-    <Compile Remove="Migrations\20190915210813_Initial.Designer.cs" />
-    <Compile Remove="Migrations\20190915212301_Initial.cs" />
-    <Compile Remove="Migrations\20190915212301_Initial.Designer.cs" />
-    <Compile Remove="Migrations\20190923190606_Initial.cs" />
-    <Compile Remove="Migrations\20190923190606_Initial.Designer.cs" />
-    <Compile Remove="Migrations\20190927123842_Initial.cs" />
-    <Compile Remove="Migrations\20190927123842_Initial.Designer.cs" />
-    <Compile Remove="Migrations\20190927131037_Initial.cs" />
-    <Compile Remove="Migrations\20190927131037_Initial.Designer.cs" />
-    <Compile Remove="Migrations\20190927153149_Initial.cs" />
-    <Compile Remove="Migrations\20190927153149_Initial.Designer.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Ardalis.GuardClauses" Version="1.2.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.0.0" />
     <PackageReference Include="Roslyn.System.IO.Abstractions.Analyzers" Version="6.0.32">

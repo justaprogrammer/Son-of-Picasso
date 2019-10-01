@@ -10,14 +10,14 @@ namespace SonOfPicasso.Data.Model
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        public int DirectoryId { get; set; }
-        
-        public int ExifDataId { get; set; }
-
-        public string Path { get; set; }
+        public int FolderId { get; set; }
 
         public Folder Folder { get; set; }
 
+        public string Path { get; set; }
+
+        public int ExifDataId { get; set; }
+   
         public ExifData ExifData { get; set; }
 
         public IList<AlbumImage> AlbumImages { get; set; }

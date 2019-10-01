@@ -268,13 +268,10 @@ namespace SonOfPicasso.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("DirectoryId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("ExifDataId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("FolderId")
+                    b.Property<int>("FolderId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Path")
@@ -314,7 +311,9 @@ namespace SonOfPicasso.Data.Migrations
 
                     b.HasOne("SonOfPicasso.Data.Model.Folder", "Folder")
                         .WithMany("Images")
-                        .HasForeignKey("FolderId");
+                        .HasForeignKey("FolderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

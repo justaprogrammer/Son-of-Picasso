@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using ReactiveUI;
 using SonOfPicasso.Data.Model;
 using SonOfPicasso.UI.Injection;
@@ -24,6 +27,8 @@ namespace SonOfPicasso.UI.ViewModels
         public ContainerTypeEnum ContainerType => ContainerTypeEnum.Album;
 
         public DateTime Date => _albumModel.Date;
+
+        public IList<int> ImageIds => _albumModel.AlbumImages.Select(image => image.Id).ToArray();
 
         public void Initialize(Album albumModel)
         {

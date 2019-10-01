@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace SonOfPicasso.UI.ViewModels.Interfaces
 {
@@ -7,6 +8,7 @@ namespace SonOfPicasso.UI.ViewModels.Interfaces
         string ContainerId { get; }
         ContainerTypeEnum ContainerType { get; }
         DateTime Date { get; }
+        IList<int> ImageIds { get; }
     }
 
     public enum ContainerTypeEnum

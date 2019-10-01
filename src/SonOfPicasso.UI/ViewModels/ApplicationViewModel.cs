@@ -45,6 +45,8 @@ namespace SonOfPicasso.UI.ViewModels
             var imageContainers = new ObservableCollectionExtended<IImageContainerViewModel>();
             ImageContainers = imageContainers;
 
+            var imagesList = new ObservableCollectionExtended<int>();
+
             AddFolder = ReactiveCommand.CreateFromObservable<Unit, Unit>(ExecuteAddFolder);
             AddFolderInteraction = new Interaction<Unit, string>();
 
@@ -70,6 +72,13 @@ namespace SonOfPicasso.UI.ViewModels
                     .ObserveOn(_schedulerProvider.MainThreadScheduler)
                     .Bind(imageContainers)
                     .Subscribe());
+
+//                ImageContainerCache
+//                    .Connect()
+//                    .Sort(SortExpressionComparer<IImageContainerViewModel>
+//                        .Ascending(model => model.ContainerType == ContainerTypeEnum.Folder)
+//                        .ThenByDescending(model => model.Date))
+//                    .TransformMany(model => model.ImageIds, i => i);
 
                 var allImages = _imageManagementService.GetImagesWithDirectoryAndExif()
                     .Publish();

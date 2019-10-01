@@ -21,7 +21,7 @@ namespace SonOfPicasso.Tools.Tests.Services
         [Fact]
         public void ShouldCopyExifDataToImageFile()
         {
-            var exifData = ImageGenerationService.ExifDataFaker.Generate();
+            var exifData = Fakers.ExifDataFaker.Generate();
 
             ImageFile imageFile;
             using (var manifestResourceStream =
@@ -48,7 +48,7 @@ namespace SonOfPicasso.Tools.Tests.Services
 
             var imageFile = MockFileSystem.Path.Combine(imageFolder, Faker.System.FileName("jpg"));
 
-            var exifData = ImageGenerationService.ExifDataFaker.Generate();
+            var exifData = Fakers.ExifDataFaker.Generate();
 
             var imageGenerationService = AutoSubstitute.Resolve<ImageGenerationService>();
 
