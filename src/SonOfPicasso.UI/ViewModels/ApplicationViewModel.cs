@@ -81,19 +81,6 @@ namespace SonOfPicasso.UI.ViewModels
                     .Bind(imageContainers)
                     .Subscribe());
 
-//                d(ImageContainerCache
-//                    .Connect()
-//                    .Sort(SortExpressionComparer<IImageContainerViewModel>
-//                        .Ascending(model => model.ContainerType == ContainerTypeEnum.Folder)
-//                        .ThenByDescending(model => model.Date))
-//                    .TransformMany(model => model.ImageIds, i => i)
-//                    .Transform(i => ImageCache.Lookup(i).Value)
-//                    .Transform(CreateImageViewModel)
-//                    .Sort(SortExpressionComparer<ImageViewModel>.Descending(model => model.ExifData.DateTime))
-//                    .ObserveOn(_schedulerProvider.MainThreadScheduler)
-//                    .Bind(images)
-//                    .Subscribe());
-
                 var allImages = _imageManagementService.GetImagesWithDirectoryAndExif()
                     .Publish();
 
