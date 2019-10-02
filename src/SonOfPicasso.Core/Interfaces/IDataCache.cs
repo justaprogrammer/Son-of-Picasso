@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Reactive;
-using SonOfPicasso.Core.Models;
+using SonOfPicasso.Core.Model;
 
 namespace SonOfPicasso.Core.Interfaces
 {
