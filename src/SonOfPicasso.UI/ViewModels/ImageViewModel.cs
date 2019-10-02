@@ -4,14 +4,11 @@ using ReactiveUI;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Data.Model;
-using SonOfPicasso.UI.Injection;
 using SonOfPicasso.UI.ViewModels.Abstract;
-using SonOfPicasso.UI.Views;
 using Splat;
 
 namespace SonOfPicasso.UI.ViewModels
 {
-    [ViewModelView(typeof(ImageViewControl))]
     public class ImageViewModel : ViewModelBase
     {
         private readonly IImageLoadingService _imageLoadingService;

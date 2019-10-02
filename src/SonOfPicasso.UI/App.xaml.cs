@@ -11,7 +11,6 @@ using SonOfPicasso.Core.Logging;
 using SonOfPicasso.Core.Services;
 using SonOfPicasso.Data.Repository;
 using SonOfPicasso.Data.Services;
-using SonOfPicasso.UI.Injection;
 using SonOfPicasso.UI.ViewModels;
 using SonOfPicasso.UI.Windows;
 using Splat;
@@ -81,6 +80,7 @@ namespace SonOfPicasso.UI
                 .Where(type => type.Namespace.StartsWith("SonOfPicasso.UI.Windows")
                                || type.Namespace.StartsWith("SonOfPicasso.UI.ViewModels")
                                || type.Namespace.StartsWith("SonOfPicasso.UI.Views"))
+                .AsImplementedInterfaces()
                 .AsSelf();
 
             containerBuilder.RegisterLogger();
@@ -94,9 +94,6 @@ namespace SonOfPicasso.UI
 
             updatedBuilder.RegisterType<ViewModelActivator>()
                 .AsSelf();
-
-            updatedBuilder.RegisterType<CustomViewLocator>()
-                .As<IViewLocator>();
 
             updatedBuilder.RegisterType<CommandBinderImplementation>()
                 .AsImplementedInterfaces();

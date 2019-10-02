@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using ReactiveUI;
 using SonOfPicasso.Core.Model;
 using SonOfPicasso.Data.Model;
-using SonOfPicasso.UI.Injection;
 using SonOfPicasso.UI.ViewModels.Abstract;
 using SonOfPicasso.UI.ViewModels.Interfaces;
-using SonOfPicasso.UI.Views;
 
 namespace SonOfPicasso.UI.ViewModels
 {
@@ -36,7 +33,6 @@ namespace SonOfPicasso.UI.ViewModels
         }
     }
 
-    [ViewModelView(typeof(AlbumViewControl))]
     public class AlbumViewModel : ViewModelBase, IImageContainerViewModel
     {
         private Album _albumModel;
