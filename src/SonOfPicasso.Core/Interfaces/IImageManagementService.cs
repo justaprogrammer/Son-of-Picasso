@@ -8,8 +8,6 @@ namespace SonOfPicasso.Core.Interfaces
     {
         IObservable<Image> ScanFolder(string path);
         IObservable<Album> CreateAlbum(ICreateAlbum createAlbum);
-        IObservable<Image> GetImagesWithDirectoryAndExif();
-        IObservable<Album> GetAllAlbumsWithAlbumImages();
         IObservable<ImageContainer> GetAllImageContainers();
     }
 }
