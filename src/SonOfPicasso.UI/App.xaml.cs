@@ -79,6 +79,7 @@ namespace SonOfPicasso.UI
 
             containerBuilder.RegisterAssemblyTypes(GetType().Assembly)
                 .Where(type => type.Namespace.StartsWith("SonOfPicasso.UI.Windows")
+                               || type.Namespace.StartsWith("SonOfPicasso.UI.Views")
                                || type.Namespace.StartsWith("SonOfPicasso.UI.ViewModels"))
                 .AsImplementedInterfaces()
                 .AsSelf();
