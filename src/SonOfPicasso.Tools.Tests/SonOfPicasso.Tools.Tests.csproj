@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoBogus" Version="2.7.1" />
+    <PackageReference Include="AutoBogus" Version="2.7.3" />
     <PackageReference Include="Autofac" Version="4.9.4" />
     <PackageReference Include="Autofac.Extras.NSubstitute" Version="1.1.0" />
     <PackageReference Include="AutofacSerilogIntegration" Version="2.0.0" />

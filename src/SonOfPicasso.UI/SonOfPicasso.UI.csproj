@@ -23,7 +23,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="ReactiveUI.Validation" Version="1.4.1" />
-    <PackageReference Include="ReactiveUI.WPF" Version="10.3.1" />
+    <PackageReference Include="ReactiveUI.WPF" Version="10.3.6" />
     <PackageReference Include="Roslyn.System.IO.Abstractions.Analyzers" Version="6.0.32">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -35,7 +35,7 @@
     <PackageReference Include="Splat.Autofac" Version="9.0.12-g19db10de08" />
     <PackageReference Include="Splat.Drawing" Version="9.0.12-g19db10de08" />
     <PackageReference Include="Splat.Serilog" Version="9.0.12-g19db10de08" />
-    <PackageReference Include="System.IO.Abstractions" Version="6.0.38" />
+    <PackageReference Include="System.IO.Abstractions" Version="7.0.4" />
     <PackageReference Include="System.Reactive" Version="4.2.0-preview.625" />
   </ItemGroup>
 
