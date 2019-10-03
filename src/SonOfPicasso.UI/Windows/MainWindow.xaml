@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:reactiveUi="http://reactiveui.net"
         xmlns:viewModels="clr-namespace:SonOfPicasso.UI.ViewModels"
+        xmlns:views="clr-namespace:SonOfPicasso.UI.Views"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <DockPanel>
@@ -32,19 +33,19 @@
                       VirtualizingStackPanel.ScrollUnit="Pixel">
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <reactiveUi:ViewModelViewHost ViewModel="{Binding}" />
+                        <reactiveUi:ViewModelViewHost ViewModel="{Binding}" ViewContract="ListItem" />
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-            <ListView Name="ImagesListView" 
+            <TreeView Name="ImagesTreeView" 
                       VirtualizingStackPanel.VirtualizationMode="Recycling"
                       VirtualizingStackPanel.ScrollUnit="Pixel">
-                <ListView.ItemTemplate>
-                    <DataTemplate DataType="{x:Type viewModels:ImageViewModel}">
-                        <reactiveUi:ViewModelViewHost ViewModel="{Binding}" />
+                <TreeView.ItemTemplate>
+                    <DataTemplate>
+                        <reactiveUi:ViewModelViewHost ViewModel="{Binding}" ViewContract="TreeItem" />
                     </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+                </TreeView.ItemTemplate>
+            </TreeView>
         </DockPanel>
     </DockPanel>
 </reactiveUi:ReactiveWindow>

@@ -44,8 +44,8 @@ namespace SonOfPicasso.UI.Windows
                     window => window.FoldersListView.ItemsSource));
 
                 d(this.OneWayBind(ViewModel,
-                    model => model.Images,
-                    window => window.ImagesListView.ItemsSource));
+                    model => model.ImageContainers,
+                    window => window.ImagesTreeView.ItemsSource));
 
                 d(this.BindCommand(ViewModel, 
                     model => model.AddFolder,

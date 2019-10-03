@@ -5,23 +5,21 @@ using SonOfPicasso.UI.ViewModels;
 namespace SonOfPicasso.UI.Views
 {
     /// <summary>
-    /// Interaction logic for AlbumViewControl.xaml
+    /// Interaction logic for ImageContainerViewControl.xaml
     /// </summary>
-    public partial class AlbumViewControl : ReactiveUserControl<AlbumViewModel>
+    public partial class ImageContainerTreeItemView : ReactiveUserControl<ImageContainerViewModel>
     {
-        public AlbumViewControl()
+        public ImageContainerTreeItemView()
         {
             InitializeComponent();
-
 
             this.WhenActivated(disposable =>
             {
                 this.OneWayBind(ViewModel,
                         model => model.Name,
-                        window => window.AlbumName.Content)
+                        window => window.FolderName.Content)
                     .DisposeWith(disposable);
             });
-
         }
     }
 }

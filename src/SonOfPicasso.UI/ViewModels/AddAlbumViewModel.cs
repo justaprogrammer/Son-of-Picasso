@@ -100,7 +100,7 @@ namespace SonOfPicasso.UI.ViewModels
                 .CombineLatest(whenAnyValue, (hasChanged, isValid) => hasChanged && !isValid)
                 .DistinctUntilChanged();
         }
-
+        
         private IObservable<Unit> OnContinue()
         {
             return Observable.Return(Unit.Default);

@@ -154,6 +154,8 @@ namespace SonOfPicasso.Core.Services
                     observer.OnNext(new FolderImageContainer(folder));
                 }
 
+                observer.OnCompleted();
+
                 return unitOfWork;
             });
 
@@ -161,14 +163,16 @@ namespace SonOfPicasso.Core.Services
             {
                 var unitOfWork = _unitOfWorkFactory();
 
-                var folders = unitOfWork.AlbumRepository
+                var albums = unitOfWork.AlbumRepository
                     .Get()
                     .ToArray();
 
-                foreach (var album in folders)
+                foreach (var album in albums)
                 {
                     observer.OnNext(new AlbumImageContainer(album));
                 }
+
+                observer.OnCompleted();
 
                 return unitOfWork;
             });

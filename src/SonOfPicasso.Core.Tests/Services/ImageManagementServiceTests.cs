@@ -36,56 +36,6 @@ namespace SonOfPicasso.Core.Tests.Services
             = new AutoFaker<ExifData>().RuleFor(exifData => exifData.Id, 0);
 
         [Fact]
-        public void AddImageToAlbum()
-        {
-            var directoryPath = Faker.System.DirectoryPathWindows();
-            var directory = new Folder
-            {
-                Id = Faker.Random.Int(1),
-                Path = directoryPath,
-                Images = new List<Image>()
-            };
-
-            var images = Faker.Make(Faker.Random.Int(3, 5), () => new Image
-            {
-                Path = Path.Join(directoryPath) + Faker.System.FileName("jpg"),
-                FolderId = directory.Id
-            });
-
-            directory.Images.AddRange(images);
-
-            var unitOfWork = Substitute.For<IUnitOfWork>();
-            unitOfWork.FolderRepository.Get()
-                .ReturnsForAnyArgs(new[] {directory, FakeNewFolder});
-
-            UnitOfWorkQueue.Enqueue(unitOfWork);
-
-            var imageManagementService = AutoSubstitute.Resolve<ImageManagementService>();
-
-            var albumName = Faker.Random.Words(2);
-            var albumId = Faker.Random.Int(1);
-
-            unitOfWork.AlbumRepository.Get().ReturnsForAnyArgs(new[] {new Album {Id = albumId, Name = albumName}});
-
-            unitOfWork.ImageRepository.GetById(Arg.Any<int>())
-                .ReturnsForAnyArgs(info => { return images.First(i => i.Id == (int) info.Arg<object>()); });
-
-            imageManagementService.AddImagesToAlbum(albumId, images.Select(image => image.Id).ToArray())
-                .Subscribe(unit => AutoResetEvent.Set());
-
-            TestSchedulerProvider.TaskPool.AdvanceBy(1);
-
-            AutoResetEvent.WaitOne(10).Should().BeTrue();
-
-            unitOfWork.AlbumImageRepository.ReceivedWithAnyArgs(images.Count)
-                .Insert(null);
-
-            unitOfWork.Received(1).Save();
-
-            unitOfWork.Received(1).Dispose();
-        }
-
-        [Fact]
         public void ShouldScanFolderWhenDirectoryModelExists()
         {
             var directoryPath = Faker.System.DirectoryPathWindows();

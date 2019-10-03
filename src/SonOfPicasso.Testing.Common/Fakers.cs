@@ -61,6 +61,11 @@ namespace SonOfPicasso.Testing.Common
             new AutoFaker<Folder>()
                 .RuleFor(folder => folder.Images, () => new List<Image>())
                 .RuleFor(folder => folder.Path, faker => faker.System.DirectoryPathWindows()));
+        
+        public static Faker<Album> AlbumFaker => LazyAlbumFaker.Value;
+        private static readonly  Lazy<Faker<Album>> LazyAlbumFaker = new Lazy<Faker<Album>>(() => 
+            new AutoFaker<Album>()
+                .RuleFor(album => album.Name, faker => faker.Random.Words(3)));
 
         public static Faker<Image> ImageFaker => LazyImageFaker.Value;
         private static readonly Lazy<Faker<Image>> LazyImageFaker = new Lazy<Faker<Image>>(() => 

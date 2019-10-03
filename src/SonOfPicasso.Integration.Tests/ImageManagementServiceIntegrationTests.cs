@@ -64,7 +64,7 @@ namespace SonOfPicasso.Integration.Tests
         private readonly int _imageCount;
 
         [Fact]
-        public void ShouldScanAndGetAllDirectories()
+        public void ShouldScanAndGetAllImageContainers()
         {
             var imageManagementService = _container.Resolve<ImageManagementService>();
             imageManagementService.ScanFolder(_imagesPath)
@@ -80,11 +80,13 @@ namespace SonOfPicasso.Integration.Tests
                 d.Length.Should().Be(_directoryCount);
             }
 
-            var directories = imageManagementService.GetAllDirectoriesWithImages()
+            var containers = imageManagementService.GetAllImageContainers()
                 .ToArray()
                 .Wait();
 
-            directories.Length.Should().Be(_directoryCount);
+            containers.Length
+                .Should()
+                .Be(_directoryCount);
         }
     }
 }
