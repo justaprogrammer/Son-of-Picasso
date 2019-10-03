@@ -17,6 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{30DC3442
 		Build.fsx = Build.fsx
 		codecov.yml = codecov.yml
 		.chglog\config.yml = .chglog\config.yml
+		nuget.config = nuget.config
 		paket.dependencies = paket.dependencies
 		paket.lock = paket.lock
 	EndProjectSection
@@ -43,6 +44,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{282F684E-B70E-4C4B-920A-06D3E96F3109}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{282F684E-B70E-4C4B-920A-06D3E96F3109}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{282F684E-B70E-4C4B-920A-06D3E96F3109}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{282F684E-B70E-4C4B-920A-06D3E96F3109}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0D73C26E-D1F1-4DE7-8354-9C9549FD2F93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0D73C26E-D1F1-4DE7-8354-9C9549FD2F93}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0D73C26E-D1F1-4DE7-8354-9C9549FD2F93}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -67,10 +72,6 @@ Global
 		{2F6B9B2C-D228-4563-B74C-12C18E753361}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2F6B9B2C-D228-4563-B74C-12C18E753361}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2F6B9B2C-D228-4563-B74C-12C18E753361}.Release|Any CPU.Build.0 = Release|Any CPU
-		{282F684E-B70E-4C4B-920A-06D3E96F3109}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{282F684E-B70E-4C4B-920A-06D3E96F3109}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{282F684E-B70E-4C4B-920A-06D3E96F3109}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{282F684E-B70E-4C4B-920A-06D3E96F3109}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9D06ACFE-6ECD-4EC9-9CA9-8D6CCC5C362A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9D06ACFE-6ECD-4EC9-9CA9-8D6CCC5C362A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9D06ACFE-6ECD-4EC9-9CA9-8D6CCC5C362A}.Release|Any CPU.ActiveCfg = Release|Any CPU
