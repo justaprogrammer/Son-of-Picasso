@@ -70,7 +70,7 @@ namespace SonOfPicasso.Core.Tests.Services
 
             TestSchedulerProvider.TaskPool.AdvanceBy(1);
 
-            AutoResetEvent.WaitOne(50).Should().BeTrue();
+            WaitOne();
 
             unitOfWork.ImageRepository.DidNotReceive().Insert(Arg.Any<Image>());
 
