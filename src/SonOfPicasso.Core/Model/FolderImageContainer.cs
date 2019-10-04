@@ -1,21 +1,25 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using SonOfPicasso.Data.Model;
 
 namespace SonOfPicasso.Core.Model
 {
     public class FolderImageContainer : ImageContainer
     {
-        private readonly Folder _folder;
-
         public FolderImageContainer(Folder folder)
         {
-            _folder = folder;
+            Id = GetContainerId(folder);
+            Name = folder.Path;
+            Date = folder.Date;
+            Images = folder.Images.Select(image => new ImageRef(image)).ToArray();
         }
 
-        public override string Id => GetContainerId(_folder);
-        public override string Name => _folder.Path;
-        public override DateTime Date => _folder.Date;
+        public override string Id { get; }
+        public override string Name { get; }
+        public override DateTime Date { get; }
         public override ImageContainerTypeEnum ContainerType => ImageContainerTypeEnum.Folder;
+        public override IList<ImageRef> Images { get; }
 
         public static string GetContainerId(Folder folder)
         {

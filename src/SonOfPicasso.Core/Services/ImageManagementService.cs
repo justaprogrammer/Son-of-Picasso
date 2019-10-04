@@ -117,7 +117,7 @@ namespace SonOfPicasso.Core.Services
                 var unitOfWork = _unitOfWorkFactory();
 
                 var folders = unitOfWork.FolderRepository
-                    .Get()
+                    .Get(includeProperties:"Images,Images.ExifData")
                     .ToArray();
 
                 foreach (var folder in folders)
@@ -135,7 +135,7 @@ namespace SonOfPicasso.Core.Services
                 var unitOfWork = _unitOfWorkFactory();
 
                 var albums = unitOfWork.AlbumRepository
-                    .Get()
+                    .Get(includeProperties:"AlbumImages,AlbumImages.Image")
                     .ToArray();
 
                 foreach (var album in albums)

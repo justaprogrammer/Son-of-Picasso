@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="Ardalis.GuardClauses" Version="1.2.9" />
+    <PackageReference Include="Dapper" Version="2.0.30" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.0.0" />
     <PackageReference Include="Roslyn.System.IO.Abstractions.Analyzers" Version="6.0.32">
       <PrivateAssets>all</PrivateAssets>

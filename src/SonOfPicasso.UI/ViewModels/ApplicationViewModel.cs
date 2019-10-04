@@ -41,6 +41,9 @@ namespace SonOfPicasso.UI.ViewModels
 
             var imageContainers = new ObservableCollectionExtended<ImageContainerViewModel>();
             ImageContainers = imageContainers;
+            
+            var imageRefList = new ObservableCollectionExtended<ImageRef>();
+            ImageRefs = imageRefList;
 
             AddFolder = ReactiveCommand.CreateFromObservable<Unit, Unit>(ExecuteAddFolder);
             AddFolderInteraction = new Interaction<Unit, string>();
@@ -62,6 +65,12 @@ namespace SonOfPicasso.UI.ViewModels
                         .ThenByDescending(model => model.Date))
                     .ObserveOn(_schedulerProvider.MainThreadScheduler)
                     .Bind(imageContainers)
+                    .Subscribe());
+
+                d(ImageContainerCache
+                    .Connect()
+                    .TransformMany(container => container.Images, imageRef => imageRef.Id)
+                    .Bind(imageRefList)
                     .Subscribe());
 
                 d(ImageContainerCache
@@ -91,6 +100,7 @@ namespace SonOfPicasso.UI.ViewModels
         public ObservableCollection<ImageViewModel> Images { get; }
 
         public ObservableCollectionExtended<ImageContainerViewModel> ImageContainers { get; }
+        public ObservableCollectionExtended<ImageRef> ImageRefs { get; }
 
         public ReactiveCommand<Unit, Unit> AddFolder { get; }
 
@@ -135,7 +145,14 @@ namespace SonOfPicasso.UI.ViewModels
         {
             return AddFolderInteraction.Handle(Unit.Default)
                 .ObserveOn(_schedulerProvider.TaskPool)
-                .Select(s => Observable.Return(Unit.Default))
+                .Select(s =>
+                {
+                    if (s == null) return Observable.Return(Unit.Default);
+
+                    return _imageManagementService.ScanFolder(s)
+                        .ToArray()
+                        .Select(images => Unit.Default);
+                })
                 .SelectMany(observable => observable);
         }
     }
