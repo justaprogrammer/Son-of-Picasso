@@ -10,6 +10,7 @@ namespace SonOfPicasso.UI.ViewModels
     public class ImageRowViewModel : ViewModelBase
     {
         private readonly Func<ImageViewModel> _imageRefViewModelFactory;
+        private ImageViewModel selectedItem;
 
         public ImageRowViewModel(Func<ImageViewModel> imageRefViewModelFactory, ViewModelActivator activator) :
             base(activator)
@@ -18,6 +19,12 @@ namespace SonOfPicasso.UI.ViewModels
         }
 
         public IList<ImageViewModel> ImageRefViewModels { get; private set; }
+
+        public ImageViewModel SelectedItem
+        {
+            get => selectedItem;
+            set => this.RaiseAndSetIfChanged(ref selectedItem, value);
+        }
 
         public void Initialize(IEnumerable<ImageRef> imageRefs)
         {

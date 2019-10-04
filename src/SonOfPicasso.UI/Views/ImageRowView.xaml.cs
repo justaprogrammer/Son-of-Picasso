@@ -4,7 +4,7 @@ using SonOfPicasso.UI.ViewModels;
 namespace SonOfPicasso.UI.Views
 {
     /// <summary>
-    /// Interaction logic for ImageRowView.xaml
+    ///     Interaction logic for ImageRowView.xaml
     /// </summary>
     public partial class ImageRowView : ReactiveUserControl<ImageRowViewModel>, IActivatableView
     {
@@ -17,6 +17,10 @@ namespace SonOfPicasso.UI.Views
                 d(this.OneWayBind(ViewModel,
                     model => model.ImageRefViewModels,
                     view => view.RowItems.ItemsSource));
+
+                d(this.Bind(ViewModel,
+                    model => model.SelectedItem,
+                    view => view.RowItems.SelectedItem));
             });
         }
     }
