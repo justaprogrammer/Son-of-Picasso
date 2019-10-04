@@ -84,12 +84,6 @@ namespace SonOfPicasso.UI
                 .AsImplementedInterfaces()
                 .AsSelf();
 
-            containerBuilder.RegisterType<ImageContainerView>()
-                .Named<IViewFor<ImageContainerViewModel>>("ListItem");
-
-            containerBuilder.RegisterType<ImageContainerTreeItemView>()
-                .Named<IViewFor<ImageContainerViewModel>>("TreeItem");
-
             containerBuilder.RegisterLogger();
             var container = containerBuilder.Build();
 

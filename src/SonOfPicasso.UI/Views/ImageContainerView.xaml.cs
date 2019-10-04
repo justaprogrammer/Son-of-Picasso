@@ -14,12 +14,11 @@ namespace SonOfPicasso.UI.Views
         {
             InitializeComponent();
 
-            this.WhenActivated(disposable =>
+            this.WhenActivated(d =>
             {
-                this.OneWayBind(ViewModel,
-                        model => model.Name,
-                        window => window.FolderName.Content)
-                    .DisposeWith(disposable);
+                d(this.OneWayBind(ViewModel,
+                    model => model.Name,
+                    window => window.FolderName.Content));
             });
         }
     }

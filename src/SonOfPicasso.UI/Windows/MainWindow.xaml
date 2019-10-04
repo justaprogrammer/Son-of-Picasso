@@ -1,20 +1,22 @@
-﻿<reactiveUi:ReactiveWindow x:TypeArguments="viewModels:ApplicationViewModel" x:Class="SonOfPicasso.UI.Windows.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:reactiveUi="http://reactiveui.net"
-        xmlns:viewModels="clr-namespace:SonOfPicasso.UI.ViewModels"
-        xmlns:views="clr-namespace:SonOfPicasso.UI.Views"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+﻿<reactiveUi:ReactiveWindow x:TypeArguments="viewModels:ApplicationViewModel"
+                           x:Class="SonOfPicasso.UI.Windows.MainWindow"
+                           xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                           xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                           xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                           xmlns:reactiveUi="http://reactiveui.net"
+                           xmlns:viewModels="clr-namespace:SonOfPicasso.UI.ViewModels"
+                           xmlns:views="clr-namespace:SonOfPicasso.UI.Views"
+                           mc:Ignorable="d"
+                           Title="MainWindow" Height="450" Width="800">
+
     <DockPanel>
         <Menu DockPanel.Dock="Top" Width="Auto" Height="20">
             <MenuItem Header="_File">
-                <MenuItem x:Name="NewAlbum" Header="New Album"/>
+                <MenuItem x:Name="NewAlbum" Header="New Album" />
                 <Separator />
-                <MenuItem x:Name="AddFolder" Header="_Add Folder"/>
-                <MenuItem x:Name="AddFile" Header="Add File"/>
+                <MenuItem x:Name="AddFolder" Header="_Add Folder" />
+                <MenuItem x:Name="AddFile" Header="Add File" />
             </MenuItem>
             <MenuItem Header="_Edit" />
             <MenuItem Header="_View" />
@@ -26,24 +28,32 @@
         </Menu>
 
         <DockPanel>
-            <ListView Name="FoldersListView" 
-                      DockPanel.Dock="Left" 
+            <ListView Name="FoldersListView"
+                      DockPanel.Dock="Left"
                       MinWidth="300"
+                      VirtualizingStackPanel.IsVirtualizing="true" 
                       VirtualizingStackPanel.VirtualizationMode="Recycling"
                       VirtualizingStackPanel.ScrollUnit="Pixel">
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <reactiveUi:ViewModelViewHost ViewModel="{Binding}" ViewContract="ListItem" />
+                        <reactiveUi:ViewModelViewHost ViewModel="{Binding}" />
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-            <TreeView Name="ImagesTreeView" 
+            <TreeView Name="ImagesTreeView"
+                      VirtualizingStackPanel.IsVirtualizing="true" 
                       VirtualizingStackPanel.VirtualizationMode="Recycling"
-                      VirtualizingStackPanel.ScrollUnit="Pixel">
+                      VirtualizingStackPanel.ScrollUnit="Pixel"
+                      ItemContainerStyle="{StaticResource ImageContainerTreeViewItem}">
                 <TreeView.ItemTemplate>
-                    <DataTemplate>
-                        <reactiveUi:ViewModelViewHost ViewModel="{Binding}" ViewContract="TreeItem" />
-                    </DataTemplate>
+                    <HierarchicalDataTemplate ItemsSource="{Binding ImageRefRows}"
+                                              DataType="{x:Type viewModels:ImageContainerViewModel}">
+                        <HierarchicalDataTemplate.ItemTemplate>
+                            <DataTemplate>
+                                <reactiveUi:ViewModelViewHost ViewModel="{Binding}" MinHeight="300" />
+                            </DataTemplate>
+                        </HierarchicalDataTemplate.ItemTemplate>
+                    </HierarchicalDataTemplate>
                 </TreeView.ItemTemplate>
             </TreeView>
         </DockPanel>

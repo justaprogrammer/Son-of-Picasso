@@ -26,12 +26,6 @@ namespace SonOfPicasso.UI.Tests.ViewModels
         [Fact]
         public void CanActivate()
         {
-            AutoSubstitute.Provide<Func<ImageContainerViewModel>>(() =>
-                new ImageContainerViewModel(new ViewModelActivator()));
-            AutoSubstitute.Provide<Func<ImageViewModel>>(() =>
-                new ImageViewModel(AutoSubstitute.Resolve<IImageLoadingService>(), TestSchedulerProvider,
-                    new ViewModelActivator()));
-
             var imageManagementService = AutoSubstitute.Resolve<IImageManagementService>();
 
             var folders = Fakers.FolderFaker
@@ -58,7 +52,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             TestSchedulerProvider.TaskPool.AdvanceBy(1);
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(2);
 
-            applicationViewModel.ImageContainers.Count.Should().Be(2);
+            applicationViewModel.ImageContainerViewModels.Count.Should().Be(2);
         }
     }
 }

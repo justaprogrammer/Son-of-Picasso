@@ -23,7 +23,7 @@ namespace SonOfPicasso.Core.Model
 
         public static string GetContainerId(Album album)
         {
-            return $"Album{album.Id}";
+            return $"Album:{album.Id}";
         }
     }
 }

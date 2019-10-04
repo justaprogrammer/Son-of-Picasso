@@ -23,7 +23,7 @@ namespace SonOfPicasso.Core.Model
 
         public static string GetContainerId(Folder folder)
         {
-            return $"Folder{folder.Id}";
+            return $"Folder:{folder.Id}";
         }
     }
 }

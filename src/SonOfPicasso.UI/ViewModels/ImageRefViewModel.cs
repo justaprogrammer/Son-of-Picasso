@@ -2,34 +2,32 @@
 using System.Reactive.Linq;
 using ReactiveUI;
 using SonOfPicasso.Core.Interfaces;
+using SonOfPicasso.Core.Model;
 using SonOfPicasso.Core.Scheduling;
-using SonOfPicasso.Data.Model;
 using SonOfPicasso.UI.ViewModels.Abstract;
 using Splat;
 
 namespace SonOfPicasso.UI.ViewModels
 {
-    public class ImageViewModel : ViewModelBase
+    public class ImageRefViewModel : ViewModelBase
     {
         private readonly IImageLoadingService _imageLoadingService;
         private readonly ISchedulerProvider _schedulerProvider;
 
-        private Image _imageModel;
-
-        public ImageViewModel(IImageLoadingService imageLoadingService, ISchedulerProvider schedulerProvider,
+        public ImageRefViewModel(IImageLoadingService imageLoadingService, ISchedulerProvider schedulerProvider,
             ViewModelActivator activator) : base(activator)
         {
             _imageLoadingService = imageLoadingService;
             _schedulerProvider = schedulerProvider;
         }
 
-        public int Id => _imageModel.Id;
-        public string Path => _imageModel.Path;
-        public ExifData ExifData => _imageModel.ExifData;
+        public ImageRef ImageRef { get; private set; }
+        public int Id => ImageRef.ImageId;
+        public string Path => ImageRef.ImagePath;
 
-        public void Initialize(Image imageModel)
+        public void Initialize(ImageRef imageRef)
         {
-            _imageModel = imageModel ?? throw new ArgumentNullException(nameof(imageModel));
+            ImageRef = imageRef ?? throw new ArgumentNullException(nameof(imageRef));
         }
 
         public IObservable<IBitmap> GetImage()
