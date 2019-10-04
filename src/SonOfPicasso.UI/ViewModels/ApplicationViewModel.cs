@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.ObjectModel;
-using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using DynamicData;
@@ -8,44 +6,33 @@ using DynamicData.Binding;
 using ReactiveUI;
 using Serilog;
 using SonOfPicasso.Core.Interfaces;
+using SonOfPicasso.Core.Model;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Data.Model;
-using SonOfPicasso.UI.ViewModels.Interfaces;
 
 namespace SonOfPicasso.UI.ViewModels
 {
     public class ApplicationViewModel : ReactiveObject, IActivatableViewModel
     {
-        private readonly Func<ImageFolderViewModel> _imageFolderViewModelFactory;
-        private readonly Func<AlbumViewModel> _albumViewModelFactory;
+        private readonly Func<ImageContainerViewModel> _imageContainerViewModelFactory;
         private readonly IImageManagementService _imageManagementService;
-        private readonly Func<ImageViewModel> _imageViewModelFactory;
         private readonly ILogger _logger;
         private readonly ISchedulerProvider _schedulerProvider;
 
         public ApplicationViewModel(ILogger logger,
             ISchedulerProvider schedulerProvider,
             IImageManagementService imageManagementService,
-            Func<ImageViewModel> imageViewModelFactory,
-            Func<ImageFolderViewModel> imageFolderViewModelFactory,
-            Func<AlbumViewModel> albumViewModelFactory,
+            Func<ImageContainerViewModel> imageContainerViewModelFactory,
             ViewModelActivator activator)
         {
             _logger = logger;
             _schedulerProvider = schedulerProvider;
             _imageManagementService = imageManagementService;
-            _imageViewModelFactory = imageViewModelFactory;
-            _imageFolderViewModelFactory = imageFolderViewModelFactory;
-            _albumViewModelFactory = albumViewModelFactory;
+            _imageContainerViewModelFactory = imageContainerViewModelFactory;
             Activator = activator;
 
-            var images = new ObservableCollectionExtended<ImageViewModel>();
-            Images = images;
-
-            var imageContainers = new ObservableCollectionExtended<IImageContainerViewModel>();
-            ImageContainers = imageContainers;
-
-            var imagesList = new ObservableCollectionExtended<int>();
+            var imageContainerViewModels = new ObservableCollectionExtended<ImageContainerViewModel>();
+            ImageContainerViewModels = imageContainerViewModels;
 
             AddFolder = ReactiveCommand.CreateFromObservable<Unit, Unit>(ExecuteAddFolder);
             AddFolderInteraction = new Interaction<Unit, string>();
@@ -53,52 +40,23 @@ namespace SonOfPicasso.UI.ViewModels
             NewAlbum = ReactiveCommand.CreateFromObservable(ExecuteNewAlbum);
             NewAlbumInteraction = new Interaction<Unit, AddAlbumViewModel>();
 
-            ImageCache = new SourceCache<ImageViewModel, string>(model => model.Path);
-            ImageContainerCache = new SourceCache<IImageContainerViewModel, string>(model => model.ContainerId);
+            ImageContainerCache = new SourceCache<ImageContainer, string>(imageContainer => imageContainer.Id);
 
             this.WhenActivated(d =>
             {
-                d(ImageCache
-                    .Connect()
-                    .ObserveOn(_schedulerProvider.MainThreadScheduler)
-                    .Bind(images)
-                    .Subscribe());
-
                 d(ImageContainerCache
                     .Connect()
-                    .Sort(SortExpressionComparer<IImageContainerViewModel>
-                        .Ascending(model => model.ContainerType == ContainerTypeEnum.Folder)
+                    .Transform(CreateImageContainerViewModel)
+                    .DisposeMany()
+                    .Sort(SortExpressionComparer<ImageContainerViewModel>
+                        .Ascending(model => model.ContainerType == ImageContainerTypeEnum.Folder)
                         .ThenByDescending(model => model.Date))
                     .ObserveOn(_schedulerProvider.MainThreadScheduler)
-                    .Bind(imageContainers)
+                    .Bind(imageContainerViewModels)
                     .Subscribe());
 
-//                ImageContainerCache
-//                    .Connect()
-//                    .Sort(SortExpressionComparer<IImageContainerViewModel>
-//                        .Ascending(model => model.ContainerType == ContainerTypeEnum.Folder)
-//                        .ThenByDescending(model => model.Date))
-//                    .TransformMany(model => model.ImageIds, i => i);
-
-                var allImages = _imageManagementService.GetImagesWithDirectoryAndExif()
-                    .Publish();
-
-                d(ImageCache
-                    .PopulateFrom(allImages
-                        .SelectMany(i => i)
-                        .Select(CreateImageViewModel)));
-
                 d(ImageContainerCache
-                    .PopulateFrom(allImages
-                        .SelectMany(i => i)
-                        .Select(image => image.Folder)
-                        .Distinct(directory => directory.Path)
-                        .Select(CreateImageFolderViewModel)));
-
-                d(allImages.Connect());
-
-                d(ImageContainerCache.PopulateFrom(_imageManagementService.GetAllAlbumsWithAlbumImages()
-                    .Select(CreateAlbumViewModel)));
+                    .PopulateFrom(_imageManagementService.GetAllImageContainers()));
             });
         }
 
@@ -106,13 +64,11 @@ namespace SonOfPicasso.UI.ViewModels
 
         public Interaction<Unit, AddAlbumViewModel> NewAlbumInteraction { get; set; }
 
-        private SourceCache<IImageContainerViewModel, string> ImageContainerCache { get; }
+        private SourceCache<ImageContainer, string> ImageContainerCache { get; }
 
-        private SourceCache<ImageViewModel, string> ImageCache { get; }
+        public ObservableCollectionExtended<ImageContainerViewModel> ImageContainerViewModels { get; }
 
-        public ObservableCollection<ImageViewModel> Images { get; }
-
-        public ObservableCollectionExtended<IImageContainerViewModel> ImageContainers { get; }
+        public ObservableCollectionExtended<ImageViewModel> ImageRefViewModels { get; }
 
         public ReactiveCommand<Unit, Unit> AddFolder { get; }
 
@@ -120,25 +76,11 @@ namespace SonOfPicasso.UI.ViewModels
 
         public ViewModelActivator Activator { get; }
 
-        private AlbumViewModel CreateAlbumViewModel(Album album)
+        private ImageContainerViewModel CreateImageContainerViewModel(ImageContainer imageContainer)
         {
-            var albumViewModel = _albumViewModelFactory();
-            albumViewModel.Initialize(album);
-            return albumViewModel;
-        }
-
-        private ImageFolderViewModel CreateImageFolderViewModel(Folder folder)
-        {
-            var imageFolderViewModel = _imageFolderViewModelFactory();
-            imageFolderViewModel.Initialize(folder);
-            return imageFolderViewModel;
-        }
-
-        private ImageViewModel CreateImageViewModel(Image image)
-        {
-            var imageViewModel = _imageViewModelFactory();
-            imageViewModel.Initialize(image);
-            return imageViewModel;
+            var imageContainerViewModel = _imageContainerViewModelFactory();
+            imageContainerViewModel.Initialize(imageContainer);
+            return imageContainerViewModel;
         }
 
         private IObservable<Unit> ExecuteNewAlbum()
@@ -153,7 +95,7 @@ namespace SonOfPicasso.UI.ViewModels
                     return _imageManagementService.CreateAlbum(model)
                         .Select(album =>
                         {
-                            ImageContainerCache.AddOrUpdate(CreateAlbumViewModel(album));
+                            // ImageContainerCache.AddOrUpdate(CreateAlbumViewModel(album));
                             return Unit.Default;
                         });
                 })
@@ -168,51 +110,9 @@ namespace SonOfPicasso.UI.ViewModels
                 {
                     if (s == null) return Observable.Return(Unit.Default);
 
-                    var discoveredImages = _imageManagementService.ScanFolder(s)
-                        .AsObservable();
-
-                    var addImages = discoveredImages
+                    return _imageManagementService.ScanFolder(s)
                         .ToArray()
-                        .Select(images =>
-                        {
-                            ImageCache.AddOrUpdate(images.Select(CreateImageViewModel));
-                            return Unit.Default;
-                        });
-
-                    var discoveredFolders = discoveredImages
-                        .Select(image => image.Folder)
-                        .GroupBy(directory => directory.Path)
-                        .Select(groupedObservable => groupedObservable.FirstAsync())
-                        .SelectMany(observable1 => observable1)
-                        .Select(directory => (directory,
-                            ImageContainerCache.Lookup(ImageFolderViewModel.GetContainerId(directory))));
-
-                    var addFolders = discoveredFolders
-                        .Where(tuple => !tuple.Item2.HasValue)
-                        .Select(tuple => tuple.directory)
-                        .ToArray()
-                        .Select(directories =>
-                        {
-                            ImageContainerCache.AddOrUpdate(directories.Select(CreateImageFolderViewModel));
-                            return Unit.Default;
-                        });
-
-                    var updateFolders = discoveredFolders
-                        .Where(tuple => tuple.Item2.HasValue)
-                        .ToArray()
-                        .Select(tuples =>
-                        {
-                            foreach (var tuple in tuples)
-                            {
-                                var imageContainerViewModel = tuple.Item2.Value;
-                                if (imageContainerViewModel is ImageFolderViewModel imageFolderViewModel)
-                                    imageFolderViewModel.Initialize(tuple.directory);
-                            }
-
-                            return Unit.Default;
-                        });
-
-                    return addImages.Zip(addFolders, updateFolders, (unit, _, __) => unit);
+                        .Select(images => Unit.Default);
                 })
                 .SelectMany(observable => observable);
         }

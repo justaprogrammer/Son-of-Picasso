@@ -1,6 +1,6 @@
 ﻿<reactiveUi:ReactiveUserControl 
-    x:TypeArguments="viewModels:ImageFolderViewModel"
-    x:Class="SonOfPicasso.UI.Views.ImageFolderViewControl"
+    x:TypeArguments="viewModels:ImageContainerViewModel"
+    x:Class="SonOfPicasso.UI.Views.ImageContainerView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 

@@ -8,7 +8,6 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using AutoBogus;
 using Bogus;
 using ExifLibrary;
 using Serilog;

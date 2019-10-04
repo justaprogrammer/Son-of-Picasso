@@ -12,6 +12,7 @@ using SonOfPicasso.Core.Services;
 using SonOfPicasso.Data.Repository;
 using SonOfPicasso.Data.Services;
 using SonOfPicasso.UI.ViewModels;
+using SonOfPicasso.UI.Views;
 using SonOfPicasso.UI.Windows;
 using Splat;
 using Splat.Serilog;
@@ -78,8 +79,8 @@ namespace SonOfPicasso.UI
 
             containerBuilder.RegisterAssemblyTypes(GetType().Assembly)
                 .Where(type => type.Namespace.StartsWith("SonOfPicasso.UI.Windows")
-                               || type.Namespace.StartsWith("SonOfPicasso.UI.ViewModels")
-                               || type.Namespace.StartsWith("SonOfPicasso.UI.Views"))
+                               || type.Namespace.StartsWith("SonOfPicasso.UI.Views")
+                               || type.Namespace.StartsWith("SonOfPicasso.UI.ViewModels"))
                 .AsImplementedInterfaces()
                 .AsSelf();
 

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reactive.Disposables;
 using ReactiveUI;
 using SonOfPicasso.UI.ViewModels;
 using Splat;
@@ -7,25 +6,24 @@ using Splat;
 namespace SonOfPicasso.UI.Views
 {
     /// <summary>
-    /// Interaction logic for ImageViewControl.xaml
+    /// Interaction logic for ImageView.xaml
     /// </summary>
-    public partial class ImageViewControl : ReactiveUserControl<ImageViewModel>
+    public partial class ImageView : ReactiveUserControl<ImageViewModel>
     {
-        public ImageViewControl()
+        public ImageView()
         {
             InitializeComponent();
 
-            this.WhenActivated(disposable =>
+            this.WhenActivated(d =>
             {
-                ImageLabel.Content = ViewModel.Path;
+                ImageLabel.Content = ViewModel.ImageRef.ImagePath;
 
-                ViewModel.GetImage()
+                d(ViewModel.GetImage()
                     .Subscribe(bitmap =>
                     {
                         var imageBitmapSource = bitmap.ToNative();
                         ImageBitmap.Source = imageBitmapSource;
-                    })
-                    .DisposeWith(disposable);
+                    }));
             });
         }
     }

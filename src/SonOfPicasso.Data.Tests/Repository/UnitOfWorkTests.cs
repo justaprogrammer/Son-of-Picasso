@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using AutoBogus;
 using Bogus;
 using FluentAssertions;
 using SonOfPicasso.Data.Model;
@@ -13,7 +12,7 @@ namespace SonOfPicasso.Data.Tests.Repository
     public class UnitOfWorkTests : DataTestsBase
     {
         private static readonly Faker<Folder> FakeNewDirectory
-            = new AutoFaker<Folder>().RuleFor(directory1 => directory1.Id, 0)
+            = new Faker<Folder>().RuleFor(directory1 => directory1.Id, 0)
                 .RuleFor(directory1 => directory1.Images, (List<Image>)null)
                 .RuleFor(directory1 => directory1.Path, faker => faker.System.DirectoryPathWindows());
 

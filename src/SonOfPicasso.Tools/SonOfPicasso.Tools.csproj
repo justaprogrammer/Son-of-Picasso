@@ -13,7 +13,6 @@
     <Compile Include="..\common\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" Condition="Exists('..\common\SharedAssemblyInfo.cs')" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AutoBogus" Version="2.7.3" />
     <PackageReference Include="Autofac" Version="4.9.4" />
     <PackageReference Include="AutofacSerilogIntegration" Version="2.0.0" />
     <PackageReference Include="Bogus" Version="28.3.2" />

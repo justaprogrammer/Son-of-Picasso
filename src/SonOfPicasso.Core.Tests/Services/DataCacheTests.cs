@@ -7,7 +7,7 @@ using Autofac.Extras.NSubstitute;
 using FluentAssertions;
 using NSubstitute;
 using Serilog;
-using SonOfPicasso.Core.Models;
+using SonOfPicasso.Core.Model;
 using SonOfPicasso.Core.Services;
 using SonOfPicasso.Testing.Common;
 using SonOfPicasso.Testing.Common.Extensions;

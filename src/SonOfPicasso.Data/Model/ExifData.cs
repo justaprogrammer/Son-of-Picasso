@@ -43,7 +43,6 @@ namespace SonOfPicasso.Data.Model
         public string DigitalZoomRatio { get; set; }
         public DateTime ThumbnailDateTime { get; set; }
         public ushort ISOSpeedRatings { get; set; }
-        // ReSharper disable once InconsistentNaming
         public ushort FocalLengthIn35mmFilm { get; set; }
         public string ColorSpace { get; set; }
         public string ExposureMode { get; set; }

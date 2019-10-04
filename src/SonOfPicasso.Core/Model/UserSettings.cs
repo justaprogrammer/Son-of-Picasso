@@ -1,4 +1,4 @@
-﻿namespace SonOfPicasso.Core.Models
+﻿namespace SonOfPicasso.Core.Model
 {
     public class UserSettings
     {

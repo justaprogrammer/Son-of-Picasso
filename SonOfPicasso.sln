@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29215.179
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SonOfPicasso.UI", "src\SonOfPicasso.UI\SonOfPicasso.UI.csproj", "{282F684E-B70E-4C4B-920A-06D3E96F3109}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{12E2CEF6-EB9D-412F-98E3-ECBBBD00A29A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SonOfPicasso.Testing.Common", "src\SonOfPicasso.Testing.Common\SonOfPicasso.Testing.Common.csproj", "{0D73C26E-D1F1-4DE7-8354-9C9549FD2F93}"
@@ -15,6 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{30DC3442
 		Build.fsx = Build.fsx
 		codecov.yml = codecov.yml
 		.chglog\config.yml = .chglog\config.yml
+		nuget.config = nuget.config
 		paket.dependencies = paket.dependencies
 		paket.lock = paket.lock
 	EndProjectSection
@@ -29,8 +32,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SonOfPicasso.Data.Tests", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SonOfPicasso.Core.Tests", "src\SonOfPicasso.Core.Tests\SonOfPicasso.Core.Tests.csproj", "{2F6B9B2C-D228-4563-B74C-12C18E753361}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SonOfPicasso.UI", "src\SonOfPicasso.UI\SonOfPicasso.UI.csproj", "{282F684E-B70E-4C4B-920A-06D3E96F3109}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SonOfPicasso.UI.Tests", "src\SonOfPicasso.UI.Tests\SonOfPicasso.UI.Tests.csproj", "{9D06ACFE-6ECD-4EC9-9CA9-8D6CCC5C362A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SonOfPicasso.Tools.Tests", "src\SonOfPicasso.Tools.Tests\SonOfPicasso.Tools.Tests.csproj", "{46317863-37D4-46EB-AEBD-57AD986F8EEB}"
@@ -43,6 +44,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{282F684E-B70E-4C4B-920A-06D3E96F3109}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{282F684E-B70E-4C4B-920A-06D3E96F3109}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{282F684E-B70E-4C4B-920A-06D3E96F3109}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{282F684E-B70E-4C4B-920A-06D3E96F3109}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0D73C26E-D1F1-4DE7-8354-9C9549FD2F93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0D73C26E-D1F1-4DE7-8354-9C9549FD2F93}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0D73C26E-D1F1-4DE7-8354-9C9549FD2F93}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -67,10 +72,6 @@ Global
 		{2F6B9B2C-D228-4563-B74C-12C18E753361}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2F6B9B2C-D228-4563-B74C-12C18E753361}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2F6B9B2C-D228-4563-B74C-12C18E753361}.Release|Any CPU.Build.0 = Release|Any CPU
-		{282F684E-B70E-4C4B-920A-06D3E96F3109}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{282F684E-B70E-4C4B-920A-06D3E96F3109}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{282F684E-B70E-4C4B-920A-06D3E96F3109}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{282F684E-B70E-4C4B-920A-06D3E96F3109}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9D06ACFE-6ECD-4EC9-9CA9-8D6CCC5C362A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9D06ACFE-6ECD-4EC9-9CA9-8D6CCC5C362A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9D06ACFE-6ECD-4EC9-9CA9-8D6CCC5C362A}.Release|Any CPU.ActiveCfg = Release|Any CPU

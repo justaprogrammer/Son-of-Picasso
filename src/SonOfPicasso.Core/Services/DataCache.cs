@@ -3,7 +3,7 @@ using System.Reactive;
 using Akavache;
 using Serilog;
 using SonOfPicasso.Core.Interfaces;
-using SonOfPicasso.Core.Models;
+using SonOfPicasso.Core.Model;
 
 namespace SonOfPicasso.Core.Services
 {
