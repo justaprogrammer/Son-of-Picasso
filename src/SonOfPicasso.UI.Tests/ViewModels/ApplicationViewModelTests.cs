@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Reactive.Linq;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore.Internal;
+using MoreLinq;
 using NSubstitute;
 using ReactiveUI;
 using SonOfPicasso.Core.Interfaces;
@@ -32,32 +34,17 @@ namespace SonOfPicasso.UI.Tests.ViewModels
 
             var imageManagementService = AutoSubstitute.Resolve<IImageManagementService>();
 
-            var startDate = Faker.Date.Past().Date;
+            var generate = Fakers.FolderFaker.Generate("WithImages");
 
-            var dictionary =
-                Faker.MakeLazy(2, i => startDate.AddDays(i))
-                    .ToDictionary(time => time, time => Faker
-                        .MakeLazy(4, () => Faker.Date.Between(time, time.AddDays(1).AddSeconds(-1)))
-                        .ToArray());
+            var folders = Fakers.FolderFaker
+                .GenerateForever("WithImages")
+                .DistinctBy(folder => folder.Date)
+                .Take(2)
+                .ToArray();
 
-            var imageContainers = dictionary.Select((pair, i) =>
-            {
-                var folder = Fakers.FolderFaker.Generate();
-                folder.Id = i;
-                folder.Date = pair.Key;
-                folder.Images = pair.Value.Select(time =>
-                {
-                    var image = Fakers.ImageFaker.Generate();
-                    image.Path = MockFileSystem.Path.Combine(folder.Path, time.ToLongTimeString() + ".png");
-                    image.ExifData.DateTime = time;
-                    image.ExifData.DateTimeDigitized = time;
-                    image.ExifData.DateTimeOriginal = time;
-                    image.ExifData.DateTimeDigitized = time;
-                    return image;
-                }).ToList();
-
-                return (ImageContainer) new FolderImageContainer(folder);
-            }).ToArray();
+            var imageContainers = folders
+                .Select(folder => new FolderImageContainer(folder))
+                .ToArray();
 
             imageManagementService.GetAllImageContainers()
                 .Returns(imageContainers

@@ -4,7 +4,6 @@ using System.IO;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Reactive.Linq;
-using AutoBogus;
 using Bogus;
 using FluentAssertions;
 using FluentAssertions.Execution;
@@ -28,12 +27,12 @@ namespace SonOfPicasso.Core.Tests.Services
         }
 
         private static readonly Faker<Folder> FakeNewFolder
-            = new AutoFaker<Folder>().RuleFor(directory1 => directory1.Id, 0)
+            = new Faker<Folder>().RuleFor(directory1 => directory1.Id, 0)
                 .RuleFor(directory1 => directory1.Images, (List<Image>) null)
                 .RuleFor(directory1 => directory1.Path, faker => faker.System.DirectoryPathWindows());
 
         private static readonly Faker<ExifData> FakeNewExifData
-            = new AutoFaker<ExifData>().RuleFor(exifData => exifData.Id, 0);
+            = new Faker<ExifData>().RuleFor(exifData => exifData.Id, 0);
 
         [Fact]
         public void ShouldScanFolderWhenDirectoryModelExists()
