@@ -6,7 +6,7 @@ namespace SonOfPicasso.UI.Views
     /// <summary>
     /// Interaction logic for ImageRowView.xaml
     /// </summary>
-    public partial class ImageRowView : ReactiveUserControl<ImageRefRowViewModel>, IActivatableView
+    public partial class ImageRowView : ReactiveUserControl<ImageRowViewModel>, IActivatableView
     {
         public ImageRowView()
         {

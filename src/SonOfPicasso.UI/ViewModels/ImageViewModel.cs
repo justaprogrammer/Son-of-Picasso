@@ -9,12 +9,12 @@ using Splat;
 
 namespace SonOfPicasso.UI.ViewModels
 {
-    public class ImageRefViewModel : ViewModelBase
+    public class ImageViewModel : ViewModelBase
     {
         private readonly IImageLoadingService _imageLoadingService;
         private readonly ISchedulerProvider _schedulerProvider;
 
-        public ImageRefViewModel(IImageLoadingService imageLoadingService, ISchedulerProvider schedulerProvider,
+        public ImageViewModel(IImageLoadingService imageLoadingService, ISchedulerProvider schedulerProvider,
             ViewModelActivator activator) : base(activator)
         {
             _imageLoadingService = imageLoadingService;

@@ -86,7 +86,6 @@ namespace SonOfPicasso.UI
 
             containerBuilder.RegisterLogger();
             var container = containerBuilder.Build();
-
             var resolver = new AutofacDependencyResolver(container);
 
             Locator.SetLocator(resolver);

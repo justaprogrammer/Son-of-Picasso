@@ -68,7 +68,7 @@ namespace SonOfPicasso.UI.ViewModels
 
         public ObservableCollectionExtended<ImageContainerViewModel> ImageContainerViewModels { get; }
 
-        public ObservableCollectionExtended<ImageRefViewModel> ImageRefViewModels { get; }
+        public ObservableCollectionExtended<ImageViewModel> ImageRefViewModels { get; }
 
         public ReactiveCommand<Unit, Unit> AddFolder { get; }
 

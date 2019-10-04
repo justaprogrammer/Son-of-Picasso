@@ -11,6 +11,5 @@ namespace SonOfPicasso.Data.Interfaces
         IGenericRepository<Folder> FolderRepository { get; }
         IGenericRepository<AlbumImage> AlbumImageRepository { get; }
         void Save();
-        T WithContext<T>(Func<IDataContext, T> func);
     }
 }

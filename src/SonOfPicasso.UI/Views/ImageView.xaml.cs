@@ -8,7 +8,7 @@ namespace SonOfPicasso.UI.Views
     /// <summary>
     /// Interaction logic for ImageView.xaml
     /// </summary>
-    public partial class ImageView : ReactiveUserControl<ImageRefViewModel>
+    public partial class ImageView : ReactiveUserControl<ImageViewModel>
     {
         public ImageView()
         {

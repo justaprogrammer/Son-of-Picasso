@@ -11,11 +11,11 @@ namespace SonOfPicasso.UI.ViewModels
 {
     public class ImageContainerViewModel : ViewModelBase
     {
-        private readonly Func<ImageRefRowViewModel> _imageRefRowViewModelFactory;
+        private readonly Func<ImageRowViewModel> _imageRefRowViewModelFactory;
         private ImageContainer _imageContainer;
 
         public ImageContainerViewModel(
-            Func<ImageRefRowViewModel> imageRefRowViewModelFactory,
+            Func<ImageRowViewModel> imageRefRowViewModelFactory,
             ViewModelActivator activator
         ) : base(activator)
         {
@@ -32,7 +32,7 @@ namespace SonOfPicasso.UI.ViewModels
 
         public DateTime Date => _imageContainer.Date;
 
-        public IList<ImageRefRowViewModel> ImageRefRows { get; private set; }
+        public IList<ImageRowViewModel> ImageRefRows { get; private set; }
 
         public void Initialize(ImageContainer imageContainer)
         {
@@ -45,7 +45,7 @@ namespace SonOfPicasso.UI.ViewModels
                     .ToArray();
         }
 
-        private ImageRefRowViewModel CreateImageRefViewModel(IEnumerable<ImageRef> imageRef)
+        private ImageRowViewModel CreateImageRefViewModel(IEnumerable<ImageRef> imageRef)
         {
             var imageRefViewModel = _imageRefRowViewModelFactory();
             imageRefViewModel.Initialize(imageRef);

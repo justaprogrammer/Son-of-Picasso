@@ -7,17 +7,17 @@ using SonOfPicasso.UI.ViewModels.Abstract;
 
 namespace SonOfPicasso.UI.ViewModels
 {
-    public class ImageRefRowViewModel : ViewModelBase
+    public class ImageRowViewModel : ViewModelBase
     {
-        private readonly Func<ImageRefViewModel> _imageRefViewModelFactory;
+        private readonly Func<ImageViewModel> _imageRefViewModelFactory;
 
-        public ImageRefRowViewModel(Func<ImageRefViewModel> imageRefViewModelFactory, ViewModelActivator activator) :
+        public ImageRowViewModel(Func<ImageViewModel> imageRefViewModelFactory, ViewModelActivator activator) :
             base(activator)
         {
             _imageRefViewModelFactory = imageRefViewModelFactory;
         }
 
-        public IList<ImageRefViewModel> ImageRefViewModels { get; private set; }
+        public IList<ImageViewModel> ImageRefViewModels { get; private set; }
 
         public void Initialize(IEnumerable<ImageRef> imageRefs)
         {
@@ -26,7 +26,7 @@ namespace SonOfPicasso.UI.ViewModels
             ImageRefViewModels = imageRefs.Select(CreateImageRefViewModel).ToArray();
         }
 
-        private ImageRefViewModel CreateImageRefViewModel(ImageRef imageRef)
+        private ImageViewModel CreateImageRefViewModel(ImageRef imageRef)
         {
             var imageRefViewModel = _imageRefViewModelFactory();
             imageRefViewModel.Initialize(imageRef);

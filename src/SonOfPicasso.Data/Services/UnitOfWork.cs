@@ -31,11 +31,6 @@ namespace SonOfPicasso.Data.Services
         public IGenericRepository<Folder> FolderRepository => _directoryRepository.Value;
         public IGenericRepository<AlbumImage> AlbumImageRepository => _albumImageRepository.Value;
 
-        public T WithContext<T>(Func<IDataContext, T> func)
-        {
-            return func(_dataContext);
-        }
-
         public void Save()
         {
             _dataContext.SaveChanges();
