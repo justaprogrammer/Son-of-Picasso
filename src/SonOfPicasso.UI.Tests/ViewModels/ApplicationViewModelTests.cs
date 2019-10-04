@@ -34,10 +34,8 @@ namespace SonOfPicasso.UI.Tests.ViewModels
 
             var imageManagementService = AutoSubstitute.Resolve<IImageManagementService>();
 
-            var generate = Fakers.FolderFaker.Generate("WithImages");
-
             var folders = Fakers.FolderFaker
-                .GenerateForever("WithImages")
+                .GenerateForever("default,withImages")
                 .DistinctBy(folder => folder.Date)
                 .Take(2)
                 .ToArray();

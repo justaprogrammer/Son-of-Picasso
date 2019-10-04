@@ -69,23 +69,16 @@ namespace SonOfPicasso.UI.ViewModels
 
                 d(ImageContainerCache
                     .Connect()
-                    .TransformMany(container => container.Images, imageRef => imageRef.Id)
+                    .TransformMany(container => container.ImageRefs, imageRef => imageRef.Id)
+                    .Sort(SortExpressionComparer<ImageRef>
+                        .Ascending(model => model.ContainerType == ImageContainerTypeEnum.Folder)
+                        .ThenByDescending(model => model.ContainerDate)
+                        .ThenBy(model => model.Date))
                     .Bind(imageRefList)
                     .Subscribe());
 
                 d(ImageContainerCache
                     .PopulateFrom(_imageManagementService.GetAllImageContainers()));
-
-//                d(ImageContainerCache
-//                    .PopulateFrom(allImages
-//                        .Distinct(directory => directory.Path)
-//                        .Select(image => (image.Folder, (Album)null))
-//                        .ToArray()));
-
-//               d(ImageContainerCache
-//                   .PopulateFrom(_imageManagementService
-//                       .GetAllAlbumsWithAlbumImages()
-//                       .Select(album => ((Folder)null, album))));
             });
         }
 

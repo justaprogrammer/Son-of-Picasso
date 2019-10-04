@@ -88,7 +88,7 @@ namespace SonOfPicasso.Testing.Common
                 .RuleFor(folder => folder.Images, () => new List<Image>())
                 .RuleFor(folder => folder.Path, faker => faker.System.DirectoryPathWindows())
                 .StrictMode(true)
-                .RuleSet("WithImages",
+                .RuleSet("withImages",
                     set => set
                         .RuleFor(folder => folder.Images, (faker, folder) =>
                         {

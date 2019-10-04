@@ -12,14 +12,14 @@ namespace SonOfPicasso.Core.Model
             Id = GetContainerId(folder);
             Name = folder.Path;
             Date = folder.Date;
-            Images = folder.Images.Select(image => new ImageRef(image)).ToArray();
+            ImageRefs = folder.Images.Select(image => new ImageRef(image, this)).ToArray();
         }
 
         public override string Id { get; }
         public override string Name { get; }
         public override DateTime Date { get; }
         public override ImageContainerTypeEnum ContainerType => ImageContainerTypeEnum.Folder;
-        public override IList<ImageRef> Images { get; }
+        public override IList<ImageRef> ImageRefs { get; }
 
         public static string GetContainerId(Folder folder)
         {
