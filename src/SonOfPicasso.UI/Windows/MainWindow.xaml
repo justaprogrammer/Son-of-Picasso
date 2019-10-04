@@ -46,7 +46,7 @@
                       VirtualizingStackPanel.ScrollUnit="Pixel"
                       ItemContainerStyle="{StaticResource ImageContainerTreeViewItem}">
                 <TreeView.ItemTemplate>
-                    <HierarchicalDataTemplate ItemsSource="{Binding ImageRefRows}"
+                    <HierarchicalDataTemplate ItemsSource="{Binding ImageRowViewModels}"
                                               DataType="{x:Type viewModels:ImageContainerViewModel}">
                         <HierarchicalDataTemplate.ItemTemplate>
                             <DataTemplate>

@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
+using DynamicData;
 using DynamicData.Binding;
 using MoreLinq;
 using ReactiveUI;
@@ -12,6 +15,8 @@ namespace SonOfPicasso.UI.ViewModels
     public class ImageContainerViewModel : ViewModelBase
     {
         private readonly Func<ImageRowViewModel> _imageRefRowViewModelFactory;
+        private readonly ObservableCollectionExtended<ImageRowViewModel> _imageRowViewModels;
+        
         private ImageContainer _imageContainer;
 
         public ImageContainerViewModel(
@@ -20,6 +25,8 @@ namespace SonOfPicasso.UI.ViewModels
         ) : base(activator)
         {
             _imageRefRowViewModelFactory = imageRefRowViewModelFactory;
+            _imageRowViewModels = new ObservableCollectionExtended<ImageRowViewModel>();
+            ImageRowViewModels = _imageRowViewModels;
         }
 
         public bool IsExpanded => true;
@@ -32,17 +39,35 @@ namespace SonOfPicasso.UI.ViewModels
 
         public DateTime Date => _imageContainer.Date;
 
-        public IList<ImageRowViewModel> ImageRefRows { get; private set; }
+        public IObservableCollection<ImageRowViewModel> ImageRowViewModels { get; private set; }
 
         public void Initialize(ImageContainer imageContainer)
         {
             _imageContainer = imageContainer ?? throw new ArgumentNullException(nameof(imageContainer));
 
-            ImageRefRows = imageContainer.ImageRefs
+            this.WhenActivated(d =>
+            {
+                var sourceList = new SourceList<ImageRowViewModel>()
+                    .DisposeWith(d);
+
+                sourceList.Connect()
+                    .Bind(_imageRowViewModels)
+                    .Subscribe()
+                    .DisposeWith(d);
+
+                sourceList.Connect()
+                    .WhenAnyPropertyChanged("SelectedItem")
+                    .Subscribe(model =>
+                    {
+                        ;
+                    })
+                    .DisposeWith(d);
+
+                sourceList.AddRange(imageContainer.ImageRefs
                     .OrderBy(imageRef => imageRef.Date)
                     .Batch(3)
-                    .Select(CreateImageRefViewModel)
-                    .ToArray();
+                    .Select(CreateImageRefViewModel));    
+            });
         }
 
         private ImageRowViewModel CreateImageRefViewModel(IEnumerable<ImageRef> imageRef)
