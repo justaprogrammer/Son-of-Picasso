@@ -39,7 +39,7 @@ namespace SonOfPicasso.UI.ViewModels
             base.Dispose(disposing);
         }
 
-        public void Initialize(IEnumerable<ImageRef> imageRefs, ImageContainerViewModel imageContainerViewModel)
+        public void Initialize(IList<ImageRef> imageRefs, ImageContainerViewModel imageContainerViewModel)
         {
             if (imageRefs == null) throw new ArgumentNullException(nameof(imageRefs));
             ImageContainerViewModel = imageContainerViewModel ??

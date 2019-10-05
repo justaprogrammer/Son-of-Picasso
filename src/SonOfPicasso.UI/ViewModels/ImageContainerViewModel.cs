@@ -64,10 +64,23 @@ namespace SonOfPicasso.UI.ViewModels
 
             this.WhenActivated(d =>
             {
-                var sourceList = new SourceList<ImageRowViewModel>()
+                var sourceCache = new SourceCache<IList<ImageRef>, string>(refs =>
+                    string.Join(";", refs.Select(imageRef => imageRef.Id)))
                     .DisposeWith(d);
 
-                sourceList.Connect()
+                var observable = sourceCache.Connect()
+                    .Transform(CreateImageRowViewModel)
+                    .DisposeMany()
+                    .AsObservableCache()
+                    .DisposeWith(d);
+
+                observable
+                    .Connect()
+                    .Bind(_imageRowViewModels)
+                    .Subscribe()
+                    .DisposeWith(d);
+
+                observable.Connect()
                     .WhenAnyPropertyChanged(nameof(ImageRowViewModel.SelectedImage))
                     .Subscribe(imageRowViewModel =>
                     {
@@ -94,11 +107,6 @@ namespace SonOfPicasso.UI.ViewModels
                     })
                     .DisposeWith(d);
 
-                sourceList.Connect()
-                    .Bind(_imageRowViewModels)
-                    .Subscribe()
-                    .DisposeWith(d);
-
                 applicationViewModel
                     .WhenPropertyChanged(model => model.SelectedImageContainer, false)
                     .Subscribe(propertyValue =>
@@ -119,10 +127,10 @@ namespace SonOfPicasso.UI.ViewModels
                     })
                     .DisposeWith(d);
 
-                sourceList.AddRange(imageContainer.ImageRefs
+                sourceCache.Edit(updater => updater.Load(imageContainer.ImageRefs
                     .OrderBy(imageRef => imageRef.Date)
                     .Batch(3)
-                    .Select(CreateImageRefViewModel));
+                    .Select(refs => refs.ToArray())));
             });
         }
 
@@ -139,7 +147,7 @@ namespace SonOfPicasso.UI.ViewModels
             base.Dispose(disposing);
         }
 
-        private ImageRowViewModel CreateImageRefViewModel(IEnumerable<ImageRef> imageRef)
+        private ImageRowViewModel CreateImageRowViewModel(IList<ImageRef> imageRef)
         {
             var imageRefViewModel = _imageRowViewModelFactory();
             imageRefViewModel.Initialize(imageRef, this);
