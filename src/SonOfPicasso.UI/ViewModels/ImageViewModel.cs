@@ -21,13 +21,16 @@ namespace SonOfPicasso.UI.ViewModels
             _schedulerProvider = schedulerProvider;
         }
 
+        public ImageRowViewModel ImageRowViewModel { get; private set; }
         public ImageRef ImageRef { get; private set; }
-        public int Id => ImageRef.ImageId;
+        public string ImageRefId => ImageRef.Id;
+        public int ImageId => ImageRef.ImageId;
         public string Path => ImageRef.ImagePath;
 
-        public void Initialize(ImageRef imageRef)
+        public void Initialize(ImageRef imageRef, ImageRowViewModel imageRowViewModel)
         {
             ImageRef = imageRef ?? throw new ArgumentNullException(nameof(imageRef));
+            ImageRowViewModel = imageRowViewModel ?? throw new ArgumentNullException(nameof(imageRowViewModel));
         }
 
         public IObservable<IBitmap> GetImage()

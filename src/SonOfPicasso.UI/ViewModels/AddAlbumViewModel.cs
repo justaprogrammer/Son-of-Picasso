@@ -16,11 +16,11 @@ namespace SonOfPicasso.UI.ViewModels
     {
         private readonly ObservableAsPropertyHelper<bool> _displayAlbumNameError;
         private readonly IImageManagementService _imageManagementService;
-        private readonly ISchedulerProvider _schedulerProvider;
         private readonly ILogger _logger;
+        private readonly ISchedulerProvider _schedulerProvider;
 
-        private string _albumName = string.Empty;
         private DateTime _albumDate = DateTime.Today;
+        private string _albumName = string.Empty;
 
         public AddAlbumViewModel(ViewModelActivator activator, ILogger logger,
             IImageManagementService imageManagementService, ISchedulerProvider schedulerProvider) : base(
@@ -48,6 +48,16 @@ namespace SonOfPicasso.UI.ViewModels
 
         public ValidationHelper AlbumNameRule { get; }
 
+        public bool DisplayAlbumNameError => _displayAlbumNameError.Value;
+
+        public Interaction<Unit, Unit> ContinueInteraction { get; set; }
+
+        public ReactiveCommand<Unit, Unit> Continue { get; }
+
+        public Interaction<Unit, Unit> CancelInteraction { get; set; }
+
+        public ReactiveCommand<Unit, Unit> Cancel { get; }
+
         public string AlbumName
         {
             get => _albumName;
@@ -60,15 +70,18 @@ namespace SonOfPicasso.UI.ViewModels
             set => this.RaiseAndSetIfChanged(ref _albumDate, value);
         }
 
-        public bool DisplayAlbumNameError => _displayAlbumNameError.Value;
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _displayAlbumNameError?.Dispose();
+                AlbumNameRule?.Dispose();
+                Continue?.Dispose();
+                Cancel?.Dispose();
+            }
 
-        public Interaction<Unit, Unit> ContinueInteraction { get; set; }
-
-        public ReactiveCommand<Unit, Unit> Continue { get; }
-
-        public Interaction<Unit, Unit> CancelInteraction { get; set; }
-
-        public ReactiveCommand<Unit, Unit> Cancel { get; }
+            base.Dispose(disposing);
+        }
 
         private IObservable<Unit> ExecuteCancel()
         {
@@ -100,7 +113,7 @@ namespace SonOfPicasso.UI.ViewModels
                 .CombineLatest(whenAnyValue, (hasChanged, isValid) => hasChanged && !isValid)
                 .DistinctUntilChanged();
         }
-        
+
         private IObservable<Unit> OnContinue()
         {
             return Observable.Return(Unit.Default);

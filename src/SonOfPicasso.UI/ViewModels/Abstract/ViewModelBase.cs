@@ -1,8 +1,9 @@
-﻿using ReactiveUI;
+﻿using System;
+using ReactiveUI;
 
 namespace SonOfPicasso.UI.ViewModels.Abstract
 {
-    public abstract class ViewModelBase : ReactiveObject, IActivatableViewModel
+    public abstract class ViewModelBase : ReactiveObject, IDisposable, IActivatableViewModel
     {
         protected ViewModelBase(ViewModelActivator activator)
         {
@@ -10,5 +11,16 @@ namespace SonOfPicasso.UI.ViewModels.Abstract
         }
 
         public ViewModelActivator Activator { get; }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing) Activator?.Dispose();
+        }
     }
 }

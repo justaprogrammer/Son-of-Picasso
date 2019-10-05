@@ -1,10 +1,11 @@
-﻿using ReactiveUI;
+﻿using System.Reactive.Disposables;
+using ReactiveUI;
 using SonOfPicasso.UI.ViewModels;
 
 namespace SonOfPicasso.UI.Views
 {
     /// <summary>
-    /// Interaction logic for ImageRowView.xaml
+    ///     Interaction logic for ImageRowView.xaml
     /// </summary>
     public partial class ImageRowView : ReactiveUserControl<ImageRowViewModel>, IActivatableView
     {
@@ -13,10 +14,16 @@ namespace SonOfPicasso.UI.Views
             InitializeComponent();
 
             this.WhenActivated(d =>
-            {
-                d(this.OneWayBind(ViewModel,
-                    model => model.ImageRefViewModels,
-                    view => view.RowItems.ItemsSource));
+            { 
+                this.OneWayBind(ViewModel,
+                    model => model.ImageViewModels,
+                    view => view.RowItems.ItemsSource)
+                    .DisposeWith(d);
+
+                this.Bind(ViewModel,
+                        model => model.SelectedImage,
+                        view => view.RowItems.SelectedItem)
+                    .DisposeWith(d);
             });
         }
     }
