@@ -24,7 +24,8 @@ namespace SonOfPicasso.UI.ViewModels
 
         public IImageRowViewModel ImageRowViewModel { get; private set; }
         public ImageRef ImageRef { get; private set; }
-        public int Id => ImageRef.ImageId;
+        public string ImageRefId => ImageRef.Id;
+        public int ImageId => ImageRef.ImageId;
         public string Path => ImageRef.ImagePath;
 
         public void Initialize(ImageRef imageRef, IImageRowViewModel imageRowViewModel)

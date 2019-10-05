@@ -14,5 +14,7 @@ namespace SonOfPicasso.UI.Interfaces
         DateTime Date { get; }
         IObservableCollection<ImageRowViewModel> ImageRowViewModels { get; }
         IApplicationViewModel ApplicationViewModel { get; }
+        ImageRowViewModel SelectedImageRow { get; }
+        ImageViewModel SelectedImage { get; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using ReactiveUI;
+﻿using System.Reactive.Disposables;
+using ReactiveUI;
 using SonOfPicasso.UI.ViewModels;
 
 namespace SonOfPicasso.UI.Views
@@ -13,18 +14,16 @@ namespace SonOfPicasso.UI.Views
             InitializeComponent();
 
             this.WhenActivated(d =>
-            {
-                d(this.OneWayBind(ViewModel,
+            { 
+                this.OneWayBind(ViewModel,
                     model => model.ImageViewModels,
-                    view => view.RowItems.ItemsSource));
+                    view => view.RowItems.ItemsSource)
+                    .DisposeWith(d);
 
-                d(this.Bind(ViewModel,
-                    model => model.ImageContainerViewModel.ApplicationViewModel.SelectedItem,
-                    view => view.RowItems.SelectedItem,
-                    vmToViewConverter: model =>
-                    {
-                        return (object) model;
-                    });
+                this.Bind(ViewModel,
+                        model => model.SelectedImage,
+                        view => view.RowItems.SelectedItem)
+                    .DisposeWith(d);
             });
         }
     }

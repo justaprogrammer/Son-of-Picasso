@@ -19,7 +19,8 @@ namespace SonOfPicasso.UI.ViewModels
         private readonly IImageManagementService _imageManagementService;
         private readonly ILogger _logger;
         private readonly ISchedulerProvider _schedulerProvider;
-        private ImageViewModel _selectedItem;
+        private IImageViewModel _selectedItem;
+        private IImageRowViewModel _selectedRow;
 
         public ApplicationViewModel(ILogger logger,
             ISchedulerProvider schedulerProvider,
@@ -46,10 +47,15 @@ namespace SonOfPicasso.UI.ViewModels
 
             this.WhenActivated(d =>
             {
-                ImageContainerCache
+                var imageContainerViewModelCache = ImageContainerCache
                     .Connect()
                     .Transform(CreateImageContainerViewModel)
                     .DisposeMany()
+                    .AsObservableCache()
+                    .DisposeWith(d);
+
+                imageContainerViewModelCache
+                    .Connect()
                     .Sort(SortExpressionComparer<ImageContainerViewModel>
                         .Ascending(model => model.ContainerType == ImageContainerTypeEnum.Folder)
                         .ThenByDescending(model => model.Date))
@@ -83,10 +89,16 @@ namespace SonOfPicasso.UI.ViewModels
 
         public ReactiveCommand<Unit, Unit> NewAlbum { get; }
 
-        public ImageViewModel SelectedItem
+        public IImageViewModel SelectedItem
         {
             get => _selectedItem;
             set => this.RaiseAndSetIfChanged(ref _selectedItem, value);
+        }
+
+        public IImageRowViewModel SelectedRow
+        {
+            get => _selectedRow;
+            set => this.RaiseAndSetIfChanged(ref _selectedRow, value);
         }
 
         public ViewModelActivator Activator { get; }

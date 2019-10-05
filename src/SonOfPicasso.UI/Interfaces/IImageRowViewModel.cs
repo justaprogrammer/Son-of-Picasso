@@ -8,5 +8,7 @@ namespace SonOfPicasso.UI.Interfaces
     {
         IImageContainerViewModel ImageContainerViewModel { get; }
         IList<ImageViewModel> ImageViewModels { get; }
+        HashSet<string> ImageIdSet { get; }
+        ImageViewModel SelectedImage { get; }
     }
 }

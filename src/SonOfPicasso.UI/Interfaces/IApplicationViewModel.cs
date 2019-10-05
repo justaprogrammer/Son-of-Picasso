@@ -5,6 +5,7 @@ namespace SonOfPicasso.UI.Interfaces
 {
     public interface IApplicationViewModel: INotifyPropertyChanged
     {
-        ImageViewModel SelectedItem { get; set; }
+        IImageViewModel SelectedItem { get; set; }
+        IImageRowViewModel SelectedRow { get; set; }
     }
 }

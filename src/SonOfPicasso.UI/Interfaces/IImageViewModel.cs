@@ -7,7 +7,8 @@ namespace SonOfPicasso.UI.Interfaces
     {
         IImageRowViewModel ImageRowViewModel { get; }
         ImageRef ImageRef { get; }
-        int Id { get; }
+        int ImageId { get; }
         string Path { get; }
+        string ImageRefId { get; }
     }
 }
