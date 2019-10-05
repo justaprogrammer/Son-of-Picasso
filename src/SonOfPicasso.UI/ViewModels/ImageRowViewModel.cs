@@ -47,16 +47,16 @@ namespace SonOfPicasso.UI.ViewModels
             {
                 imageContainerViewModel
                     .WhenPropertyChanged(model => model.SelectedImageRow, false)
-                    .Subscribe(model =>
+                    .Subscribe(propertyValue =>
                     {
-                        var imageRowViewModel = model.Value;
+                        var imageRowViewModel = propertyValue.Value;
                         var selectedRowIsNull = imageRowViewModel == null;
                         var selectedRowIsNotThis = imageRowViewModel != this;
-                        var selectedRowImageIsNotNull = !selectedRowIsNull && imageRowViewModel.SelectedImage != null;
+                        var selectedImageIsNotNull = !selectedRowIsNull && imageRowViewModel.SelectedImage != null;
                         var thisImageIsNotNull = SelectedImage != null;
 
                         if (selectedRowIsNull && thisImageIsNotNull
-                            || selectedRowIsNotThis && selectedRowImageIsNotNull && thisImageIsNotNull)
+                            || selectedRowIsNotThis && selectedImageIsNotNull && thisImageIsNotNull)
                             SelectedImage = null;
                     })
                     .DisposeWith(d);

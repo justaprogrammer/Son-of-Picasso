@@ -2,6 +2,7 @@
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using DynamicData;
 using DynamicData.Binding;
 using ReactiveUI;
@@ -10,29 +11,33 @@ using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Model;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.UI.Interfaces;
+using SonOfPicasso.UI.ViewModels.Abstract;
 
 namespace SonOfPicasso.UI.ViewModels
 {
-    public class ApplicationViewModel : ReactiveObject, IActivatableViewModel, IApplicationViewModel
+    public class ApplicationViewModel : ViewModelBase, IApplicationViewModel, IDisposable
     {
         private readonly Func<ImageContainerViewModel> _imageContainerViewModelFactory;
         private readonly IImageManagementService _imageManagementService;
         private readonly ILogger _logger;
         private readonly ISchedulerProvider _schedulerProvider;
-        private IImageViewModel _selectedItem;
-        private IImageRowViewModel _selectedRow;
+        private readonly ObservableAsPropertyHelper<ImageViewModel> _selectedImage;
+        private readonly ObservableAsPropertyHelper<ImageContainerViewModel> _selectedImageContainer;
+        private readonly ReplaySubject<ImageContainerViewModel> _selectedImageContainerReplay;
+        private readonly ReplaySubject<ImageViewModel> _selectedImageReplay;
+        private readonly ObservableAsPropertyHelper<ImageRowViewModel> _selectedImageRow;
+        private readonly ReplaySubject<ImageRowViewModel> _selectedImageRowReplay;
 
         public ApplicationViewModel(ILogger logger,
             ISchedulerProvider schedulerProvider,
             IImageManagementService imageManagementService,
             Func<ImageContainerViewModel> imageContainerViewModelFactory,
-            ViewModelActivator activator)
+            ViewModelActivator activator) : base(activator)
         {
             _logger = logger;
             _schedulerProvider = schedulerProvider;
             _imageManagementService = imageManagementService;
             _imageContainerViewModelFactory = imageContainerViewModelFactory;
-            Activator = activator;
 
             var imageContainerViewModels = new ObservableCollectionExtended<ImageContainerViewModel>();
             ImageContainerViewModels = imageContainerViewModels;
@@ -45,6 +50,15 @@ namespace SonOfPicasso.UI.ViewModels
 
             ImageContainerCache = new SourceCache<ImageContainer, string>(imageContainer => imageContainer.Id);
 
+            _selectedImageContainerReplay = new ReplaySubject<ImageContainerViewModel>();
+            _selectedImageContainer = _selectedImageContainerReplay.ToProperty(this, nameof(SelectedImageContainer));
+
+            _selectedImageRowReplay = new ReplaySubject<ImageRowViewModel>(1);
+            _selectedImageRow = _selectedImageRowReplay.ToProperty(this, nameof(SelectedImageRow));
+
+            _selectedImageReplay = new ReplaySubject<ImageViewModel>();
+            _selectedImage = _selectedImageReplay.ToProperty(this, nameof(SelectedImage));
+
             this.WhenActivated(d =>
             {
                 var imageContainerViewModelCache = ImageContainerCache
@@ -52,6 +66,43 @@ namespace SonOfPicasso.UI.ViewModels
                     .Transform(CreateImageContainerViewModel)
                     .DisposeMany()
                     .AsObservableCache()
+                    .DisposeWith(d);
+
+                imageContainerViewModelCache.Connect()
+                    .WhenAnyPropertyChanged(nameof(ImageContainerViewModel.SelectedImageRow), nameof(ImageContainerViewModel.SelectedImage))
+                    .Subscribe(imageContainerViewModel =>
+                    {
+                        var selectedImageRowChanged = imageContainerViewModel.SelectedImageRow != null
+                                                   && imageContainerViewModel.SelectedImageRow != SelectedImageRow;
+
+                        var selectedImageChanged = imageContainerViewModel.SelectedImage != null
+                                                   && imageContainerViewModel.SelectedImage != SelectedImage;
+
+                        var selectedContainerClearing = imageContainerViewModel.SelectedImageRow == null
+                                                  && imageContainerViewModel == SelectedImageContainer;
+
+                        if (selectedImageRowChanged
+                            || selectedContainerClearing)
+                        {
+                            if (imageContainerViewModel.SelectedImageRow == null)
+                            {
+                                _selectedImageContainerReplay.OnNext(null);
+                                _selectedImageRowReplay.OnNext(null);
+                                _selectedImageReplay.OnNext(null);
+                            }
+                            else
+                            {
+                                _selectedImageContainerReplay.OnNext(imageContainerViewModel);
+                                _selectedImageRowReplay.OnNext(imageContainerViewModel.SelectedImageRow);
+                                _selectedImageReplay.OnNext(imageContainerViewModel.SelectedImageRow.SelectedImage);
+                            }
+                        }
+
+                        if (selectedImageChanged)
+                        {
+                            _selectedImageReplay.OnNext(SelectedImageContainer.SelectedImage);
+                        }
+                    })
                     .DisposeWith(d);
 
                 imageContainerViewModelCache
@@ -66,13 +117,6 @@ namespace SonOfPicasso.UI.ViewModels
 
                 ImageContainerCache
                     .PopulateFrom(_imageManagementService.GetAllImageContainers())
-                    .DisposeWith(d);
-
-                this.WhenAnyValue(model => model.SelectedItem)
-                    .Subscribe(model =>
-                    {
-                        ;
-                    })
                     .DisposeWith(d);
             });
         }
@@ -89,19 +133,33 @@ namespace SonOfPicasso.UI.ViewModels
 
         public ReactiveCommand<Unit, Unit> NewAlbum { get; }
 
-        public IImageViewModel SelectedItem
+        public ImageContainerViewModel SelectedImageContainer => _selectedImageContainer.Value;
+
+        public ImageRowViewModel SelectedImageRow => _selectedImageRow.Value;
+
+        public ImageViewModel SelectedImage => _selectedImage.Value;
+
+        public new void Dispose()
         {
-            get => _selectedItem;
-            set => this.RaiseAndSetIfChanged(ref _selectedItem, value);
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
-        public IImageRowViewModel SelectedRow
+        protected virtual void Dispose(bool disposing)
         {
-            get => _selectedRow;
-            set => this.RaiseAndSetIfChanged(ref _selectedRow, value);
+            if (disposing)
+            {
+                _selectedImage?.Dispose();
+                _selectedImageContainer?.Dispose();
+                _selectedImageContainerReplay?.Dispose();
+                _selectedImageReplay?.Dispose();
+                _selectedImageRow?.Dispose();
+                _selectedImageRowReplay?.Dispose();
+                ImageContainerCache?.Dispose();
+                AddFolder?.Dispose();
+                NewAlbum?.Dispose();
+            }
         }
-
-        public ViewModelActivator Activator { get; }
 
         private ImageContainerViewModel CreateImageContainerViewModel(ImageContainer imageContainer)
         {

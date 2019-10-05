@@ -17,14 +17,15 @@ namespace SonOfPicasso.UI.ViewModels
     public class ImageContainerViewModel : ViewModelBase, IImageContainerViewModel, IDisposable
     {
         private readonly Func<ImageRowViewModel> _imageRowViewModelFactory;
-        private readonly ObservableCollectionExtended<ImageRowViewModel> _imageRowViewModels;
         private readonly ISchedulerProvider _schedulerProvider;
-        private readonly ObservableAsPropertyHelper<ImageViewModel> _selectedImage;
+        
+        private readonly ObservableCollectionExtended<ImageRowViewModel> _imageRowViewModels;
 
         private readonly ReplaySubject<ImageViewModel> _selectedImageReplay;
-        private readonly ObservableAsPropertyHelper<ImageRowViewModel> _selectedImageRow;
+        private readonly ObservableAsPropertyHelper<ImageViewModel> _selectedImage;
 
         private readonly ReplaySubject<ImageRowViewModel> _selectedImageRowReplay;
+        private readonly ObservableAsPropertyHelper<ImageRowViewModel> _selectedImageRow;
 
         private ImageContainer _imageContainer;
 
@@ -41,8 +42,6 @@ namespace SonOfPicasso.UI.ViewModels
 
             _selectedImageReplay = new ReplaySubject<ImageViewModel>();
             _selectedImage = _selectedImageReplay.ToProperty(this, nameof(SelectedImage));
-
-            ImageRowViewModels = _imageRowViewModels;
         }
 
         public void Dispose()
@@ -59,7 +58,7 @@ namespace SonOfPicasso.UI.ViewModels
 
         public DateTime Date => _imageContainer.Date;
 
-        public IObservableCollection<ImageRowViewModel> ImageRowViewModels { get; }
+        public IObservableCollection<ImageRowViewModel> ImageRowViewModels => _imageRowViewModels;
 
         public IApplicationViewModel ApplicationViewModel { get; private set; }
 
@@ -83,10 +82,10 @@ namespace SonOfPicasso.UI.ViewModels
                     .Subscribe(imageRowViewModel =>
                     {
                         var selectedImageChanged = imageRowViewModel.SelectedImage != null
-                                && imageRowViewModel.SelectedImage != SelectedImage;
+                                                   && imageRowViewModel.SelectedImage != SelectedImage;
 
                         var selectedRowClearing = imageRowViewModel.SelectedImage == null
-                                && imageRowViewModel == SelectedImageRow;
+                                                  && imageRowViewModel == SelectedImageRow;
 
                         if (selectedImageChanged
                             || selectedRowClearing)
@@ -108,6 +107,25 @@ namespace SonOfPicasso.UI.ViewModels
                 sourceList.Connect()
                     .Bind(_imageRowViewModels)
                     .Subscribe()
+                    .DisposeWith(d);
+
+                applicationViewModel
+                    .WhenPropertyChanged(model => model.SelectedImageContainer, false)
+                    .Subscribe(propertyValue =>
+                    {
+                        var imageContainerViewModel = propertyValue.Value;
+                        var selectedContainerIsNull = imageContainerViewModel == null;
+                        var selectedContainerIsNotThis = imageContainerViewModel != this;
+                        var selectedImageRowIsNotNull = !selectedContainerIsNull && imageContainerViewModel.SelectedImageRow != null;
+                        var thisImageRowIsNotNull = SelectedImageRow != null;
+
+                        if (selectedContainerIsNull && thisImageRowIsNotNull
+                            || selectedContainerIsNotThis && selectedImageRowIsNotNull && thisImageRowIsNotNull)
+                        {
+                            _selectedImageRowReplay.OnNext(null);
+                            _selectedImageReplay.OnNext(null);
+                        }
+                    })
                     .DisposeWith(d);
 
                 sourceList.AddRange(imageContainer.ImageRefs

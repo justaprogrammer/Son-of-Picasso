@@ -5,7 +5,7 @@ using Xunit.Abstractions;
 
 namespace SonOfPicasso.UI.Tests.ViewModels
 {
-    public class AddAlbumViewModelTests : UnitTestsBase
+    public class AddAlbumViewModelTests : ViewModelTestsBase
     {
         public AddAlbumViewModelTests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)

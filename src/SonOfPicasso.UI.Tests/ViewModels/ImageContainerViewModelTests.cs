@@ -1,9 +1,6 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using FluentAssertions;
 using FluentAssertions.Execution;
-using ReactiveUI;
-using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Model;
 using SonOfPicasso.Testing.Common;
 using SonOfPicasso.UI.Interfaces;
@@ -13,19 +10,11 @@ using Xunit.Abstractions;
 
 namespace SonOfPicasso.UI.Tests.ViewModels
 {
-    public class ImageContainerViewModelTests : UnitTestsBase
+    public class ImageContainerViewModelTests : ViewModelTestsBase
     {
         public ImageContainerViewModelTests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {
-            Func<ImageViewModel> imageViewModelFactory = () =>
-                new ImageViewModel(AutoSubstitute.Resolve<IImageLoadingService>(), TestSchedulerProvider,
-                    new ViewModelActivator());
-
-            Func<ImageRowViewModel> imageRowViewModelFactory =
-                () => new ImageRowViewModel(imageViewModelFactory, new ViewModelActivator());
-
-            AutoSubstitute.Provide(imageRowViewModelFactory);
         }
 
         [Fact]
@@ -42,14 +31,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
                 .ToArray();
 
             imageContainerViewModel.Initialize(folderImageContainer, applicationViewModel);
-            imageContainerViewModel.Activator.Activate();
-            foreach (var imageRowViewModel in imageContainerViewModel.ImageRowViewModels)
-            {
-                imageRowViewModel.Activator.Activate();
-                
-                foreach (var imageViewModel in imageRowViewModel.ImageViewModels) 
-                    imageViewModel.Activator.Activate();
-            }
+            ActivateContainerViewModel(imageContainerViewModel);
 
             using (new AssertionScope())
             {

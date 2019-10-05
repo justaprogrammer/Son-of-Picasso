@@ -1,10 +1,6 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using FluentAssertions;
 using FluentAssertions.Execution;
-using MoreLinq;
-using ReactiveUI;
-using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Model;
 using SonOfPicasso.Testing.Common;
 using SonOfPicasso.UI.Interfaces;
@@ -14,16 +10,11 @@ using Xunit.Abstractions;
 
 namespace SonOfPicasso.UI.Tests.ViewModels
 {
-    public class ImageRowViewModelTests : UnitTestsBase
+    public class ImageRowViewModelTests : ViewModelTestsBase
     {
         public ImageRowViewModelTests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {
-            Func<ImageViewModel> imageViewModelFactory = () =>
-                new ImageViewModel(AutoSubstitute.Resolve<IImageLoadingService>(), TestSchedulerProvider,
-                    new ViewModelActivator());
-
-            AutoSubstitute.Provide(imageViewModelFactory);
         }
 
         [Fact]
@@ -33,8 +24,8 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             var imageContainerViewModel = AutoSubstitute.Resolve<IImageContainerViewModel>();
 
             var folder = Fakers.FolderFaker.Generate("default,withImages");
-                    var folderImageContainer = new FolderImageContainer(folder);
-            
+            var folderImageContainer = new FolderImageContainer(folder);
+
             var imageRefs = folder.Images
                 .Select(image => new ImageRef(image, folderImageContainer))
                 .ToArray();
@@ -46,14 +37,10 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             {
                 imageRowViewModel.ImageViewModels.Count.Should().Be(imageRefs.Length);
                 foreach (var imageRef in imageRefs)
-                {
                     imageRowViewModel.ImageIdSet.Contains(imageRef.Id).Should().BeTrue();
-                }
 
                 foreach (var imageViewModel in imageRowViewModel.ImageViewModels)
-                {
                     imageViewModel.ImageRowViewModel.Should().Be(imageRowViewModel);
-                }
             }
         }
     }
