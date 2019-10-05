@@ -10,12 +10,11 @@ using Serilog;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Model;
 using SonOfPicasso.Core.Scheduling;
-using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.ViewModels.Abstract;
 
 namespace SonOfPicasso.UI.ViewModels
 {
-    public class ApplicationViewModel : ViewModelBase, IApplicationViewModel, IDisposable
+    public class ApplicationViewModel : ViewModelBase
     {
         private readonly Func<ImageContainerViewModel> _imageContainerViewModelFactory;
         private readonly IImageManagementService _imageManagementService;
@@ -69,17 +68,18 @@ namespace SonOfPicasso.UI.ViewModels
                     .DisposeWith(d);
 
                 imageContainerViewModelCache.Connect()
-                    .WhenAnyPropertyChanged(nameof(ImageContainerViewModel.SelectedImageRow), nameof(ImageContainerViewModel.SelectedImage))
+                    .WhenAnyPropertyChanged(nameof(ImageContainerViewModel.SelectedImageRow),
+                        nameof(ImageContainerViewModel.SelectedImage))
                     .Subscribe(imageContainerViewModel =>
                     {
                         var selectedImageRowChanged = imageContainerViewModel.SelectedImageRow != null
-                                                   && imageContainerViewModel.SelectedImageRow != SelectedImageRow;
+                                                      && imageContainerViewModel.SelectedImageRow != SelectedImageRow;
 
                         var selectedImageChanged = imageContainerViewModel.SelectedImage != null
                                                    && imageContainerViewModel.SelectedImage != SelectedImage;
 
                         var selectedContainerClearing = imageContainerViewModel.SelectedImageRow == null
-                                                  && imageContainerViewModel == SelectedImageContainer;
+                                                        && imageContainerViewModel == SelectedImageContainer;
 
                         if (selectedImageRowChanged
                             || selectedContainerClearing)
@@ -98,10 +98,7 @@ namespace SonOfPicasso.UI.ViewModels
                             }
                         }
 
-                        if (selectedImageChanged)
-                        {
-                            _selectedImageReplay.OnNext(SelectedImageContainer.SelectedImage);
-                        }
+                        if (selectedImageChanged) _selectedImageReplay.OnNext(SelectedImageContainer.SelectedImage);
                     })
                     .DisposeWith(d);
 

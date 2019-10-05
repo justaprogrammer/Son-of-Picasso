@@ -5,12 +5,11 @@ using System.Reactive.Disposables;
 using DynamicData.Binding;
 using ReactiveUI;
 using SonOfPicasso.Core.Model;
-using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.ViewModels.Abstract;
 
 namespace SonOfPicasso.UI.ViewModels
 {
-    public class ImageRowViewModel : ViewModelBase, IImageRowViewModel, IDisposable
+    public class ImageRowViewModel : ViewModelBase
     {
         private readonly Func<ImageViewModel> _imageViewModelFactory;
         private ImageViewModel _selectedImage;
@@ -29,7 +28,7 @@ namespace SonOfPicasso.UI.ViewModels
 
         public HashSet<string> ImageIdSet { get; private set; }
 
-        public IImageContainerViewModel ImageContainerViewModel { get; private set; }
+        public ImageContainerViewModel ImageContainerViewModel { get; private set; }
 
         public IList<ImageViewModel> ImageViewModels { get; private set; }
 
@@ -40,7 +39,7 @@ namespace SonOfPicasso.UI.ViewModels
             base.Dispose(disposing);
         }
 
-        public void Initialize(IEnumerable<ImageRef> imageRefs, IImageContainerViewModel imageContainerViewModel)
+        public void Initialize(IEnumerable<ImageRef> imageRefs, ImageContainerViewModel imageContainerViewModel)
         {
             if (imageRefs == null) throw new ArgumentNullException(nameof(imageRefs));
             ImageContainerViewModel = imageContainerViewModel ??

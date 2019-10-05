@@ -9,12 +9,11 @@ using MoreLinq;
 using ReactiveUI;
 using SonOfPicasso.Core.Model;
 using SonOfPicasso.Core.Scheduling;
-using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.ViewModels.Abstract;
 
 namespace SonOfPicasso.UI.ViewModels
 {
-    public class ImageContainerViewModel : ViewModelBase, IImageContainerViewModel
+    public class ImageContainerViewModel : ViewModelBase
     {
         private readonly Func<ImageRowViewModel> _imageRowViewModelFactory;
         private readonly ObservableCollectionExtended<ImageRowViewModel> _imageRowViewModels;
@@ -51,26 +50,13 @@ namespace SonOfPicasso.UI.ViewModels
 
         public IObservableCollection<ImageRowViewModel> ImageRowViewModels => _imageRowViewModels;
 
-        public IApplicationViewModel ApplicationViewModel { get; private set; }
+        public ApplicationViewModel ApplicationViewModel { get; private set; }
 
         public ImageRowViewModel SelectedImageRow => _selectedImageRow.Value;
 
         public ImageViewModel SelectedImage => _selectedImage.Value;
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                _selectedImage?.Dispose();
-                _selectedImageReplay?.Dispose();
-                _selectedImageRow?.Dispose();
-                _selectedImageRowReplay?.Dispose();
-            }
-
-            base.Dispose(disposing);
-        }
-
-        public void Initialize(ImageContainer imageContainer, IApplicationViewModel applicationViewModel)
+        public void Initialize(ImageContainer imageContainer, ApplicationViewModel applicationViewModel)
         {
             _imageContainer = imageContainer ?? throw new ArgumentNullException(nameof(imageContainer));
             ApplicationViewModel =
@@ -138,6 +124,19 @@ namespace SonOfPicasso.UI.ViewModels
                     .Batch(3)
                     .Select(CreateImageRefViewModel));
             });
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _selectedImage?.Dispose();
+                _selectedImageReplay?.Dispose();
+                _selectedImageRow?.Dispose();
+                _selectedImageRowReplay?.Dispose();
+            }
+
+            base.Dispose(disposing);
         }
 
         private ImageRowViewModel CreateImageRefViewModel(IEnumerable<ImageRef> imageRef)

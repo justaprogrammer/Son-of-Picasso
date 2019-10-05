@@ -7,18 +7,12 @@ namespace SonOfPicasso.UI.ViewModels.Abstract
 {
     public abstract class ValidatedViewModelBase<T> : ReactiveValidationObject<T>, IActivatableViewModel, IDisposable
     {
-        protected ValidatedViewModelBase(ViewModelActivator activator, IScheduler scheduler):base(scheduler)
+        protected ValidatedViewModelBase(ViewModelActivator activator, IScheduler scheduler) : base(scheduler)
         {
             Activator = activator;
         }
 
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                Activator?.Dispose();
-            }
-        }
+        public ViewModelActivator Activator { get; }
 
         public void Dispose()
         {
@@ -26,6 +20,9 @@ namespace SonOfPicasso.UI.ViewModels.Abstract
             GC.SuppressFinalize(this);
         }
 
-        public ViewModelActivator Activator { get; }
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing) Activator?.Dispose();
+        }
     }
 }

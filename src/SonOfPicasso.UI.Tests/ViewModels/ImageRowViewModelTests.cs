@@ -3,7 +3,6 @@ using FluentAssertions;
 using FluentAssertions.Execution;
 using SonOfPicasso.Core.Model;
 using SonOfPicasso.Testing.Common;
-using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.ViewModels;
 using Xunit;
 using Xunit.Abstractions;
@@ -21,7 +20,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
         public void ShouldInitializeAndActivate()
         {
             var imageRowViewModel = AutoSubstitute.Resolve<ImageRowViewModel>();
-            var imageContainerViewModel = AutoSubstitute.Resolve<IImageContainerViewModel>();
+            var imageContainerViewModel = AutoSubstitute.Resolve<ImageContainerViewModel>();
 
             var folder = Fakers.FolderFaker.Generate("default,withImages");
             var folderImageContainer = new FolderImageContainer(folder);

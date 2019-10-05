@@ -8,19 +8,18 @@ using ReactiveUI.Validation.Helpers;
 using Serilog;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
-using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.ViewModels.Abstract;
 
 namespace SonOfPicasso.UI.ViewModels
 {
-    public class AddAlbumViewModel : ValidatedViewModelBase<AddAlbumViewModel>, ICreateAlbum, IAddAlbumViewModel
+    public class AddAlbumViewModel : ValidatedViewModelBase<AddAlbumViewModel>, ICreateAlbum
     {
         private readonly ObservableAsPropertyHelper<bool> _displayAlbumNameError;
         private readonly IImageManagementService _imageManagementService;
         private readonly ILogger _logger;
         private readonly ISchedulerProvider _schedulerProvider;
-        private DateTime _albumDate = DateTime.Today;
 
+        private DateTime _albumDate = DateTime.Today;
         private string _albumName = string.Empty;
 
         public AddAlbumViewModel(ViewModelActivator activator, ILogger logger,
