@@ -50,7 +50,7 @@
                                               DataType="{x:Type viewModels:ImageContainerViewModel}">
                         <HierarchicalDataTemplate.ItemTemplate>
                             <DataTemplate>
-                                <reactiveUi:ViewModelViewHost ViewModel="{Binding}" MinHeight="300" Focusable="False" />
+                                <reactiveUi:ViewModelViewHost ViewModel="{Binding}" MinHeight="300" />
                             </DataTemplate>
                         </HierarchicalDataTemplate.ItemTemplate>
                     </HierarchicalDataTemplate>

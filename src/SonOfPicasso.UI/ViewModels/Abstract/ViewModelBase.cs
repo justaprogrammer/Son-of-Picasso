@@ -13,9 +13,18 @@ namespace SonOfPicasso.UI.ViewModels.Abstract
 
         public ViewModelActivator Activator { get; }
 
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Activator?.Dispose();
+            }
+        }
+
         public void Dispose()
         {
-            Activator?.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

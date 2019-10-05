@@ -139,13 +139,7 @@ namespace SonOfPicasso.UI.ViewModels
 
         public ImageViewModel SelectedImage => _selectedImage.Value;
 
-        public new void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
+        protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
@@ -159,6 +153,8 @@ namespace SonOfPicasso.UI.ViewModels
                 AddFolder?.Dispose();
                 NewAlbum?.Dispose();
             }
+
+            base.Dispose(disposing);
         }
 
         private ImageContainerViewModel CreateImageContainerViewModel(ImageContainer imageContainer)

@@ -14,18 +14,15 @@ using SonOfPicasso.UI.ViewModels.Abstract;
 
 namespace SonOfPicasso.UI.ViewModels
 {
-    public class ImageContainerViewModel : ViewModelBase, IImageContainerViewModel, IDisposable
+    public class ImageContainerViewModel : ViewModelBase, IImageContainerViewModel
     {
         private readonly Func<ImageRowViewModel> _imageRowViewModelFactory;
-        private readonly ISchedulerProvider _schedulerProvider;
-        
         private readonly ObservableCollectionExtended<ImageRowViewModel> _imageRowViewModels;
-
-        private readonly ReplaySubject<ImageViewModel> _selectedImageReplay;
+        private readonly ISchedulerProvider _schedulerProvider;
         private readonly ObservableAsPropertyHelper<ImageViewModel> _selectedImage;
-
-        private readonly ReplaySubject<ImageRowViewModel> _selectedImageRowReplay;
+        private readonly ReplaySubject<ImageViewModel> _selectedImageReplay;
         private readonly ObservableAsPropertyHelper<ImageRowViewModel> _selectedImageRow;
+        private readonly ReplaySubject<ImageRowViewModel> _selectedImageRowReplay;
 
         private ImageContainer _imageContainer;
 
@@ -44,12 +41,6 @@ namespace SonOfPicasso.UI.ViewModels
             _selectedImage = _selectedImageReplay.ToProperty(this, nameof(SelectedImage));
         }
 
-        public void Dispose()
-        {
-            _selectedImageRowReplay?.Dispose();
-            _selectedImageRow?.Dispose();
-        }
-
         public string Name => _imageContainer.Name;
 
         public string ContainerId => _imageContainer.Id;
@@ -65,6 +56,19 @@ namespace SonOfPicasso.UI.ViewModels
         public ImageRowViewModel SelectedImageRow => _selectedImageRow.Value;
 
         public ImageViewModel SelectedImage => _selectedImage.Value;
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _selectedImage?.Dispose();
+                _selectedImageReplay?.Dispose();
+                _selectedImageRow?.Dispose();
+                _selectedImageRowReplay?.Dispose();
+            }
+
+            base.Dispose(disposing);
+        }
 
         public void Initialize(ImageContainer imageContainer, IApplicationViewModel applicationViewModel)
         {
@@ -116,7 +120,8 @@ namespace SonOfPicasso.UI.ViewModels
                         var imageContainerViewModel = propertyValue.Value;
                         var selectedContainerIsNull = imageContainerViewModel == null;
                         var selectedContainerIsNotThis = imageContainerViewModel != this;
-                        var selectedImageRowIsNotNull = !selectedContainerIsNull && imageContainerViewModel.SelectedImageRow != null;
+                        var selectedImageRowIsNotNull =
+                            !selectedContainerIsNull && imageContainerViewModel.SelectedImageRow != null;
                         var thisImageRowIsNotNull = SelectedImageRow != null;
 
                         if (selectedContainerIsNull && thisImageRowIsNotNull
