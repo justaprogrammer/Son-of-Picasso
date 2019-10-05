@@ -2,34 +2,32 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Disposables;
-using System.Reactive.Linq;
 using DynamicData;
 using DynamicData.Binding;
 using MoreLinq;
 using ReactiveUI;
 using SonOfPicasso.Core.Model;
+using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.ViewModels.Abstract;
 
 namespace SonOfPicasso.UI.ViewModels
 {
-    public class ImageContainerViewModel : ViewModelBase
+    public class ImageContainerViewModel : ViewModelBase, IImageContainerViewModel
     {
-        private readonly Func<ImageRowViewModel> _imageRefRowViewModelFactory;
+        private readonly Func<ImageRowViewModel> _imageRowViewModelFactory;
         private readonly ObservableCollectionExtended<ImageRowViewModel> _imageRowViewModels;
-        
+
         private ImageContainer _imageContainer;
 
         public ImageContainerViewModel(
-            Func<ImageRowViewModel> imageRefRowViewModelFactory,
+            Func<ImageRowViewModel> imageRowViewModelFactory,
             ViewModelActivator activator
         ) : base(activator)
         {
-            _imageRefRowViewModelFactory = imageRefRowViewModelFactory;
+            _imageRowViewModelFactory = imageRowViewModelFactory;
             _imageRowViewModels = new ObservableCollectionExtended<ImageRowViewModel>();
             ImageRowViewModels = _imageRowViewModels;
         }
-
-        public bool IsExpanded => true;
 
         public string Name => _imageContainer.Name;
 
@@ -39,11 +37,15 @@ namespace SonOfPicasso.UI.ViewModels
 
         public DateTime Date => _imageContainer.Date;
 
-        public IObservableCollection<ImageRowViewModel> ImageRowViewModels { get; private set; }
+        public IObservableCollection<ImageRowViewModel> ImageRowViewModels { get; }
 
-        public void Initialize(ImageContainer imageContainer)
+        public IApplicationViewModel ApplicationViewModel { get; private set; }
+
+        public void Initialize(ImageContainer imageContainer, IApplicationViewModel applicationViewModel)
         {
             _imageContainer = imageContainer ?? throw new ArgumentNullException(nameof(imageContainer));
+            ApplicationViewModel =
+                applicationViewModel ?? throw new ArgumentNullException(nameof(applicationViewModel));
 
             this.WhenActivated(d =>
             {
@@ -55,25 +57,17 @@ namespace SonOfPicasso.UI.ViewModels
                     .Subscribe()
                     .DisposeWith(d);
 
-                sourceList.Connect()
-                    .WhenAnyPropertyChanged("SelectedItem")
-                    .Subscribe(model =>
-                    {
-                        ;
-                    })
-                    .DisposeWith(d);
-
                 sourceList.AddRange(imageContainer.ImageRefs
                     .OrderBy(imageRef => imageRef.Date)
                     .Batch(3)
-                    .Select(CreateImageRefViewModel));    
+                    .Select(CreateImageRefViewModel));
             });
         }
 
         private ImageRowViewModel CreateImageRefViewModel(IEnumerable<ImageRef> imageRef)
         {
-            var imageRefViewModel = _imageRefRowViewModelFactory();
-            imageRefViewModel.Initialize(imageRef);
+            var imageRefViewModel = _imageRowViewModelFactory();
+            imageRefViewModel.Initialize(imageRef, this);
             return imageRefViewModel;
         }
     }

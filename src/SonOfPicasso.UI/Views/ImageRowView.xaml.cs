@@ -15,12 +15,16 @@ namespace SonOfPicasso.UI.Views
             this.WhenActivated(d =>
             {
                 d(this.OneWayBind(ViewModel,
-                    model => model.ImageRefViewModels,
+                    model => model.ImageViewModels,
                     view => view.RowItems.ItemsSource));
 
                 d(this.Bind(ViewModel,
-                    model => model.SelectedItem,
-                    view => view.RowItems.SelectedItem));
+                    model => model.ImageContainerViewModel.ApplicationViewModel.SelectedItem,
+                    view => view.RowItems.SelectedItem,
+                    vmToViewConverter: model =>
+                    {
+                        return (object) model;
+                    });
             });
         }
     }

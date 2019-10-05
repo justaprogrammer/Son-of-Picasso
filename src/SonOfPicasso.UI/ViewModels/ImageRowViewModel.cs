@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using ReactiveUI;
 using SonOfPicasso.Core.Model;
+using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.ViewModels.Abstract;
 
 namespace SonOfPicasso.UI.ViewModels
 {
-    public class ImageRowViewModel : ViewModelBase
+    public class ImageRowViewModel : ViewModelBase, IImageRowViewModel
     {
         private readonly Func<ImageViewModel> _imageRefViewModelFactory;
-        private ImageViewModel selectedItem;
 
         public ImageRowViewModel(Func<ImageViewModel> imageRefViewModelFactory, ViewModelActivator activator) :
             base(activator)
@@ -18,25 +18,23 @@ namespace SonOfPicasso.UI.ViewModels
             _imageRefViewModelFactory = imageRefViewModelFactory;
         }
 
-        public IList<ImageViewModel> ImageRefViewModels { get; private set; }
+        public IImageContainerViewModel ImageContainerViewModel { get; private set; }
 
-        public ImageViewModel SelectedItem
-        {
-            get => selectedItem;
-            set => this.RaiseAndSetIfChanged(ref selectedItem, value);
-        }
+        public IList<ImageViewModel> ImageViewModels { get; private set; }
 
-        public void Initialize(IEnumerable<ImageRef> imageRefs)
+        public void Initialize(IEnumerable<ImageRef> imageRefs, IImageContainerViewModel imageContainerViewModel)
         {
             if (imageRefs == null) throw new ArgumentNullException(nameof(imageRefs));
+            ImageContainerViewModel = imageContainerViewModel ??
+                                      throw new ArgumentNullException(nameof(imageContainerViewModel));
 
-            ImageRefViewModels = imageRefs.Select(CreateImageRefViewModel).ToArray();
+            ImageViewModels = imageRefs.Select(CreateImageRefViewModel).ToArray();
         }
 
         private ImageViewModel CreateImageRefViewModel(ImageRef imageRef)
         {
             var imageRefViewModel = _imageRefViewModelFactory();
-            imageRefViewModel.Initialize(imageRef);
+            imageRefViewModel.Initialize(imageRef, this);
             return imageRefViewModel;
         }
     }
