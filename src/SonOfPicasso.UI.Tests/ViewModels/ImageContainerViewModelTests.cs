@@ -24,9 +24,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             var folderImageContainer = new FolderImageContainer(folder);
 
             imageContainerViewModel.Initialize(folderImageContainer, applicationViewModel);
-            ActivateContainerViewModel(imageContainerViewModel);
-
-            TestSchedulerProvider.MainThreadScheduler.AdvanceBy(1);
+            ActivateContainerViewModel(2, imageContainerViewModel);
 
             imageContainerViewModel.SelectedImageRow.Should().BeNull();
             imageContainerViewModel.SelectedImage.Should().BeNull();
@@ -104,7 +102,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             var folderImageContainer = new FolderImageContainer(folder);
 
             imageContainerViewModel.Initialize(folderImageContainer, applicationViewModel);
-            ActivateContainerViewModel(imageContainerViewModel);
+            ActivateContainerViewModel(2, imageContainerViewModel);
 
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(1);
 
