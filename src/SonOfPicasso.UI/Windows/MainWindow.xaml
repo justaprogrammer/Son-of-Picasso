@@ -31,7 +31,7 @@
             <ListView Name="FoldersListView"
                       DockPanel.Dock="Left"
                       MinWidth="300"
-                      VirtualizingStackPanel.IsVirtualizing="True" 
+                      VirtualizingStackPanel.IsVirtualizing="True"
                       VirtualizingStackPanel.VirtualizationMode="Recycling"
                       VirtualizingStackPanel.ScrollUnit="Pixel">
                 <ListView.ItemTemplate>
@@ -41,16 +41,19 @@
                 </ListView.ItemTemplate>
             </ListView>
             <TreeView Name="ImagesTreeView"
-                      VirtualizingStackPanel.IsVirtualizing="True" 
+                      VirtualizingStackPanel.IsVirtualizing="True"
                       VirtualizingStackPanel.VirtualizationMode="Recycling"
                       VirtualizingStackPanel.ScrollUnit="Pixel"
                       ItemContainerStyle="{StaticResource ImageContainerTreeViewItem}">
                 <TreeView.ItemTemplate>
                     <HierarchicalDataTemplate ItemsSource="{Binding ImageRowViewModels}"
                                               DataType="{x:Type viewModels:ImageContainerViewModel}">
+
+                        <reactiveUi:ViewModelViewHost ViewModel="{Binding}" ViewContract="Detail" />
+
                         <HierarchicalDataTemplate.ItemTemplate>
                             <DataTemplate>
-                                <reactiveUi:ViewModelViewHost ViewModel="{Binding}" MinHeight="300" ViewContract="Detail" />
+                                <reactiveUi:ViewModelViewHost ViewModel="{Binding}" />
                             </DataTemplate>
                         </HierarchicalDataTemplate.ItemTemplate>
                     </HierarchicalDataTemplate>
