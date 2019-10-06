@@ -38,57 +38,6 @@ namespace SonOfPicasso.Core.Services
             _exifDataService = exifDataService;
         }
 
-        public IObservable<Album> CreateAlbum(ICreateAlbum createAlbum)
-        {
-            return Observable.Defer(() =>
-            {
-                using var unitOfWork = _unitOfWorkFactory();
-
-                var album = new Album {Name = createAlbum.AlbumName, Date = createAlbum.AlbumDate};
-
-                unitOfWork.AlbumRepository.Insert(album);
-                unitOfWork.Save();
-
-                return Observable.Return(album);
-            }).SubscribeOn(_schedulerProvider.TaskPool);
-        }
-
-        public IObservable<ImageContainer> GetAllImageContainers()
-        {
-            var selectFolders = Observable.Create<ImageContainer>(observer =>
-            {
-                var unitOfWork = _unitOfWorkFactory();
-
-                var folders = unitOfWork.FolderRepository
-                    .Get(includeProperties: "Images,Images.ExifData")
-                    .ToArray();
-
-                foreach (var folder in folders) observer.OnNext(new FolderImageContainer(folder));
-
-                observer.OnCompleted();
-
-                return unitOfWork;
-            });
-
-            var selectAlbums = Observable.Create<ImageContainer>(observer =>
-            {
-                var unitOfWork = _unitOfWorkFactory();
-
-                var albums = unitOfWork.AlbumRepository
-                    .Get(includeProperties: "AlbumImages,AlbumImages.Image")
-                    .ToArray();
-
-                foreach (var album in albums) observer.OnNext(new AlbumImageContainer(album));
-
-                observer.OnCompleted();
-
-                return unitOfWork;
-            });
-
-            return selectFolders.Merge(selectAlbums)
-                .SubscribeOn(_schedulerProvider.TaskPool);
-        }
-
         public IObservable<ImageContainer> ScanFolder(string path)
         {
             return Observable.Create<Folder>(async observer =>
@@ -137,6 +86,57 @@ namespace SonOfPicasso.Core.Services
                     return Disposable.Empty;
                 })
                 .Select(folder => (ImageContainer) new FolderImageContainer(folder))
+                .SubscribeOn(_schedulerProvider.TaskPool);
+        }
+
+        public IObservable<Album> CreateAlbum(ICreateAlbum createAlbum)
+        {
+            return Observable.Defer(() =>
+            {
+                using var unitOfWork = _unitOfWorkFactory();
+
+                var album = new Album {Name = createAlbum.AlbumName, Date = createAlbum.AlbumDate};
+
+                unitOfWork.AlbumRepository.Insert(album);
+                unitOfWork.Save();
+
+                return Observable.Return(album);
+            }).SubscribeOn(_schedulerProvider.TaskPool);
+        }
+
+        public IObservable<ImageContainer> GetAllImageContainers()
+        {
+            var selectFolders = Observable.Create<ImageContainer>(observer =>
+            {
+                var unitOfWork = _unitOfWorkFactory();
+
+                var folders = unitOfWork.FolderRepository
+                    .Get(includeProperties: "Images,Images.ExifData")
+                    .ToArray();
+
+                foreach (var folder in folders) observer.OnNext(new FolderImageContainer(folder));
+
+                observer.OnCompleted();
+
+                return unitOfWork;
+            });
+
+            var selectAlbums = Observable.Create<ImageContainer>(observer =>
+            {
+                var unitOfWork = _unitOfWorkFactory();
+
+                var albums = unitOfWork.AlbumRepository
+                    .Get(includeProperties: "AlbumImages,AlbumImages.Image")
+                    .ToArray();
+
+                foreach (var album in albums) observer.OnNext(new AlbumImageContainer(album));
+
+                observer.OnCompleted();
+
+                return unitOfWork;
+            });
+
+            return selectFolders.Merge(selectAlbums)
                 .SubscribeOn(_schedulerProvider.TaskPool);
         }
     }
