@@ -45,8 +45,8 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             TestSchedulerProvider.TaskPool.AdvanceBy(1);
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(2);
 
-            ActivateContainerViewModel(applicationViewModel.ImageContainerViewModels.ToArray());
-
+            ActivateContainerViewModel(2, applicationViewModel.ImageContainerViewModels.ToArray());
+            
             applicationViewModel.SelectedImage.Should().BeNull();
             applicationViewModel.SelectedImageRow.Should().BeNull();
             applicationViewModel.SelectedImageContainer.Should().BeNull();
@@ -198,7 +198,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(2);
 
             applicationViewModel.ImageContainerViewModels.Count.Should().Be(2);
-            ActivateContainerViewModel(applicationViewModel.ImageContainerViewModels.ToArray());
+            ActivateContainerViewModel(2, applicationViewModel.ImageContainerViewModels.ToArray());
         }
     }
 }

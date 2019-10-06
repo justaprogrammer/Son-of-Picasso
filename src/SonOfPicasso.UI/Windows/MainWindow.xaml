@@ -36,7 +36,7 @@
                       VirtualizingStackPanel.ScrollUnit="Pixel">
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <reactiveUi:ViewModelViewHost ViewModel="{Binding}" />
+                        <reactiveUi:ViewModelViewHost ViewModel="{Binding}" ViewContract="ListItem" />
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
@@ -50,7 +50,7 @@
                                               DataType="{x:Type viewModels:ImageContainerViewModel}">
                         <HierarchicalDataTemplate.ItemTemplate>
                             <DataTemplate>
-                                <reactiveUi:ViewModelViewHost ViewModel="{Binding}" MinHeight="300" />
+                                <reactiveUi:ViewModelViewHost ViewModel="{Binding}" MinHeight="300" ViewContract="Detail" />
                             </DataTemplate>
                         </HierarchicalDataTemplate.ItemTemplate>
                     </HierarchicalDataTemplate>

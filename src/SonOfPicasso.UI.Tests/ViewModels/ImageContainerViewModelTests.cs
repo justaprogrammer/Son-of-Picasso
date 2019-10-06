@@ -1,6 +1,4 @@
-﻿using System.Linq;
-using FluentAssertions;
-using FluentAssertions.Execution;
+﻿using FluentAssertions;
 using SonOfPicasso.Core.Model;
 using SonOfPicasso.Testing.Common;
 using SonOfPicasso.UI.ViewModels;
@@ -25,92 +23,73 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             var folder = Fakers.FolderFaker.Generate("default,withImages");
             var folderImageContainer = new FolderImageContainer(folder);
 
-            var imageRefs = folder.Images
-                .Select(image => new ImageRef(image, folderImageContainer))
-                .ToArray();
-
             imageContainerViewModel.Initialize(folderImageContainer, applicationViewModel);
-            ActivateContainerViewModel(imageContainerViewModel);
+            ActivateContainerViewModel(2, imageContainerViewModel);
 
-            using (new AssertionScope())
-            {
-                imageContainerViewModel.SelectedImageRow.Should().BeNull();
-                imageContainerViewModel.SelectedImage.Should().BeNull();
+            imageContainerViewModel.SelectedImageRow.Should().BeNull();
+            imageContainerViewModel.SelectedImage.Should().BeNull();
 
-                imageContainerViewModel.ImageRowViewModels[0].SelectedImage.Should().BeNull();
-                imageContainerViewModel.ImageRowViewModels[1].SelectedImage.Should().BeNull();
-            }
+            imageContainerViewModel.ImageRowViewModels[0].SelectedImage.Should().BeNull();
+            imageContainerViewModel.ImageRowViewModels[1].SelectedImage.Should().BeNull();
 
             imageContainerViewModel.ImageRowViewModels[0].SelectedImage =
                 imageContainerViewModel.ImageRowViewModels[0].ImageViewModels[0];
 
-            using (new AssertionScope())
-            {
-                imageContainerViewModel.SelectedImage.Should()
-                    .Be(imageContainerViewModel.ImageRowViewModels[0].ImageViewModels[0]);
+            imageContainerViewModel.SelectedImage.Should()
+                .Be(imageContainerViewModel.ImageRowViewModels[0].ImageViewModels[0]);
 
-                imageContainerViewModel.SelectedImageRow.Should()
-                    .Be(imageContainerViewModel.ImageRowViewModels[0]);
+            imageContainerViewModel.SelectedImageRow.Should()
+                .Be(imageContainerViewModel.ImageRowViewModels[0]);
 
-                imageContainerViewModel.ImageRowViewModels[0].SelectedImage.Should()
-                    .Be(imageContainerViewModel.ImageRowViewModels[0].ImageViewModels[0]);
+            imageContainerViewModel.ImageRowViewModels[0].SelectedImage.Should()
+                .Be(imageContainerViewModel.ImageRowViewModels[0].ImageViewModels[0]);
 
-                imageContainerViewModel.ImageRowViewModels[1].SelectedImage.Should()
-                    .BeNull();
-            }
+            imageContainerViewModel.ImageRowViewModels[1].SelectedImage.Should()
+                .BeNull();
 
             imageContainerViewModel.ImageRowViewModels[0].SelectedImage =
                 imageContainerViewModel.ImageRowViewModels[0].ImageViewModels[1];
 
-            using (new AssertionScope())
-            {
-                imageContainerViewModel.SelectedImage.Should()
-                    .Be(imageContainerViewModel.ImageRowViewModels[0].ImageViewModels[1]);
+            imageContainerViewModel.SelectedImage.Should()
+                .Be(imageContainerViewModel.ImageRowViewModels[0].ImageViewModels[1]);
 
-                imageContainerViewModel.SelectedImageRow.Should()
-                    .Be(imageContainerViewModel.ImageRowViewModels[0]);
+            imageContainerViewModel.SelectedImageRow.Should()
+                .Be(imageContainerViewModel.ImageRowViewModels[0]);
 
-                imageContainerViewModel.ImageRowViewModels[0].SelectedImage.Should()
-                    .Be(imageContainerViewModel.ImageRowViewModels[0].ImageViewModels[1]);
+            imageContainerViewModel.ImageRowViewModels[0].SelectedImage.Should()
+                .Be(imageContainerViewModel.ImageRowViewModels[0].ImageViewModels[1]);
 
-                imageContainerViewModel.ImageRowViewModels[1].SelectedImage.Should()
-                    .BeNull();
-            }
+            imageContainerViewModel.ImageRowViewModels[1].SelectedImage.Should()
+                .BeNull();
 
             imageContainerViewModel.ImageRowViewModels[1].SelectedImage =
                 imageContainerViewModel.ImageRowViewModels[1].ImageViewModels[0];
 
-            using (new AssertionScope())
-            {
-                imageContainerViewModel.SelectedImage.Should()
-                    .Be(imageContainerViewModel.ImageRowViewModels[1].ImageViewModels[0]);
+            imageContainerViewModel.SelectedImage.Should()
+                .Be(imageContainerViewModel.ImageRowViewModels[1].ImageViewModels[0]);
 
-                imageContainerViewModel.SelectedImageRow.Should()
-                    .Be(imageContainerViewModel.ImageRowViewModels[1]);
+            imageContainerViewModel.SelectedImageRow.Should()
+                .Be(imageContainerViewModel.ImageRowViewModels[1]);
 
-                imageContainerViewModel.ImageRowViewModels[0].SelectedImage.Should()
-                    .BeNull();
+            imageContainerViewModel.ImageRowViewModels[0].SelectedImage.Should()
+                .BeNull();
 
-                imageContainerViewModel.ImageRowViewModels[1].SelectedImage.Should()
-                    .Be(imageContainerViewModel.ImageRowViewModels[1].ImageViewModels[0]);
-            }
+            imageContainerViewModel.ImageRowViewModels[1].SelectedImage.Should()
+                .Be(imageContainerViewModel.ImageRowViewModels[1].ImageViewModels[0]);
 
             imageContainerViewModel.ImageRowViewModels[1].SelectedImage = null;
 
-            using (new AssertionScope())
-            {
-                imageContainerViewModel.SelectedImage.Should()
-                    .BeNull();
+            imageContainerViewModel.SelectedImage.Should()
+                .BeNull();
 
-                imageContainerViewModel.SelectedImageRow.Should()
-                    .BeNull();
+            imageContainerViewModel.SelectedImageRow.Should()
+                .BeNull();
 
-                imageContainerViewModel.ImageRowViewModels[0].SelectedImage.Should()
-                    .BeNull();
+            imageContainerViewModel.ImageRowViewModels[0].SelectedImage.Should()
+                .BeNull();
 
-                imageContainerViewModel.ImageRowViewModels[1].SelectedImage.Should()
-                    .BeNull();
-            }
+            imageContainerViewModel.ImageRowViewModels[1].SelectedImage.Should()
+                .BeNull();
         }
 
         [Fact]
@@ -122,12 +101,10 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             var folder = Fakers.FolderFaker.Generate("default,withImages");
             var folderImageContainer = new FolderImageContainer(folder);
 
-            var imageRefs = folder.Images
-                .Select(image => new ImageRef(image, folderImageContainer))
-                .ToArray();
-
             imageContainerViewModel.Initialize(folderImageContainer, applicationViewModel);
-            imageContainerViewModel.Activator.Activate();
+            ActivateContainerViewModel(2, imageContainerViewModel);
+
+            TestSchedulerProvider.MainThreadScheduler.AdvanceBy(1);
 
             imageContainerViewModel.ImageRowViewModels.Count.Should().Be(2);
             imageContainerViewModel.ImageRowViewModels[0].ImageViewModels.Count.Should().Be(3);

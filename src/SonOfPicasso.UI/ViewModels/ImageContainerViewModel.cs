@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using DynamicData;
 using DynamicData.Binding;
@@ -13,7 +14,7 @@ using SonOfPicasso.UI.ViewModels.Abstract;
 
 namespace SonOfPicasso.UI.ViewModels
 {
-    public class ImageContainerViewModel : ViewModelBase
+    public class ImageContainerViewModel : ViewModelBase, IDisposable
     {
         private readonly Func<ImageRowViewModel> _imageRowViewModelFactory;
         private readonly ObservableCollectionExtended<ImageRowViewModel> _imageRowViewModels;
@@ -27,10 +28,11 @@ namespace SonOfPicasso.UI.ViewModels
 
         public ImageContainerViewModel(
             Func<ImageRowViewModel> imageRowViewModelFactory,
-            ViewModelActivator activator
-        ) : base(activator)
+            ViewModelActivator activator, 
+            ISchedulerProvider schedulerProvider) : base(activator)
         {
             _imageRowViewModelFactory = imageRowViewModelFactory;
+            _schedulerProvider = schedulerProvider;
             _imageRowViewModels = new ObservableCollectionExtended<ImageRowViewModel>();
 
             _selectedImageRowReplay = new ReplaySubject<ImageRowViewModel>(1);
@@ -76,6 +78,7 @@ namespace SonOfPicasso.UI.ViewModels
 
                 observable
                     .Connect()
+                    .ObserveOn(_schedulerProvider.MainThreadScheduler)
                     .Bind(_imageRowViewModels)
                     .Subscribe()
                     .DisposeWith(d);
@@ -134,17 +137,13 @@ namespace SonOfPicasso.UI.ViewModels
             });
         }
 
-        protected override void Dispose(bool disposing)
+        public void Dispose()
         {
-            if (disposing)
-            {
-                _selectedImage?.Dispose();
-                _selectedImageReplay?.Dispose();
-                _selectedImageRow?.Dispose();
-                _selectedImageRowReplay?.Dispose();
-            }
-
-            base.Dispose(disposing);
+            _selectedImage?.Dispose();
+            _selectedImageReplay?.Dispose();
+            _selectedImageRow?.Dispose();
+            _selectedImageRowReplay?.Dispose();
+            ApplicationViewModel?.Dispose();
         }
 
         private ImageRowViewModel CreateImageRowViewModel(IList<ImageRef> imageRef)

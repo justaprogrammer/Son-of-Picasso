@@ -14,7 +14,7 @@ using SonOfPicasso.UI.ViewModels.Abstract;
 
 namespace SonOfPicasso.UI.ViewModels
 {
-    public class ApplicationViewModel : ViewModelBase
+    public class ApplicationViewModel : ViewModelBase, IDisposable
     {
         private readonly Func<ImageContainerViewModel> _imageContainerViewModelFactory;
         private readonly IImageManagementService _imageManagementService;
@@ -136,22 +136,14 @@ namespace SonOfPicasso.UI.ViewModels
 
         public ImageViewModel SelectedImage => _selectedImage.Value;
 
-        protected override void Dispose(bool disposing)
+        public void Dispose()
         {
-            if (disposing)
-            {
-                _selectedImage?.Dispose();
-                _selectedImageContainer?.Dispose();
-                _selectedImageContainerReplay?.Dispose();
-                _selectedImageReplay?.Dispose();
-                _selectedImageRow?.Dispose();
-                _selectedImageRowReplay?.Dispose();
-                ImageContainerCache?.Dispose();
-                AddFolder?.Dispose();
-                NewAlbum?.Dispose();
-            }
-
-            base.Dispose(disposing);
+            _selectedImage?.Dispose();
+            _selectedImageContainer?.Dispose();
+            _selectedImageContainerReplay?.Dispose();
+            _selectedImageReplay?.Dispose();
+            _selectedImageRow?.Dispose();
+            _selectedImageRowReplay?.Dispose();
         }
 
         private ImageContainerViewModel CreateImageContainerViewModel(ImageContainer imageContainer)
@@ -171,9 +163,9 @@ namespace SonOfPicasso.UI.ViewModels
                         return Observable.Return(Unit.Default);
 
                     return _imageManagementService.CreateAlbum(model)
-                        .Select(album =>
+                        .Select(imageContainer =>
                         {
-                            // ImageContainerCache.AddOrUpdate(CreateAlbumViewModel(album));
+                            ImageContainerCache.AddOrUpdate(imageContainer);
                             return Unit.Default;
                         });
                 })
@@ -186,11 +178,12 @@ namespace SonOfPicasso.UI.ViewModels
                 .ObserveOn(_schedulerProvider.TaskPool)
                 .Select(s =>
                 {
-                    if (s == null) return Observable.Return(Unit.Default);
+                    if (s != null)
+                    {
+                        ImageContainerCache.PopulateFrom(_imageManagementService.ScanFolder(s).ToArray());
+                    }
 
-                    return _imageManagementService.ScanFolder(s)
-                        .ToArray()
-                        .Select(images => Unit.Default);
+                    return Observable.Return(Unit.Default);
                 })
                 .SelectMany(observable => observable);
         }

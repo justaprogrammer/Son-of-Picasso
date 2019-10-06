@@ -19,25 +19,28 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             Func<ImageRowViewModel> imageRowViewModelFactory =
                 () => new ImageRowViewModel(imageViewModelFactory, new ViewModelActivator());
 
-            Func<ImageContainerViewModel> imageContainerViewModelFactory = () => new ImageContainerViewModel(imageRowViewModelFactory, new ViewModelActivator());
+            Func<ImageContainerViewModel> imageContainerViewModelFactory = () =>
+                new ImageContainerViewModel(imageRowViewModelFactory, new ViewModelActivator(), TestSchedulerProvider);
 
             AutoSubstitute.Provide(imageViewModelFactory);
             AutoSubstitute.Provide(imageRowViewModelFactory);
             AutoSubstitute.Provide(imageContainerViewModelFactory);
         }
 
-        protected static void ActivateContainerViewModel(params ImageContainerViewModel[] imageContainerViewModels)
+        protected void ActivateContainerViewModel(int rowCount, params ImageContainerViewModel[] imageContainerViewModels)
         {
             foreach (var imageContainerViewModel in imageContainerViewModels)
-            {
                 imageContainerViewModel.Activator.Activate();
-                foreach (var imageRowViewModel in imageContainerViewModel.ImageRowViewModels)
-                {
-                    imageRowViewModel.Activator.Activate();
 
-                    foreach (var imageViewModel in imageRowViewModel.ImageViewModels)
-                        imageViewModel.Activator.Activate();
-                }
+            TestSchedulerProvider.MainThreadScheduler.AdvanceBy(rowCount);
+
+            foreach (var imageContainerViewModel in imageContainerViewModels)
+            foreach (var imageRowViewModel in imageContainerViewModel.ImageRowViewModels)
+            {
+                imageRowViewModel.Activator.Activate();
+
+                foreach (var imageViewModel in imageRowViewModel.ImageViewModels)
+                    imageViewModel.Activator.Activate();
             }
         }
     }
