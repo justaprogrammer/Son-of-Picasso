@@ -107,9 +107,7 @@ namespace SonOfPicasso.UI.ViewModels
                     .Sort(SortExpressionComparer<ImageContainerViewModel>
                         .Ascending(model => model.ContainerType == ImageContainerTypeEnum.Folder)
                         .ThenByDescending(model => model.Date))
-                    .Do(set => { ; })
                     .ObserveOn(_schedulerProvider.MainThreadScheduler)
-                    .Do(set => { ; })
                     .Bind(imageContainerViewModels)
                     .Subscribe()
                     .DisposeWith(d);

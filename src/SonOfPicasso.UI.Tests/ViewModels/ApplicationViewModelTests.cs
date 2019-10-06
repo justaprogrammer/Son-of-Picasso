@@ -46,6 +46,8 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(2);
 
             ActivateContainerViewModel(applicationViewModel.ImageContainerViewModels.ToArray());
+            
+            TestSchedulerProvider.MainThreadScheduler.AdvanceBy(2);
 
             applicationViewModel.SelectedImage.Should().BeNull();
             applicationViewModel.SelectedImageRow.Should().BeNull();
