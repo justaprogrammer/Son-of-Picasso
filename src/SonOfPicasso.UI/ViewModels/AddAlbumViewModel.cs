@@ -74,8 +74,6 @@ namespace SonOfPicasso.UI.ViewModels
         {
             _displayAlbumNameError?.Dispose();
             AlbumNameRule?.Dispose();
-            Continue?.Dispose();
-            Cancel?.Dispose();
         }
 
         private IObservable<Unit> ExecuteCancel()
@@ -107,11 +105,6 @@ namespace SonOfPicasso.UI.ViewModels
             return modelPropertyHasChanged
                 .CombineLatest(whenAnyValue, (hasChanged, isValid) => hasChanged && !isValid)
                 .DistinctUntilChanged();
-        }
-
-        private IObservable<Unit> OnContinue()
-        {
-            return Observable.Return(Unit.Default);
         }
     }
 }

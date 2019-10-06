@@ -64,7 +64,7 @@ namespace SonOfPicasso.Core.Services
                                     folder = new Folder
                                     {
                                         Path = tuple.Key,
-                                        Images = new List<Image>(), 
+                                        Images = new List<Image>(),
                                         Date = minDate.Date
                                     };
 
@@ -89,19 +89,26 @@ namespace SonOfPicasso.Core.Services
                 .SubscribeOn(_schedulerProvider.TaskPool);
         }
 
-        public IObservable<Album> CreateAlbum(ICreateAlbum createAlbum)
+        public IObservable<ImageContainer> CreateAlbum(ICreateAlbum createAlbum)
         {
             return Observable.Defer(() =>
-            {
-                using var unitOfWork = _unitOfWorkFactory();
+                {
+                    using var unitOfWork = _unitOfWorkFactory();
 
-                var album = new Album {Name = createAlbum.AlbumName, Date = createAlbum.AlbumDate};
+                    var album = new Album
+                    {
+                        Name = createAlbum.AlbumName, 
+                        Date = createAlbum.AlbumDate,
+                        AlbumImages = new List<AlbumImage>()
+                    };
 
-                unitOfWork.AlbumRepository.Insert(album);
-                unitOfWork.Save();
+                    unitOfWork.AlbumRepository.Insert(album);
+                    unitOfWork.Save();
 
-                return Observable.Return(album);
-            }).SubscribeOn(_schedulerProvider.TaskPool);
+                    return Observable.Return(album);
+                })
+                .Select(album => (ImageContainer) new AlbumImageContainer(album))
+                .SubscribeOn(_schedulerProvider.TaskPool);
         }
 
         public IObservable<ImageContainer> GetAllImageContainers()

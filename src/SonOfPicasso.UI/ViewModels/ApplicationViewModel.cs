@@ -144,9 +144,6 @@ namespace SonOfPicasso.UI.ViewModels
             _selectedImageReplay?.Dispose();
             _selectedImageRow?.Dispose();
             _selectedImageRowReplay?.Dispose();
-            ImageContainerCache?.Dispose();
-            AddFolder?.Dispose();
-            NewAlbum?.Dispose();
         }
 
         private ImageContainerViewModel CreateImageContainerViewModel(ImageContainer imageContainer)
@@ -166,9 +163,9 @@ namespace SonOfPicasso.UI.ViewModels
                         return Observable.Return(Unit.Default);
 
                     return _imageManagementService.CreateAlbum(model)
-                        .Select(album =>
+                        .Select(imageContainer =>
                         {
-                            // ImageContainerCache.AddOrUpdate(CreateAlbumViewModel(album));
+                            ImageContainerCache.AddOrUpdate(imageContainer);
                             return Unit.Default;
                         });
                 })
