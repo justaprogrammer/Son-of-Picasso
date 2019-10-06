@@ -12,7 +12,7 @@ using SonOfPicasso.UI.ViewModels.Abstract;
 
 namespace SonOfPicasso.UI.ViewModels
 {
-    public class AddAlbumViewModel : ValidatedViewModelBase<AddAlbumViewModel>, ICreateAlbum
+    public class AddAlbumViewModel : ValidatedViewModelBase<AddAlbumViewModel>, ICreateAlbum, IDisposable
     {
         private readonly ObservableAsPropertyHelper<bool> _displayAlbumNameError;
         private readonly IImageManagementService _imageManagementService;
@@ -70,17 +70,12 @@ namespace SonOfPicasso.UI.ViewModels
             set => this.RaiseAndSetIfChanged(ref _albumDate, value);
         }
 
-        protected override void Dispose(bool disposing)
+        public void Dispose()
         {
-            if (disposing)
-            {
-                _displayAlbumNameError?.Dispose();
-                AlbumNameRule?.Dispose();
-                Continue?.Dispose();
-                Cancel?.Dispose();
-            }
-
-            base.Dispose(disposing);
+            _displayAlbumNameError?.Dispose();
+            AlbumNameRule?.Dispose();
+            Continue?.Dispose();
+            Cancel?.Dispose();
         }
 
         private IObservable<Unit> ExecuteCancel()

@@ -19,7 +19,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             Func<ImageRowViewModel> imageRowViewModelFactory =
                 () => new ImageRowViewModel(imageViewModelFactory, new ViewModelActivator());
 
-            Func<ImageContainerViewModel> imageContainerViewModelFactory = () => new ImageContainerViewModel(imageRowViewModelFactory, new ViewModelActivator());
+            Func<ImageContainerViewModel> imageContainerViewModelFactory = () => new ImageContainerViewModel(imageRowViewModelFactory, new ViewModelActivator(), TestSchedulerProvider);
 
             AutoSubstitute.Provide(imageViewModelFactory);
             AutoSubstitute.Provide(imageRowViewModelFactory);

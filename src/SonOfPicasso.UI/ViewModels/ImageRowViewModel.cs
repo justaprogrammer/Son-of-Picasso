@@ -9,7 +9,7 @@ using SonOfPicasso.UI.ViewModels.Abstract;
 
 namespace SonOfPicasso.UI.ViewModels
 {
-    public class ImageRowViewModel : ViewModelBase
+    public class ImageRowViewModel : ViewModelBase, IDisposable
     {
         private readonly Func<ImageViewModel> _imageViewModelFactory;
         private ImageViewModel _selectedImage;
@@ -31,13 +31,6 @@ namespace SonOfPicasso.UI.ViewModels
         public ImageContainerViewModel ImageContainerViewModel { get; private set; }
 
         public IList<ImageViewModel> ImageViewModels { get; private set; }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing) _selectedImage?.Dispose();
-
-            base.Dispose(disposing);
-        }
 
         public void Initialize(IList<ImageRef> imageRefs, ImageContainerViewModel imageContainerViewModel)
         {
@@ -74,6 +67,11 @@ namespace SonOfPicasso.UI.ViewModels
             var imageRefViewModel = _imageViewModelFactory();
             imageRefViewModel.Initialize(imageRef, this);
             return imageRefViewModel;
+        }
+
+        public void Dispose()
+        {
+            ImageContainerViewModel?.Dispose();
         }
     }
 }

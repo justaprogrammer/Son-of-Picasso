@@ -67,8 +67,11 @@ namespace SonOfPicasso.Integration.Tests
         public void ShouldScanAndGetAllImageContainers()
         {
             var imageManagementService = _container.Resolve<ImageManagementService>();
-            imageManagementService.ScanFolder(_imagesPath)
+            var imageContainers = imageManagementService.ScanFolder(_imagesPath)
+                .ToArray()
                 .Wait();
+
+            imageContainers.Length.Should().Be(_directoryCount);
 
             var unitOfWorkFactory = _container.Resolve<Func<UnitOfWork>>();
             using (var unitOfWork = unitOfWorkFactory())

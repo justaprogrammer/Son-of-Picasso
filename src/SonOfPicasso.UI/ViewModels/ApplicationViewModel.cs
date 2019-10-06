@@ -14,7 +14,7 @@ using SonOfPicasso.UI.ViewModels.Abstract;
 
 namespace SonOfPicasso.UI.ViewModels
 {
-    public class ApplicationViewModel : ViewModelBase
+    public class ApplicationViewModel : ViewModelBase, IDisposable
     {
         private readonly Func<ImageContainerViewModel> _imageContainerViewModelFactory;
         private readonly IImageManagementService _imageManagementService;
@@ -107,7 +107,9 @@ namespace SonOfPicasso.UI.ViewModels
                     .Sort(SortExpressionComparer<ImageContainerViewModel>
                         .Ascending(model => model.ContainerType == ImageContainerTypeEnum.Folder)
                         .ThenByDescending(model => model.Date))
+                    .Do(set => { ; })
                     .ObserveOn(_schedulerProvider.MainThreadScheduler)
+                    .Do(set => { ; })
                     .Bind(imageContainerViewModels)
                     .Subscribe()
                     .DisposeWith(d);
@@ -136,22 +138,17 @@ namespace SonOfPicasso.UI.ViewModels
 
         public ImageViewModel SelectedImage => _selectedImage.Value;
 
-        protected override void Dispose(bool disposing)
+        public void Dispose()
         {
-            if (disposing)
-            {
-                _selectedImage?.Dispose();
-                _selectedImageContainer?.Dispose();
-                _selectedImageContainerReplay?.Dispose();
-                _selectedImageReplay?.Dispose();
-                _selectedImageRow?.Dispose();
-                _selectedImageRowReplay?.Dispose();
-                ImageContainerCache?.Dispose();
-                AddFolder?.Dispose();
-                NewAlbum?.Dispose();
-            }
-
-            base.Dispose(disposing);
+            _selectedImage?.Dispose();
+            _selectedImageContainer?.Dispose();
+            _selectedImageContainerReplay?.Dispose();
+            _selectedImageReplay?.Dispose();
+            _selectedImageRow?.Dispose();
+            _selectedImageRowReplay?.Dispose();
+            ImageContainerCache?.Dispose();
+            AddFolder?.Dispose();
+            NewAlbum?.Dispose();
         }
 
         private ImageContainerViewModel CreateImageContainerViewModel(ImageContainer imageContainer)
@@ -186,11 +183,12 @@ namespace SonOfPicasso.UI.ViewModels
                 .ObserveOn(_schedulerProvider.TaskPool)
                 .Select(s =>
                 {
-                    if (s == null) return Observable.Return(Unit.Default);
+                    if (s != null)
+                    {
+                        ImageContainerCache.PopulateFrom(_imageManagementService.ScanFolder(s).ToArray());
+                    }
 
-                    return _imageManagementService.ScanFolder(s)
-                        .ToArray()
-                        .Select(images => Unit.Default);
+                    return Observable.Return(Unit.Default);
                 })
                 .SelectMany(observable => observable);
         }

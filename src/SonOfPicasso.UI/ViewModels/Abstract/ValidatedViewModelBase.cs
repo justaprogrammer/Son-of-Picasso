@@ -5,7 +5,7 @@ using ReactiveUI.Validation.Helpers;
 
 namespace SonOfPicasso.UI.ViewModels.Abstract
 {
-    public abstract class ValidatedViewModelBase<T> : ReactiveValidationObject<T>, IActivatableViewModel, IDisposable
+    public abstract class ValidatedViewModelBase<T> : ReactiveValidationObject<T>, IActivatableViewModel
     {
         protected ValidatedViewModelBase(ViewModelActivator activator, IScheduler scheduler) : base(scheduler)
         {
@@ -13,16 +13,5 @@ namespace SonOfPicasso.UI.ViewModels.Abstract
         }
 
         public ViewModelActivator Activator { get; }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing) Activator?.Dispose();
-        }
     }
 }

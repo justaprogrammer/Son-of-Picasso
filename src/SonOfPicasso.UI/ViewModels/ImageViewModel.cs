@@ -9,7 +9,7 @@ using Splat;
 
 namespace SonOfPicasso.UI.ViewModels
 {
-    public class ImageViewModel : ViewModelBase
+    public class ImageViewModel : ViewModelBase, IDisposable
     {
         private readonly IImageLoadingService _imageLoadingService;
         private readonly ISchedulerProvider _schedulerProvider;
@@ -37,6 +37,11 @@ namespace SonOfPicasso.UI.ViewModels
         {
             return _imageLoadingService.LoadImageFromPath(Path)
                 .ObserveOn(_schedulerProvider.MainThreadScheduler);
+        }
+
+        public void Dispose()
+        {
+            ImageRowViewModel?.Dispose();
         }
     }
 }
