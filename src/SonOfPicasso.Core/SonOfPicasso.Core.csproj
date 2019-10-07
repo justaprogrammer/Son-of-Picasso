@@ -11,7 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="akavache.core" Version="6.8.1" />
+    <PackageReference Include="akavache.core" Version="6.9.1" />
     <PackageReference Include="Ardalis.GuardClauses" Version="1.2.9" />
     <PackageReference Include="Autofac" Version="4.9.4" />
     <PackageReference Include="ExifLibNet" Version="2.1.0" />
