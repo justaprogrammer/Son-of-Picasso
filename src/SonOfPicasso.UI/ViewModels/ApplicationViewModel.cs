@@ -20,12 +20,6 @@ namespace SonOfPicasso.UI.ViewModels
         private readonly IImageManagementService _imageManagementService;
         private readonly ILogger _logger;
         private readonly ISchedulerProvider _schedulerProvider;
-        private readonly ObservableAsPropertyHelper<ImageViewModel> _selectedImage;
-        private readonly ObservableAsPropertyHelper<ImageContainerViewModel> _selectedImageContainer;
-        private readonly ReplaySubject<ImageContainerViewModel> _selectedImageContainerReplay;
-        private readonly ReplaySubject<ImageViewModel> _selectedImageReplay;
-        private readonly ObservableAsPropertyHelper<ImageRowViewModel> _selectedImageRow;
-        private readonly ReplaySubject<ImageRowViewModel> _selectedImageRowReplay;
 
         public ApplicationViewModel(ILogger logger,
             ISchedulerProvider schedulerProvider,
@@ -49,15 +43,6 @@ namespace SonOfPicasso.UI.ViewModels
 
             ImageContainerCache = new SourceCache<ImageContainer, string>(imageContainer => imageContainer.Id);
 
-            _selectedImageContainerReplay = new ReplaySubject<ImageContainerViewModel>();
-            _selectedImageContainer = _selectedImageContainerReplay.ToProperty(this, nameof(SelectedImageContainer));
-
-            _selectedImageRowReplay = new ReplaySubject<ImageRowViewModel>(1);
-            _selectedImageRow = _selectedImageRowReplay.ToProperty(this, nameof(SelectedImageRow));
-
-            _selectedImageReplay = new ReplaySubject<ImageViewModel>();
-            _selectedImage = _selectedImageReplay.ToProperty(this, nameof(SelectedImage));
-
             this.WhenActivated(d =>
             {
                 var imageContainerViewModelCache = ImageContainerCache
@@ -65,41 +50,6 @@ namespace SonOfPicasso.UI.ViewModels
                     .Transform(CreateImageContainerViewModel)
                     .DisposeMany()
                     .AsObservableCache()
-                    .DisposeWith(d);
-
-                imageContainerViewModelCache.Connect()
-                    .WhenAnyPropertyChanged(nameof(ImageContainerViewModel.SelectedImageRow),
-                        nameof(ImageContainerViewModel.SelectedImage))
-                    .Subscribe(imageContainerViewModel =>
-                    {
-                        var selectedImageRowChanged = imageContainerViewModel.SelectedImageRow != null
-                                                      && imageContainerViewModel.SelectedImageRow != SelectedImageRow;
-
-                        var selectedImageChanged = imageContainerViewModel.SelectedImage != null
-                                                   && imageContainerViewModel.SelectedImage != SelectedImage;
-
-                        var selectedContainerClearing = imageContainerViewModel.SelectedImageRow == null
-                                                        && imageContainerViewModel == SelectedImageContainer;
-
-                        if (selectedImageRowChanged
-                            || selectedContainerClearing)
-                        {
-                            if (imageContainerViewModel.SelectedImageRow == null)
-                            {
-                                _selectedImageContainerReplay.OnNext(null);
-                                _selectedImageRowReplay.OnNext(null);
-                                _selectedImageReplay.OnNext(null);
-                            }
-                            else
-                            {
-                                _selectedImageContainerReplay.OnNext(imageContainerViewModel);
-                                _selectedImageRowReplay.OnNext(imageContainerViewModel.SelectedImageRow);
-                                _selectedImageReplay.OnNext(imageContainerViewModel.SelectedImageRow.SelectedImage);
-                            }
-                        }
-
-                        if (selectedImageChanged) _selectedImageReplay.OnNext(SelectedImageContainer.SelectedImage);
-                    })
                     .DisposeWith(d);
 
                 imageContainerViewModelCache
@@ -130,20 +80,8 @@ namespace SonOfPicasso.UI.ViewModels
 
         public ReactiveCommand<Unit, Unit> NewAlbum { get; }
 
-        public ImageContainerViewModel SelectedImageContainer => _selectedImageContainer.Value;
-
-        public ImageRowViewModel SelectedImageRow => _selectedImageRow.Value;
-
-        public ImageViewModel SelectedImage => _selectedImage.Value;
-
         public void Dispose()
         {
-            _selectedImage?.Dispose();
-            _selectedImageContainer?.Dispose();
-            _selectedImageContainerReplay?.Dispose();
-            _selectedImageReplay?.Dispose();
-            _selectedImageRow?.Dispose();
-            _selectedImageRowReplay?.Dispose();
         }
 
         private ImageContainerViewModel CreateImageContainerViewModel(ImageContainer imageContainer)

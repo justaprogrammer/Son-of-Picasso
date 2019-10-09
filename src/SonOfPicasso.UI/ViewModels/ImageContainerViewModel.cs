@@ -16,30 +16,20 @@ namespace SonOfPicasso.UI.ViewModels
 {
     public class ImageContainerViewModel : ViewModelBase, IDisposable
     {
-        private readonly Func<ImageRowViewModel> _imageRowViewModelFactory;
-        private readonly ObservableCollectionExtended<ImageRowViewModel> _imageRowViewModels;
+        private readonly ObservableCollectionExtended<ImageViewModel> _imageViewModels;
+        private readonly Func<ImageViewModel> _imageViewModelFactory;
         private readonly ISchedulerProvider _schedulerProvider;
-        private readonly ObservableAsPropertyHelper<ImageViewModel> _selectedImage;
-        private readonly ReplaySubject<ImageViewModel> _selectedImageReplay;
-        private readonly ObservableAsPropertyHelper<ImageRowViewModel> _selectedImageRow;
-        private readonly ReplaySubject<ImageRowViewModel> _selectedImageRowReplay;
 
         private ImageContainer _imageContainer;
 
         public ImageContainerViewModel(
-            Func<ImageRowViewModel> imageRowViewModelFactory,
+            Func<ImageViewModel> imageViewModelFactory,
             ViewModelActivator activator, 
             ISchedulerProvider schedulerProvider) : base(activator)
         {
-            _imageRowViewModelFactory = imageRowViewModelFactory;
+            _imageViewModelFactory = imageViewModelFactory;
             _schedulerProvider = schedulerProvider;
-            _imageRowViewModels = new ObservableCollectionExtended<ImageRowViewModel>();
-
-            _selectedImageRowReplay = new ReplaySubject<ImageRowViewModel>(1);
-            _selectedImageRow = _selectedImageRowReplay.ToProperty(this, nameof(SelectedImageRow));
-
-            _selectedImageReplay = new ReplaySubject<ImageViewModel>();
-            _selectedImage = _selectedImageReplay.ToProperty(this, nameof(SelectedImage));
+            _imageViewModels = new ObservableCollectionExtended<ImageViewModel>();
         }
 
         public string Name => _imageContainer.Name;
@@ -50,13 +40,9 @@ namespace SonOfPicasso.UI.ViewModels
 
         public DateTime Date => _imageContainer.Date;
 
-        public IObservableCollection<ImageRowViewModel> ImageRowViewModels => _imageRowViewModels;
+        public IObservableCollection<ImageViewModel> ImageViewModels => _imageViewModels;
 
         public ApplicationViewModel ApplicationViewModel { get; private set; }
-
-        public ImageRowViewModel SelectedImageRow => _selectedImageRow.Value;
-
-        public ImageViewModel SelectedImage => _selectedImage.Value;
 
         public void Initialize(ImageContainer imageContainer, ApplicationViewModel applicationViewModel)
         {
@@ -64,92 +50,28 @@ namespace SonOfPicasso.UI.ViewModels
             ApplicationViewModel =
                 applicationViewModel ?? throw new ArgumentNullException(nameof(applicationViewModel));
 
-            this.WhenActivated(d =>
+            this.WhenActivated((CompositeDisposable d) =>
             {
-                var sourceCache = new SourceCache<IList<ImageRef>, string>(refs =>
-                    string.Join(";", refs.Select(imageRef => imageRef.Id)))
+                var sourceCache = new SourceCache<ImageRef, string>(refs => refs.Id)
                     .DisposeWith(d);
 
-                var observable = sourceCache.Connect()
-                    .Transform(CreateImageRowViewModel)
-                    .DisposeMany()
-                    .AsObservableCache()
-                    .DisposeWith(d);
-
-                observable
-                    .Connect()
-                    .ObserveOn(_schedulerProvider.MainThreadScheduler)
-                    .Bind(_imageRowViewModels)
-                    .Subscribe()
-                    .DisposeWith(d);
-
-                observable.Connect()
-                    .WhenAnyPropertyChanged(nameof(ImageRowViewModel.SelectedImage))
-                    .Subscribe(imageRowViewModel =>
-                    {
-                        var selectedImageChanged = imageRowViewModel.SelectedImage != null
-                                                   && imageRowViewModel.SelectedImage != SelectedImage;
-
-                        var selectedRowClearing = imageRowViewModel.SelectedImage == null
-                                                  && imageRowViewModel == SelectedImageRow;
-
-                        if (selectedImageChanged
-                            || selectedRowClearing)
-                        {
-                            if (imageRowViewModel.SelectedImage == null)
-                            {
-                                _selectedImageRowReplay.OnNext(null);
-                                _selectedImageReplay.OnNext(null);
-                            }
-                            else
-                            {
-                                _selectedImageRowReplay.OnNext(imageRowViewModel);
-                                _selectedImageReplay.OnNext(imageRowViewModel?.SelectedImage);
-                            }
-                        }
-                    })
-                    .DisposeWith(d);
-
-                applicationViewModel
-                    .WhenPropertyChanged(model => model.SelectedImageContainer, false)
-                    .Subscribe(propertyValue =>
-                    {
-                        var imageContainerViewModel = propertyValue.Value;
-                        var selectedContainerIsNull = imageContainerViewModel == null;
-                        var selectedContainerIsNotThis = imageContainerViewModel != this;
-                        var selectedImageRowIsNotNull =
-                            !selectedContainerIsNull && imageContainerViewModel.SelectedImageRow != null;
-                        var thisImageRowIsNotNull = SelectedImageRow != null;
-
-                        if (selectedContainerIsNull && thisImageRowIsNotNull
-                            || selectedContainerIsNotThis && selectedImageRowIsNotNull && thisImageRowIsNotNull)
-                        {
-                            _selectedImageRowReplay.OnNext(null);
-                            _selectedImageReplay.OnNext(null);
-                        }
-                    })
-                    .DisposeWith(d);
+                sourceCache.Connect()
+                    .Transform(CreateImageViewModel);
 
                 sourceCache.Edit(updater => updater.Load(imageContainer.ImageRefs
-                    .OrderBy(imageRef => imageRef.Date)
-                    .Batch(3)
-                    .Select(refs => refs.ToArray())));
+                    .OrderBy(imageRef => imageRef.Date)));
             });
         }
 
         public void Dispose()
         {
-            _selectedImage?.Dispose();
-            _selectedImageReplay?.Dispose();
-            _selectedImageRow?.Dispose();
-            _selectedImageRowReplay?.Dispose();
             ApplicationViewModel?.Dispose();
         }
 
-        private ImageRowViewModel CreateImageRowViewModel(IList<ImageRef> imageRef)
+        private ImageViewModel CreateImageViewModel(ImageRef imageRef)
         {
-            var imageRefViewModel = _imageRowViewModelFactory();
-            imageRefViewModel.Initialize(imageRef, this);
+            var imageRefViewModel = _imageViewModelFactory();
+            imageRefViewModel.Initialize(imageRef);
             return imageRefViewModel;
         }
     }
