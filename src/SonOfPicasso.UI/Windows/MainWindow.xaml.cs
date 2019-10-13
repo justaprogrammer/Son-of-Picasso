@@ -2,6 +2,7 @@
 using System.IO.Abstractions;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Windows.Data;
 using System.Windows.Forms;
 using ReactiveUI;
 using Serilog;
@@ -37,15 +38,16 @@ namespace SonOfPicasso.UI.Windows
 
             InitializeComponent();
 
+            var imageCollectionViewSource = (CollectionViewSource) FindResource("ImagesCollectionViewSource");
+            imageCollectionViewSource.GroupDescriptions.Add(new PropertyGroupDescription("ImageContainerViewModel"));
+
             this.WhenActivated(d =>
             {
-                d(this.OneWayBind(ViewModel,
-                    model => model.ImageContainerViewModels,
-                    window => window.FoldersListView.ItemsSource));
+                imageCollectionViewSource.Source = ViewModel.ImageViewModels;
 
                 d(this.OneWayBind(ViewModel,
                     model => model.ImageContainerViewModels,
-                    window => window.ImagesTreeView.ItemsSource));
+                    window => window.FoldersListView.ItemsSource));
 
                 d(this.BindCommand(ViewModel, 
                     model => model.AddFolder,

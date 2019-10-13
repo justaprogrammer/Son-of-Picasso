@@ -10,6 +10,24 @@
                            mc:Ignorable="d"
                            Title="MainWindow" Height="450" Width="800">
 
+    <Window.Resources>
+        <CollectionViewSource x:Key="ImagesCollectionViewSource" />
+
+        <Style x:Key="ImageCollectionGroup"
+               TargetType="{x:Type GroupItem}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type GroupItem}">
+                        <StackPanel>
+                            <ContentPresenter x:Name="PART_Header"/>
+                            <ItemsPresenter x:Name="ItemsPresenter" Margin="5,0,0,0"/>
+                        </StackPanel>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </Window.Resources>
     <DockPanel>
         <Menu DockPanel.Dock="Top" Width="Auto" Height="20">
             <MenuItem Header="_File">
@@ -28,6 +46,7 @@
         </Menu>
 
         <DockPanel>
+            <Label Content="{Binding ViewModel}" />
             <ListView Name="FoldersListView"
                       DockPanel.Dock="Left"
                       MinWidth="300"
@@ -40,25 +59,51 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-            <TreeView Name="ImagesTreeView"
+            <ListView Name="ImagesListView"
+                      ItemsSource="{Binding Source={StaticResource ImagesCollectionViewSource}}"
                       VirtualizingStackPanel.IsVirtualizing="True"
+                      VirtualizingStackPanel.IsVirtualizingWhenGrouping="True"
                       VirtualizingStackPanel.VirtualizationMode="Recycling"
                       VirtualizingStackPanel.ScrollUnit="Pixel"
-                      ItemContainerStyle="{StaticResource ImageContainerTreeViewItem}">
-                <TreeView.ItemTemplate>
-                    <HierarchicalDataTemplate ItemsSource="{Binding ImageRowViewModels}"
-                                              DataType="{x:Type viewModels:ImageContainerViewModel}">
+                      SelectionMode="Extended">
 
-                        <reactiveUi:ViewModelViewHost ViewModel="{Binding}" ViewContract="Detail" />
+                <ListView.GroupStyle>
+                    <GroupStyle HidesIfEmpty="False">
+                        <GroupStyle.ContainerStyle>
+                            <Style TargetType="{x:Type GroupItem}">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="{x:Type GroupItem}">
+                                            <StackPanel Width="{Binding ElementName=ImagesListView, Path=ActualWidth}">
+                                                <ContentPresenter x:Name="PART_Header"/>
+                                                <ItemsPresenter x:Name="ItemsPresenter" Margin="5,0,0,0"/>
+                                            </StackPanel>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </GroupStyle.ContainerStyle>
 
-                        <HierarchicalDataTemplate.ItemTemplate>
-                            <DataTemplate>
-                                <reactiveUi:ViewModelViewHost ViewModel="{Binding}" />
+                        <GroupStyle.HeaderTemplate>
+                            <DataTemplate DataType="CollectionViewGroup">
+                                <reactiveUi:ViewModelViewHost ViewModel="{Binding Name}" ViewContract="Detail"/>
                             </DataTemplate>
-                        </HierarchicalDataTemplate.ItemTemplate>
-                    </HierarchicalDataTemplate>
-                </TreeView.ItemTemplate>
-            </TreeView>
+                        </GroupStyle.HeaderTemplate>
+                    </GroupStyle>
+                </ListView.GroupStyle>
+
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel  />
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
+
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <reactiveUi:ViewModelViewHost ViewModel="{Binding}"/>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
         </DockPanel>
     </DockPanel>
 </reactiveUi:ReactiveWindow>

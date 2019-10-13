@@ -1,12 +1,11 @@
 ﻿using System;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using DynamicData;
 using DynamicData.Binding;
 using ReactiveUI;
-using Serilog;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Model;
 using SonOfPicasso.Core.Scheduling;
@@ -18,22 +17,25 @@ namespace SonOfPicasso.UI.ViewModels
     {
         private readonly Func<ImageContainerViewModel> _imageContainerViewModelFactory;
         private readonly IImageManagementService _imageManagementService;
-        private readonly ILogger _logger;
+        private readonly Func<ImageViewModel> _imageViewModelFactory;
         private readonly ISchedulerProvider _schedulerProvider;
 
-        public ApplicationViewModel(ILogger logger,
-            ISchedulerProvider schedulerProvider,
+        public ApplicationViewModel(ISchedulerProvider schedulerProvider,
             IImageManagementService imageManagementService,
             Func<ImageContainerViewModel> imageContainerViewModelFactory,
+            Func<ImageViewModel> imageViewModelFactory,
             ViewModelActivator activator) : base(activator)
         {
-            _logger = logger;
             _schedulerProvider = schedulerProvider;
             _imageManagementService = imageManagementService;
             _imageContainerViewModelFactory = imageContainerViewModelFactory;
+            _imageViewModelFactory = imageViewModelFactory;
 
             var imageContainerViewModels = new ObservableCollectionExtended<ImageContainerViewModel>();
             ImageContainerViewModels = imageContainerViewModels;
+
+            var imageViewModels = new ObservableCollectionExtended<ImageViewModel>();
+            ImageViewModels = imageViewModels;
 
             AddFolder = ReactiveCommand.CreateFromObservable<Unit, Unit>(ExecuteAddFolder);
             AddFolderInteraction = new Interaction<Unit, string>();
@@ -62,6 +64,17 @@ namespace SonOfPicasso.UI.ViewModels
                     .Subscribe()
                     .DisposeWith(d);
 
+                imageContainerViewModelCache
+                    .Connect()
+                    .TransformMany(
+                        containerViewModel => containerViewModel.ImageRefs.Select(imageRef => CreateImageViewModel(imageRef, containerViewModel)),
+                        imageViewModel => imageViewModel.ImageRefId)
+                    .DisposeMany()
+                    .ObserveOn(_schedulerProvider.MainThreadScheduler)
+                    .Bind(imageViewModels)
+                    .Subscribe()
+                    .DisposeWith(d);
+
                 ImageContainerCache
                     .PopulateFrom(_imageManagementService.GetAllImageContainers())
                     .DisposeWith(d);
@@ -76,12 +89,22 @@ namespace SonOfPicasso.UI.ViewModels
 
         public IObservableCollection<ImageContainerViewModel> ImageContainerViewModels { get; }
 
+        public ObservableCollectionExtended<ImageViewModel> ImageViewModels { get; }
+
         public ReactiveCommand<Unit, Unit> AddFolder { get; }
 
         public ReactiveCommand<Unit, Unit> NewAlbum { get; }
 
         public void Dispose()
         {
+            ImageContainerCache?.Dispose();
+        }
+
+        private ImageViewModel CreateImageViewModel(ImageRef imageRef, ImageContainerViewModel imageContainerViewModel)
+        {
+            var imageViewModel = _imageViewModelFactory();
+            imageViewModel.Initialize(imageRef, imageContainerViewModel);
+            return imageViewModel;
         }
 
         private ImageContainerViewModel CreateImageContainerViewModel(ImageContainer imageContainer)
