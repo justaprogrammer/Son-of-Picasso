@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections;
 using System.ComponentModel;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Windows;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Forms;
 using DynamicData;
@@ -48,10 +51,13 @@ namespace SonOfPicasso.UI.Windows
             
             this.WhenActivated(d =>
             {
-                imageCollectionViewSource.Source = ViewModel.ImageViewModels;
+                imageCollectionViewSource.Source = ViewModel.Images;
 
                 var propertyGroupDescription = new PropertyGroupDescription("ImageContainerViewModel");
-                d(ViewModel.ImageContainerViewModels.ToObservableChangeSet()
+                var viewModelImageContainerViewModels = (ObservableCollectionExtended<ImageContainerViewModel>) ViewModel.ImageContainers;
+
+                viewModelImageContainerViewModels
+                    .ToObservableChangeSet()
                     .Subscribe(changeSets =>
                     {
                         foreach (var chagetSet in changeSets)
@@ -65,29 +71,42 @@ namespace SonOfPicasso.UI.Windows
                                     throw new ArgumentOutOfRangeException();
                             }
                         }
-                    }));
+                    }).DisposeWith(d);
 
                 imageCollectionViewSource.GroupDescriptions.Add(propertyGroupDescription);
                 imageCollectionViewSource.SortDescriptions.Add(new SortDescription("ContainerType", ListSortDirection.Ascending));
                 imageCollectionViewSource.SortDescriptions.Add(new SortDescription("ContainerYear", ListSortDirection.Descending));
                 imageCollectionViewSource.SortDescriptions.Add(new SortDescription("ContainerDate", ListSortDirection.Descending));
 
-                imageContainersViewSource.Source = ViewModel.ImageContainerViewModels;
+                imageContainersViewSource.Source = ViewModel.ImageContainers;
                 imageContainersViewSource.GroupDescriptions.Add(new PropertyGroupDescription("ContainerType"));
                 imageContainersViewSource.GroupDescriptions.Add(new PropertyGroupDescription("Year"));
                 imageContainersViewSource.SortDescriptions.Add(new SortDescription("ContainerType", ListSortDirection.Ascending));
                 imageContainersViewSource.SortDescriptions.Add(new SortDescription("Year", ListSortDirection.Descending));
                 imageContainersViewSource.SortDescriptions.Add(new SortDescription("Date", ListSortDirection.Descending));
 
-                d(this.BindCommand(ViewModel, 
+                this.BindCommand(ViewModel, 
                     model => model.AddFolder,
-                    window => window.AddFolder));
+                    window => window.AddFolder).DisposeWith(d);
 
-                d(this.BindCommand(ViewModel,
+                this.BindCommand(ViewModel,
                     model => model.NewAlbum,
-                    window => window.NewAlbum));
+                    window => window.NewAlbum).DisposeWith(d);
 
-                d(ViewModel.NewAlbumInteraction.RegisterHandler(context =>
+                ImagesList.Events().SelectionChanged.Subscribe(ea =>
+                {
+                    using (ViewModel.SelectedImages.SuspendNotifications())
+                    {
+                        ViewModel.SelectedImages.RemoveMany(ea.RemovedItems.Cast<ImageViewModel>());
+                        ViewModel.SelectedImages.AddRange(ea.AddedItems.Cast<ImageViewModel>());
+                    }
+                }).DisposeWith(d);
+
+                this.OneWayBind(ViewModel,
+                    model => model.TrayImages,
+                    window => window.TrayImagesList.ItemsSource).DisposeWith(d);
+
+                ViewModel.NewAlbumInteraction.RegisterHandler(context =>
                 {
                     return Observable.Defer(() =>
                     {
@@ -102,9 +121,9 @@ namespace SonOfPicasso.UI.Windows
                         context.SetOutput(result);
                         return Observable.Return(Unit.Default);
                     }).SubscribeOn(_schedulerProvider.MainThreadScheduler);
-                }));
+                }).DisposeWith(d);
 
-                d(ViewModel.AddFolderInteraction.RegisterHandler(context =>
+                ViewModel.AddFolderInteraction.RegisterHandler(context =>
                 {
                     return Observable.Defer(() =>
                     {
@@ -119,7 +138,7 @@ namespace SonOfPicasso.UI.Windows
                         context.SetOutput(result);
                         return Observable.Return(Unit.Default);
                     }).SubscribeOn(_schedulerProvider.MainThreadScheduler);
-                }));
+                }).DisposeWith(d);
             });
         }
     }

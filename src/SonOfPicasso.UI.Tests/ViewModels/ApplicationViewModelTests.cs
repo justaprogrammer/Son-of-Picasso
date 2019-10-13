@@ -48,8 +48,8 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             TestSchedulerProvider.TaskPool.AdvanceBy(1);
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(2);
 
-            applicationViewModel.ImageContainerViewModels.Count.Should().Be(2);
-            ActivateContainerViewModel(2, applicationViewModel.ImageContainerViewModels.ToArray());
+            applicationViewModel.ImageContainers.Count.Should().Be(2);
+            ActivateContainerViewModel(2, applicationViewModel.ImageContainers.ToArray());
         }
     }
 }

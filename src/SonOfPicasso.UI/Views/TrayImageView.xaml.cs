@@ -8,17 +8,15 @@ namespace SonOfPicasso.UI.Views
     /// <summary>
     /// Interaction logic for ImageDetailView.xaml
     /// </summary>
-    public partial class ImageView : ReactiveUserControl<ImageViewModel>
+    public partial class TrayImageView : ReactiveUserControl<TrayImageViewModel>
     {
-        public ImageView()
+        public TrayImageView()
         {
             InitializeComponent();
 
             this.WhenActivated(d =>
             {
-                ImageLabel.Content = ViewModel.ImageRef.ImagePath;
-
-                d(ViewModel.GetImage()
+                d(ViewModel.Image.GetImage()
                     .Subscribe(bitmap =>
                     {
                         var imageBitmapSource = bitmap.ToNative();

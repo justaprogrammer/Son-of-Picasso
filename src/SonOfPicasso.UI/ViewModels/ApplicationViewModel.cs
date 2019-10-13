@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
@@ -20,23 +20,32 @@ namespace SonOfPicasso.UI.ViewModels
         private readonly IImageManagementService _imageManagementService;
         private readonly Func<ImageViewModel> _imageViewModelFactory;
         private readonly ISchedulerProvider _schedulerProvider;
+        private readonly Func<TrayImageViewModel> _trayImageViewModelFactory;
 
         public ApplicationViewModel(ISchedulerProvider schedulerProvider,
             IImageManagementService imageManagementService,
             Func<ImageContainerViewModel> imageContainerViewModelFactory,
             Func<ImageViewModel> imageViewModelFactory,
+            Func<TrayImageViewModel> trayImageViewModelFactory,
             ViewModelActivator activator) : base(activator)
         {
             _schedulerProvider = schedulerProvider;
             _imageManagementService = imageManagementService;
             _imageContainerViewModelFactory = imageContainerViewModelFactory;
             _imageViewModelFactory = imageViewModelFactory;
+            _trayImageViewModelFactory = trayImageViewModelFactory;
 
-            var imageContainerViewModels = new ObservableCollectionExtended<ImageContainerViewModel>();
-            ImageContainerViewModels = imageContainerViewModels;
+            var imageContainers = new ObservableCollectionExtended<ImageContainerViewModel>();
+            ImageContainers = imageContainers;
 
-            var imageViewModels = new ObservableCollectionExtended<ImageViewModel>();
-            ImageViewModels = imageViewModels;
+            var images = new ObservableCollectionExtended<ImageViewModel>();
+            Images = images;
+
+            var selectedImages = new ObservableCollectionExtended<ImageViewModel>();
+            SelectedImages = selectedImages;
+
+            var trayImages = new ObservableCollectionExtended<TrayImageViewModel>();
+            TrayImages = trayImages;
 
             AddFolder = ReactiveCommand.CreateFromObservable<Unit, Unit>(ExecuteAddFolder);
             AddFolderInteraction = new Interaction<Unit, string>();
@@ -61,18 +70,25 @@ namespace SonOfPicasso.UI.ViewModels
                         .Ascending(model => model.ContainerType == ImageContainerTypeEnum.Folder)
                         .ThenByDescending(model => model.Date))
                     .ObserveOn(_schedulerProvider.MainThreadScheduler)
-                    .Bind(imageContainerViewModels)
+                    .Bind(imageContainers)
                     .Subscribe()
                     .DisposeWith(d);
 
                 imageContainerViewModelCache
                     .Connect()
-                    .TransformMany(
-                        containerViewModel => containerViewModel.ImageRefs.Select(imageRef => CreateImageViewModel(imageRef, containerViewModel)),
-                        imageViewModel => imageViewModel.ImageRefId)
+                    .TransformMany(CreateImageViewModels, imageViewModel => imageViewModel.ImageRefId)
                     .DisposeMany()
                     .ObserveOn(_schedulerProvider.MainThreadScheduler)
-                    .Bind(imageViewModels)
+                    .Bind(images)
+                    .Subscribe()
+                    .DisposeWith(d);
+
+                selectedImages
+                    .ToObservableChangeSet()
+                    .Transform(CreateTrayImageViewModel)
+                    .DisposeMany()
+                    .ObserveOn(_schedulerProvider.MainThreadScheduler)
+                    .Bind(trayImages)
                     .Subscribe()
                     .DisposeWith(d);
 
@@ -88,9 +104,13 @@ namespace SonOfPicasso.UI.ViewModels
 
         private SourceCache<ImageContainer, string> ImageContainerCache { get; }
 
-        public ObservableCollection<ImageContainerViewModel> ImageContainerViewModels { get; }
+        public ObservableCollectionExtended<ImageContainerViewModel> ImageContainers { get; }
 
-        public ObservableCollectionExtended<ImageViewModel> ImageViewModels { get; }
+        public ObservableCollectionExtended<ImageViewModel> Images { get; }
+
+        public ObservableCollectionExtended<ImageViewModel> SelectedImages { get; }
+
+        public ObservableCollectionExtended<TrayImageViewModel> TrayImages { get; }
 
         public ReactiveCommand<Unit, Unit> AddFolder { get; }
 
@@ -99,6 +119,19 @@ namespace SonOfPicasso.UI.ViewModels
         public void Dispose()
         {
             ImageContainerCache?.Dispose();
+        }
+
+        private IEnumerable<ImageViewModel> CreateImageViewModels(ImageContainerViewModel containerViewModel)
+        {
+            return containerViewModel.ImageRefs.Select(imageRef =>
+                CreateImageViewModel(imageRef, containerViewModel));
+        }
+
+        private TrayImageViewModel CreateTrayImageViewModel(ImageViewModel model)
+        {
+            var trayImageViewModel = _trayImageViewModelFactory();
+            trayImageViewModel.Initialize(model);
+            return trayImageViewModel;
         }
 
         private ImageViewModel CreateImageViewModel(ImageRef imageRef, ImageContainerViewModel imageContainerViewModel)
@@ -140,10 +173,7 @@ namespace SonOfPicasso.UI.ViewModels
                 .ObserveOn(_schedulerProvider.TaskPool)
                 .Select(s =>
                 {
-                    if (s != null)
-                    {
-                        ImageContainerCache.PopulateFrom(_imageManagementService.ScanFolder(s).ToArray());
-                    }
+                    if (s != null) ImageContainerCache.PopulateFrom(_imageManagementService.ScanFolder(s).ToArray());
 
                     return Observable.Return(Unit.Default);
                 })

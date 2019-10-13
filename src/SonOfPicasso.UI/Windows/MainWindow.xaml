@@ -45,17 +45,19 @@
             <MenuItem Header="_Tools" />
             <MenuItem Header="_Help" />
         </Menu>
+
         <Grid DockPanel.Dock="Top">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition />
+                <ColumnDefinition Width="4*" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition />
                 <RowDefinition Height="100" />
             </Grid.RowDefinitions>
-            <ListView Name="FoldersListView"
+
+            <ListView Name="ContainersList"
                       Grid.Column="0"
                       Grid.Row="0"
                       ItemsSource="{Binding Source={StaticResource ImageContainersViewSource}}"
@@ -104,7 +106,8 @@
                           VerticalAlignment="Stretch"
                           ShowsPreview="True"
                           Width="5" />
-            <ListView Name="ImagesListView"
+
+            <ListView Name="ImagesList"
                       Grid.Column="2"
                       Grid.Row="0"
                       ItemsSource="{Binding Source={StaticResource ImagesCollectionViewSource}}"
@@ -121,7 +124,7 @@
                                 <Setter Property="Template">
                                     <Setter.Value>
                                         <ControlTemplate TargetType="{x:Type GroupItem}">
-                                            <StackPanel Width="{Binding ElementName=ImagesListView, Path=ActualWidth}">
+                                            <StackPanel Width="{Binding ElementName=ImagesList, Path=ActualWidth}">
                                                 <ContentPresenter x:Name="PART_Header" />
                                                 <ItemsPresenter x:Name="ItemsPresenter" Margin="5,0,0,0" />
                                             </StackPanel>
@@ -152,7 +155,23 @@
                 </ListView.ItemTemplate>
             </ListView>
 
-            <ListView Grid.Row="1" Grid.ColumnSpan="3" />
+            <ListView Name="TrayImagesList"
+                      Grid.Row="1" Grid.Column="0"
+                      Grid.ColumnSpan="3">
+
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel />
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
+
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <reactiveUi:ViewModelViewHost ViewModel="{Binding}" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
         </Grid>
     </DockPanel>
 </reactiveUi:ReactiveWindow>
