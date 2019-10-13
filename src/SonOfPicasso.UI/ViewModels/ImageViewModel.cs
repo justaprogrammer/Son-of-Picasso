@@ -27,6 +27,9 @@ namespace SonOfPicasso.UI.ViewModels
         public int ImageId => ImageRef.ImageId;
         public string Path => ImageRef.ImagePath;
         public string ContainerId => ImageContainerViewModel.ContainerId;
+        public ImageContainerTypeEnum ContainerType => ImageContainerViewModel.ContainerType;
+        public int ContainerYear => ImageContainerViewModel.Year;
+        public DateTime ContainerDate => ImageContainerViewModel.Date;
 
         public void Initialize(ImageRef imageRef, ImageContainerViewModel imageContainerViewModel)
         {

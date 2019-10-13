@@ -28,6 +28,8 @@ namespace SonOfPicasso.UI.ViewModels
 
         public IList<ImageRef> ImageRefs => _imageContainer.ImageRefs;
 
+        public int Year => _imageContainer.Year;
+
         public DateTime Date => _imageContainer.Date;
 
         public ApplicationViewModel ApplicationViewModel { get; private set; }

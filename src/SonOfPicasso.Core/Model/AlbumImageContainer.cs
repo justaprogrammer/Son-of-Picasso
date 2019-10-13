@@ -12,11 +12,13 @@ namespace SonOfPicasso.Core.Model
             Id = GetContainerId(album);
             Name = album.Name;
             Date = album.Date;
+            Year = album.Date.Year;
             ImageRefs = album.AlbumImages.Select(albumImage => new ImageRef(albumImage.Image, this)).ToArray();
         }
 
         public override string Id { get; }
         public override string Name { get; }
+        public override int Year { get; }
         public override DateTime Date { get; }
         public override ImageContainerTypeEnum ContainerType => ImageContainerTypeEnum.Album;
         public override IList<ImageRef> ImageRefs { get; }

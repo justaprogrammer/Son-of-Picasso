@@ -85,7 +85,7 @@ namespace SonOfPicasso.Core.Services
                     observer.OnCompleted();
                     return Disposable.Empty;
                 })
-                .Select(folder => (ImageContainer) new FolderImageContainer(folder))
+                .Select(folder => (ImageContainer) new FolderImageContainer(folder, _fileSystem))
                 .SubscribeOn(_schedulerProvider.TaskPool);
         }
 
@@ -121,7 +121,7 @@ namespace SonOfPicasso.Core.Services
                     .Get(includeProperties: "Images,Images.ExifData")
                     .ToArray();
 
-                foreach (var folder in folders) observer.OnNext(new FolderImageContainer(folder));
+                foreach (var folder in folders) observer.OnNext(new FolderImageContainer(folder, _fileSystem));
 
                 observer.OnCompleted();
 

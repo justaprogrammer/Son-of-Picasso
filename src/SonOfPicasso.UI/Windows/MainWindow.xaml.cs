@@ -1,9 +1,14 @@
 ﻿using System;
+using System.ComponentModel;
 using System.IO.Abstractions;
+using System.Linq;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows.Data;
 using System.Windows.Forms;
+using DynamicData;
+using DynamicData.Binding;
 using ReactiveUI;
 using Serilog;
 using SonOfPicasso.Core.Interfaces;
@@ -39,15 +44,40 @@ namespace SonOfPicasso.UI.Windows
             InitializeComponent();
 
             var imageCollectionViewSource = (CollectionViewSource) FindResource("ImagesCollectionViewSource");
-            imageCollectionViewSource.GroupDescriptions.Add(new PropertyGroupDescription("ImageContainerViewModel"));
-
+            var imageContainersViewSource = (CollectionViewSource) FindResource("ImageContainersViewSource");
+            
             this.WhenActivated(d =>
             {
                 imageCollectionViewSource.Source = ViewModel.ImageViewModels;
 
-                d(this.OneWayBind(ViewModel,
-                    model => model.ImageContainerViewModels,
-                    window => window.FoldersListView.ItemsSource));
+                var propertyGroupDescription = new PropertyGroupDescription("ImageContainerViewModel");
+                d(ViewModel.ImageContainerViewModels.ToObservableChangeSet()
+                    .Subscribe(changeSets =>
+                    {
+                        foreach (var chagetSet in changeSets)
+                        {
+                            switch (chagetSet.Reason)
+                            {
+                                case ListChangeReason.AddRange:
+                                    propertyGroupDescription.GroupNames.AddRange(chagetSet.Range.ToArray());
+                                    break;
+                                default:
+                                    throw new ArgumentOutOfRangeException();
+                            }
+                        }
+                    }));
+
+                imageCollectionViewSource.GroupDescriptions.Add(propertyGroupDescription);
+                imageCollectionViewSource.SortDescriptions.Add(new SortDescription("ContainerType", ListSortDirection.Ascending));
+                imageCollectionViewSource.SortDescriptions.Add(new SortDescription("ContainerYear", ListSortDirection.Descending));
+                imageCollectionViewSource.SortDescriptions.Add(new SortDescription("ContainerDate", ListSortDirection.Descending));
+
+                imageContainersViewSource.Source = ViewModel.ImageContainerViewModels;
+                imageContainersViewSource.GroupDescriptions.Add(new PropertyGroupDescription("ContainerType"));
+                imageContainersViewSource.GroupDescriptions.Add(new PropertyGroupDescription("Year"));
+                imageContainersViewSource.SortDescriptions.Add(new SortDescription("ContainerType", ListSortDirection.Ascending));
+                imageContainersViewSource.SortDescriptions.Add(new SortDescription("Year", ListSortDirection.Descending));
+                imageContainersViewSource.SortDescriptions.Add(new SortDescription("Date", ListSortDirection.Descending));
 
                 d(this.BindCommand(ViewModel, 
                     model => model.AddFolder,

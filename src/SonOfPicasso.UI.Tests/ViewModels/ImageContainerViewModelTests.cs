@@ -21,7 +21,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             var applicationViewModel = AutoSubstitute.Resolve<ApplicationViewModel>();
 
             var folder = Fakers.FolderFaker.Generate("default,withImages");
-            var folderImageContainer = new FolderImageContainer(folder);
+            var folderImageContainer = new FolderImageContainer(folder, MockFileSystem);
 
             imageContainerViewModel.Initialize(folderImageContainer, applicationViewModel);
             ActivateContainerViewModel(2, imageContainerViewModel);

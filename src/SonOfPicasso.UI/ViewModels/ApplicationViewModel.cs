@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
@@ -76,7 +77,7 @@ namespace SonOfPicasso.UI.ViewModels
                     .DisposeWith(d);
 
                 ImageContainerCache
-                    .PopulateFrom(_imageManagementService.GetAllImageContainers())
+                    .PopulateFrom(_imageManagementService.GetAllImageContainers().ToArray())
                     .DisposeWith(d);
             });
         }
@@ -87,7 +88,7 @@ namespace SonOfPicasso.UI.ViewModels
 
         private SourceCache<ImageContainer, string> ImageContainerCache { get; }
 
-        public IObservableCollection<ImageContainerViewModel> ImageContainerViewModels { get; }
+        public ObservableCollection<ImageContainerViewModel> ImageContainerViewModels { get; }
 
         public ObservableCollectionExtended<ImageViewModel> ImageViewModels { get; }
 

@@ -31,7 +31,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
                 .ToArray();
 
             var imageContainers = folders
-                .Select(folder => new FolderImageContainer(folder))
+                .Select(folder => new FolderImageContainer(folder, MockFileSystem))
                 .ToArray();
 
             imageManagementService.GetAllImageContainers()
