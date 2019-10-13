@@ -1,12 +1,12 @@
 ﻿using System;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using DynamicData;
 using DynamicData.Binding;
 using ReactiveUI;
-using Serilog;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Model;
 using SonOfPicasso.Core.Scheduling;
@@ -18,28 +18,25 @@ namespace SonOfPicasso.UI.ViewModels
     {
         private readonly Func<ImageContainerViewModel> _imageContainerViewModelFactory;
         private readonly IImageManagementService _imageManagementService;
-        private readonly ILogger _logger;
+        private readonly Func<ImageViewModel> _imageViewModelFactory;
         private readonly ISchedulerProvider _schedulerProvider;
-        private readonly ObservableAsPropertyHelper<ImageViewModel> _selectedImage;
-        private readonly ObservableAsPropertyHelper<ImageContainerViewModel> _selectedImageContainer;
-        private readonly ReplaySubject<ImageContainerViewModel> _selectedImageContainerReplay;
-        private readonly ReplaySubject<ImageViewModel> _selectedImageReplay;
-        private readonly ObservableAsPropertyHelper<ImageRowViewModel> _selectedImageRow;
-        private readonly ReplaySubject<ImageRowViewModel> _selectedImageRowReplay;
 
-        public ApplicationViewModel(ILogger logger,
-            ISchedulerProvider schedulerProvider,
+        public ApplicationViewModel(ISchedulerProvider schedulerProvider,
             IImageManagementService imageManagementService,
             Func<ImageContainerViewModel> imageContainerViewModelFactory,
+            Func<ImageViewModel> imageViewModelFactory,
             ViewModelActivator activator) : base(activator)
         {
-            _logger = logger;
             _schedulerProvider = schedulerProvider;
             _imageManagementService = imageManagementService;
             _imageContainerViewModelFactory = imageContainerViewModelFactory;
+            _imageViewModelFactory = imageViewModelFactory;
 
             var imageContainerViewModels = new ObservableCollectionExtended<ImageContainerViewModel>();
             ImageContainerViewModels = imageContainerViewModels;
+
+            var imageViewModels = new ObservableCollectionExtended<ImageViewModel>();
+            ImageViewModels = imageViewModels;
 
             AddFolder = ReactiveCommand.CreateFromObservable<Unit, Unit>(ExecuteAddFolder);
             AddFolderInteraction = new Interaction<Unit, string>();
@@ -49,15 +46,6 @@ namespace SonOfPicasso.UI.ViewModels
 
             ImageContainerCache = new SourceCache<ImageContainer, string>(imageContainer => imageContainer.Id);
 
-            _selectedImageContainerReplay = new ReplaySubject<ImageContainerViewModel>();
-            _selectedImageContainer = _selectedImageContainerReplay.ToProperty(this, nameof(SelectedImageContainer));
-
-            _selectedImageRowReplay = new ReplaySubject<ImageRowViewModel>(1);
-            _selectedImageRow = _selectedImageRowReplay.ToProperty(this, nameof(SelectedImageRow));
-
-            _selectedImageReplay = new ReplaySubject<ImageViewModel>();
-            _selectedImage = _selectedImageReplay.ToProperty(this, nameof(SelectedImage));
-
             this.WhenActivated(d =>
             {
                 var imageContainerViewModelCache = ImageContainerCache
@@ -65,41 +53,6 @@ namespace SonOfPicasso.UI.ViewModels
                     .Transform(CreateImageContainerViewModel)
                     .DisposeMany()
                     .AsObservableCache()
-                    .DisposeWith(d);
-
-                imageContainerViewModelCache.Connect()
-                    .WhenAnyPropertyChanged(nameof(ImageContainerViewModel.SelectedImageRow),
-                        nameof(ImageContainerViewModel.SelectedImage))
-                    .Subscribe(imageContainerViewModel =>
-                    {
-                        var selectedImageRowChanged = imageContainerViewModel.SelectedImageRow != null
-                                                      && imageContainerViewModel.SelectedImageRow != SelectedImageRow;
-
-                        var selectedImageChanged = imageContainerViewModel.SelectedImage != null
-                                                   && imageContainerViewModel.SelectedImage != SelectedImage;
-
-                        var selectedContainerClearing = imageContainerViewModel.SelectedImageRow == null
-                                                        && imageContainerViewModel == SelectedImageContainer;
-
-                        if (selectedImageRowChanged
-                            || selectedContainerClearing)
-                        {
-                            if (imageContainerViewModel.SelectedImageRow == null)
-                            {
-                                _selectedImageContainerReplay.OnNext(null);
-                                _selectedImageRowReplay.OnNext(null);
-                                _selectedImageReplay.OnNext(null);
-                            }
-                            else
-                            {
-                                _selectedImageContainerReplay.OnNext(imageContainerViewModel);
-                                _selectedImageRowReplay.OnNext(imageContainerViewModel.SelectedImageRow);
-                                _selectedImageReplay.OnNext(imageContainerViewModel.SelectedImageRow.SelectedImage);
-                            }
-                        }
-
-                        if (selectedImageChanged) _selectedImageReplay.OnNext(SelectedImageContainer.SelectedImage);
-                    })
                     .DisposeWith(d);
 
                 imageContainerViewModelCache
@@ -112,8 +65,19 @@ namespace SonOfPicasso.UI.ViewModels
                     .Subscribe()
                     .DisposeWith(d);
 
+                imageContainerViewModelCache
+                    .Connect()
+                    .TransformMany(
+                        containerViewModel => containerViewModel.ImageRefs.Select(imageRef => CreateImageViewModel(imageRef, containerViewModel)),
+                        imageViewModel => imageViewModel.ImageRefId)
+                    .DisposeMany()
+                    .ObserveOn(_schedulerProvider.MainThreadScheduler)
+                    .Bind(imageViewModels)
+                    .Subscribe()
+                    .DisposeWith(d);
+
                 ImageContainerCache
-                    .PopulateFrom(_imageManagementService.GetAllImageContainers())
+                    .PopulateFrom(_imageManagementService.GetAllImageContainers().ToArray())
                     .DisposeWith(d);
             });
         }
@@ -124,26 +88,24 @@ namespace SonOfPicasso.UI.ViewModels
 
         private SourceCache<ImageContainer, string> ImageContainerCache { get; }
 
-        public IObservableCollection<ImageContainerViewModel> ImageContainerViewModels { get; }
+        public ObservableCollection<ImageContainerViewModel> ImageContainerViewModels { get; }
+
+        public ObservableCollectionExtended<ImageViewModel> ImageViewModels { get; }
 
         public ReactiveCommand<Unit, Unit> AddFolder { get; }
 
         public ReactiveCommand<Unit, Unit> NewAlbum { get; }
 
-        public ImageContainerViewModel SelectedImageContainer => _selectedImageContainer.Value;
-
-        public ImageRowViewModel SelectedImageRow => _selectedImageRow.Value;
-
-        public ImageViewModel SelectedImage => _selectedImage.Value;
-
         public void Dispose()
         {
-            _selectedImage?.Dispose();
-            _selectedImageContainer?.Dispose();
-            _selectedImageContainerReplay?.Dispose();
-            _selectedImageReplay?.Dispose();
-            _selectedImageRow?.Dispose();
-            _selectedImageRowReplay?.Dispose();
+            ImageContainerCache?.Dispose();
+        }
+
+        private ImageViewModel CreateImageViewModel(ImageRef imageRef, ImageContainerViewModel imageContainerViewModel)
+        {
+            var imageViewModel = _imageViewModelFactory();
+            imageViewModel.Initialize(imageRef, imageContainerViewModel);
+            return imageViewModel;
         }
 
         private ImageContainerViewModel CreateImageContainerViewModel(ImageContainer imageContainer)

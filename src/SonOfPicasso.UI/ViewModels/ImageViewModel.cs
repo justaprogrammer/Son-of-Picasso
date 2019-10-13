@@ -9,7 +9,7 @@ using Splat;
 
 namespace SonOfPicasso.UI.ViewModels
 {
-    public class ImageViewModel : ViewModelBase, IDisposable
+    public class ImageViewModel : ViewModelBase
     {
         private readonly IImageLoadingService _imageLoadingService;
         private readonly ISchedulerProvider _schedulerProvider;
@@ -21,27 +21,26 @@ namespace SonOfPicasso.UI.ViewModels
             _schedulerProvider = schedulerProvider;
         }
 
-        public ImageRowViewModel ImageRowViewModel { get; private set; }
         public ImageRef ImageRef { get; private set; }
+        public ImageContainerViewModel ImageContainerViewModel { get; set; }
         public string ImageRefId => ImageRef.Id;
         public int ImageId => ImageRef.ImageId;
         public string Path => ImageRef.ImagePath;
+        public string ContainerId => ImageContainerViewModel.ContainerId;
+        public ImageContainerTypeEnum ContainerType => ImageContainerViewModel.ContainerType;
+        public int ContainerYear => ImageContainerViewModel.Year;
+        public DateTime ContainerDate => ImageContainerViewModel.Date;
 
-        public void Initialize(ImageRef imageRef, ImageRowViewModel imageRowViewModel)
+        public void Initialize(ImageRef imageRef, ImageContainerViewModel imageContainerViewModel)
         {
             ImageRef = imageRef ?? throw new ArgumentNullException(nameof(imageRef));
-            ImageRowViewModel = imageRowViewModel ?? throw new ArgumentNullException(nameof(imageRowViewModel));
+            ImageContainerViewModel = imageContainerViewModel;
         }
 
         public IObservable<IBitmap> GetImage()
         {
             return _imageLoadingService.LoadImageFromPath(Path)
                 .ObserveOn(_schedulerProvider.MainThreadScheduler);
-        }
-
-        public void Dispose()
-        {
-            ImageRowViewModel?.Dispose();
         }
     }
 }

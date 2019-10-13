@@ -16,14 +16,10 @@ namespace SonOfPicasso.UI.Tests.ViewModels
                 new ImageViewModel(AutoSubstitute.Resolve<IImageLoadingService>(), TestSchedulerProvider,
                     new ViewModelActivator());
 
-            Func<ImageRowViewModel> imageRowViewModelFactory =
-                () => new ImageRowViewModel(imageViewModelFactory, new ViewModelActivator());
-
             Func<ImageContainerViewModel> imageContainerViewModelFactory = () =>
-                new ImageContainerViewModel(imageRowViewModelFactory, new ViewModelActivator(), TestSchedulerProvider);
+                new ImageContainerViewModel(new ViewModelActivator(), TestSchedulerProvider);
 
             AutoSubstitute.Provide(imageViewModelFactory);
-            AutoSubstitute.Provide(imageRowViewModelFactory);
             AutoSubstitute.Provide(imageContainerViewModelFactory);
         }
 
@@ -31,17 +27,6 @@ namespace SonOfPicasso.UI.Tests.ViewModels
         {
             foreach (var imageContainerViewModel in imageContainerViewModels)
                 imageContainerViewModel.Activator.Activate();
-
-            TestSchedulerProvider.MainThreadScheduler.AdvanceBy(rowCount);
-
-            foreach (var imageContainerViewModel in imageContainerViewModels)
-            foreach (var imageRowViewModel in imageContainerViewModel.ImageRowViewModels)
-            {
-                imageRowViewModel.Activator.Activate();
-
-                foreach (var imageViewModel in imageRowViewModel.ImageViewModels)
-                    imageViewModel.Activator.Activate();
-            }
         }
     }
 }
