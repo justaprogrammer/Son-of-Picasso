@@ -155,23 +155,33 @@
                 </ListView.ItemTemplate>
             </ListView>
 
-            <ListView Name="TrayImagesList"
-                      Grid.Row="1" Grid.Column="0"
-                      Grid.ColumnSpan="3">
+            <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="4*" />
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="6*" />
+                </Grid.ColumnDefinitions>
 
-                <ListView.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <WrapPanel />
-                    </ItemsPanelTemplate>
-                </ListView.ItemsPanel>
+                <ListView Name="TrayImagesList" Grid.Column="0">
+                    <ListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel />
+                        </ItemsPanelTemplate>
+                    </ListView.ItemsPanel>
 
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <reactiveUi:ViewModelViewHost ViewModel="{Binding}" />
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <reactiveUi:ViewModelViewHost ViewModel="{Binding}" />
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
 
+                <StackPanel Orientation="Vertical" Grid.Column="1">
+                    <Button>Pin</Button>
+                    <Button>Clear</Button>
+                    <Button>Album</Button>
+                </StackPanel>
+            </Grid>
         </Grid>
     </DockPanel>
 </reactiveUi:ReactiveWindow>
