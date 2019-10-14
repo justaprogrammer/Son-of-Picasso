@@ -13,21 +13,6 @@
     <Window.Resources>
         <CollectionViewSource x:Key="ImageContainersViewSource" />
         <CollectionViewSource x:Key="ImagesCollectionViewSource" />
-
-        <Style x:Key="ImageCollectionGroup"
-               TargetType="{x:Type GroupItem}">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type GroupItem}">
-                        <StackPanel>
-                            <ContentPresenter x:Name="PART_Header" />
-                            <ItemsPresenter x:Name="ItemsPresenter" Margin="5,0,0,0" />
-                        </StackPanel>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
     </Window.Resources>
     <DockPanel>
         <Menu DockPanel.Dock="Top" Width="Auto" Height="20">
