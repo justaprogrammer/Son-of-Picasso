@@ -5,6 +5,8 @@ namespace SonOfPicasso.UI.ViewModels
 {
     public class TrayImageViewModel : ViewModelBase
     {
+        private bool _pinned;
+
         public TrayImageViewModel(ViewModelActivator activator) : base(activator)
         {
         }
@@ -14,6 +16,12 @@ namespace SonOfPicasso.UI.ViewModels
         public void Initialize(ImageViewModel imageViewModel)
         {
             Image = imageViewModel;
+        }
+
+        public bool Pinned
+        {
+            get => _pinned;
+            set => this.RaiseAndSetIfChanged(ref _pinned, value);
         }
     }
 }

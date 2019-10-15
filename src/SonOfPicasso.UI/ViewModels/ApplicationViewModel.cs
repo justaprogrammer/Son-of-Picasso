@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
@@ -47,13 +48,34 @@ namespace SonOfPicasso.UI.ViewModels
             var trayImages = new ObservableCollectionExtended<TrayImageViewModel>();
             TrayImages = trayImages;
 
-            AddFolder = ReactiveCommand.CreateFromObservable<Unit, Unit>(ExecuteAddFolder);
-            AddFolderInteraction = new Interaction<Unit, string>();
+            var selectedTrayImages = new ObservableCollectionExtended<TrayImageViewModel>();
+            SelectedTrayImages = selectedTrayImages;
 
-            NewAlbum = ReactiveCommand.CreateFromObservable(ExecuteNewAlbum);
+            AddFolderInteraction = new Interaction<Unit, string>();
             NewAlbumInteraction = new Interaction<Unit, AddAlbumViewModel>();
 
+            AddFolder = ReactiveCommand.CreateFromObservable<Unit, Unit>(ExecuteAddFolder);
+            NewAlbum = ReactiveCommand.CreateFromObservable(ExecuteNewAlbum);
+                
+            var hasItemsInTray = this.WhenAnyValue(model => model.TrayImages.Count)
+                .Select(propertyValue => propertyValue > 0);
+
+            PinSelectedItems = ReactiveCommand.CreateFromObservable<IList<TrayImageViewModel>, Unit>(ExecutePinSelectedItems, hasItemsInTray);
+            ClearTrayItems = ReactiveCommand.CreateFromObservable< (IList<TrayImageViewModel>, bool), Unit>(ExecuteClearTrayItems, hasItemsInTray);
+            AddTrayItemsToAlbum = ReactiveCommand.CreateFromObservable<Unit, Unit>(ExecuteAddTrayItemsToAlbum, hasItemsInTray);
+
+            ClearTrayItemsInteraction = new Interaction<Unit, Unit>();
+
             ImageContainerCache = new SourceCache<ImageContainer, string>(imageContainer => imageContainer.Id);
+
+            TrayImageSourceCache = new SourceCache<ImageViewModel, int>(model => model.ImageId);
+
+            TrayImageCache = TrayImageSourceCache
+                .Connect()
+                .Transform(CreateTrayImageViewModel)
+                .ObserveOn(_schedulerProvider.MainThreadScheduler)
+                .Bind(trayImages)
+                .AsObservableCache();
 
             this.WhenActivated(d =>
             {
@@ -85,11 +107,36 @@ namespace SonOfPicasso.UI.ViewModels
 
                 selectedImages
                     .ToObservableChangeSet()
-                    .Transform(CreateTrayImageViewModel)
-                    .DisposeMany()
-                    .ObserveOn(_schedulerProvider.MainThreadScheduler)
-                    .Bind(trayImages)
-                    .Subscribe()
+                    .Subscribe(set =>
+                    {
+                        TrayImageSourceCache.Edit(updater =>
+                        {
+                            foreach (var change in set)
+                            {
+                                switch (change.Reason)
+                                {
+                                    case ListChangeReason.AddRange:
+                                        updater.AddOrUpdate(change.Range);
+                                        break;
+
+                                    case ListChangeReason.RemoveRange:
+                                    case ListChangeReason.Clear:
+                                        foreach (var imageViewModel in change.Range)
+                                        {
+                                            var lookup = TrayImageCache.Lookup(imageViewModel.ImageId);
+                                            if (lookup.HasValue && !lookup.Value.Pinned)
+                                            {
+                                                updater.Remove(imageViewModel.ImageId);
+                                            }
+                                        }
+                                        break;
+
+                                    default:
+                                        throw new ArgumentOutOfRangeException();
+                                }
+                            }
+                        });
+                    })
                     .DisposeWith(d);
 
                 ImageContainerCache
@@ -103,18 +150,32 @@ namespace SonOfPicasso.UI.ViewModels
         public Interaction<Unit, AddAlbumViewModel> NewAlbumInteraction { get; set; }
 
         private SourceCache<ImageContainer, string> ImageContainerCache { get; }
+        
+        private SourceCache<ImageViewModel, int> TrayImageSourceCache { get; }
+        
+        private IObservableCache<TrayImageViewModel, int> TrayImageCache { get; }
 
         public ObservableCollectionExtended<ImageContainerViewModel> ImageContainers { get; }
 
         public ObservableCollectionExtended<ImageViewModel> Images { get; }
 
         public ObservableCollectionExtended<ImageViewModel> SelectedImages { get; }
-
+        
         public ObservableCollectionExtended<TrayImageViewModel> TrayImages { get; }
 
-        public ReactiveCommand<Unit, Unit> AddFolder { get; }
+        public ObservableCollectionExtended<TrayImageViewModel> SelectedTrayImages { get; }
 
-        public ReactiveCommand<Unit, Unit> NewAlbum { get; }
+        public ReactiveCommand<Unit, Unit> AddFolder { get; private set; }
+
+        public ReactiveCommand<Unit, Unit> NewAlbum { get; private set; }
+        
+        public ReactiveCommand<IList<TrayImageViewModel>, Unit> PinSelectedItems { get; private set; }
+        
+        public ReactiveCommand<(IList<TrayImageViewModel>, bool), Unit> ClearTrayItems { get; private set; }
+
+        public Interaction<Unit, Unit> ClearTrayItemsInteraction { get; set; }
+
+        public ReactiveCommand<Unit, Unit> AddTrayItemsToAlbum { get; private set; }
 
         public void Dispose()
         {
@@ -178,6 +239,35 @@ namespace SonOfPicasso.UI.ViewModels
                     return Observable.Return(Unit.Default);
                 })
                 .SelectMany(observable => observable);
+        }
+
+        private IObservable<Unit> ExecutePinSelectedItems(IList<TrayImageViewModel> trayImageViewModels)
+        {
+            return Observable.Start(() =>
+            {
+                foreach (var trayImageViewModel in trayImageViewModels)
+                {
+                    trayImageViewModel.Pinned = true;
+                }
+            }, _schedulerProvider.MainThreadScheduler);
+        }
+
+        private IObservable<Unit> ExecuteClearTrayItems((IList<TrayImageViewModel> trayImageViewModels, bool isAllItems) tuple)
+        {
+            return Observable.Start(() =>
+            {
+                var (trayImageViewModels, isAllItems) = tuple;
+
+                foreach (var trayImageViewModel in trayImageViewModels)
+                {
+                    trayImageViewModel.Pinned = false;
+                }
+            }, _schedulerProvider.MainThreadScheduler);
+        }
+
+        private IObservable<Unit> ExecuteAddTrayItemsToAlbum(Unit unit)
+        {
+            return Observable.Start(() => Unit.Default);
         }
     }
 }

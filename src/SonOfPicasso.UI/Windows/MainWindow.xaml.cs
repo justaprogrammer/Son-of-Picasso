@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Forms;
@@ -48,20 +47,18 @@ namespace SonOfPicasso.UI.Windows
 
             var imageCollectionViewSource = (CollectionViewSource) FindResource("ImagesCollectionViewSource");
             var imageContainersViewSource = (CollectionViewSource) FindResource("ImageContainersViewSource");
-            
+
             this.WhenActivated(d =>
             {
                 imageCollectionViewSource.Source = ViewModel.Images;
 
                 var propertyGroupDescription = new PropertyGroupDescription("ImageContainerViewModel");
-                var viewModelImageContainerViewModels = (ObservableCollectionExtended<ImageContainerViewModel>) ViewModel.ImageContainers;
 
-                viewModelImageContainerViewModels
+                ViewModel.ImageContainers
                     .ToObservableChangeSet()
                     .Subscribe(changeSets =>
                     {
                         foreach (var chagetSet in changeSets)
-                        {
                             switch (chagetSet.Reason)
                             {
                                 case ListChangeReason.AddRange:
@@ -70,28 +67,65 @@ namespace SonOfPicasso.UI.Windows
                                 default:
                                     throw new ArgumentOutOfRangeException();
                             }
-                        }
                     }).DisposeWith(d);
 
                 imageCollectionViewSource.GroupDescriptions.Add(propertyGroupDescription);
-                imageCollectionViewSource.SortDescriptions.Add(new SortDescription("ContainerType", ListSortDirection.Ascending));
-                imageCollectionViewSource.SortDescriptions.Add(new SortDescription("ContainerYear", ListSortDirection.Descending));
-                imageCollectionViewSource.SortDescriptions.Add(new SortDescription("ContainerDate", ListSortDirection.Descending));
+                imageCollectionViewSource.SortDescriptions.Add(new SortDescription("ContainerType",
+                    ListSortDirection.Ascending));
+                imageCollectionViewSource.SortDescriptions.Add(new SortDescription("ContainerYear",
+                    ListSortDirection.Descending));
+                imageCollectionViewSource.SortDescriptions.Add(new SortDescription("ContainerDate",
+                    ListSortDirection.Descending));
 
                 imageContainersViewSource.Source = ViewModel.ImageContainers;
                 imageContainersViewSource.GroupDescriptions.Add(new PropertyGroupDescription("ContainerType"));
                 imageContainersViewSource.GroupDescriptions.Add(new PropertyGroupDescription("Year"));
-                imageContainersViewSource.SortDescriptions.Add(new SortDescription("ContainerType", ListSortDirection.Ascending));
-                imageContainersViewSource.SortDescriptions.Add(new SortDescription("Year", ListSortDirection.Descending));
-                imageContainersViewSource.SortDescriptions.Add(new SortDescription("Date", ListSortDirection.Descending));
-
-                this.BindCommand(ViewModel, 
-                    model => model.AddFolder,
-                    window => window.AddFolder).DisposeWith(d);
+                imageContainersViewSource.SortDescriptions.Add(new SortDescription("ContainerType",
+                    ListSortDirection.Ascending));
+                imageContainersViewSource.SortDescriptions.Add(
+                    new SortDescription("Year", ListSortDirection.Descending));
+                imageContainersViewSource.SortDescriptions.Add(
+                    new SortDescription("Date", ListSortDirection.Descending));
 
                 this.BindCommand(ViewModel,
-                    model => model.NewAlbum,
-                    window => window.NewAlbum).DisposeWith(d);
+                        model => model.AddFolder,
+                        window => window.AddFolder)
+                    .DisposeWith(d);
+
+                this.BindCommand(ViewModel,
+                        model => model.NewAlbum,
+                        window => window.NewAlbum)
+                    .DisposeWith(d);
+
+                var observableSelectedTrayImageCount = ViewModel.WhenAnyValue(
+                    model => model.TrayImages.Count,
+                    model => model.SelectedTrayImages.Count,
+                    (trayImages, selectedTrayImages) => selectedTrayImages);
+
+                this.BindCommand(ViewModel,
+                        model => model.PinSelectedItems,
+                        window => window.PinSelectedItems,
+                        observableSelectedTrayImageCount
+                            .Select(selectedTrayCount => (selectedTrayCount == 0 ? ViewModel.TrayImages : ViewModel.SelectedTrayImages)
+                                .ToObservable()
+                                .ToList()
+                            ).SelectMany(observable => observable))
+                    .DisposeWith(d);
+
+                this.BindCommand(ViewModel,
+                    model => model.ClearTrayItems,
+                    window => window.ClearTrayItems,
+                    observableSelectedTrayImageCount
+                        .Select(selectedTrayCount =>
+                        {
+                            var allItems = selectedTrayCount == 0;
+
+                            return (!allItems ? ViewModel.SelectedTrayImages : ViewModel.TrayImages)
+                                .ToObservable()
+                                .ToList()
+                                .CombineLatest(Observable.Return(allItems), (list, b) => (list, b));
+                        })
+                        .SelectMany(observable => observable)).DisposeWith(d);
 
                 ImagesList.Events().SelectionChanged.Subscribe(ea =>
                 {
@@ -101,6 +135,29 @@ namespace SonOfPicasso.UI.Windows
                         ViewModel.SelectedImages.AddRange(ea.AddedItems.Cast<ImageViewModel>());
                     }
                 }).DisposeWith(d);
+
+                ViewModel.SelectedImages.AsObservableChangeSet()
+                    .Subscribe(set =>
+                    {
+                        ;
+                    })
+                    .DisposeWith(d);
+
+                TrayImagesList.Events().SelectionChanged.Subscribe(ea =>
+                {
+                    using (ViewModel.SelectedTrayImages.SuspendNotifications())
+                    {
+                        ViewModel.SelectedTrayImages.RemoveMany(ea.RemovedItems.Cast<TrayImageViewModel>());
+                        ViewModel.SelectedTrayImages.AddRange(ea.AddedItems.Cast<TrayImageViewModel>());
+                    }
+                }).DisposeWith(d);
+
+                ViewModel.SelectedTrayImages.AsObservableChangeSet()
+                    .Subscribe(set =>
+                    {
+                        ;
+                    })
+                    .DisposeWith(d);
 
                 this.OneWayBind(ViewModel,
                     model => model.TrayImages,

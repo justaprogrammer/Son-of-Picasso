@@ -7,6 +7,9 @@
                                 xmlns:reactiveUi="http://reactiveui.net"
                                 xmlns:viewModels="clr-namespace:SonOfPicasso.UI.ViewModels"
                                 mc:Ignorable="d"
-                                d:DesignHeight="450" d:DesignWidth="800">
-    <Image Name="ImageBitmap" Height="15" Width="15" Stretch="Fill" />
+                                d:DesignHeight="15" d:DesignWidth="15">
+    <Canvas Height="15" Width="15">
+        <Image Name="ImageBitmap" Height="15" Width="15" Stretch="Fill" />
+        <Rectangle Name="ImageOverlay" Canvas.Top="5" Canvas.Left="5" Height="10" Width="10" Fill="LightGreen" />
+    </Canvas>
 </reactiveUi:ReactiveUserControl>

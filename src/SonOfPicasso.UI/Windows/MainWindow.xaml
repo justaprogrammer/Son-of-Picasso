@@ -142,12 +142,17 @@
 
             <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="4*" />
-                    <ColumnDefinition />
                     <ColumnDefinition Width="6*" />
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="10*" />
                 </Grid.ColumnDefinitions>
 
-                <ListView Name="TrayImagesList" Grid.Column="0">
+                <ListView Name="TrayImagesList" Grid.Column="0"
+                          VirtualizingStackPanel.IsVirtualizing="True"
+                          VirtualizingStackPanel.IsVirtualizingWhenGrouping="True"
+                          VirtualizingStackPanel.VirtualizationMode="Recycling"
+                          VirtualizingStackPanel.ScrollUnit="Pixel"
+                          SelectionMode="Extended">
                     <ListView.ItemsPanel>
                         <ItemsPanelTemplate>
                             <WrapPanel />
@@ -161,11 +166,11 @@
                     </ListView.ItemTemplate>
                 </ListView>
 
-                <StackPanel Orientation="Vertical" Grid.Column="1">
-                    <Button>Pin</Button>
-                    <Button>Clear</Button>
-                    <Button>Album</Button>
-                </StackPanel>
+                <DockPanel Grid.Column="1" LastChildFill="False">
+                    <Button Name="PinSelectedItems" DockPanel.Dock="Top">Pin</Button>
+                    <Button Name="ClearTrayItems" DockPanel.Dock="Top">Clear</Button>
+                    <Button DockPanel.Dock="Bottom">Album</Button>
+                </DockPanel>
             </Grid>
         </Grid>
     </DockPanel>

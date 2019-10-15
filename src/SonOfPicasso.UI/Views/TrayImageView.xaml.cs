@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reactive.Disposables;
 using ReactiveUI;
 using SonOfPicasso.UI.ViewModels;
 using Splat;
@@ -16,12 +17,16 @@ namespace SonOfPicasso.UI.Views
 
             this.WhenActivated(d =>
             {
-                d(ViewModel.Image.GetImage()
+                ViewModel.Image.GetImage()
                     .Subscribe(bitmap =>
                     {
                         var imageBitmapSource = bitmap.ToNative();
                         ImageBitmap.Source = imageBitmapSource;
-                    }));
+                    }).DisposeWith(d);
+
+                this.OneWayBind(ViewModel,
+                    model => model.Pinned,
+                    view => view.ImageOverlay.Visibility);
             });
         }
     }
