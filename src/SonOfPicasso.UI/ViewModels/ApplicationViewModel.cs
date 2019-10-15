@@ -127,6 +127,14 @@ namespace SonOfPicasso.UI.ViewModels
                     .Subscribe()
                     .DisposeWith(d);
 
+                _imageContainerViewModelCache
+                    .Connect()
+                    .Filter(model => model.ContainerType == ImageContainerTypeEnum.Album)
+                    .ObserveOn(_schedulerProvider.MainThreadScheduler)
+                    .Bind(AlbumImageContainers)
+                    .Subscribe()
+                    .DisposeWith(d);
+
                 _imageViewModelCache
                     .Connect()
                     .ObserveOn(_schedulerProvider.MainThreadScheduler)
@@ -157,6 +165,9 @@ namespace SonOfPicasso.UI.ViewModels
             new Interaction<Unit, AddAlbumViewModel>();
 
         public ObservableCollectionExtended<ImageContainerViewModel> ImageContainers { get; } =
+            new ObservableCollectionExtended<ImageContainerViewModel>();
+
+        public ObservableCollectionExtended<ImageContainerViewModel> AlbumImageContainers { get; } =
             new ObservableCollectionExtended<ImageContainerViewModel>();
 
         public IObservableCollection<ImageViewModel> Images { get; } =

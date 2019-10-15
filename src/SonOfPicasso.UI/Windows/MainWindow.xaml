@@ -7,11 +7,13 @@
                            xmlns:reactiveUi="http://reactiveui.net"
                            xmlns:viewModels="clr-namespace:SonOfPicasso.UI.ViewModels"
                            xmlns:views="clr-namespace:SonOfPicasso.UI.Views"
+                           xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
                            mc:Ignorable="d"
                            Title="MainWindow" Height="450" Width="800">
 
     <Window.Resources>
         <CollectionViewSource x:Key="ImageContainersViewSource" />
+        <CollectionViewSource x:Key="AlbumImageContainersViewSource" />
         <CollectionViewSource x:Key="ImagesCollectionViewSource" />
     </Window.Resources>
     <DockPanel>
@@ -169,7 +171,33 @@
                 <DockPanel Grid.Column="1" LastChildFill="False">
                     <Button Name="PinSelectedItems" DockPanel.Dock="Top">Pin</Button>
                     <Button Name="ClearTrayItems" DockPanel.Dock="Top">Clear</Button>
-                    <Button DockPanel.Dock="Bottom">Album</Button>
+                    <xctk:DropDownButton Name="AddAlbumSplitButton" DockPanel.Dock="Bottom">
+                        <xctk:DropDownButton.DropDownContent>
+                            <ListView>
+                                <ListView.ItemsSource>
+                                    <CompositeCollection>
+                                        <ListViewItem>
+                                            <StackPanel>
+                                                <Label>Add Album</Label>
+                                            </StackPanel>
+                                        </ListViewItem>
+                                        <ListViewItem IsEnabled="False">
+                                            <StackPanel Height="25" >
+                                                <Separator Width="Auto" />
+                                            </StackPanel>
+                                        </ListViewItem>
+                                        <CollectionContainer Collection="{Binding Source={StaticResource ImageContainersViewSource}}"/>
+                                    </CompositeCollection>
+                                </ListView.ItemsSource>
+                                <ListView.ItemTemplate>
+                                    <DataTemplate DataType="viewModels:ImageContainerViewModel">
+                                        <Label Content="{Binding Name}" />
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </xctk:DropDownButton.DropDownContent>
+                            Album
+                    </xctk:DropDownButton>
                 </DockPanel>
             </Grid>
         </Grid>

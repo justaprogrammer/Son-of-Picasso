@@ -48,6 +48,7 @@ namespace SonOfPicasso.UI.Windows
 
             var imageCollectionViewSource = (CollectionViewSource) FindResource("ImagesCollectionViewSource");
             var imageContainersViewSource = (CollectionViewSource) FindResource("ImageContainersViewSource");
+            var albumImageContainersViewSource = (CollectionViewSource) FindResource("AlbumImageContainersViewSource");
 
             this.WhenActivated(d =>
             {
@@ -86,6 +87,12 @@ namespace SonOfPicasso.UI.Windows
                 imageContainersViewSource.SortDescriptions.Add(
                     new SortDescription("Year", ListSortDirection.Descending));
                 imageContainersViewSource.SortDescriptions.Add(
+                    new SortDescription("Date", ListSortDirection.Descending));
+
+                albumImageContainersViewSource.Source = ViewModel.AlbumImageContainers;
+                albumImageContainersViewSource.SortDescriptions.Add(
+                    new SortDescription("Year", ListSortDirection.Descending));
+                albumImageContainersViewSource.SortDescriptions.Add(
                     new SortDescription("Date", ListSortDirection.Descending));
 
                 this.BindCommand(ViewModel,
