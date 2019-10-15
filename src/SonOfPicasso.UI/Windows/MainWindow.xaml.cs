@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Forms;
@@ -17,6 +17,7 @@ using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.UI.ViewModels;
 using SonOfPicasso.UI.Windows.Dialogs;
+using MessageBox = System.Windows.MessageBox;
 
 namespace SonOfPicasso.UI.Windows
 {
@@ -62,7 +63,7 @@ namespace SonOfPicasso.UI.Windows
                             switch (chagetSet.Reason)
                             {
                                 case ListChangeReason.AddRange:
-                                    propertyGroupDescription.GroupNames.AddRange(chagetSet.Range.ToArray());
+                                    propertyGroupDescription.GroupNames.AddRange(chagetSet.Range);
                                     break;
                                 default:
                                     throw new ArgumentOutOfRangeException();
@@ -106,7 +107,8 @@ namespace SonOfPicasso.UI.Windows
                         model => model.PinSelectedItems,
                         window => window.PinSelectedItems,
                         observableSelectedTrayImageCount
-                            .Select(selectedTrayCount => (selectedTrayCount == 0 ? ViewModel.TrayImages : ViewModel.SelectedTrayImages)
+                            .Select(selectedTrayCount =>
+                                (selectedTrayCount == 0 ? ViewModel.TrayImages : ViewModel.SelectedTrayImages)
                                 .ToObservable()
                                 .ToList()
                             ).SelectMany(observable => observable))
@@ -127,19 +129,22 @@ namespace SonOfPicasso.UI.Windows
                         })
                         .SelectMany(observable => observable)).DisposeWith(d);
 
-                ImagesList.Events().SelectionChanged.Subscribe(ea =>
-                {
-                    using (ViewModel.SelectedImages.SuspendNotifications())
+                ImagesList.Events().SelectionChanged
+                    .Subscribe(ea =>
                     {
-                        ViewModel.SelectedImages.RemoveMany(ea.RemovedItems.Cast<ImageViewModel>());
-                        ViewModel.SelectedImages.AddRange(ea.AddedItems.Cast<ImageViewModel>());
-                    }
-                }).DisposeWith(d);
+                        ViewModel.ChangeSelectedImages(
+                            ea.AddedItems.Cast<ImageViewModel>(),
+                            ea.RemovedItems.Cast<ImageViewModel>());
+                    }).DisposeWith(d);
 
-                ViewModel.SelectedImages.AsObservableChangeSet()
-                    .Subscribe(set =>
+                ViewModel.UnselectImage
+                    .ObserveOn(_schedulerProvider.MainThreadScheduler)
+                    .Subscribe(imageViewModels =>
                     {
-                        ;
+                        foreach (var imageViewModel in imageViewModels)
+                        {
+                            ImagesList.SelectedItems.Remove(imageViewModel);
+                        }
                     })
                     .DisposeWith(d);
 
@@ -152,10 +157,14 @@ namespace SonOfPicasso.UI.Windows
                     }
                 }).DisposeWith(d);
 
-                ViewModel.SelectedTrayImages.AsObservableChangeSet()
-                    .Subscribe(set =>
+                ViewModel.UnselectTrayImage
+                    .ObserveOn(_schedulerProvider.MainThreadScheduler)
+                    .Subscribe(trayImageViewModels =>
                     {
-                        ;
+                        foreach (var trayImageViewModel in trayImageViewModels)
+                        {
+                            TrayImagesList.SelectedItems.Remove(trayImageViewModel);
+                        }
                     })
                     .DisposeWith(d);
 
@@ -193,6 +202,16 @@ namespace SonOfPicasso.UI.Windows
                         if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK) result = dialog.SelectedPath;
 
                         context.SetOutput(result);
+                        return Observable.Return(Unit.Default);
+                    }).SubscribeOn(_schedulerProvider.MainThreadScheduler);
+                }).DisposeWith(d);
+
+                ViewModel.ConfirmClearTrayItemsInteraction.RegisterHandler(context =>
+                {
+                    return Observable.Defer(() =>
+                    {
+                        var messageBoxResult = MessageBox.Show("This will clear items in the tray. Are you sure?", "Confirmation", MessageBoxButton.YesNo);
+                        context.SetOutput(messageBoxResult == MessageBoxResult.Yes);
                         return Observable.Return(Unit.Default);
                     }).SubscribeOn(_schedulerProvider.MainThreadScheduler);
                 }).DisposeWith(d);
