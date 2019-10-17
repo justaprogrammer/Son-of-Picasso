@@ -7,7 +7,7 @@
                            xmlns:reactiveUi="http://reactiveui.net"
                            xmlns:viewModels="clr-namespace:SonOfPicasso.UI.ViewModels"
                            xmlns:views="clr-namespace:SonOfPicasso.UI.Views"
-                           xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+                           xmlns:converters="clr-namespace:SonOfPicasso.UI.Converters"
                            mc:Ignorable="d"
                            Title="MainWindow" Height="450" Width="800">
 
@@ -171,33 +171,46 @@
                 <DockPanel Grid.Column="1" LastChildFill="False">
                     <Button Name="PinSelectedItems" DockPanel.Dock="Top">Pin</Button>
                     <Button Name="ClearTrayItems" DockPanel.Dock="Top">Clear</Button>
-                    <xctk:DropDownButton Name="AddAlbumSplitButton" DockPanel.Dock="Bottom">
-                        <xctk:DropDownButton.DropDownContent>
-                            <ListView>
-                                <ListView.ItemsSource>
+                    <Button DockPanel.Dock="Bottom" Content="Album">
+                        <Button.Resources>
+                            <Style x:Key="AlbumMenuItemStyle"
+                                   TargetType="MenuItem">
+                                <d:Style.DataContext>
+                                    <x:Type Type="viewModels:ImageContainerViewModel" />
+                                </d:Style.DataContext>
+                                <EventSetter Event="Click" Handler="AlbumButtonAlbum_OnClick"></EventSetter>
+                            </Style>
+                            
+                            <Style x:Key="OtherMenuItemStyle" TargetType="MenuItem">
+                            </Style>
+
+                            <Style x:Key="SeparatorMenuItemStyle" TargetType="Separator" />
+
+                            <converters:AlbumContextMenuStyleSelector 
+                                        x:Key="MenuItemStyleConverter" 
+                                        AlbumModelStyle="{StaticResource AlbumMenuItemStyle}"
+                                        OtherMenuItemStyle="{StaticResource OtherMenuItemStyle}"
+                                        SeparatorMenuItemStyle="{StaticResource SeparatorMenuItemStyle}"
+                                        />
+                        </Button.Resources>
+                        <Button.ContextMenu>
+                            <ContextMenu ItemContainerStyleSelector="{StaticResource MenuItemStyleConverter}">
+                                <ContextMenu.ItemsSource>
                                     <CompositeCollection>
-                                        <ListViewItem>
-                                            <StackPanel>
-                                                <Label>Add Album</Label>
-                                            </StackPanel>
-                                        </ListViewItem>
-                                        <ListViewItem IsEnabled="False">
-                                            <StackPanel Height="25" >
-                                                <Separator Width="Auto" />
-                                            </StackPanel>
-                                        </ListViewItem>
-                                        <CollectionContainer Collection="{Binding Source={StaticResource ImageContainersViewSource}}"/>
+                                        <MenuItem Header="Add Album"  Click="AlbumButtonAddAlbum_OnClick"/>
+                                        <Separator />
+                                        <CollectionContainer Collection="{Binding Source={StaticResource AlbumImageContainersViewSource}}" />
                                     </CompositeCollection>
-                                </ListView.ItemsSource>
-                                <ListView.ItemTemplate>
+                                </ContextMenu.ItemsSource>
+                                <ContextMenu.ItemTemplate>
                                     <DataTemplate DataType="viewModels:ImageContainerViewModel">
-                                        <Label Content="{Binding Name}" />
+                                        <TextBlock Text="{Binding Name}"/>
                                     </DataTemplate>
-                                </ListView.ItemTemplate>
-                            </ListView>
-                        </xctk:DropDownButton.DropDownContent>
-                            Album
-                    </xctk:DropDownButton>
+                                </ContextMenu.ItemTemplate>
+                            </ContextMenu>
+                        </Button.ContextMenu>
+                        
+                    </Button>
                 </DockPanel>
             </Grid>
         </Grid>

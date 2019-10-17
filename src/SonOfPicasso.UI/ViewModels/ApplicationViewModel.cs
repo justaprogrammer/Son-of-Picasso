@@ -251,7 +251,10 @@ namespace SonOfPicasso.UI.ViewModels
                 .ObserveOn(_schedulerProvider.TaskPool)
                 .Select(s =>
                 {
-                    if (s != null) _imageContainerCache.PopulateFrom(_imageManagementService.ScanFolder(s).ToArray());
+                    if (s != null)
+                    {
+                        _imageContainerCache.PopulateFrom(_imageManagementService.ScanFolder(s));
+                    }
 
                     return Observable.Return(Unit.Default);
                 })

@@ -66,6 +66,9 @@ namespace SonOfPicasso.UI.Windows
                                 case ListChangeReason.AddRange:
                                     propertyGroupDescription.GroupNames.AddRange(chagetSet.Range);
                                     break;
+                                case ListChangeReason.Add:
+                                    propertyGroupDescription.GroupNames.Add(chagetSet.Item.Current);
+                                    break;
                                 default:
                                     throw new ArgumentOutOfRangeException();
                             }
@@ -223,6 +226,14 @@ namespace SonOfPicasso.UI.Windows
                     }).SubscribeOn(_schedulerProvider.MainThreadScheduler);
                 }).DisposeWith(d);
             });
+        }
+
+        private void AlbumButtonAlbum_OnClick(object sender, RoutedEventArgs e)
+        {
+        }
+
+        private void AlbumButtonAddAlbum_OnClick(object sender, RoutedEventArgs e)
+        {
         }
     }
 }
