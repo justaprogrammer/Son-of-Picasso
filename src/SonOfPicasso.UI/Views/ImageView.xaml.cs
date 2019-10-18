@@ -6,7 +6,7 @@ using Splat;
 namespace SonOfPicasso.UI.Views
 {
     /// <summary>
-    /// Interaction logic for ImageDetailView.xaml
+    /// Interaction logic for ImageView.xaml
     /// </summary>
     public partial class ImageView : ReactiveUserControl<ImageViewModel>
     {
