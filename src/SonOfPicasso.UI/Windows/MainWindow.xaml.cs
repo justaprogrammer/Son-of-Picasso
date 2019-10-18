@@ -103,8 +103,7 @@ namespace SonOfPicasso.UI.Windows
                         observableSelectedTrayImageCount
                             .Select(selectedTrayCount =>
                                 (selectedTrayCount == 0 ? ViewModel.TrayImages : ViewModel.SelectedTrayImages)
-                                .ToObservable()
-                                .ToList()
+                                .AsEnumerable()
                             ).SelectMany(observable => observable))
                     .DisposeWith(d);
 
