@@ -174,7 +174,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
         }
 
         [Fact]
-        public void ShouldClearPinnedAllIfNonSelectedAndConfirm()
+        public void ShouldClearPinnedAllIfNoneSelectedAndConfirm()
         {
             var imageManagementService = AutoSubstitute.Resolve<IImageManagementService>();
 
@@ -243,6 +243,78 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             WaitOne();
 
             applicationViewModel.TrayImages.Count.Should().Be(0);
+        }
+
+        [Fact]
+        public void ShouldClearPinnedAllIfNoneSelectedAndDecline()
+        {
+            var imageManagementService = AutoSubstitute.Resolve<IImageManagementService>();
+
+            var folders = Fakers.FolderFaker
+                .GenerateForever("default,withImages")
+                .DistinctBy(folder => folder.Date)
+                .Take(2)
+                .ToArray();
+
+            var imageContainers = folders
+                .Select(folder => new FolderImageContainer(folder, MockFileSystem))
+                .ToArray();
+
+            imageManagementService.GetAllImageContainers()
+                .Returns(imageContainers
+                    .ToObservable()
+                    .SubscribeOn(TestSchedulerProvider.TaskPool));
+
+            var applicationViewModel = AutoSubstitute.Resolve<ApplicationViewModel>();
+            applicationViewModel.Activator.Activate();
+
+            imageManagementService.Received(1)
+                .GetAllImageContainers();
+
+            TestSchedulerProvider.TaskPool.AdvanceBy(1);
+            TestSchedulerProvider.MainThreadScheduler.AdvanceBy(2);
+
+            ActivateContainerViewModel(2, applicationViewModel.ImageContainers.ToArray());
+
+            var randomImages = Faker.PickRandom(applicationViewModel.Images, 4)
+                .ToArray();
+
+            var randomImageBatches = randomImages
+                .Batch(2)
+                .ToArray();
+
+            applicationViewModel.ChangeSelectedImages(randomImageBatches[0], Enumerable.Empty<ImageViewModel>());
+
+            TestSchedulerProvider.MainThreadScheduler.AdvanceBy(4);
+
+            applicationViewModel.TrayImages.Select(model => model.Pinned).Should().AllBeEquivalentTo(false);
+
+            applicationViewModel.PinSelectedItems.Execute(applicationViewModel.TrayImages)
+                .Subscribe(unit => { }, () => AutoResetEvent.Set());
+
+            TestSchedulerProvider.MainThreadScheduler.AdvanceBy(1);
+
+            WaitOne();
+            
+            applicationViewModel.ChangeSelectedImages(randomImageBatches[1], randomImageBatches[0]);
+    
+            TestSchedulerProvider.MainThreadScheduler.AdvanceBy(1);
+            applicationViewModel.TrayImages.Count.Should().Be(4);
+
+            applicationViewModel.ConfirmClearTrayItemsInteraction.RegisterHandler(context =>
+            {
+                context.SetOutput(false);
+            });
+
+            applicationViewModel.ClearTrayItems.Execute((applicationViewModel.TrayImages.ToArray(), true))
+                .Subscribe(unit => { }, () => AutoResetEvent.Set());
+
+            TestSchedulerProvider.TaskPool.AdvanceBy(4);
+            TestSchedulerProvider.MainThreadScheduler.AdvanceBy(4);
+       
+            WaitOne();
+
+            applicationViewModel.TrayImages.Count.Should().Be(4);
         }
     }
 }
