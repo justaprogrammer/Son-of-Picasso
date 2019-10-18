@@ -1,4 +1,5 @@
-﻿using SonOfPicasso.UI.ViewModels;
+﻿using FluentAssertions;
+using SonOfPicasso.UI.ViewModels;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -14,10 +15,19 @@ namespace SonOfPicasso.UI.Tests.ViewModels
         [Fact]
         public void ShouldInitializeAndActivate()
         {
+            MockFileSystem.AddDirectory("C:\\");
+            MockFileSystem.AddDirectory("C:\\" + Faker.Random.Word());
             MockFileSystem.AddDirectory("D:\\");
+            MockFileSystem.AddDirectory("D:\\" + Faker.Random.Word());
 
             var folderManagementViewModel = AutoSubstitute.Resolve<FolderManagementViewModel>();
             folderManagementViewModel.Activator.Activate();
+
+            TestSchedulerProvider.TaskPool.AdvanceBy(1);
+            TestSchedulerProvider.MainThreadScheduler.AdvanceBy(3);
+
+            folderManagementViewModel.Folders.Count.Should().Be(2);
+            folderManagementViewModel._foldersSourceCache.Count.Should().Be(4);
         }
     }
 }
