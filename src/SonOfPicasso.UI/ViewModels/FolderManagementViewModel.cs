@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Text;
 using DynamicData;
 using DynamicData.Binding;
 using ReactiveUI;
@@ -16,7 +14,8 @@ namespace SonOfPicasso.UI.ViewModels
 {
     public class FolderViewModel
     {
-        public FolderViewModel(IDirectoryInfo directoryInfo, ObservableCollectionExtended<FolderViewModel> observableCollectionExtended)
+        public FolderViewModel(IDirectoryInfo directoryInfo,
+            ObservableCollectionExtended<FolderViewModel> observableCollectionExtended)
         {
             Path = directoryInfo.FullName;
             Children = observableCollectionExtended;
@@ -27,46 +26,58 @@ namespace SonOfPicasso.UI.ViewModels
         public string Path { get; }
     }
 
-    public class FolderManagementViewModel: ViewModelBase
+    public class FolderManagementViewModel : ViewModelBase
     {
         private readonly IFileSystem _fileSystem;
-        private readonly ISchedulerProvider _schedulerProvider;
 
-        public FolderManagementViewModel(ViewModelActivator activator, IFileSystem fileSystem, ISchedulerProvider schedulerProvider) : base(activator)
+        internal readonly SourceCache<FolderViewModel, string> _foldersSourceCache;
+        private readonly ISchedulerProvider _schedulerProvider;
+        private readonly ObservableCollectionExtended<FolderViewModel> _foldersObservableCollection;
+
+        public FolderManagementViewModel(ViewModelActivator activator, IFileSystem fileSystem,
+            ISchedulerProvider schedulerProvider) : base(activator)
         {
             _fileSystem = fileSystem;
             _schedulerProvider = schedulerProvider;
             _foldersSourceCache = new SourceCache<FolderViewModel, string>(model => model.Path);
 
+            Continue = ReactiveCommand.CreateFromObservable(ExecuteContinue);
+            ContinueInteraction = new Interaction<Unit, Unit>();
+
+            Cancel = ReactiveCommand.CreateFromObservable(ExecuteCancel);
+            CancelInteraction = new Interaction<Unit, Unit>();
+
+            _foldersObservableCollection = new ObservableCollectionExtended<FolderViewModel>();
+
             this.WhenActivated(d =>
             {
-                _foldersSourceCache
-                    .Connect()
+                GetFolderViewModels()
+                    .ToList()
                     .ObserveOn(_schedulerProvider.MainThreadScheduler)
-                    .Bind(Folders)
-                    .Subscribe()
+                    .Subscribe(items => _foldersObservableCollection.AddRange(items))
                     .DisposeWith(d);
-
-                _foldersSourceCache.PopulateFrom(GetFolderViewModels());
             });
         }
 
+        public Interaction<Unit, Unit> ContinueInteraction { get; set; }
+
+        public ReactiveCommand<Unit, Unit> Continue { get; }
+
+        public Interaction<Unit, Unit> CancelInteraction { get; set; }
+
+        public ReactiveCommand<Unit, Unit> Cancel { get; }
+
+        public IObservableCollection<FolderViewModel> Folders => _foldersObservableCollection;
+
         private IObservable<FolderViewModel> GetFolderViewModels()
         {
-            return Observable.Create<FolderViewModel>(observer =>
+            return Observable.Defer(() =>
             {
-                var folderViewModels = _fileSystem.DriveInfo.GetDrives()
+                return _fileSystem.DriveInfo.GetDrives()
                     .Select(driveInfo => driveInfo.RootDirectory)
-                    .Select(CreateFolderViewModel);
+                    .Select(CreateFolderViewModel)
+                    .ToObservable();
 
-                foreach (var folderViewModel in folderViewModels)
-                {
-                    observer.OnNext(folderViewModel);
-                }
-
-                observer.OnCompleted();
-
-                return Disposable.Empty;
             }).SubscribeOn(_schedulerProvider.TaskPool);
         }
 
@@ -79,13 +90,22 @@ namespace SonOfPicasso.UI.ViewModels
 
             var folderViewModel = new FolderViewModel(directoryInfo, children);
             _foldersSourceCache.AddOrUpdate(folderViewModel);
-            
+
             return folderViewModel;
         }
 
-        internal readonly SourceCache<FolderViewModel, string> _foldersSourceCache;
+        private IObservable<Unit> ExecuteCancel()
+        {
+            return CancelInteraction.Handle(Unit.Default)
+                .SubscribeOn(_schedulerProvider.TaskPool)
+                .Select(unit => unit);
+        }
 
-        public IObservableCollection<FolderViewModel> Folders { get; } =
-            new ObservableCollectionExtended<FolderViewModel>();
+        private IObservable<Unit> ExecuteContinue()
+        {
+            return ContinueInteraction.Handle(Unit.Default)
+                .SubscribeOn(_schedulerProvider.TaskPool)
+                .Select(unit => unit);
+        }
     }
 }

@@ -27,6 +27,11 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(3);
 
             folderManagementViewModel.Folders.Count.Should().Be(2);
+            foreach (var folderViewModel in folderManagementViewModel.Folders)
+            {
+                folderViewModel.Children.Count.Should().Be(1);
+            }
+
             folderManagementViewModel._foldersSourceCache.Count.Should().Be(4);
         }
     }
