@@ -10,6 +10,7 @@ namespace SonOfPicasso.Core.Model
         public AlbumImageContainer(Album album)
         {
             Id = GetContainerId(album);
+            ContainerTypeId = album.Id;
             Name = album.Name;
             Date = album.Date;
             Year = album.Date.Year;
@@ -21,6 +22,7 @@ namespace SonOfPicasso.Core.Model
         public override int Year { get; }
         public override DateTime Date { get; }
         public override ImageContainerTypeEnum ContainerType => ImageContainerTypeEnum.Album;
+        public override int ContainerTypeId { get; }
         public override IList<ImageRef> ImageRefs { get; }
 
         public static string GetContainerId(Album album)

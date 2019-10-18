@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO.Abstractions;
 using System.Linq;
@@ -32,6 +33,9 @@ namespace SonOfPicasso.UI.Windows
         private readonly IFileSystem _fileSystem;
         private readonly ILogger _logger;
         private readonly ISchedulerProvider _schedulerProvider;
+        private CollectionViewSource imageCollectionViewSource;
+        private CollectionViewSource imageContainersViewSource;
+        private CollectionViewSource albumImageContainersViewSource;
 
         public MainWindow(ILogger logger, IEnvironmentService environmentService, IFileSystem fileSystem,
             ISchedulerProvider schedulerProvider, Func<AddAlbumWindow> addAlbumWindowFactory,
@@ -46,51 +50,31 @@ namespace SonOfPicasso.UI.Windows
 
             InitializeComponent();
 
-            var imageCollectionViewSource = (CollectionViewSource) FindResource("ImagesCollectionViewSource");
-            var imageContainersViewSource = (CollectionViewSource) FindResource("ImageContainersViewSource");
-            var albumImageContainersViewSource = (CollectionViewSource) FindResource("AlbumImageContainersViewSource");
+            imageCollectionViewSource = (CollectionViewSource) FindResource("ImagesCollectionViewSource");
+            imageContainersViewSource = (CollectionViewSource) FindResource("ImageContainersViewSource");
+            albumImageContainersViewSource = (CollectionViewSource) FindResource("AlbumImageContainersViewSource");
 
             this.WhenActivated(d =>
             {
                 imageCollectionViewSource.Source = ViewModel.Images;
 
-                var propertyGroupDescription = new PropertyGroupDescription("ImageContainerViewModel");
-
-                ViewModel.ImageContainers
-                    .ToObservableChangeSet()
-                    .Subscribe(changeSets =>
-                    {
-                        foreach (var chagetSet in changeSets)
-                            switch (chagetSet.Reason)
-                            {
-                                case ListChangeReason.AddRange:
-                                    propertyGroupDescription.GroupNames.AddRange(chagetSet.Range);
-                                    break;
-                                case ListChangeReason.Add:
-                                    propertyGroupDescription.GroupNames.Add(chagetSet.Item.Current);
-                                    break;
-                                default:
-                                    throw new ArgumentOutOfRangeException();
-                            }
-                    }).DisposeWith(d);
+                var propertyGroupDescription = new PropertyGroupDescription(nameof(ImageViewModel.ImageContainerViewModel));
 
                 imageCollectionViewSource.GroupDescriptions.Add(propertyGroupDescription);
-                imageCollectionViewSource.SortDescriptions.Add(new SortDescription("ContainerType",
+                imageCollectionViewSource.SortDescriptions.Add(new SortDescription(nameof(ImageViewModel.ContainerType),
                     ListSortDirection.Ascending));
-                imageCollectionViewSource.SortDescriptions.Add(new SortDescription("ContainerYear",
+                imageCollectionViewSource.SortDescriptions.Add(new SortDescription(nameof(ImageViewModel.ContainerDate),
                     ListSortDirection.Descending));
-                imageCollectionViewSource.SortDescriptions.Add(new SortDescription("ContainerDate",
-                    ListSortDirection.Descending));
-
+                imageCollectionViewSource.SortDescriptions.Add(new SortDescription(nameof(ImageViewModel.Date),
+                    ListSortDirection.Ascending));
+                
                 imageContainersViewSource.Source = ViewModel.ImageContainers;
-                imageContainersViewSource.GroupDescriptions.Add(new PropertyGroupDescription("ContainerType"));
-                imageContainersViewSource.GroupDescriptions.Add(new PropertyGroupDescription("Year"));
-                imageContainersViewSource.SortDescriptions.Add(new SortDescription("ContainerType",
+                imageContainersViewSource.GroupDescriptions.Add(new PropertyGroupDescription(nameof(ImageContainerViewModel.ContainerType)));
+                imageContainersViewSource.GroupDescriptions.Add(new PropertyGroupDescription(nameof(ImageContainerViewModel.Year)));
+                imageContainersViewSource.SortDescriptions.Add(new SortDescription(nameof(ImageContainerViewModel.ContainerType),
                     ListSortDirection.Ascending));
                 imageContainersViewSource.SortDescriptions.Add(
-                    new SortDescription("Year", ListSortDirection.Descending));
-                imageContainersViewSource.SortDescriptions.Add(
-                    new SortDescription("Date", ListSortDirection.Descending));
+                    new SortDescription(nameof(ImageContainerViewModel.Date), ListSortDirection.Descending));
 
                 albumImageContainersViewSource.Source = ViewModel.AlbumImageContainers;
                 albumImageContainersViewSource.SortDescriptions.Add(
@@ -228,12 +212,25 @@ namespace SonOfPicasso.UI.Windows
             });
         }
 
-        private void AlbumButtonAlbum_OnClick(object sender, RoutedEventArgs e)
+        private void AlbumButton_AddImagesToAlbum_OnClick(object sender, RoutedEventArgs e)
         {
+            var menuItem = (System.Windows.Controls.MenuItem)sender;
+            var imageContainerViewModel = (ImageContainerViewModel) menuItem.DataContext;
+
+            var viewModelSelectedTrayImages = ViewModel.SelectedTrayImages.Any() ? ViewModel.SelectedTrayImages : ViewModel.TrayImages;
+            var imageViewModels = viewModelSelectedTrayImages.Select(model => model.Image).ToList();
+
+            ViewModel.AddImagesToAlbum.Execute((imageViewModels.AsEnumerable(), imageContainerViewModel))
+                .Subscribe();
         }
 
-        private void AlbumButtonAddAlbum_OnClick(object sender, RoutedEventArgs e)
+        private void AlbumButton_AddAlbum_OnClick(object sender, RoutedEventArgs e)
         {
+            var viewModelSelectedTrayImages = ViewModel.SelectedTrayImages.Any() ? ViewModel.SelectedTrayImages : ViewModel.TrayImages;
+            var imageViewModels = viewModelSelectedTrayImages.Select(model => model.Image).ToList();
+
+            ViewModel.NewAlbumWithImages.Execute(imageViewModels)
+                .Subscribe();
         }
     }
 }

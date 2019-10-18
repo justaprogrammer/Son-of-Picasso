@@ -133,7 +133,7 @@ namespace SonOfPicasso.Core.Services
                 var unitOfWork = _unitOfWorkFactory();
 
                 var albums = unitOfWork.AlbumRepository
-                    .Get(includeProperties: "AlbumImages,AlbumImages.Image")
+                    .Get(includeProperties: "AlbumImages,AlbumImages.Image,AlbumImages.Image.ExifData")
                     .ToArray();
 
                 foreach (var album in albums) observer.OnNext(new AlbumImageContainer(album));
@@ -145,6 +145,55 @@ namespace SonOfPicasso.Core.Services
 
             return selectFolders.Merge(selectAlbums)
                 .SubscribeOn(_schedulerProvider.TaskPool);
+        }
+
+        public IObservable<ImageContainer> GetAlbumImageContainer(int albumId)
+        {
+            return Observable.Create<ImageContainer>(observer =>
+            {
+                var unitOfWork = _unitOfWorkFactory();
+
+                var album = unitOfWork.AlbumRepository
+                    .Get(album => album.Id == albumId, includeProperties: "AlbumImages,AlbumImages.Image,AlbumImages.Image.ExifData")
+                    .First();
+
+                observer.OnNext(new AlbumImageContainer(album));
+                observer.OnCompleted();
+
+                return unitOfWork;
+            }).SubscribeOn(_schedulerProvider.TaskPool);
+        }
+
+        public IObservable<ImageContainer> AddImagesToAlbum(int albumId, IEnumerable<int> imageIds)
+        {
+            return Observable.Create<IObservable<ImageContainer>>(observer =>
+            {
+                var unitOfWork = _unitOfWorkFactory();
+
+                var imageIdHash = unitOfWork.AlbumImageRepository.Get(image => image.AlbumId == albumId)
+                    .Select(image => image.ImageId)
+                    .ToHashSet();
+
+                foreach (var imageId in imageIds)
+                {
+                    if (!imageIdHash.Contains(imageId))
+                    {
+                        unitOfWork.AlbumImageRepository.Insert(new AlbumImage
+                        {
+                            ImageId = imageId,
+                            AlbumId = albumId
+                        });
+                    }
+                }
+
+                unitOfWork.Save();
+                
+                observer.OnNext(GetAlbumImageContainer(albumId));
+                observer.OnCompleted();
+
+                return unitOfWork;
+            })
+            .SelectMany(observable => observable);
         }
     }
 }

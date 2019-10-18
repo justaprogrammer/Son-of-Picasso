@@ -8,6 +8,7 @@
                            xmlns:viewModels="clr-namespace:SonOfPicasso.UI.ViewModels"
                            xmlns:views="clr-namespace:SonOfPicasso.UI.Views"
                            xmlns:converters="clr-namespace:SonOfPicasso.UI.Converters"
+                           xmlns:windows="clr-namespace:SonOfPicasso.UI.Windows"
                            mc:Ignorable="d"
                            Title="MainWindow" Height="450" Width="800">
 
@@ -178,7 +179,7 @@
                                 <d:Style.DataContext>
                                     <x:Type Type="viewModels:ImageContainerViewModel" />
                                 </d:Style.DataContext>
-                                <EventSetter Event="Click" Handler="AlbumButtonAlbum_OnClick"></EventSetter>
+                                <EventSetter Event="Click" Handler="AlbumButton_AddImagesToAlbum_OnClick"></EventSetter>
                             </Style>
                             
                             <Style x:Key="OtherMenuItemStyle" TargetType="MenuItem">
@@ -197,7 +198,7 @@
                             <ContextMenu ItemContainerStyleSelector="{StaticResource MenuItemStyleConverter}">
                                 <ContextMenu.ItemsSource>
                                     <CompositeCollection>
-                                        <MenuItem Header="Add Album"  Click="AlbumButtonAddAlbum_OnClick"/>
+                                        <MenuItem Header="Add Album"  Click="AlbumButton_AddAlbum_OnClick"/>
                                         <Separator />
                                         <CollectionContainer Collection="{Binding Source={StaticResource AlbumImageContainersViewSource}}" />
                                     </CompositeCollection>

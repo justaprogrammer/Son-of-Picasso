@@ -50,7 +50,9 @@ namespace SonOfPicasso.UI.ViewModels
             _selectedImagesSourceCache = new SourceCache<ImageViewModel, int>(model => model.ImageId);
 
             AddFolder = ReactiveCommand.CreateFromObservable<Unit, Unit>(ExecuteAddFolder);
-            NewAlbum = ReactiveCommand.CreateFromObservable(ExecuteNewAlbum);
+            NewAlbum = ReactiveCommand.CreateFromObservable<Unit, ImageContainerViewModel>(ExecuteNewAlbum);
+            NewAlbumWithImages = ReactiveCommand.CreateFromObservable<IEnumerable<ImageViewModel>, ImageContainerViewModel>(ExecuteNewAlbumWithImages);
+            AddImagesToAlbum = ReactiveCommand.CreateFromObservable<(IEnumerable<ImageViewModel>, ImageContainerViewModel), ImageContainerViewModel>(ExecuteAddImagesToAlbum, outputScheduler: _schedulerProvider.TaskPool);
 
             var hasItemsInTray = this.WhenAnyValue(model => model.TrayImages.Count)
                 .Select(propertyValue => propertyValue > 0);
@@ -184,7 +186,11 @@ namespace SonOfPicasso.UI.ViewModels
 
         public ReactiveCommand<Unit, Unit> AddFolder { get; }
 
-        public ReactiveCommand<Unit, Unit> NewAlbum { get; }
+        public ReactiveCommand<Unit, ImageContainerViewModel> NewAlbum { get; }
+
+        public ReactiveCommand<(IEnumerable<ImageViewModel>, ImageContainerViewModel), ImageContainerViewModel> AddImagesToAlbum { get; set; }
+    
+        public ReactiveCommand<IEnumerable<ImageViewModel>, ImageContainerViewModel> NewAlbumWithImages { get; }
 
         public ReactiveCommand<IList<TrayImageViewModel>, Unit> PinSelectedItems { get; }
 
@@ -226,21 +232,55 @@ namespace SonOfPicasso.UI.ViewModels
             return imageContainerViewModel;
         }
 
-        private IObservable<Unit> ExecuteNewAlbum()
+        private IObservable<ImageContainerViewModel> ExecuteNewAlbum(Unit _)
         {
             return NewAlbumInteraction.Handle(Unit.Default)
                 .ObserveOn(_schedulerProvider.TaskPool)
                 .Select(model =>
                 {
                     if (model == null)
-                        return Observable.Return(Unit.Default);
+                        return Observable.Return((ImageContainerViewModel) null);
 
                     return _imageManagementService.CreateAlbum(model)
                         .Select(imageContainer =>
                         {
                             _imageContainerCache.AddOrUpdate(imageContainer);
-                            return Unit.Default;
+                            return _imageContainerViewModelCache.Lookup(imageContainer.Id).Value;
                         });
+                })
+                .SelectMany(observable => observable);
+        }
+
+        private IObservable<ImageContainerViewModel> ExecuteAddImagesToAlbum((IEnumerable<ImageViewModel>, ImageContainerViewModel) tuple)
+        {
+            return Observable.Defer(() =>
+            {
+                var (imageViewModels, imageContainerViewModel) = tuple;
+
+                var addImagesToAlbum = _imageManagementService
+                    .AddImagesToAlbum(imageContainerViewModel.ContainerTypeId,
+                        imageViewModels.Select(viewModel => viewModel.ImageId))
+                    .Select(imageContainer =>
+                    {
+                        _imageContainerCache.AddOrUpdate(imageContainer);
+                        return _imageContainerViewModelCache.Lookup(imageContainer.Id).Value;
+                    });
+
+                return addImagesToAlbum;
+            }).SubscribeOn(_schedulerProvider.TaskPool);
+        }
+
+        private IObservable<ImageContainerViewModel> ExecuteNewAlbumWithImages(IEnumerable<ImageViewModel> imageViewModels)
+        {
+            return ExecuteNewAlbum(Unit.Default)
+                .Select(model =>
+                {
+                    if (model == null)
+                    {
+                        return Observable.Return((ImageContainerViewModel) null);
+                    }
+
+                    return ExecuteAddImagesToAlbum((imageViewModels, model));
                 })
                 .SelectMany(observable => observable);
         }
