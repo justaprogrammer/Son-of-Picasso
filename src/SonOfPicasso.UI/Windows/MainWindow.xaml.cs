@@ -28,6 +28,8 @@ namespace SonOfPicasso.UI.Windows
     public partial class MainWindow : ReactiveWindow<ApplicationViewModel>
     {
         private readonly Func<AddAlbumViewModel> _addAlbumViewModelFactory;
+        private readonly Func<FolderManagementWindow> _folderManagementWindowFactory;
+        private readonly Func<FolderManagementViewModel> _folderManagementViewModelFactory;
         private readonly Func<AddAlbumWindow> _addAlbumWindowFactory;
         private readonly IEnvironmentService _environmentService;
         private readonly IFileSystem _fileSystem;
@@ -38,8 +40,12 @@ namespace SonOfPicasso.UI.Windows
         private CollectionViewSource albumImageContainersViewSource;
 
         public MainWindow(ILogger logger, IEnvironmentService environmentService, IFileSystem fileSystem,
-            ISchedulerProvider schedulerProvider, Func<AddAlbumWindow> addAlbumWindowFactory,
-            Func<AddAlbumViewModel> addAlbumViewModelFactory)
+            ISchedulerProvider schedulerProvider, 
+            Func<AddAlbumWindow> addAlbumWindowFactory,
+            Func<AddAlbumViewModel> addAlbumViewModelFactory,
+            Func<FolderManagementWindow> folderManagementWindowFactory,
+            Func<FolderManagementViewModel> folderManagementViewModelFactory
+            )
         {
             _logger = logger;
             _environmentService = environmentService;
@@ -47,6 +53,8 @@ namespace SonOfPicasso.UI.Windows
             _schedulerProvider = schedulerProvider;
             _addAlbumWindowFactory = addAlbumWindowFactory;
             _addAlbumViewModelFactory = addAlbumViewModelFactory;
+            _folderManagementWindowFactory = folderManagementWindowFactory;
+            _folderManagementViewModelFactory = folderManagementViewModelFactory;
 
             InitializeComponent();
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive;
@@ -7,38 +8,45 @@ using System.Reactive.Linq;
 using DynamicData;
 using DynamicData.Binding;
 using ReactiveUI;
+using Serilog;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.UI.ViewModels.Abstract;
 
 namespace SonOfPicasso.UI.ViewModels
 {
-    public class FolderViewModel
+    public class FolderViewModel : ReactiveObject
     {
+        private readonly IDirectoryInfo _directoryInfo;
+
         public FolderViewModel(IDirectoryInfo directoryInfo,
-            ObservableCollectionExtended<FolderViewModel> observableCollectionExtended)
+            Func<IDirectoryInfo, FolderViewModel> folderViewModelFactory)
         {
-            Path = directoryInfo.FullName;
-            Children = observableCollectionExtended;
+            _directoryInfo = directoryInfo;
         }
 
-        public IObservableCollection<FolderViewModel> Children { get; }
-
-        public string Path { get; }
+        public string Path => _directoryInfo.FullName;
     }
 
     public class FolderManagementViewModel : ViewModelBase
     {
+        private readonly IDirectoryInfoPermissionsService _directoryInfoPermissionsService;
         private readonly IFileSystem _fileSystem;
-
-        internal readonly SourceCache<FolderViewModel, string> _foldersSourceCache;
-        private readonly ISchedulerProvider _schedulerProvider;
         private readonly ObservableCollectionExtended<FolderViewModel> _foldersObservableCollection;
 
-        public FolderManagementViewModel(ViewModelActivator activator, IFileSystem fileSystem,
-            ISchedulerProvider schedulerProvider) : base(activator)
+        internal readonly SourceCache<FolderViewModel, string> _foldersSourceCache;
+        private readonly ILogger _logger;
+        private readonly ISchedulerProvider _schedulerProvider;
+
+        public FolderManagementViewModel(ViewModelActivator activator,
+            IFileSystem fileSystem,
+            ISchedulerProvider schedulerProvider,
+            ILogger logger,
+            IDirectoryInfoPermissionsService directoryInfoPermissionsService) : base(activator)
         {
             _fileSystem = fileSystem;
             _schedulerProvider = schedulerProvider;
+            _logger = logger;
+            _directoryInfoPermissionsService = directoryInfoPermissionsService;
             _foldersSourceCache = new SourceCache<FolderViewModel, string>(model => model.Path);
 
             Continue = ReactiveCommand.CreateFromObservable(ExecuteContinue);
@@ -72,23 +80,20 @@ namespace SonOfPicasso.UI.ViewModels
         private IObservable<FolderViewModel> GetFolderViewModels()
         {
             return Observable.Defer(() =>
-            {
-                return _fileSystem.DriveInfo.GetDrives()
-                    .Select(driveInfo => driveInfo.RootDirectory)
-                    .Select(CreateFolderViewModel)
-                    .ToObservable();
-
-            }).SubscribeOn(_schedulerProvider.TaskPool);
+                {
+                    return _fileSystem.DriveInfo.GetDrives()
+                        .Where(driveInfo => driveInfo.DriveType == DriveType.Fixed)
+                        .Where(driveInfo => driveInfo.IsReady)
+                        .Select(driveInfo => driveInfo.RootDirectory)
+                        .Select(CreateFolderViewModel)
+                        .ToObservable();
+                })
+                .SubscribeOn(_schedulerProvider.TaskPool);
         }
 
         private FolderViewModel CreateFolderViewModel(IDirectoryInfo directoryInfo)
         {
-            var enumerable = directoryInfo.EnumerateDirectories()
-                .Select(CreateFolderViewModel);
-
-            var children = new ObservableCollectionExtended<FolderViewModel>(enumerable);
-
-            var folderViewModel = new FolderViewModel(directoryInfo, children);
+            var folderViewModel = new FolderViewModel(directoryInfo, CreateFolderViewModel);
             _foldersSourceCache.AddOrUpdate(folderViewModel);
 
             return folderViewModel;

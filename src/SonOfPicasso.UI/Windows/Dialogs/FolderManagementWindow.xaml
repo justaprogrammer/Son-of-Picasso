@@ -7,11 +7,14 @@
         xmlns:viewModels="clr-namespace:SonOfPicasso.UI.ViewModels"
         mc:Ignorable="d"
         Title="AddAlbumWindow" Height="150" Width="300">
-    <DockPanel>
-     
+    <DockPanel LastChildFill="True">
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
             <Button Name="OkButton" Content="Ok" />
             <Button Name="CancelButton" Content="Cancel" />
         </StackPanel>
+
+        <ListView DockPanel.Dock="Top" Name="FoldersListView" >
+
+        </ListView>
     </DockPanel>
 </reactiveUi:ReactiveWindow>

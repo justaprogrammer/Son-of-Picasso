@@ -30,7 +30,9 @@
             <MenuItem Header="_Folder" />
             <MenuItem Header="_Picture" />
             <MenuItem Header="_Create" />
-            <MenuItem Header="_Tools" />
+            <MenuItem Header="_Tools">
+                <MenuItem x:Name="FolderManager" Header="Folder Manager" />
+            </MenuItem>
             <MenuItem Header="_Help" />
         </Menu>
 

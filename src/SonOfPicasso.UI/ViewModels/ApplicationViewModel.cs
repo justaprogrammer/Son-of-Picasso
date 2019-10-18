@@ -49,6 +49,7 @@ namespace SonOfPicasso.UI.ViewModels
 
             _selectedImagesSourceCache = new SourceCache<ImageViewModel, int>(model => model.ImageId);
 
+            FolderManager = ReactiveCommand.CreateFromObservable<Unit, Unit>(ExecuteFolderManager);
             AddFolder = ReactiveCommand.CreateFromObservable<Unit, Unit>(ExecuteAddFolder);
             NewAlbum = ReactiveCommand.CreateFromObservable<Unit, ImageContainerViewModel>(ExecuteNewAlbum);
             NewAlbumWithImages = ReactiveCommand.CreateFromObservable<IEnumerable<ImageViewModel>, ImageContainerViewModel>(ExecuteNewAlbumWithImages);
@@ -167,6 +168,8 @@ namespace SonOfPicasso.UI.ViewModels
         public Interaction<Unit, AddAlbumViewModel> NewAlbumInteraction { get; set; } =
             new Interaction<Unit, AddAlbumViewModel>();
 
+        public Interaction<Unit, FolderManagementViewModel> FolderManagerInteraction { get; set; } = new Interaction<Unit, FolderManagementViewModel>();
+
         public IObservableCollection<ImageContainerViewModel> ImageContainers { get; } =
             new ObservableCollectionExtended<ImageContainerViewModel>();
 
@@ -197,6 +200,8 @@ namespace SonOfPicasso.UI.ViewModels
         public Interaction<Unit, bool> ConfirmClearTrayItemsInteraction { get; set; } = new Interaction<Unit, bool>();
 
         public ReactiveCommand<Unit, Unit> AddTrayItemsToAlbum { get; }
+        
+        public ReactiveCommand<Unit, Unit> FolderManager { get; }
 
         public void Dispose()
         {
@@ -349,6 +354,19 @@ namespace SonOfPicasso.UI.ViewModels
                 updater.AddOrUpdate(added);
                 updater.Remove(removed);
             });
+        }
+
+        private IObservable<Unit> ExecuteFolderManager(Unit folderManagementViewModel)
+        {
+            return FolderManagerInteraction.Handle(Unit.Default)
+                .ObserveOn(_schedulerProvider.TaskPool)
+                .Select(folderManagementViewModel =>
+                {
+                    
+
+                    return Observable.Return(Unit.Default);
+                })
+                .SelectMany(observable => observable);
         }
     }
 }

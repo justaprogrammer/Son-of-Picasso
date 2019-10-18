@@ -1,9 +1,7 @@
-﻿using System;
-using System.Reactive;
+﻿using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Windows;
 using ReactiveUI;
-using ReactiveUI.Validation.Extensions;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.UI.ViewModels;
 
@@ -20,37 +18,41 @@ namespace SonOfPicasso.UI.Windows.Dialogs
 
             this.WhenActivated(d =>
             {
-              
+                FoldersListView.ItemsSource = ViewModel.Folders;
+                
+                this.BindCommand(ViewModel,
+                        model => model.Continue,
+                        window => window.OkButton)
+                    .DisposeWith(d);
 
-                d(this.BindCommand(ViewModel, 
-                    model => model.Continue, 
-                    window => window.OkButton));
+                this.BindCommand(ViewModel,
+                        model => model.Cancel,
+                        window => window.CancelButton)
+                    .DisposeWith(d);
 
-                d(this.BindCommand(ViewModel, 
-                    model => model.Cancel, 
-                    window => window.CancelButton));
-
-                d(this.ViewModel.CancelInteraction.RegisterHandler(context =>
-                {
-                    return Observable.Defer<Unit>(() =>
+                ViewModel.CancelInteraction.RegisterHandler(context =>
                     {
-                        context.SetOutput(Unit.Default);
-                        DialogResult = false;
-                        Close();
-                        return Observable.Return(Unit.Default);
-                    }).SubscribeOn(schedulerProvider.MainThreadScheduler);
-                }));
+                        return Observable.Defer(() =>
+                        {
+                            context.SetOutput(Unit.Default);
+                            DialogResult = false;
+                            Close();
+                            return Observable.Return(Unit.Default);
+                        }).SubscribeOn(schedulerProvider.MainThreadScheduler);
+                    })
+                    .DisposeWith(d);
 
-                d(this.ViewModel.ContinueInteraction.RegisterHandler(context =>
-                {
-                    return Observable.Defer(() =>
+                ViewModel.ContinueInteraction.RegisterHandler(context =>
                     {
-                        context.SetOutput(Unit.Default);
-                        DialogResult = true;
-                        Close();
-                        return Observable.Return(Unit.Default);
-                    }).SubscribeOn(schedulerProvider.MainThreadScheduler);
-                }));
+                        return Observable.Defer(() =>
+                        {
+                            context.SetOutput(Unit.Default);
+                            DialogResult = true;
+                            Close();
+                            return Observable.Return(Unit.Default);
+                        }).SubscribeOn(schedulerProvider.MainThreadScheduler);
+                    })
+                    .DisposeWith(d);
             });
         }
     }
