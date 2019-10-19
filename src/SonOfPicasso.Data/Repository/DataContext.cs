@@ -12,6 +12,8 @@ namespace SonOfPicasso.Data.Repository
         public DbSet<Album> Albums { get; set; }
 
         public DbSet<AlbumImage> AlbumImages { get; set; }
+        
+        public DbSet<FolderRule> FolderRules { get; set; }
 
         public DataContext()
         { }

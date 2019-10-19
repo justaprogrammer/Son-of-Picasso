@@ -11,6 +11,7 @@ using ReactiveUI;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Model;
 using SonOfPicasso.Core.Scheduling;
+using SonOfPicasso.Data.Model;
 using SonOfPicasso.UI.ViewModels.Abstract;
 
 namespace SonOfPicasso.UI.ViewModels
@@ -168,7 +169,8 @@ namespace SonOfPicasso.UI.ViewModels
         public Interaction<Unit, AddAlbumViewModel> NewAlbumInteraction { get; set; } =
             new Interaction<Unit, AddAlbumViewModel>();
 
-        public Interaction<Unit, FolderManagementViewModel> FolderManagerInteraction { get; set; } = new Interaction<Unit, FolderManagementViewModel>();
+        public Interaction<Unit, FolderRulesViewModel> FolderManagerInteraction { get; set; } =
+            new Interaction<Unit, FolderRulesViewModel>();
 
         public IObservableCollection<ImageContainerViewModel> ImageContainers { get; } =
             new ObservableCollectionExtended<ImageContainerViewModel>();
@@ -200,7 +202,7 @@ namespace SonOfPicasso.UI.ViewModels
         public Interaction<Unit, bool> ConfirmClearTrayItemsInteraction { get; set; } = new Interaction<Unit, bool>();
 
         public ReactiveCommand<Unit, Unit> AddTrayItemsToAlbum { get; }
-        
+
         public ReactiveCommand<Unit, Unit> FolderManager { get; }
 
         public void Dispose()
@@ -362,11 +364,43 @@ namespace SonOfPicasso.UI.ViewModels
                 .ObserveOn(_schedulerProvider.TaskPool)
                 .Select(folderManagementViewModel =>
                 {
-                    
+                    var manageFolderRules = ComputeRuleset(folderManagementViewModel.Folders)
+                        .ToArray();
 
                     return Observable.Return(Unit.Default);
                 })
                 .SelectMany(observable => observable);
+        }
+
+        private IEnumerable<FolderRule> ComputeRuleset(IEnumerable<ManageFolderViewModel> manageFolderViewModels)
+        {
+            return manageFolderViewModels
+                .Select(ComputeRuleset)
+                .SelectMany(rules => rules);
+        }
+
+        private IEnumerable<FolderRule> ComputeRuleset(ManageFolderViewModel manageFolderViewModel)
+        {
+            return ComputeInternal(manageFolderViewModel, null);
+        }
+
+        private IEnumerable<FolderRule> ComputeInternal(ManageFolderViewModel manageFolderViewModel,
+            FolderRuleActionEnum? state)
+        {
+            if (manageFolderViewModel.ManageFolderState != state)
+            {
+                yield return new FolderRule
+                {
+                    Path = manageFolderViewModel.FullName,
+                    Action = manageFolderViewModel.ManageFolderState
+                };
+
+                state = manageFolderViewModel.ManageFolderState;
+            }
+
+            foreach (var child in manageFolderViewModel.Children)
+            foreach (var manageFolderRule in ComputeInternal(child, state))
+                yield return manageFolderRule;
         }
     }
 }

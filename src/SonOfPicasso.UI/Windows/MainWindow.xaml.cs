@@ -29,7 +29,7 @@ namespace SonOfPicasso.UI.Windows
     {
         private readonly Func<AddAlbumViewModel> _addAlbumViewModelFactory;
         private readonly Func<FolderManagementWindow> _folderManagementWindowFactory;
-        private readonly Func<FolderManagementViewModel> _folderManagementViewModelFactory;
+        private readonly Func<FolderRulesViewModel> _folderManagementViewModelFactory;
         private readonly Func<AddAlbumWindow> _addAlbumWindowFactory;
         private readonly IEnvironmentService _environmentService;
         private readonly IFileSystem _fileSystem;
@@ -44,7 +44,7 @@ namespace SonOfPicasso.UI.Windows
             Func<AddAlbumWindow> addAlbumWindowFactory,
             Func<AddAlbumViewModel> addAlbumViewModelFactory,
             Func<FolderManagementWindow> folderManagementWindowFactory,
-            Func<FolderManagementViewModel> folderManagementViewModelFactory
+            Func<FolderRulesViewModel> folderManagementViewModelFactory
             )
         {
             _logger = logger;
@@ -223,9 +223,28 @@ namespace SonOfPicasso.UI.Windows
                     {
                         var messageBoxResult = MessageBox.Show("This will clear items in the tray. Are you sure?", "Confirmation", MessageBoxButton.YesNo);
                         context.SetOutput(messageBoxResult == MessageBoxResult.Yes);
+                            FolderManagementViewModel result = null;
                         return Observable.Return(Unit.Default);
                     }).SubscribeOn(_schedulerProvider.MainThreadScheduler);
                 }).DisposeWith(d);
+
+                ViewModel.FolderManagerInteraction.RegisterHandler(context =>
+                    {
+                        return Observable.Defer(() =>
+                        {
+                            var folderManagementWindow = _folderManagementWindowFactory();
+                            var folderManagementViewModel = _folderManagementViewModelFactory();
+
+                            folderManagementWindow.ViewModel = folderManagementViewModel;
+
+                            FolderRulesViewModel result = null;
+                            if (folderManagementWindow.ShowDialog() == true) result = folderManagementWindow.ViewModel;
+
+                            context.SetOutput(result);
+                            return Observable.Return(Unit.Default);
+                        }).SubscribeOn(_schedulerProvider.MainThreadScheduler);
+                    })
+                    .DisposeWith(d);
             });
         }
 

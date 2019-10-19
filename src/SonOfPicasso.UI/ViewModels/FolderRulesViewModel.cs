@@ -1,53 +1,49 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using DynamicData;
 using DynamicData.Binding;
 using ReactiveUI;
 using Serilog;
 using SonOfPicasso.Core.Scheduling;
+using SonOfPicasso.Data.Model;
 using SonOfPicasso.UI.ViewModels.Abstract;
 
 namespace SonOfPicasso.UI.ViewModels
 {
-    public class FolderViewModel : ReactiveObject
+    public class FolderRulesViewModel : ViewModelBase
     {
-        private readonly IDirectoryInfo _directoryInfo;
-
-        public FolderViewModel(IDirectoryInfo directoryInfo,
-            Func<IDirectoryInfo, FolderViewModel> folderViewModelFactory)
-        {
-            _directoryInfo = directoryInfo;
-        }
-
-        public string Path => _directoryInfo.FullName;
-    }
-
-    public class FolderManagementViewModel : ViewModelBase
-    {
+        private readonly IDriveInfoFactory _driveInfoFactory;
         private readonly IDirectoryInfoPermissionsService _directoryInfoPermissionsService;
         private readonly IFileSystem _fileSystem;
-        private readonly ObservableCollectionExtended<FolderViewModel> _foldersObservableCollection;
+        private readonly ObservableCollectionExtended<ManageFolderViewModel> _foldersObservableCollection;
 
-        internal readonly SourceCache<FolderViewModel, string> _foldersSourceCache;
         private readonly ILogger _logger;
+        private readonly Func<ManageFolderViewModel> _manageFolderViewModelFactory;
         private readonly ISchedulerProvider _schedulerProvider;
+        private ManageFolderViewModel _selectedItem;
 
-        public FolderManagementViewModel(ViewModelActivator activator,
+        public FolderRulesViewModel(ViewModelActivator activator,
             IFileSystem fileSystem,
+            IDriveInfoFactory driveInfoFactory,
+            IDirectoryInfoPermissionsService directoryInfoPermissionsService,
             ISchedulerProvider schedulerProvider,
             ILogger logger,
-            IDirectoryInfoPermissionsService directoryInfoPermissionsService) : base(activator)
+            Func<ManageFolderViewModel> manageFolderViewModelFactory
+        ) : base(activator)
         {
             _fileSystem = fileSystem;
+            _driveInfoFactory = driveInfoFactory;
+            _directoryInfoPermissionsService = directoryInfoPermissionsService;
             _schedulerProvider = schedulerProvider;
             _logger = logger;
-            _directoryInfoPermissionsService = directoryInfoPermissionsService;
-            _foldersSourceCache = new SourceCache<FolderViewModel, string>(model => model.Path);
+            _manageFolderViewModelFactory = manageFolderViewModelFactory;
 
             Continue = ReactiveCommand.CreateFromObservable(ExecuteContinue);
             ContinueInteraction = new Interaction<Unit, Unit>();
@@ -55,7 +51,7 @@ namespace SonOfPicasso.UI.ViewModels
             Cancel = ReactiveCommand.CreateFromObservable(ExecuteCancel);
             CancelInteraction = new Interaction<Unit, Unit>();
 
-            _foldersObservableCollection = new ObservableCollectionExtended<FolderViewModel>();
+            _foldersObservableCollection = new ObservableCollectionExtended<ManageFolderViewModel>();
 
             this.WhenActivated(d =>
             {
@@ -75,28 +71,31 @@ namespace SonOfPicasso.UI.ViewModels
 
         public ReactiveCommand<Unit, Unit> Cancel { get; }
 
-        public IObservableCollection<FolderViewModel> Folders => _foldersObservableCollection;
+        public ManageFolderViewModel SelectedItem
+        {
+            get => _selectedItem;
+            set => this.RaiseAndSetIfChanged(ref _selectedItem, value);
+        }
 
-        private IObservable<FolderViewModel> GetFolderViewModels()
+        public IObservableCollection<ManageFolderViewModel> Folders => _foldersObservableCollection;
+
+        private IObservable<ManageFolderViewModel> GetFolderViewModels()
         {
             return Observable.Defer(() =>
                 {
-                    return _fileSystem.DriveInfo.GetDrives()
+                    return _driveInfoFactory.GetDrives()
                         .Where(driveInfo => driveInfo.DriveType == DriveType.Fixed)
                         .Where(driveInfo => driveInfo.IsReady)
                         .Select(driveInfo => driveInfo.RootDirectory)
-                        .Select(CreateFolderViewModel)
+                        .Select(directoryInfo =>
+                        {
+                            var folderViewModel = _manageFolderViewModelFactory();
+                            folderViewModel.Initialize(directoryInfo, FolderRuleActionEnum.Remove);
+                            return folderViewModel;
+                        })
                         .ToObservable();
                 })
                 .SubscribeOn(_schedulerProvider.TaskPool);
-        }
-
-        private FolderViewModel CreateFolderViewModel(IDirectoryInfo directoryInfo)
-        {
-            var folderViewModel = new FolderViewModel(directoryInfo, CreateFolderViewModel);
-            _foldersSourceCache.AddOrUpdate(folderViewModel);
-
-            return folderViewModel;
         }
 
         private IObservable<Unit> ExecuteCancel()

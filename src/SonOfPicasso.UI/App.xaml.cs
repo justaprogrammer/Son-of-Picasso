@@ -50,6 +50,10 @@ namespace SonOfPicasso.UI
                 .As<IFileSystem>()
                 .InstancePerLifetimeScope();
 
+            containerBuilder.Register(context => context.Resolve<IFileSystem>().DriveInfo)
+                .As<IDriveInfoFactory>()
+                .InstancePerLifetimeScope();
+
             containerBuilder.Register(context =>
             {
                 var environmentService = context.Resolve<IEnvironmentService>();
