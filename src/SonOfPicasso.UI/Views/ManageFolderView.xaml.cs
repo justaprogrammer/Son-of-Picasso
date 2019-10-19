@@ -6,7 +6,7 @@ namespace SonOfPicasso.UI.Views
     /// <summary>
     ///     Interaction logic for ManageFolderView.xaml
     /// </summary>
-    public partial class ManageFolderView : ReactiveUserControl<ManageFolderViewModel>
+    public partial class ManageFolderView : ReactiveUserControl<ManageFolderRulesViewModel>
     {
         public ManageFolderView()
         {

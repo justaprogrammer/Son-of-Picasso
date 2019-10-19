@@ -9,9 +9,9 @@ using Xunit.Abstractions;
 
 namespace SonOfPicasso.UI.Tests.ViewModels
 {
-    public class FolderManagementViewModelTests : ViewModelTestsBase
+    public class ManageFolderRulesViewModelTests : ViewModelTestsBase
     {
-        public FolderManagementViewModelTests(ITestOutputHelper testOutputHelper)
+        public ManageFolderRulesViewModelTests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {
             
@@ -49,7 +49,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             directoryInfoPermissionsService.IsReadable(Arg.Any<IDirectoryInfo>())
                 .ReturnsForAnyArgs(true);
 
-            var folderManagementViewModel = AutoSubstitute.Resolve<FolderRulesViewModel>();
+            var folderManagementViewModel = AutoSubstitute.Resolve<FolderRuleViewModel>();
             folderManagementViewModel.Activator.Activate();
 
             TestSchedulerProvider.TaskPool.AdvanceBy(5);

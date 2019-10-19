@@ -17,25 +17,25 @@ using SonOfPicasso.UI.ViewModels.Abstract;
 
 namespace SonOfPicasso.UI.ViewModels
 {
-    public class FolderRulesViewModel : ViewModelBase
+    public class FolderRuleViewModel : ViewModelBase
     {
         private readonly IDriveInfoFactory _driveInfoFactory;
         private readonly IDirectoryInfoPermissionsService _directoryInfoPermissionsService;
         private readonly IFileSystem _fileSystem;
-        private readonly ObservableCollectionExtended<ManageFolderViewModel> _foldersObservableCollection;
+        private readonly ObservableCollectionExtended<ManageFolderRulesViewModel> _foldersObservableCollection;
 
         private readonly ILogger _logger;
-        private readonly Func<ManageFolderViewModel> _manageFolderViewModelFactory;
+        private readonly Func<ManageFolderRulesViewModel> _manageFolderViewModelFactory;
         private readonly ISchedulerProvider _schedulerProvider;
-        private ManageFolderViewModel _selectedItem;
+        private ManageFolderRulesViewModel _selectedItem;
 
-        public FolderRulesViewModel(ViewModelActivator activator,
+        public FolderRuleViewModel(ViewModelActivator activator,
             IFileSystem fileSystem,
             IDriveInfoFactory driveInfoFactory,
             IDirectoryInfoPermissionsService directoryInfoPermissionsService,
             ISchedulerProvider schedulerProvider,
             ILogger logger,
-            Func<ManageFolderViewModel> manageFolderViewModelFactory
+            Func<ManageFolderRulesViewModel> manageFolderViewModelFactory
         ) : base(activator)
         {
             _fileSystem = fileSystem;
@@ -51,7 +51,7 @@ namespace SonOfPicasso.UI.ViewModels
             Cancel = ReactiveCommand.CreateFromObservable(ExecuteCancel);
             CancelInteraction = new Interaction<Unit, Unit>();
 
-            _foldersObservableCollection = new ObservableCollectionExtended<ManageFolderViewModel>();
+            _foldersObservableCollection = new ObservableCollectionExtended<ManageFolderRulesViewModel>();
 
             this.WhenActivated(d =>
             {
@@ -71,15 +71,15 @@ namespace SonOfPicasso.UI.ViewModels
 
         public ReactiveCommand<Unit, Unit> Cancel { get; }
 
-        public ManageFolderViewModel SelectedItem
+        public ManageFolderRulesViewModel SelectedItem
         {
             get => _selectedItem;
             set => this.RaiseAndSetIfChanged(ref _selectedItem, value);
         }
 
-        public IObservableCollection<ManageFolderViewModel> Folders => _foldersObservableCollection;
+        public IObservableCollection<ManageFolderRulesViewModel> Folders => _foldersObservableCollection;
 
-        private IObservable<ManageFolderViewModel> GetFolderViewModels()
+        private IObservable<ManageFolderRulesViewModel> GetFolderViewModels()
         {
             return Observable.Defer(() =>
                 {

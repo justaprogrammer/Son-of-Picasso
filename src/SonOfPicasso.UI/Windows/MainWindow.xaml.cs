@@ -29,7 +29,7 @@ namespace SonOfPicasso.UI.Windows
     {
         private readonly Func<AddAlbumViewModel> _addAlbumViewModelFactory;
         private readonly Func<FolderManagementWindow> _folderManagementWindowFactory;
-        private readonly Func<FolderRulesViewModel> _folderManagementViewModelFactory;
+        private readonly Func<FolderRuleViewModel> _folderManagementViewModelFactory;
         private readonly Func<AddAlbumWindow> _addAlbumWindowFactory;
         private readonly IEnvironmentService _environmentService;
         private readonly IFileSystem _fileSystem;
@@ -44,7 +44,7 @@ namespace SonOfPicasso.UI.Windows
             Func<AddAlbumWindow> addAlbumWindowFactory,
             Func<AddAlbumViewModel> addAlbumViewModelFactory,
             Func<FolderManagementWindow> folderManagementWindowFactory,
-            Func<FolderRulesViewModel> folderManagementViewModelFactory
+            Func<FolderRuleViewModel> folderManagementViewModelFactory
             )
         {
             _logger = logger;
@@ -237,7 +237,7 @@ namespace SonOfPicasso.UI.Windows
 
                             folderManagementWindow.ViewModel = folderManagementViewModel;
 
-                            FolderRulesViewModel result = null;
+                            FolderRuleViewModel result = null;
                             if (folderManagementWindow.ShowDialog() == true) result = folderManagementWindow.ViewModel;
 
                             context.SetOutput(result);

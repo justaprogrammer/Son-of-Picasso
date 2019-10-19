@@ -169,8 +169,8 @@ namespace SonOfPicasso.UI.ViewModels
         public Interaction<Unit, AddAlbumViewModel> NewAlbumInteraction { get; set; } =
             new Interaction<Unit, AddAlbumViewModel>();
 
-        public Interaction<Unit, FolderRulesViewModel> FolderManagerInteraction { get; set; } =
-            new Interaction<Unit, FolderRulesViewModel>();
+        public Interaction<Unit, FolderRuleViewModel> FolderManagerInteraction { get; set; } =
+            new Interaction<Unit, FolderRuleViewModel>();
 
         public IObservableCollection<ImageContainerViewModel> ImageContainers { get; } =
             new ObservableCollectionExtended<ImageContainerViewModel>();
@@ -372,33 +372,33 @@ namespace SonOfPicasso.UI.ViewModels
                 .SelectMany(observable => observable);
         }
 
-        private IEnumerable<FolderRule> ComputeRuleset(IEnumerable<ManageFolderViewModel> manageFolderViewModels)
+        private IEnumerable<FolderRule> ComputeRuleset(IEnumerable<ManageFolderRulesViewModel> manageFolderViewModels)
         {
             return manageFolderViewModels
                 .Select(ComputeRuleset)
                 .SelectMany(rules => rules);
         }
 
-        private IEnumerable<FolderRule> ComputeRuleset(ManageFolderViewModel manageFolderViewModel)
+        private IEnumerable<FolderRule> ComputeRuleset(ManageFolderRulesViewModel manageFolderRulesViewModel)
         {
-            return ComputeInternal(manageFolderViewModel, null);
+            return ComputeInternal(manageFolderRulesViewModel, null);
         }
 
-        private IEnumerable<FolderRule> ComputeInternal(ManageFolderViewModel manageFolderViewModel,
+        private IEnumerable<FolderRule> ComputeInternal(ManageFolderRulesViewModel manageFolderRulesViewModel,
             FolderRuleActionEnum? state)
         {
-            if (manageFolderViewModel.ManageFolderState != state)
+            if (manageFolderRulesViewModel.ManageFolderState != state)
             {
                 yield return new FolderRule
                 {
-                    Path = manageFolderViewModel.FullName,
-                    Action = manageFolderViewModel.ManageFolderState
+                    Path = manageFolderRulesViewModel.FullName,
+                    Action = manageFolderRulesViewModel.ManageFolderState
                 };
 
-                state = manageFolderViewModel.ManageFolderState;
+                state = manageFolderRulesViewModel.ManageFolderState;
             }
 
-            foreach (var child in manageFolderViewModel.Children)
+            foreach (var child in manageFolderRulesViewModel.Children)
             foreach (var manageFolderRule in ComputeInternal(child, state))
                 yield return manageFolderRule;
         }

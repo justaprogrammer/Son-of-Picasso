@@ -10,18 +10,18 @@ using SonOfPicasso.UI.ViewModels.Abstract;
 
 namespace SonOfPicasso.UI.ViewModels
 {
-    public class ManageFolderViewModel : ViewModelBase
+    public class ManageFolderRulesViewModel : ViewModelBase
     {
-        private readonly ObservableCollectionExtended<ManageFolderViewModel> _manageFolderViewModels =
-            new ObservableCollectionExtended<ManageFolderViewModel>();
+        private readonly ObservableCollectionExtended<ManageFolderRulesViewModel> _manageFolderViewModels =
+            new ObservableCollectionExtended<ManageFolderRulesViewModel>();
 
         private IDirectoryInfo _directoryInfo;
         private FolderRuleActionEnum _manageFolderState;
 
-        public ManageFolderViewModel(
+        public ManageFolderRulesViewModel(
             ISchedulerProvider schedulerProvider,
             IDirectoryInfoPermissionsService directoryInfoPermissionsService,
-            Func<ManageFolderViewModel> folderViewModelFactory,
+            Func<ManageFolderRulesViewModel> folderViewModelFactory,
             ViewModelActivator activator) : base(activator)
         {
             this.WhenActivated(disposable =>
@@ -70,7 +70,7 @@ namespace SonOfPicasso.UI.ViewModels
 
         public string Name => _directoryInfo.Name;
 
-        public IObservableCollection<ManageFolderViewModel> Children => _manageFolderViewModels;
+        public IObservableCollection<ManageFolderRulesViewModel> Children => _manageFolderViewModels;
 
         public void Initialize(IDirectoryInfo directoryInfo, FolderRuleActionEnum manageFolderState)
         {
