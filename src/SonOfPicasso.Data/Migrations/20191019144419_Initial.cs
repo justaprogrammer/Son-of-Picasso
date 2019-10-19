@@ -94,6 +94,20 @@ namespace SonOfPicasso.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "FolderRules",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Path = table.Column<string>(nullable: true),
+                    Action = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FolderRules", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Folders",
                 columns: table => new
                 {
@@ -185,6 +199,9 @@ namespace SonOfPicasso.Data.Migrations
         {
             migrationBuilder.DropTable(
                 name: "AlbumImages");
+
+            migrationBuilder.DropTable(
+                name: "FolderRules");
 
             migrationBuilder.DropTable(
                 name: "Albums");

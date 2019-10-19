@@ -9,7 +9,7 @@ using SonOfPicasso.Data.Repository;
 namespace SonOfPicasso.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20190930211055_Initial")]
+    [Migration("20191019144419_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -262,6 +262,23 @@ namespace SonOfPicasso.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Folders");
+                });
+
+            modelBuilder.Entity("SonOfPicasso.Data.Model.FolderRule", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Action")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Path")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FolderRules");
                 });
 
             modelBuilder.Entity("SonOfPicasso.Data.Model.Image", b =>
