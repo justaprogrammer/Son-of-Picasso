@@ -49,7 +49,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             directoryInfoPermissionsService.IsReadable(Arg.Any<IDirectoryInfo>())
                 .ReturnsForAnyArgs(true);
 
-            var folderManagementViewModel = AutoSubstitute.Resolve<FolderRuleViewModel>();
+            var folderManagementViewModel = AutoSubstitute.Resolve<ManageFolderRulesViewModel>();
             folderManagementViewModel.Activator.Activate();
 
             TestSchedulerProvider.TaskPool.AdvanceBy(5);

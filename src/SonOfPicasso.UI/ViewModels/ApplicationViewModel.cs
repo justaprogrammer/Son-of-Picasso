@@ -169,8 +169,8 @@ namespace SonOfPicasso.UI.ViewModels
         public Interaction<Unit, AddAlbumViewModel> NewAlbumInteraction { get; set; } =
             new Interaction<Unit, AddAlbumViewModel>();
 
-        public Interaction<Unit, FolderRuleViewModel> FolderManagerInteraction { get; set; } =
-            new Interaction<Unit, FolderRuleViewModel>();
+        public Interaction<Unit, ManageFolderRulesViewModel> FolderManagerInteraction { get; set; } =
+            new Interaction<Unit, ManageFolderRulesViewModel>();
 
         public IObservableCollection<ImageContainerViewModel> ImageContainers { get; } =
             new ObservableCollectionExtended<ImageContainerViewModel>();
@@ -364,41 +364,44 @@ namespace SonOfPicasso.UI.ViewModels
                 .ObserveOn(_schedulerProvider.TaskPool)
                 .Select(folderManagementViewModel =>
                 {
-                    var manageFolderRules = ComputeRuleset(folderManagementViewModel.Folders)
-                        .ToArray();
+                    if (folderManagementViewModel != null)
+                    {
+                        var manageFolderRules = ComputeRuleset(folderManagementViewModel.Folders)
+                            .ToArray();
+                    }
 
                     return Observable.Return(Unit.Default);
                 })
                 .SelectMany(observable => observable);
         }
 
-        private IEnumerable<FolderRule> ComputeRuleset(IEnumerable<ManageFolderRulesViewModel> manageFolderViewModels)
+        private IEnumerable<FolderRule> ComputeRuleset(IEnumerable<FolderRuleViewModel> manageFolderViewModels)
         {
             return manageFolderViewModels
                 .Select(ComputeRuleset)
                 .SelectMany(rules => rules);
         }
 
-        private IEnumerable<FolderRule> ComputeRuleset(ManageFolderRulesViewModel manageFolderRulesViewModel)
+        private IEnumerable<FolderRule> ComputeRuleset(FolderRuleViewModel folderRuleViewModel)
         {
-            return ComputeInternal(manageFolderRulesViewModel, null);
+            return ComputeInternal(folderRuleViewModel, null);
         }
 
-        private IEnumerable<FolderRule> ComputeInternal(ManageFolderRulesViewModel manageFolderRulesViewModel,
+        private IEnumerable<FolderRule> ComputeInternal(FolderRuleViewModel folderRuleViewModel,
             FolderRuleActionEnum? state)
         {
-            if (manageFolderRulesViewModel.ManageFolderState != state)
+            if (folderRuleViewModel.ManageFolderState != state)
             {
                 yield return new FolderRule
                 {
-                    Path = manageFolderRulesViewModel.FullName,
-                    Action = manageFolderRulesViewModel.ManageFolderState
+                    Path = folderRuleViewModel.FullName,
+                    Action = folderRuleViewModel.ManageFolderState
                 };
 
-                state = manageFolderRulesViewModel.ManageFolderState;
+                state = folderRuleViewModel.ManageFolderState;
             }
 
-            foreach (var child in manageFolderRulesViewModel.Children)
+            foreach (var child in folderRuleViewModel.Children)
             foreach (var manageFolderRule in ComputeInternal(child, state))
                 yield return manageFolderRule;
         }

@@ -13,7 +13,7 @@ namespace SonOfPicasso.UI.Windows.Dialogs
     /// <summary>
     ///     Interaction logic for AddAlbumWindow.xaml
     /// </summary>
-    public partial class FolderManagementWindow : ReactiveWindow<FolderRuleViewModel>
+    public partial class FolderManagementWindow : ReactiveWindow<ManageFolderRulesViewModel>
     {
         public FolderManagementWindow(ISchedulerProvider schedulerProvider)
         {
@@ -76,7 +76,7 @@ namespace SonOfPicasso.UI.Windows.Dialogs
 
         private void FoldersListView_OnSelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            ViewModel.SelectedItem = (ManageFolderRulesViewModel) e.NewValue;
+            ViewModel.SelectedItem = (FolderRuleViewModel) e.NewValue;
         }
 
         private void SelectedItemNeverRadioButton_OnClick(object sender, RoutedEventArgs e)
