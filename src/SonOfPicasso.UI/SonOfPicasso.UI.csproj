@@ -36,7 +36,7 @@
     <PackageReference Include="Splat.Autofac" Version="9.1.1" />
     <PackageReference Include="Splat.Drawing" Version="9.1.1" />
     <PackageReference Include="Splat.Serilog" Version="9.1.1" />
-    <PackageReference Include="System.IO.Abstractions" Version="7.0.5" />
+    <PackageReference Include="System.IO.Abstractions" Version="7.0.7" />
     <PackageReference Include="System.Reactive" Version="4.2.0" />
   </ItemGroup>
 
