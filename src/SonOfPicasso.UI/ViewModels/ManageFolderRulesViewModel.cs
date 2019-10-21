@@ -11,8 +11,8 @@ using DynamicData;
 using DynamicData.Binding;
 using ReactiveUI;
 using Serilog;
+using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
-using SonOfPicasso.Data.Model;
 using SonOfPicasso.UI.ViewModels.Abstract;
 
 namespace SonOfPicasso.UI.ViewModels
@@ -21,6 +21,7 @@ namespace SonOfPicasso.UI.ViewModels
     {
         private readonly IDriveInfoFactory _driveInfoFactory;
         private readonly IDirectoryInfoPermissionsService _directoryInfoPermissionsService;
+        private readonly IFolderRulesManagementService _folderRulesManagementService;
         private readonly IFileSystem _fileSystem;
         private readonly ObservableCollectionExtended<FolderRuleViewModel> _foldersObservableCollection;
 
@@ -33,6 +34,7 @@ namespace SonOfPicasso.UI.ViewModels
             IFileSystem fileSystem,
             IDriveInfoFactory driveInfoFactory,
             IDirectoryInfoPermissionsService directoryInfoPermissionsService,
+            IFolderRulesManagementService folderRulesManagementService,
             ISchedulerProvider schedulerProvider,
             ILogger logger,
             Func<FolderRuleViewModel> manageFolderViewModelFactory
@@ -41,6 +43,7 @@ namespace SonOfPicasso.UI.ViewModels
             _fileSystem = fileSystem;
             _driveInfoFactory = driveInfoFactory;
             _directoryInfoPermissionsService = directoryInfoPermissionsService;
+            _folderRulesManagementService = folderRulesManagementService;
             _schedulerProvider = schedulerProvider;
             _logger = logger;
             _manageFolderViewModelFactory = manageFolderViewModelFactory;
@@ -83,17 +86,27 @@ namespace SonOfPicasso.UI.ViewModels
         {
             return Observable.Defer(() =>
                 {
+                    var folderManagementRules = _folderRulesManagementService.GetFolderManagementRules()
+                        .Select(list => list.ToDictionary(rule => rule.Path, rule => rule.Action));
+
                     return _driveInfoFactory.GetDrives()
                         .Where(driveInfo => driveInfo.DriveType == DriveType.Fixed)
                         .Where(driveInfo => driveInfo.IsReady)
                         .Select(driveInfo => driveInfo.RootDirectory)
-                        .Select(directoryInfo =>
+                        .ToObservable()
+                        .ToArray()
+                        .CombineLatest(folderManagementRules, (directoryInfos, folderManagmentRules) =>
                         {
-                            var folderViewModel = _manageFolderViewModelFactory();
-                            folderViewModel.Initialize(directoryInfo, FolderRuleActionEnum.Remove);
-                            return folderViewModel;
+                            return directoryInfos
+                                .ToObservable()
+                                .Select(directoryInfo =>
+                                {
+                                    var folderViewModel = _manageFolderViewModelFactory();
+                                    folderViewModel.Initialize(directoryInfo, folderManagmentRules);
+                                    return folderViewModel;
+                                });
                         })
-                        .ToObservable();
+                        .SelectMany(observable1 => observable1);
                 })
                 .SubscribeOn(_schedulerProvider.TaskPool);
         }

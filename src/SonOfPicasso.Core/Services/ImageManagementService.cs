@@ -97,7 +97,7 @@ namespace SonOfPicasso.Core.Services
 
                     var album = new Album
                     {
-                        Name = createAlbum.AlbumName, 
+                        Name = createAlbum.AlbumName,
                         Date = createAlbum.AlbumDate,
                         AlbumImages = new List<AlbumImage>()
                     };

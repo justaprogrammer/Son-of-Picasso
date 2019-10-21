@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO.Abstractions;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -17,6 +18,7 @@ namespace SonOfPicasso.UI.ViewModels
 
         private IDirectoryInfo _directoryInfo;
         private FolderRuleActionEnum _manageFolderState;
+        private IReadOnlyDictionary<string, FolderRuleActionEnum> _currentRules;
 
         public FolderRuleViewModel(
             ISchedulerProvider schedulerProvider,
@@ -35,7 +37,7 @@ namespace SonOfPicasso.UI.ViewModels
                             .Select(info =>
                             {
                                 var folderViewModel = folderViewModelFactory();
-                                folderViewModel.Initialize(info, ManageFolderState);
+                                folderViewModel.Initialize(info,_currentRules);
                                 return folderViewModel;
                             });
                     })
@@ -72,10 +74,21 @@ namespace SonOfPicasso.UI.ViewModels
 
         public IObservableCollection<FolderRuleViewModel> Children => _manageFolderViewModels;
 
-        public void Initialize(IDirectoryInfo directoryInfo, FolderRuleActionEnum manageFolderState)
+        public void Initialize(IDirectoryInfo directoryInfo,
+            IReadOnlyDictionary<string, FolderRuleActionEnum> currentRules)
         {
             _directoryInfo = directoryInfo;
-            _manageFolderState = manageFolderState;
+
+            if (currentRules.TryGetValue(_directoryInfo.FullName, out var currentFolderRule))
+            {
+                _manageFolderState = currentFolderRule;
+            }
+            else
+            {
+                _manageFolderState = FolderRuleActionEnum.Remove;
+            }   
+            
+            _currentRules = currentRules;
         }
     }
 }

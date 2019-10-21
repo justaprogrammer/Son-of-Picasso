@@ -24,6 +24,7 @@ namespace SonOfPicasso.UI.ViewModels
         private readonly Func<ImageContainerViewModel> _imageContainerViewModelFactory;
         private readonly IImageManagementService _imageManagementService;
         private readonly IObservableCache<ImageViewModel, string> _imageViewModelCache;
+        private readonly IFolderRulesManagementService _folderRulesManagementService;
         private readonly Func<ImageViewModel> _imageViewModelFactory;
         private readonly ISchedulerProvider _schedulerProvider;
 
@@ -37,6 +38,7 @@ namespace SonOfPicasso.UI.ViewModels
 
         public ApplicationViewModel(ISchedulerProvider schedulerProvider,
             IImageManagementService imageManagementService,
+            IFolderRulesManagementService folderRulesManagementService,
             Func<ImageContainerViewModel> imageContainerViewModelFactory,
             Func<ImageViewModel> imageViewModelFactory,
             Func<TrayImageViewModel> trayImageViewModelFactory,
@@ -44,6 +46,7 @@ namespace SonOfPicasso.UI.ViewModels
         {
             _schedulerProvider = schedulerProvider;
             _imageManagementService = imageManagementService;
+            _folderRulesManagementService = folderRulesManagementService;
             _imageContainerViewModelFactory = imageContainerViewModelFactory;
             _imageViewModelFactory = imageViewModelFactory;
             _trayImageViewModelFactory = trayImageViewModelFactory;
@@ -366,8 +369,10 @@ namespace SonOfPicasso.UI.ViewModels
                 {
                     if (folderManagementViewModel != null)
                     {
-                        var manageFolderRules = ComputeRuleset(folderManagementViewModel.Folders)
+                        var folderRules = ComputeRuleset(folderManagementViewModel.Folders)
                             .ToArray();
+
+                        return _folderRulesManagementService.ResetFolderManagementRules(folderRules);
                     }
 
                     return Observable.Return(Unit.Default);
@@ -392,13 +397,16 @@ namespace SonOfPicasso.UI.ViewModels
         {
             if (folderRuleViewModel.ManageFolderState != state)
             {
-                yield return new FolderRule
+                if (state.HasValue || folderRuleViewModel.ManageFolderState != FolderRuleActionEnum.Remove)
                 {
-                    Path = folderRuleViewModel.FullName,
-                    Action = folderRuleViewModel.ManageFolderState
-                };
+                    yield return new FolderRule
+                    {
+                        Path = folderRuleViewModel.FullName,
+                        Action = folderRuleViewModel.ManageFolderState
+                    };
 
-                state = folderRuleViewModel.ManageFolderState;
+                    state = folderRuleViewModel.ManageFolderState;
+                }
             }
 
             foreach (var child in folderRuleViewModel.Children)
