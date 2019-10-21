@@ -1,6 +1,7 @@
-﻿using ReactiveUI;
+﻿using System.Windows;
+using ReactiveUI;
+using SonOfPicasso.Data.Model;
 using SonOfPicasso.UI.Interfaces;
-using SonOfPicasso.UI.Services;
 using SonOfPicasso.UI.ViewModels;
 
 namespace SonOfPicasso.UI.Views
@@ -12,15 +13,25 @@ namespace SonOfPicasso.UI.Views
     {
         public ManageFolderView(ISvgImageProvider svgImageProvider)
         {
-            InitializeComponent();
+            SvgImageProvider = svgImageProvider;
 
+            InitializeComponent();
 
             this.WhenActivated(disposable =>
             {
-                this.ImageIcon.Source = svgImageProvider.Folder;
                 this.OneWayBind(ViewModel, model => model.Name, view => view.NameLabel.Content);
-                this.OneWayBind(ViewModel, model => model.ManageFolderState, view => view.StatusLabel.Content);
+
+                this.OneWayBind(ViewModel, model => model.ManageFolderState, view => view.CancelImage.Visibility,
+                    value => value == FolderRuleActionEnum.Remove ? Visibility.Visible : Visibility.Collapsed);
+
+                this.OneWayBind(ViewModel, model => model.ManageFolderState, view => view.CheckmarkImage.Visibility,
+                    value => value == FolderRuleActionEnum.Once ? Visibility.Visible : Visibility.Collapsed);
+
+                this.OneWayBind(ViewModel, model => model.ManageFolderState, view => view.SynchronizeImage.Visibility,
+                    value => value == FolderRuleActionEnum.Always ? Visibility.Visible : Visibility.Collapsed);
             });
         }
+
+        public ISvgImageProvider SvgImageProvider { get; }
     }
 }

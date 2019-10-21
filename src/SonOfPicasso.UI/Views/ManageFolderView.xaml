@@ -8,10 +8,43 @@
                                 xmlns:reactiveUi="http://reactiveui.net"
                                 xmlns:viewModels="clr-namespace:SonOfPicasso.UI.ViewModels"
                                 mc:Ignorable="d"
-                                d:DesignHeight="450" d:DesignWidth="800">
-    <DockPanel LastChildFill="True">
-        <Image Name="ImageIcon" Height="16" Width="16"></Image>
-        <Label Name="StatusLabel" DockPanel.Dock="Left"/>
-        <Label Name="NameLabel" DockPanel.Dock="Right"/>
-    </DockPanel>
+                                d:DesignHeight="450" d:DesignWidth="800"
+                                Name="UserControl">
+
+    <UserControl.Resources>
+        <Style x:Key="FolderImageStyle" TargetType="Image">
+            <Setter Property="Source" Value="{Binding ElementName=UserControl, Path=SvgImageProvider.Folder}"></Setter>
+            <Style.Triggers>
+                <DataTrigger
+                    Binding="{Binding RelativeSource={RelativeSource AncestorType=TreeViewItem}, Path=IsExpanded}"
+                    Value="True">
+                    <DataTrigger.Setters>
+                        <Setter Property="Source" Value="{Binding ElementName=UserControl, Path=SvgImageProvider.OpenedFolder}"></Setter>
+                    </DataTrigger.Setters>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <StackPanel Orientation="Horizontal">
+        <Image Height="16" Width="16"
+               Style="{StaticResource FolderImageStyle}"/>
+
+        <Image Height="16" Width="16"
+               Name="CheckmarkImage"
+               Visibility="Collapsed"
+               Source="{Binding ElementName=UserControl, Path=SvgImageProvider.Checkmark}" />
+
+        <Image Height="16" Width="16"
+               Name="CancelImage"
+               Visibility="Collapsed"
+               Source="{Binding ElementName=UserControl, Path=SvgImageProvider.Cancel}" />
+
+        <Image Height="16" Width="16"
+               Name="SynchronizeImage"
+               Visibility="Collapsed"
+               Source="{Binding ElementName=UserControl, Path=SvgImageProvider.Synchronize}" />
+
+        <Label Name="NameLabel" DockPanel.Dock="Right" Content="{Binding Name}" />
+    </StackPanel>
 </reactiveUi:ReactiveUserControl>

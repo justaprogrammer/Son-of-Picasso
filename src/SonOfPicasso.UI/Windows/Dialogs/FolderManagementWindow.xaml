@@ -7,7 +7,9 @@
                            xmlns:reactiveUi="http://reactiveui.net"
                            xmlns:viewModels="clr-namespace:SonOfPicasso.UI.ViewModels"
                            mc:Ignorable="d"
-                           Title="AddAlbumWindow" Height="150" Width="300">
+                           Title="Manage Folders"
+                           Name="Window"
+                           Height="150" Width="300">
     <DockPanel LastChildFill="True">
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right"
                     VerticalAlignment="Bottom">

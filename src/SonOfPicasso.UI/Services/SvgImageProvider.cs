@@ -17,6 +17,14 @@ namespace SonOfPicasso.UI.Services
 
         public BitmapImage Folder => GetOrAdd("FlatColorIcons.folder");
 
+        public BitmapImage OpenedFolder => GetOrAdd("FlatColorIcons.opened_folder");
+
+        public BitmapImage Cancel => GetOrAdd("FlatColorIcons.cancel");
+
+        public BitmapImage Checkmark => GetOrAdd("FlatColorIcons.checkmark");
+
+        public BitmapImage Synchronize => GetOrAdd("FlatColorIcons.synchronize");
+
         private BitmapImage GetOrAdd(string name)
         {
             return _concurrentDictionary.GetOrAdd(name, s => _svgImageService.LoadBitmapImage(s));

@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using ReactiveUI;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Data.Model;
+using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.ViewModels;
 
 namespace SonOfPicasso.UI.Windows.Dialogs
@@ -15,8 +16,12 @@ namespace SonOfPicasso.UI.Windows.Dialogs
     /// </summary>
     public partial class FolderManagementWindow : ReactiveWindow<ManageFolderRulesViewModel>
     {
-        public FolderManagementWindow(ISchedulerProvider schedulerProvider)
+        public ISvgImageProvider SvgImageProvider { get; }
+
+        public FolderManagementWindow(ISchedulerProvider schedulerProvider, ISvgImageProvider svgImageProvider)
         {
+            SvgImageProvider = svgImageProvider;
+            
             InitializeComponent();
 
             this.WhenActivated(d =>
