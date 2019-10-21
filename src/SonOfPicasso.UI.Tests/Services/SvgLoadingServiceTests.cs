@@ -26,8 +26,8 @@ namespace SonOfPicasso.UI.Tests.Services
         {
             var flatIconSvgLoader = new SvgImageService();
             var image = flatIconSvgLoader.LoadBitmapImage("FlatColorIcons.folder");
-            image.Height.Should().Be(48);
-            image.Width.Should().Be(48);
+            image.Height.Should().BeInRange(48, 48.01);
+            image.Width.Should().BeInRange(48, 48.01);
         }
     }
 }
