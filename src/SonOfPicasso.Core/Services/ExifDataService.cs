@@ -5,6 +5,7 @@ using System.Reactive.Linq;
 using Ardalis.GuardClauses;
 using ExifLibrary;
 using Serilog;
+using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Data.Model;
 

@@ -1,7 +1,7 @@
 ﻿using System;
 using SonOfPicasso.Data.Model;
 
-namespace SonOfPicasso.Core.Services
+namespace SonOfPicasso.Core.Interfaces
 {
     public interface IExifDataService
     {

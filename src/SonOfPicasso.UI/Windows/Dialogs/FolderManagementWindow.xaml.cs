@@ -16,11 +16,11 @@ namespace SonOfPicasso.UI.Windows.Dialogs
     /// </summary>
     public partial class FolderManagementWindow : ReactiveWindow<ManageFolderRulesViewModel>
     {
-        public ISvgImageProvider SvgImageProvider { get; }
+        public IImageProvider ImageProvider { get; }
 
-        public FolderManagementWindow(ISchedulerProvider schedulerProvider, ISvgImageProvider svgImageProvider)
+        public FolderManagementWindow(ISchedulerProvider schedulerProvider, IImageProvider imageProvider)
         {
-            SvgImageProvider = svgImageProvider;
+            ImageProvider = imageProvider;
             
             InitializeComponent();
 

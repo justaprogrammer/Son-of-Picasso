@@ -11,9 +11,9 @@ namespace SonOfPicasso.UI.Views
     /// </summary>
     public partial class ManageFolderView : ReactiveUserControl<FolderRuleViewModel>
     {
-        public ManageFolderView(ISvgImageProvider svgImageProvider)
+        public ManageFolderView(IImageProvider imageProvider)
         {
-            SvgImageProvider = svgImageProvider;
+            ImageProvider = imageProvider;
 
             InitializeComponent();
 
@@ -32,6 +32,6 @@ namespace SonOfPicasso.UI.Views
             });
         }
 
-        public ISvgImageProvider SvgImageProvider { get; }
+        public IImageProvider ImageProvider { get; }
     }
 }

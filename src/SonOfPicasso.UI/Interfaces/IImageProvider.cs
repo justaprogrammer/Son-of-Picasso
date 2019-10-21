@@ -2,7 +2,7 @@
 
 namespace SonOfPicasso.UI.Interfaces
 {
-    public interface ISvgImageProvider
+    public interface IImageProvider
     {
         BitmapImage Folder { get; }
         BitmapImage OpenedFolder { get; }

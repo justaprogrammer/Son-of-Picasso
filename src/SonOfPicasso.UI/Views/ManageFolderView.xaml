@@ -13,13 +13,13 @@
 
     <UserControl.Resources>
         <Style x:Key="FolderImageStyle" TargetType="Image">
-            <Setter Property="Source" Value="{Binding ElementName=UserControl, Path=SvgImageProvider.Folder}"></Setter>
+            <Setter Property="Source" Value="{Binding ElementName=UserControl, Path=ImageProvider.Folder}"></Setter>
             <Style.Triggers>
                 <DataTrigger
                     Binding="{Binding RelativeSource={RelativeSource AncestorType=TreeViewItem}, Path=IsExpanded}"
                     Value="True">
                     <DataTrigger.Setters>
-                        <Setter Property="Source" Value="{Binding ElementName=UserControl, Path=SvgImageProvider.OpenedFolder}"></Setter>
+                        <Setter Property="Source" Value="{Binding ElementName=UserControl, Path=ImageProvider.OpenedFolder}"></Setter>
                     </DataTrigger.Setters>
                 </DataTrigger>
             </Style.Triggers>
@@ -33,17 +33,17 @@
         <Image Height="16" Width="16"
                Name="CheckmarkImage"
                Visibility="Collapsed"
-               Source="{Binding ElementName=UserControl, Path=SvgImageProvider.Checkmark}" />
+               Source="{Binding ElementName=UserControl, Path=ImageProvider.Checkmark}" />
 
         <Image Height="16" Width="16"
                Name="CancelImage"
                Visibility="Collapsed"
-               Source="{Binding ElementName=UserControl, Path=SvgImageProvider.Cancel}" />
+               Source="{Binding ElementName=UserControl, Path=ImageProvider.Cancel}" />
 
         <Image Height="16" Width="16"
                Name="SynchronizeImage"
                Visibility="Collapsed"
-               Source="{Binding ElementName=UserControl, Path=SvgImageProvider.Synchronize}" />
+               Source="{Binding ElementName=UserControl, Path=ImageProvider.Synchronize}" />
 
         <Label Name="NameLabel" DockPanel.Dock="Right" Content="{Binding Name}" />
     </StackPanel>
