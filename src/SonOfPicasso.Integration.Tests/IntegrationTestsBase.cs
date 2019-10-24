@@ -12,18 +12,18 @@ namespace SonOfPicasso.Integration.Tests
         protected readonly string DatabasePath;
         protected readonly DbContextOptions<DataContext> DbContextOptions;
         protected readonly FileSystem FileSystem;
-        protected readonly string TestRoot;
+        protected readonly string TestPath;
 
         public IntegrationTestsBase(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {
             FileSystem = new FileSystem();
 
-            TestRoot = FileSystem.Path.Combine(FileSystem.Path.GetTempPath(), "SonOfPicasso.IntegrationTests",
+            TestPath = FileSystem.Path.Combine(FileSystem.Path.GetTempPath(), "SonOfPicasso.IntegrationTests",
                 Guid.NewGuid().ToString());
-            FileSystem.Directory.CreateDirectory(TestRoot);
+            FileSystem.Directory.CreateDirectory(TestPath);
 
-            DatabasePath = FileSystem.Path.Combine(TestRoot, "database.db");
+            DatabasePath = FileSystem.Path.Combine(TestPath, "database.db");
 
             DbContextOptions =
                 new DbContextOptionsBuilder<DataContext>()
@@ -38,14 +38,14 @@ namespace SonOfPicasso.Integration.Tests
         {
             base.Dispose();
 
-            if (FileSystem.Directory.Exists(TestRoot))
+            if (FileSystem.Directory.Exists(TestPath))
                 try
                 {
-                    FileSystem.Directory.Delete(TestRoot, true);
+                    FileSystem.Directory.Delete(TestPath, true);
                 }
                 catch (Exception e)
                 {
-                    Logger.Error(e, "Unable to delete test directory {TestRoot}", TestRoot);
+                    Logger.Error(e, "Unable to delete test directory {TestPath}", TestPath);
                 }
         }
     }

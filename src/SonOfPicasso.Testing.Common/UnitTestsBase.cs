@@ -7,6 +7,7 @@ using Autofac;
 using Autofac.Extras.NSubstitute;
 using AutofacSerilogIntegration;
 using FluentAssertions;
+using NSubstitute;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Data.Interfaces;
 using SonOfPicasso.Testing.Common.Scheduling;
@@ -29,7 +30,14 @@ namespace SonOfPicasso.Testing.Common
             UnitOfWorkQueue = new Queue<IUnitOfWork>();
             AutoSubstitute.Provide<Func<IUnitOfWork>>(() => UnitOfWorkQueue.Dequeue());
 
+            FileSystemWatcherQueue = new Queue<IFileSystemWatcher>();
+
+            FileSystemWatcherFactory = Substitute.For<IFileSystemWatcherFactory>();
+            FileSystemWatcherFactory.FromPath(default)
+                .ReturnsForAnyArgs(info => FileSystemWatcherQueue.Dequeue());
+
             MockFileSystem = new MockFileSystem();
+            MockFileSystem.FileSystemWatcher = FileSystemWatcherFactory;
             AutoSubstitute.Provide<IFileSystem>(MockFileSystem);
         }
 
@@ -37,6 +45,8 @@ namespace SonOfPicasso.Testing.Common
         protected readonly Queue<IUnitOfWork> UnitOfWorkQueue;
         protected readonly MockFileSystem MockFileSystem;
         protected readonly TestSchedulerProvider TestSchedulerProvider;
+        protected Queue<IFileSystemWatcher> FileSystemWatcherQueue;
+        protected IFileSystemWatcherFactory FileSystemWatcherFactory;
 
         public override void Dispose()
         {

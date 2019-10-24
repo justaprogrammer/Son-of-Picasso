@@ -1,66 +1,121 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Data.Model;
 
 namespace SonOfPicasso.Core.Services
 {
     public class FolderWatcherService : IFolderWatcherService
     {
-        private readonly IFileSystemWatcherFactory _fileSystemWatcherFactory;
+        private readonly IFileSystem _fileSystem;
+        private readonly ISchedulerProvider _schedulerProvider;
 
-        public FolderWatcherService(IFileSystemWatcherFactory fileSystemWatcherFactory)
+        public FolderWatcherService(IFileSystem fileSystem,
+            ISchedulerProvider schedulerProvider)
         {
-            _fileSystemWatcherFactory = fileSystemWatcherFactory;
+            _fileSystem = fileSystem;
+            _schedulerProvider = schedulerProvider;
         }
 
-        public IObservable<FileSystemEventArgs> StartWatch(FolderRule[] folderRules)
+        public IObservable<FileSystemEventArgs> WatchFolders(IEnumerable<FolderRule> folderRules)
         {
-            var observable = folderRules
-                .ToObservable()
-                .Select(rule =>
-                {
-                    return Observable.Using(() => _fileSystemWatcherFactory.FromPath(rule.Path), fileSystemWatcher =>
-                    {
-                        return Observable.Create<FileSystemEventArgs>(observer =>
-                        {
-                            var d1 = Observable.Merge(
-                                    Observable.FromEvent<FileSystemEventHandler, FileSystemEventArgs>(
-                                        action => fileSystemWatcher.Created += action,
-                                        action => fileSystemWatcher.Created -= action),
-                                    Observable.FromEvent<FileSystemEventHandler, FileSystemEventArgs>(
-                                        action => fileSystemWatcher.Deleted += action,
-                                        action => fileSystemWatcher.Deleted -= action),
-                                    Observable.FromEvent<FileSystemEventHandler, FileSystemEventArgs>(
-                                        action => fileSystemWatcher.Changed += action,
-                                        action => fileSystemWatcher.Changed -= action))
-                                .Subscribe(observer.OnNext);
+            var itemsDictionary = new Dictionary<string, List<FolderRule>>();
 
-                            var d2 = Observable.FromEvent<RenamedEventHandler, RenamedEventArgs>(
+            string firstRoot = null;
+            folderRules = folderRules
+                .OrderBy(rule => rule.Path, StringComparer.InvariantCultureIgnoreCase);
+
+            foreach (var folderRule in folderRules)
+            {
+                if (firstRoot == null || !folderRule.Path.StartsWith(firstRoot))
+                {
+                    firstRoot = folderRule.Path;
+                    itemsDictionary[firstRoot] = new List<FolderRule>();
+                }
+                else
+                {
+                    itemsDictionary[firstRoot].Add(folderRule);    
+                }
+            }
+
+            return itemsDictionary
+                .ToObservable()
+                .Select(keyValuePair =>
+                {
+                    return Observable.Using(
+                        () => _fileSystem.FileSystemWatcher.FromPath(keyValuePair.Key),
+                        fileSystemWatcher =>
+                        {
+                            var d1 = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
+                                    action => fileSystemWatcher.Created += action,
+                                    action => fileSystemWatcher.Created -= action)
+                                .Select(pattern => pattern.EventArgs);
+
+                            var d2 = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
+                                    action => fileSystemWatcher.Deleted += action,
+                                    action => fileSystemWatcher.Deleted -= action)
+                                .Select(pattern => pattern.EventArgs);
+
+                            var d3 = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
+                                    action => fileSystemWatcher.Changed += action,
+                                    action => fileSystemWatcher.Changed -= action)
+                                .Select(pattern => pattern.EventArgs);
+
+                            var d4 = Observable.FromEventPattern<RenamedEventHandler, RenamedEventArgs>(
                                     action => fileSystemWatcher.Renamed += action,
                                     action => fileSystemWatcher.Renamed -= action)
-                                .Subscribe(observer.OnNext);
+                                .Select(pattern => (FileSystemEventArgs) pattern.EventArgs);
 
-                            var d3 = Observable.FromEvent<ErrorEventHandler, ErrorEventArgs>(
-                                    action => fileSystemWatcher.Error += action,
-                                    action => fileSystemWatcher.Error -= action)
-                                .Subscribe(args => { ; });
-
+                            fileSystemWatcher.IncludeSubdirectories = true;
                             fileSystemWatcher.EnableRaisingEvents = true;
-         
-                            return new CompositeDisposable(d1, d2, d3);
+
+                            var rules = keyValuePair.Value
+                                .OrderByDescending(rule => rule.Path.Length)
+                                .ToArray();
+
+                            return
+                                Observable.Merge(d1, d2, d3, d4)
+                                    .Select(args => InRuleSet(args, rules))
+                                    .Where(args => args != null);
                         });
-                    });
                 })
                 .ToArray()
-                .Select(observables => Observable.Merge(observables));
+                .Select(observables => Observable.Merge(observables))
+                .SelectMany(observable => observable);
         }
 
-        public void StopWatch()
+        private FileSystemEventArgs InRuleSet(FileSystemEventArgs fileSystemEventArgs, IList<FolderRule> folderRules)
         {
+            switch (fileSystemEventArgs.ChangeType)
+            {
+                case WatcherChangeTypes.Created:
+                case WatcherChangeTypes.Deleted:
+                case WatcherChangeTypes.Changed:
+                    foreach (var folderRule in folderRules)
+                    {
+                        if (fileSystemEventArgs.FullPath.StartsWith(folderRule.Path))
+                        {
+                            if (folderRule.Action == FolderRuleActionEnum.Always)
+                            {
+                                return fileSystemEventArgs;
+                            }
+
+                            return null;
+                        }
+                    }
+
+                    return fileSystemEventArgs;
+
+                case WatcherChangeTypes.Renamed:
+                    return fileSystemEventArgs;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
     }
 }

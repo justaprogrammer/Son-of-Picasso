@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
+using FluentAssertions;
 using NSubstitute;
 using NSubstitute.Core.Events;
 using SonOfPicasso.Core.Services;
@@ -16,17 +18,10 @@ namespace SonOfPicasso.Core.Tests.Services
         public FolderWatcherServiceTests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {
-            _fileSystemWatcherQueue = new Queue<IFileSystemWatcher>();
-            _fileSystemWatcherFactory = AutoSubstitute.Resolve<IFileSystemWatcherFactory>();
-            _fileSystemWatcherFactory.FromPath(Arg.Any<string>())
-                .ReturnsForAnyArgs(info => _fileSystemWatcherQueue.Dequeue());
         }
 
-        private readonly Queue<IFileSystemWatcher> _fileSystemWatcherQueue;
-        private readonly IFileSystemWatcherFactory _fileSystemWatcherFactory;
-
         [Fact]
-        public void ShouldEvalSimpleRule()
+        public void ShouldEvalSingleRule()
         {
             var path = "C:\\Hello";
 
@@ -40,45 +35,253 @@ namespace SonOfPicasso.Core.Tests.Services
                 };
 
             var fileSystemWatcher = Substitute.For<IFileSystemWatcher>();
-            _fileSystemWatcherQueue.Enqueue(fileSystemWatcher);
+            FileSystemWatcherQueue.Enqueue(fileSystemWatcher);
 
+            FileSystemEventArgs lastArgs = null;
             var folderWatcherService = AutoSubstitute.Resolve<FolderWatcherService>();
-            folderWatcherService.StartWatch(folderRules);
+            folderWatcherService.WatchFolders(folderRules)
+                .Subscribe(args =>
+                {
+                    lastArgs = args;
+                    AutoResetEvent.Set();
+                });
 
-            _fileSystemWatcherFactory.Received(1)
+            FileSystemWatcherFactory.ReceivedWithAnyArgs(1)
+                .FromPath(default);
+
+            FileSystemWatcherFactory.Received(1)
                 .FromPath(path);
 
-            fileSystemWatcher.Created += Raise.Event<FileSystemEventHandler>(this, new FileSystemEventArgs(WatcherChangeTypes.Created, path, ""));
+            fileSystemWatcher.Created += 
+                Raise.Event<FileSystemEventHandler>(this, 
+                    new FileSystemEventArgs(WatcherChangeTypes.Created, path, "hello.txt"));
+         
+            TestSchedulerProvider.TaskPool.AdvanceBy(1);
+
+            WaitOne();
         }
 
         [Fact]
-        public void ShouldEvalRuleWithOneExclude()
+        public void ShouldEvalRulesWithOneExclude()
         {
             var rootPath = "C:\\Hello";
             var excludePath = $"{rootPath}\\World";
 
             var folderRules = new[]
             {
-                    new FolderRule
-                    {
-                        Path = rootPath,
-                        Action = FolderRuleActionEnum.Always
-                    },
-                    new FolderRule
-                    {
-                        Path = excludePath,
-                        Action = FolderRuleActionEnum.Remove
-                    }
-                };
+                new FolderRule
+                {
+                    Path = rootPath,
+                    Action = FolderRuleActionEnum.Always
+                },
+                new FolderRule
+                {
+                    Path = excludePath,
+                    Action = FolderRuleActionEnum.Remove
+                }
+            };
 
-            var fileSystemWatcher = Substitute.For<IFileSystemWatcher>();
-            _fileSystemWatcherQueue.Enqueue(fileSystemWatcher);
+            var fileSystemWatcher1 = Substitute.For<IFileSystemWatcher>();
+            FileSystemWatcherQueue.Enqueue(fileSystemWatcher1);
 
+            var fileSystemWatcher2 = Substitute.For<IFileSystemWatcher>();
+            FileSystemWatcherQueue.Enqueue(fileSystemWatcher2);
+
+            FileSystemEventArgs lastArgs = null;
             var folderWatcherService = AutoSubstitute.Resolve<FolderWatcherService>();
-            folderWatcherService.StartWatch(folderRules);
+            folderWatcherService.WatchFolders(folderRules)
+                .Subscribe(args =>
+                {
+                    lastArgs = args;
+                    AutoResetEvent.Set();
+                });
 
-            _fileSystemWatcherFactory.Received(1)
+            FileSystemWatcherFactory.ReceivedWithAnyArgs(1)
+                .FromPath(default);
+
+            FileSystemWatcherFactory.Received(1)
                 .FromPath(rootPath);
+
+            fileSystemWatcher1.Created +=
+                Raise.Event<FileSystemEventHandler>(this,
+                    new FileSystemEventArgs(WatcherChangeTypes.Created, rootPath, "hello.txt"));
+
+            TestSchedulerProvider.TaskPool.AdvanceBy(1);
+
+            WaitOne();
+
+            fileSystemWatcher1.Created +=
+                Raise.Event<FileSystemEventHandler>(this,
+                    new FileSystemEventArgs(WatcherChangeTypes.Created, excludePath, "hello.txt"));
+
+            TestSchedulerProvider.TaskPool.AdvanceBy(1);
+
+            AutoResetEvent.WaitOne(500).Should().BeFalse();
+        }
+
+        [Fact]
+        public void ShouldEvalRulesWithExcludeAndInclude()
+        {
+            var rootPath = "C:\\Hello";
+            var excludePath = $"{rootPath}\\World";
+            var includePath = $"{excludePath}\\Hello";
+
+            var folderRules = new[]
+            {
+                new FolderRule
+                {
+                    Path = rootPath,
+                    Action = FolderRuleActionEnum.Always
+                },
+                new FolderRule
+                {
+                    Path = excludePath,
+                    Action = FolderRuleActionEnum.Remove
+                },
+                new FolderRule
+                {
+                    Path = includePath,
+                    Action = FolderRuleActionEnum.Always
+                }
+            };
+
+            var fileSystemWatcher1 = Substitute.For<IFileSystemWatcher>();
+            FileSystemWatcherQueue.Enqueue(fileSystemWatcher1);
+
+            var fileSystemWatcher2 = Substitute.For<IFileSystemWatcher>();
+            FileSystemWatcherQueue.Enqueue(fileSystemWatcher2);
+
+            FileSystemEventArgs lastArgs = null;
+            var folderWatcherService = AutoSubstitute.Resolve<FolderWatcherService>();
+            folderWatcherService.WatchFolders(folderRules)
+                .Subscribe(args =>
+                {
+                    lastArgs = args;
+                    AutoResetEvent.Set();
+                });
+
+            FileSystemWatcherFactory.ReceivedWithAnyArgs(1)
+                .FromPath(default);
+
+            FileSystemWatcherFactory.Received(1)
+                .FromPath(rootPath);
+
+            fileSystemWatcher1.Created +=
+                Raise.Event<FileSystemEventHandler>(this,
+                    new FileSystemEventArgs(WatcherChangeTypes.Created, rootPath, "hello.txt"));
+
+            TestSchedulerProvider.TaskPool.AdvanceBy(1);
+
+            WaitOne();
+
+            fileSystemWatcher1.Created +=
+                Raise.Event<FileSystemEventHandler>(this,
+                    new FileSystemEventArgs(WatcherChangeTypes.Created, includePath, "hello.txt"));
+
+            TestSchedulerProvider.TaskPool.AdvanceBy(1);
+
+            WaitOne();
+        }
+
+        [Fact]
+        public void ShouldEvalTwoRules()
+        {
+            var path1 = "C:\\Hello";
+            var path2 = "C:\\World";
+
+            var folderRules = new[]
+            {
+                new FolderRule
+                {
+                    Path = path1,
+                    Action = FolderRuleActionEnum.Always
+                },
+                new FolderRule
+                {
+                    Path = path2,
+                    Action = FolderRuleActionEnum.Always
+                }
+            };
+
+            var fileSystemWatcher1 = Substitute.For<IFileSystemWatcher>();
+            var fileSystemWatcher2 = Substitute.For<IFileSystemWatcher>();
+            FileSystemWatcherQueue.Enqueue(fileSystemWatcher1);
+            FileSystemWatcherQueue.Enqueue(fileSystemWatcher2);
+
+            FileSystemEventArgs lastArgs = null;
+            var folderWatcherService = AutoSubstitute.Resolve<FolderWatcherService>();
+            folderWatcherService.WatchFolders(folderRules)
+                .Subscribe(args =>
+                {
+                    lastArgs = args;
+                    AutoResetEvent.Set();
+                });
+
+            FileSystemWatcherFactory.ReceivedWithAnyArgs(2)
+                .FromPath(default);
+
+            FileSystemWatcherFactory.Received(1)
+                .FromPath(path1);
+
+            FileSystemWatcherFactory.Received(1)
+                .FromPath(path2);
+
+            fileSystemWatcher1.Created +=
+                Raise.Event<FileSystemEventHandler>(this,
+                    new FileSystemEventArgs(WatcherChangeTypes.Created, path1, "hello.txt"));
+
+            TestSchedulerProvider.TaskPool.AdvanceBy(1);
+
+            WaitOne();
+
+            fileSystemWatcher2.Created +=
+                Raise.Event<FileSystemEventHandler>(this,
+                    new FileSystemEventArgs(WatcherChangeTypes.Created, path2, "hello.txt"));
+
+            TestSchedulerProvider.TaskPool.AdvanceBy(1);
+
+            WaitOne();
+        }
+
+        [Fact]
+        public void ShouldHandleInternalRename()
+        {
+            var path = "C:\\Hello";
+
+            var folderRules = new[]
+            {
+                new FolderRule
+                {
+                    Path = path,
+                    Action = FolderRuleActionEnum.Always
+                }
+            };
+
+            var fileSystemWatcher1 = Substitute.For<IFileSystemWatcher>();
+            FileSystemWatcherQueue.Enqueue(fileSystemWatcher1);
+
+            FileSystemEventArgs lastArgs = null;
+            var folderWatcherService = AutoSubstitute.Resolve<FolderWatcherService>();
+            folderWatcherService.WatchFolders(folderRules)
+                .Subscribe(args =>
+                {
+                    lastArgs = args;
+                    AutoResetEvent.Set();
+                });
+
+            FileSystemWatcherFactory.ReceivedWithAnyArgs(1)
+                .FromPath(default);
+
+            FileSystemWatcherFactory.Received(1)
+                .FromPath(path);
+
+            fileSystemWatcher1.Renamed +=
+                Raise.Event<RenamedEventHandler>(this,
+                    new RenamedEventArgs(WatcherChangeTypes.Renamed, path, "hello1.txt", "hello.txt"));
+
+            TestSchedulerProvider.TaskPool.AdvanceBy(1);
+
+            WaitOne();
         }
     }
 }

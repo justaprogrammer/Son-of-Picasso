@@ -223,7 +223,7 @@ namespace SonOfPicasso.UI.Windows
                     {
                         var messageBoxResult = MessageBox.Show("This will clear items in the tray. Are you sure?", "Confirmation", MessageBoxButton.YesNo);
                         context.SetOutput(messageBoxResult == MessageBoxResult.Yes);
-                            FolderManagementViewModel result = null;
+                        
                         return Observable.Return(Unit.Default);
                     }).SubscribeOn(_schedulerProvider.MainThreadScheduler);
                 }).DisposeWith(d);
