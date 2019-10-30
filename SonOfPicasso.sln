@@ -13,7 +13,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SonOfPicasso.Core", "src\So
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{30DC3442-C225-4FC5-9439-77BD1B3EE895}"
 	ProjectSection(SolutionItems) = preProject
-		appveyor.yml = appveyor.yml
 		Build.fsx = Build.fsx
 		codecov.yml = codecov.yml
 		.chglog\config.yml = .chglog\config.yml
@@ -37,6 +36,11 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SonOfPicasso.Tools.Tests", "src\SonOfPicasso.Tools.Tests\SonOfPicasso.Tools.Tests.csproj", "{46317863-37D4-46EB-AEBD-57AD986F8EEB}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SonOfPicasso.Integration.Tests", "src\SonOfPicasso.Integration.Tests\SonOfPicasso.Integration.Tests.csproj", "{BC32339A-4C41-420C-8812-E84FD2608954}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Actions", "Actions", "{2EA7D4EE-CF84-417D-BBC0-9AF256A46DEF}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\build-test.yml = .github\workflows\build-test.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -96,6 +100,7 @@ Global
 		{9D06ACFE-6ECD-4EC9-9CA9-8D6CCC5C362A} = {12E2CEF6-EB9D-412F-98E3-ECBBBD00A29A}
 		{46317863-37D4-46EB-AEBD-57AD986F8EEB} = {12E2CEF6-EB9D-412F-98E3-ECBBBD00A29A}
 		{BC32339A-4C41-420C-8812-E84FD2608954} = {12E2CEF6-EB9D-412F-98E3-ECBBBD00A29A}
+		{2EA7D4EE-CF84-417D-BBC0-9AF256A46DEF} = {30DC3442-C225-4FC5-9439-77BD1B3EE895}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2C01583D-05D7-4F03-A86C-ECF79DA041D0}
