@@ -10,6 +10,8 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.0.100
+    - name: Setup GitVersion
+      uses: StanleyGoldmab/setup-gitversion@v1
     - name: Install Fake Cli
       run: dotnet tool install fake-cli -g
 
