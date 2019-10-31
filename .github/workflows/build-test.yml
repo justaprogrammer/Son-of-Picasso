@@ -16,11 +16,11 @@ jobs:
           gitversion-version: 5.x
     - name: Install other tools
       run: |- 
-        sudo dotnet tool install fake-cli --tool-path /usr/local/bin
-        sudo dotnet tool install coverlet.console --tool-path /usr/local/bin
         sudo npm install -g semantic-release @semantic-release/changelog @semantic-release/git commit-analyzer-cli
-    - name: Run 
-      run: fake build --parallel 4
+    - name: GitVersion 
+      run: gitversion /updateassemblyinfo ./src/common/SharedAssemblyInfo.cs /ensureassemblyinfo
+    - name: Environment Printer
+      uses: managedkaos/print-env@v1.0
 
   build-macos:
     runs-on: macos-latest
@@ -36,11 +36,11 @@ jobs:
           gitversion-version: 5.x
     - name: Install other tools
       run: |- 
-        sudo dotnet tool install fake-cli --tool-path /usr/local/bin
-        sudo dotnet tool install coverlet.console --tool-path /usr/local/bin
         sudo npm install -g semantic-release @semantic-release/changelog @semantic-release/git commit-analyzer-cli
-    - name: Run 
-      run: fake build --parallel 44
+    - name: GitVersion 
+      run: gitversion /updateassemblyinfo ./src/common/SharedAssemblyInfo.cs /ensureassemblyinfo
+    - name: Environment Printer
+      uses: managedkaos/print-env@v1.0
 
   build-windows:
     runs-on: windows-latest
@@ -52,10 +52,12 @@ jobs:
         dotnet-version: 3.0.100
     - name: Install other tools
       run: |- 
-        dotnet tool install fake-cli -g
-        dotnet tool install coverlet.console -g
         npm install -g semantic-release @semantic-release/changelog @semantic-release/git commit-analyzer-cli
-    - name: Run 
-      run: fake build --parallel 4
+    - name: GitVersion 
+      run: gitversion /updateassemblyinfo src\common\SharedAssemblyInfo.cs /ensureassemblyinfo
+    - name: Environment Printer
+      uses: managedkaos/print-env@v1.0
+
+      
 
 # deploy_script: semantic-release
