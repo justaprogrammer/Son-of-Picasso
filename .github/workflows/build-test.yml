@@ -18,7 +18,7 @@ jobs:
       run: |- 
         sudo npm install -g semantic-release @semantic-release/changelog @semantic-release/git commit-analyzer-cli
     - name: GitVersion 
-      run: gitversion /updateassemblyinfo ./src/common/SharedAssemblyInfo.cs /ensureassemblyinfo
+      run: GitVersion /updateassemblyinfo ./src/common/SharedAssemblyInfo.cs /ensureassemblyinfo
     - name: Run
       run: env
 
@@ -38,7 +38,7 @@ jobs:
       run: |- 
         sudo npm install -g semantic-release @semantic-release/changelog @semantic-release/git commit-analyzer-cli
     - name: GitVersion 
-      run: gitversion /updateassemblyinfo ./src/common/SharedAssemblyInfo.cs /ensureassemblyinfo
+      run: GitVersion /updateassemblyinfo ./src/common/SharedAssemblyInfo.cs /ensureassemblyinfo
     - name: Run
       run: env
 
@@ -54,7 +54,7 @@ jobs:
       run: |- 
         npm install -g semantic-release @semantic-release/changelog @semantic-release/git commit-analyzer-cli
     - name: GitVersion 
-      run: gitversion /updateassemblyinfo src\common\SharedAssemblyInfo.cs /ensureassemblyinfo
+      run: GitVersion /updateassemblyinfo src\common\SharedAssemblyInfo.cs /ensureassemblyinfo
     - name: Run
       run: set
 
