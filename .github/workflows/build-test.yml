@@ -16,11 +16,8 @@ jobs:
           gitversion-version: 5.x
     - name: Install other tools
       run: |- 
-        mkdir ~/.bin
-        dotnet tool install fake-cli -g
-        dotnet tool install fake-cli --tool-path ~/.bin
-        ls ~/.bin
-        dotnet tool install coverlet.console -g
+        sudo dotnet tool install fake-cli --tool-path /usr/local/bin
+        sudo dotnet tool install coverlet.console --tool-path /usr/local/bin
         sudo npm install -g semantic-release @semantic-release/changelog @semantic-release/git commit-analyzer-cli
     - name: Run 
       run: fake build --parallel 4
@@ -39,8 +36,8 @@ jobs:
           gitversion-version: 5.x
     - name: Install other tools
       run: |- 
-        dotnet tool install fake-cli -g
-        dotnet tool install coverlet.console -g
+        sudo dotnet tool install fake-cli --tool-path /usr/local/bin
+        sudo dotnet tool install coverlet.console --tool-path /usr/local/bin
         sudo npm install -g semantic-release @semantic-release/changelog @semantic-release/git commit-analyzer-cli
     - name: Run 
       run: fake build --parallel 44
