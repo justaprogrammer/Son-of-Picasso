@@ -56,7 +56,8 @@ jobs:
     - name: GitVersion 
       run: GitVersion /updateassemblyinfo src\common\SharedAssemblyInfo.cs /ensureassemblyinfo
     - name: Run
-      run: set
+      run: _-
+        Get-ChildItem Env;
 
       
 
