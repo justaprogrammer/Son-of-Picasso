@@ -2,7 +2,7 @@ name: Build and Test
 on: [push]
 
 jobs:
-  build:
+  build-ubuntu:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
@@ -18,7 +18,7 @@ jobs:
       run: |-
         dotnet tool install fake-cli -g
         dotnet tool install coverlet.console -g
-        npm install -g semantic-release @semantic-release/changelog @semantic-release/git commit-analyzer-cli
+        sudo npm install -g semantic-release @semantic-release/changelog @semantic-release/git commit-analyzer-cli
 
 # before_build:
 #   - ps: gitversion /output buildserver 
