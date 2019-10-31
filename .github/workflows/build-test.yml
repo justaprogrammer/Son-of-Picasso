@@ -14,23 +14,12 @@ jobs:
       uses: StanleyGoldman/setup-gitversion@master
       with:
           gitversion-version: 5.x
-    - name: Install Fake Cli
-      run: dotnet tool install fake-cli -g
+    - name: Install other tools
+      run: |-
+        dotnet tool install fake-cli -g
+        dotnet tool install coverlet.console -g
+        npm install -g semantic-release @semantic-release/changelog @semantic-release/git commit-analyzer-cli
 
-# version: 1.0.{build}
-# image: Visual Studio 2017
-# install:
-#   - dotnet tool install fake-cli -g
-#   - dotnet tool install coverlet.console -g
-#   - choco config set cacheLocation %LOCALAPPDATA%\Temp\Chocolatey
-#   - choco install dotnetcore-sdk --version 3.0.100-preview9-014004 --pre 
-#   - choco install codecov --no-progress --confirm
-#   - choco install gitversion.portable --no-progress --confirm
-#   - npm install -g semantic-release @semantic-release/changelog @semantic-release/git commit-analyzer-cli
-# cache:
-#   - '%LOCALAPPDATA%\Temp\Chocolatey -> appveyor.yml'
-#   - '.fake -> Build.fsx'
-#   - 'packages\cache -> paket.*'
 # before_build:
 #   - ps: gitversion /output buildserver 
 # build_script:
