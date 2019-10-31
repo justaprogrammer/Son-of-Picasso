@@ -19,8 +19,8 @@ jobs:
         sudo npm install -g semantic-release @semantic-release/changelog @semantic-release/git commit-analyzer-cli
     - name: GitVersion 
       run: gitversion /updateassemblyinfo ./src/common/SharedAssemblyInfo.cs /ensureassemblyinfo
-    - name: Environment Printer
-      uses: managedkaos/print-env@v1.0
+    - name: Run
+      run: env
 
   build-macos:
     runs-on: macos-latest
@@ -39,8 +39,8 @@ jobs:
         sudo npm install -g semantic-release @semantic-release/changelog @semantic-release/git commit-analyzer-cli
     - name: GitVersion 
       run: gitversion /updateassemblyinfo ./src/common/SharedAssemblyInfo.cs /ensureassemblyinfo
-    - name: Environment Printer
-      uses: managedkaos/print-env@v1.0
+    - name: Run
+      run: env
 
   build-windows:
     runs-on: windows-latest
@@ -55,8 +55,8 @@ jobs:
         npm install -g semantic-release @semantic-release/changelog @semantic-release/git commit-analyzer-cli
     - name: GitVersion 
       run: gitversion /updateassemblyinfo src\common\SharedAssemblyInfo.cs /ensureassemblyinfo
-    - name: Environment Printer
-      uses: managedkaos/print-env@v1.0
+    - name: Run
+      run: set
 
       
 
