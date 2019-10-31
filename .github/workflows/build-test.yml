@@ -19,7 +19,7 @@ jobs:
         mkdir ~/.bin
         dotnet tool install fake-cli -g
         dotnet tool install fake-cli --tool-path ~/.bin
-        ls ~./bin
+        ls ~/.bin
         dotnet tool install coverlet.console -g
         sudo npm install -g semantic-release @semantic-release/changelog @semantic-release/git commit-analyzer-cli
     - name: Run 
