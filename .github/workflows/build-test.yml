@@ -12,6 +12,8 @@ jobs:
         dotnet-version: 3.0.100
     - name: Setup GitVersion
       uses: StanleyGoldman/setup-gitversion@setup-gitversion
+      with:
+          gitversion-version: 5.x
     - name: Install Fake Cli
       run: dotnet tool install fake-cli -g
 
