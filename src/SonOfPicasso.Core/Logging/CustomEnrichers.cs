@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using Serilog.Core;
 using Serilog.Events;
 
 namespace SonOfPicasso.Core.Logging
 {
+    [ExcludeFromCodeCoverage]
     public class CustomEnrichers : ILogEventEnricher
     {
         public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
