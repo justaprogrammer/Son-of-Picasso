@@ -22,4 +22,40 @@ jobs:
     - name: Run 
       run: fake build --parallel 4
 
+  build-macos:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.0.100
+    - name: Setup GitVersion
+      uses: StanleyGoldman/setup-gitversion@v1.0.0
+      with:
+          gitversion-version: 5.x
+    - name: Install other tools
+      run: |- 
+        dotnet tool install fake-cli -g
+        dotnet tool install coverlet.console -g
+        sudo npm install -g semantic-release @semantic-release/changelog @semantic-release/git commit-analyzer-cli
+    - name: Run 
+      run: fake build --parallel 44
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.0.100
+    - name: Install other tools
+      run: |- 
+        dotnet tool install fake-cli -g
+        dotnet tool install coverlet.console -g
+        sudo npm install -g semantic-release @semantic-release/changelog @semantic-release/git commit-analyzer-cli
+    - name: Run 
+      run: fake build --parallel 4
+
 # deploy_script: semantic-release
