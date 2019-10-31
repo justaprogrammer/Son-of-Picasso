@@ -9,12 +9,7 @@ namespace SonOfPicasso.UI.Converters
         public object Convert(object value, Type targetType, object parameter,
             CultureInfo culture)
         {
-            if (value != null)
-            {
-                return value.GetType();
-            }
-
-            return new object();
+            return value?.GetType();
         }
 
         public object ConvertBack(object value, Type targetType, object parameter,
