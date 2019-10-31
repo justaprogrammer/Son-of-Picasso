@@ -103,8 +103,7 @@ namespace SonOfPicasso.UI.Windows
                         observableSelectedTrayImageCount
                             .Select(selectedTrayCount =>
                                 (selectedTrayCount == 0 ? ViewModel.TrayImages : ViewModel.SelectedTrayImages)
-                                .AsEnumerable()
-                            ).SelectMany(observable => observable))
+                                .AsEnumerable()))
                     .DisposeWith(d);
 
                 this.BindCommand(ViewModel,
@@ -115,12 +114,11 @@ namespace SonOfPicasso.UI.Windows
                         {
                             var allItems = selectedTrayCount == 0;
 
-                            return (!allItems ? ViewModel.SelectedTrayImages : ViewModel.TrayImages)
-                                .ToObservable()
-                                .ToList()
-                                .CombineLatest(Observable.Return(allItems), (list, b) => (list, b));
-                        })
-                        .SelectMany(observable => observable)).DisposeWith(d);
+                            var collection =
+                                !allItems ? ViewModel.SelectedTrayImages : ViewModel.TrayImages;
+
+                            return (collection.AsEnumerable(), allItems);
+                        })).DisposeWith(d);
 
                 ImagesList.Events().SelectionChanged
                     .Subscribe(ea =>
