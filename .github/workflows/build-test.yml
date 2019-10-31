@@ -54,7 +54,7 @@ jobs:
       run: |- 
         dotnet tool install fake-cli -g
         dotnet tool install coverlet.console -g
-        sudo npm install -g semantic-release @semantic-release/changelog @semantic-release/git commit-analyzer-cli
+        npm install -g semantic-release @semantic-release/changelog @semantic-release/git commit-analyzer-cli
     - name: Run 
       run: fake build --parallel 4
 
