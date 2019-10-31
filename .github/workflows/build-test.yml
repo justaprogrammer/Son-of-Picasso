@@ -25,5 +25,5 @@ jobs:
 # build_script:
 # - ps: >-
 #     fake build --parallel 4
-# test: off
+# test: off 
 # deploy_script: semantic-release
