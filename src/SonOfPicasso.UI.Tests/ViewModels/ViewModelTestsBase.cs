@@ -19,8 +19,12 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             Func<ImageContainerViewModel> imageContainerViewModelFactory = () =>
                 new ImageContainerViewModel(new ViewModelActivator(), TestSchedulerProvider);
 
+            Func<TrayImageViewModel> trayImageViewModelFactory = () =>
+                new TrayImageViewModel(new ViewModelActivator());
+
             AutoSubstitute.Provide(imageViewModelFactory);
             AutoSubstitute.Provide(imageContainerViewModelFactory);
+            AutoSubstitute.Provide(trayImageViewModelFactory);
         }
 
         protected void ActivateContainerViewModel(int rowCount, params ImageContainerViewModel[] imageContainerViewModels)
