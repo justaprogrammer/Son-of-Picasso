@@ -25,6 +25,6 @@ jobs:
         dotnet test src\SonOfPicasso.Tools.Tests\SonOfPicasso.Tools.Tests.csproj `
           --logger trx;LogFileName=SonOfPicasso.Tools.Tests-netcoreapp3.0.results.trx `
           --configuration Release `
-          --results-directory ../../reports `
+          --results-directory ../../reports
     - name: Semantic Release
       run: semantic-release
