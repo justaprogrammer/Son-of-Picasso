@@ -5,7 +5,7 @@
       <DataCollector friendlyName="XPlat code coverage">
         <Configuration>
           <Format>json</Format>
-          <MergeWith>/custom/path/result.json</MergeWith>
+          <MergeWith>reports\result.json</MergeWith>
           <Exclude>[SonOfPicasso.*.Tests]*,[SonOfPicasso.Testing.Common]*</Exclude>
           <Include>[SonOfPicasso.*]*</Include>
           <SingleHit>false</SingleHit>
