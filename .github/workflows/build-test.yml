@@ -23,7 +23,9 @@ jobs:
         dotnet test src\SonOfPicasso.Core.Tests\SonOfPicasso.Core.Tests.csproj `
           --logger "trx;LogFileName=SonOfPicasso.Core.Tests-netcoreapp3.0.results.trx" `
           --configuration "Release" `
-          --results-directory "../../reports"
+          --results-directory "../../reports" `
+          --collect:"XPlat code coverage" `
+          --settings src\coverletArgs.runsettings
 #     - uses: codecov/codecov-action@v1.0.3
 #       with:
 #         token: ${{secrets.CODECOV_TOKEN}} #required
@@ -35,25 +37,33 @@ jobs:
         dotnet test src\SonOfPicasso.Data.Tests\SonOfPicasso.Data.Tests.csproj `
           --logger "trx;LogFileName=SonOfPicasso.Data.Tests-netcoreapp3.0.results.trx" `
           --configuration "Release" `
-          --results-directory "../../reports"
+          --results-directory "../../reports" `
+          --collect:"XPlat code coverage" `
+          --settings src\coverletArgs.runsettings
     - name: Test SonOfPicasso.UI.Tests
       run: |-
         dotnet test src\SonOfPicasso.UI.Tests\SonOfPicasso.UI.Tests.csproj `
           --logger "trx;LogFileName=SonOfPicasso.UI.Tests-netcoreapp3.0.results.trx" `
           --configuration "Release" `
-          --results-directory "../../reports"
+          --results-directory "../../reports" `
+          --collect:"XPlat code coverage" `
+          --settings src\coverletArgs.runsettings
     - name: Test SonOfPicasso.Tools.Tests
       run: |-
         dotnet test src\SonOfPicasso.Tools.Tests\SonOfPicasso.Tools.Tests.csproj `
           --logger "trx;LogFileName=SonOfPicasso.Tools.Tests-netcoreapp3.0.results.trx" `
           --configuration "Release" `
-          --results-directory "../../reports"
+          --results-directory "../../reports" `
+          --collect:"XPlat code coverage" `
+          --settings src\coverletArgs.runsettings
     - name: Test SonOfPicasso.Integration.Tests
       run: |-
         dotnet test src\SonOfPicasso.Integration.Tests\SonOfPicasso.Integration.Tests.csproj `
           --logger "trx;LogFileName=SonOfPicasso.Integration.Tests-netcoreapp3.0.results.trx" `
           --configuration "Release" `
-          --results-directory "../../reports"
+          --results-directory "../../reports" `
+          --collect:"XPlat code coverage" `
+          --settings src\coverletArgs.runsettings
     - name: Semantic Release
       run: semantic-release
       
