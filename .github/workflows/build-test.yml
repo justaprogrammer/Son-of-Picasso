@@ -18,10 +18,11 @@ jobs:
       run: |- 
         sudo npm install -g semantic-release @semantic-release/changelog @semantic-release/git commit-analyzer-cli
     - name: GitVersion 
-      run: GitVersion /updateassemblyinfo ./src/common/SharedAssemblyInfo.cs /ensureassemblyinfo /output BuildServer
+      run: GitVersion /updateassemblyinfo ./src/common/SharedAssemblyInfo.cs /ensureassemblyinfo /output buildserver
     - name: Run
-      run: |-
-        env
+      run: env
+    - name: Build
+      run: dotnet build ./src/SonOfPicasso.sln --configuration Release
 
   build-macos:
     runs-on: macos-latest
@@ -39,9 +40,11 @@ jobs:
       run: |- 
         sudo npm install -g semantic-release @semantic-release/changelog @semantic-release/git commit-analyzer-cli
     - name: GitVersion 
-      run: GitVersion /updateassemblyinfo ./src/common/SharedAssemblyInfo.cs /ensureassemblyinfo /output BuildServer
+      run: GitVersion /updateassemblyinfo ./src/common/SharedAssemblyInfo.cs /ensureassemblyinfo /output buildserver
     - name: Run
       run: env
+    - name: Build
+      run: dotnet build ./src/SonOfPicasso.sln --configuration Release
 
   build-windows:
     runs-on: windows-latest
@@ -55,10 +58,12 @@ jobs:
       run: |- 
         npm install -g semantic-release @semantic-release/changelog @semantic-release/git commit-analyzer-cli
     - name: GitVersion 
-      run: GitVersion /updateassemblyinfo ./src/common/SharedAssemblyInfo.cs /ensureassemblyinfo /output BuildServer
+      run: GitVersion /updateassemblyinfo ./src/common/SharedAssemblyInfo.cs /ensureassemblyinfo /output buildserver
     - name: Run
       run: |- 
         Get-ChildItem Env:
+    - name: Build
+      run: dotnet build ./src/SonOfPicasso.sln --configuration Release
 
       
 
