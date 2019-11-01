@@ -21,10 +21,10 @@ jobs:
     - name: Run
       run: |-
         GitVersion /updateassemblyinfo src\common\SharedAssemblyInfo.cs /ensureassemblyinfo /output BuildServer
-        dotnet build src\SonOfPicasso.sln --configuration Release
+        dotnet build src\SonOfPicasso.sln --configuration "Release"
         dotnet test src\SonOfPicasso.Tools.Tests\SonOfPicasso.Tools.Tests.csproj `
-          --logger trx;LogFileName=SonOfPicasso.Tools.Tests-netcoreapp3.0.results.trx `
-          --configuration Release `
-          --results-directory ../../reports
+          --logger "trx;LogFileName=SonOfPicasso.Tools.Tests-netcoreapp3.0.results.trx" `
+          --configuration "Release" `
+          --results-directory "../../reports"
     - name: Semantic Release
       run: semantic-release
