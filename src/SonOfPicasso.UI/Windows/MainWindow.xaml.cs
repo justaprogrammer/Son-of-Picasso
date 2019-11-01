@@ -67,6 +67,10 @@ namespace SonOfPicasso.UI.Windows
                     ListSortDirection.Descending));
                 imageCollectionViewSource.SortDescriptions.Add(new SortDescription(nameof(ImageViewModel.Date),
                     ListSortDirection.Ascending));
+
+                imageCollectionViewSource.IsLiveFilteringRequested = true;
+                imageCollectionViewSource.IsLiveGroupingRequested = true;
+                imageCollectionViewSource.IsLiveSortingRequested = true;
                 
                 imageContainersViewSource.Source = ViewModel.ImageContainers;
                 imageContainersViewSource.GroupDescriptions.Add(new PropertyGroupDescription(nameof(ImageContainerViewModel.ContainerType)));
@@ -76,11 +80,19 @@ namespace SonOfPicasso.UI.Windows
                 imageContainersViewSource.SortDescriptions.Add(
                     new SortDescription(nameof(ImageContainerViewModel.Date), ListSortDirection.Descending));
 
+                imageContainersViewSource.IsLiveFilteringRequested = true;
+                imageContainersViewSource.IsLiveGroupingRequested = true;
+                imageContainersViewSource.IsLiveSortingRequested = true;
+
                 albumImageContainersViewSource.Source = ViewModel.AlbumImageContainers;
                 albumImageContainersViewSource.SortDescriptions.Add(
                     new SortDescription("Year", ListSortDirection.Descending));
                 albumImageContainersViewSource.SortDescriptions.Add(
                     new SortDescription("Date", ListSortDirection.Descending));
+
+                albumImageContainersViewSource.IsLiveFilteringRequested = true;
+                albumImageContainersViewSource.IsLiveGroupingRequested = true;
+                albumImageContainersViewSource.IsLiveSortingRequested = true;
 
                 this.BindCommand(ViewModel,
                         model => model.AddFolder,
