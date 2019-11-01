@@ -48,6 +48,12 @@ jobs:
           --logger "trx;LogFileName=SonOfPicasso.Tools.Tests-netcoreapp3.0.results.trx" `
           --configuration "Release" `
           --results-directory "../../reports"
+    - name: Test SonOfPicasso.Integration.Tests
+      run: |-
+        dotnet test src\SonOfPicasso.Integration.Tests\SonOfPicasso.Integration.Tests.csproj `
+          --logger "trx;LogFileName=SonOfPicasso.Integration.Tests-netcoreapp3.0.results.trx" `
+          --configuration "Release" `
+          --results-directory "../../reports"
     - name: Semantic Release
       run: semantic-release
       
