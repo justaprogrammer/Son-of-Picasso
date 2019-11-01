@@ -12,7 +12,6 @@ jobs:
         dotnet-version: 3.0.100
     - name: Install other tools
       run: |-
-        dotnet tool install fake-cli -g
         dotnet tool install coverlet.console -g
         choco install codecov --no-progress --confirm
         choco install gitversion.portable --no-progress --confirm
@@ -20,6 +19,12 @@ jobs:
     - name: GitVersion
       run: gitversion /output buildserver 
     - name: Run
-      run: fake build --parallel 4
+      run: |-
+        GitVersion /updateassemblyinfo src\common\SharedAssemblyInfo.cs /ensureassemblyinfo /output BuildServer
+        dotnet build src\SonOfPicasso.sln --configuration Release
+        dotnet test src\SonOfPicasso.Tools.Tests\SonOfPicasso.Tools.Tests.csproj `
+          --logger trx;LogFileName=SonOfPicasso.Tools.Tests-netcoreapp3.0.results.trx `
+          --configuration Release `
+          --results-directory ../../reports `
     - name: Semantic Release
       run: semantic-release
