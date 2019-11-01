@@ -10,18 +10,18 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.0.100
-    - name: Install other tools
-      run: |-
-        dotnet tool install coverlet.console -g
-        choco install codecov --no-progress --confirm
-        choco install gitversion.portable --no-progress --confirm
-        npm install -g semantic-release @semantic-release/changelog @semantic-release/git commit-analyzer-cli
+    - name: Install Coverlet
+      run: dotnet tool install coverlet.console -g
+    - name: Install Codecov
+      run: choco install codecov --no-progress --confirm
+    - name: Install Semantic Release Tools
+      run: npm install -g semantic-release @semantic-release/changelog @semantic-release/git commit-analyzer-cli100
     - name: GitVersion
-      run: gitversion /output buildserver 
-    - name: Run
+      run: GitVersion /updateassemblyinfo src\common\SharedAssemblyInfo.cs /ensureassemblyinfo /output BuildServer
+    - name: Build
+      run: dotnet build src\SonOfPicasso.sln --configuration "Release"
+    - name: Test SonOfPicasso.Tools.Tests
       run: |-
-        GitVersion /updateassemblyinfo src\common\SharedAssemblyInfo.cs /ensureassemblyinfo /output BuildServer
-        dotnet build src\SonOfPicasso.sln --configuration "Release"
         dotnet test src\SonOfPicasso.Tools.Tests\SonOfPicasso.Tools.Tests.csproj `
           --logger "trx;LogFileName=SonOfPicasso.Tools.Tests-netcoreapp3.0.results.trx" `
           --configuration "Release" `
