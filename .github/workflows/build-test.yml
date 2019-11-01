@@ -20,15 +20,18 @@ jobs:
       run: dotnet publish SonOfPicasso.sln --configuration "Release"
     - name: Test SonOfPicasso.Core.Tests
       run: |-
-        dotnet vstest src\SonOfPicasso.Core.Tests\bin\Release\netcoreapp3.0\publish\SonOfPicasso.Core.Tests.dll `
+        $output = dotnet vstest src\SonOfPicasso.Core.Tests\bin\Release\netcoreapp3.0\publish\SonOfPicasso.Core.Tests.dll `
+          --logger:"trx;LogFileName=SonOfPicasso.Core.Tests.trx" `
+          --ResultsDirectory:reports `
           --collect:"XPlat code coverage" `
           --settings:"src\coverletArgs.runsettings"
-#     - uses: codecov/codecov-action@v1.0.3
-#       with:
-#         token: ${{secrets.CODECOV_TOKEN}} #required
-#         file: ./coverage.xml #optional
-#         flags: unittests #optional
-#         name: codecov-umbrella #optional
+        echo $output
+        $ENV:lastCoverageReport = ($output -match "opencover").Trim()
+    - uses: codecov/codecov-action@v1.0.3
+      with:
+        token: ${{secrets.CODECOV_TOKEN}}
+        file: $ENV:lastCoverageReport
+        flags: coretests
     - name: Test SonOfPicasso.Data.Tests
       run: |-
         dotnet vstest src\SonOfPicasso.Data.Tests\bin\Release\netcoreapp3.0\publish\SonOfPicasso.Data.Tests.dll `
