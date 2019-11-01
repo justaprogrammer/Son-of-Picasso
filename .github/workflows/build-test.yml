@@ -16,6 +16,8 @@ jobs:
       run: GitVersion /updateassemblyinfo src\common\SharedAssemblyInfo.cs /ensureassemblyinfo /output BuildServer
     - name: Build
       run: dotnet build SonOfPicasso.sln --configuration "Release"
+    - name: Publish
+      run: dotnet publish SonOfPicasso.sln --configuration "Release"
     - name: Test SonOfPicasso.Core.Tests
       run: |-
         dotnet vstest src\SonOfPicasso.Core.Tests\SonOfPicasso.Core.Tests.csproj `
