@@ -20,7 +20,10 @@ jobs:
     - name: GitVersion 
       run: GitVersion /updateassemblyinfo ./src/common/SharedAssemblyInfo.cs /ensureassemblyinfo /output buildserver
     - name: Run
-      run: env
+      run: |-
+        pwd
+        ls
+        env
     - name: Build
       run: dotnet build ./src/SonOfPicasso.sln --configuration Release
 
@@ -42,7 +45,10 @@ jobs:
     - name: GitVersion 
       run: GitVersion /updateassemblyinfo ./src/common/SharedAssemblyInfo.cs /ensureassemblyinfo /output buildserver
     - name: Run
-      run: env
+      run: |-
+        pwd
+        ls
+        env
     - name: Build
       run: dotnet build ./src/SonOfPicasso.sln --configuration Release
 
