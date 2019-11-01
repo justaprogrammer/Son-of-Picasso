@@ -49,6 +49,9 @@ jobs:
         dotnet vstest src\SonOfPicasso.Integration.Tests\bin\Release\netcoreapp3.0\publish\SonOfPicasso.Integration.Tests.dll `
           --collect:"XPlat code coverage" `
           --settings:"src\coverletArgs.runsettings"
+    - name: Run
+      run: |-
+        Get-ChildItem -Recurse
     - name: Semantic Release
       run: semantic-release
       
