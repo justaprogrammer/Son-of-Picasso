@@ -4,8 +4,7 @@
     <DataCollectors>
       <DataCollector friendlyName="XPlat code coverage">
         <Configuration>
-          <Format>json</Format>
-          <MergeWith>reports\result.json</MergeWith>
+          <Format>opencover</Format>
           <Exclude>[SonOfPicasso.*.Tests]*,[SonOfPicasso.Testing.Common]*</Exclude>
           <Include>[SonOfPicasso.*]*</Include>
           <SingleHit>false</SingleHit>
