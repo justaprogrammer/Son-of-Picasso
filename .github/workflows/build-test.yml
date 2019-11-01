@@ -10,8 +10,6 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.0.100
-    - name: Install Coverlet
-      run: dotnet tool install coverlet.console -g
     - name: Install Semantic Release Tools
       run: npm install -g semantic-release @semantic-release/changelog @semantic-release/git commit-analyzer-cli
     - name: GitVersion
