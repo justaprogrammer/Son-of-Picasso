@@ -2,7 +2,7 @@ name: Build and Test
 on: [push]
 
 jobs:
-  build-windows:
+  build:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v1
@@ -28,3 +28,4 @@ jobs:
           --results-directory "../../reports"
     - name: Semantic Release
       run: semantic-release
+      
