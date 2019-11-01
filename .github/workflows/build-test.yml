@@ -12,8 +12,6 @@ jobs:
         dotnet-version: 3.0.100
     - name: Install Coverlet
       run: dotnet tool install coverlet.console -g
-    - name: Install Codecov
-      run: choco install codecov --no-progress --confirm
     - name: Install Semantic Release Tools
       run: npm install -g semantic-release @semantic-release/changelog @semantic-release/git commit-analyzer-cli
     - name: GitVersion
@@ -26,6 +24,12 @@ jobs:
           --logger "trx;LogFileName=SonOfPicasso.Core.Tests-netcoreapp3.0.results.trx" `
           --configuration "Release" `
           --results-directory "../../reports"
+#     - uses: codecov/codecov-action@v1.0.3
+#       with:
+#         token: ${{secrets.CODECOV_TOKEN}} #required
+#         file: ./coverage.xml #optional
+#         flags: unittests #optional
+#         name: codecov-umbrella #optional
     - name: Test SonOfPicasso.Data.Tests
       run: |-
         dotnet test src\SonOfPicasso.Data.Tests\SonOfPicasso.Data.Tests.csproj `
