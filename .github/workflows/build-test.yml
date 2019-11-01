@@ -20,7 +20,7 @@ jobs:
       run: dotnet publish SonOfPicasso.sln --configuration "Release"
     - name: Test SonOfPicasso.Core.Tests
       run: |-
-        dotnet vstest src\SonOfPicasso.Core.Tests\SonOfPicasso.Core.Tests.csproj `
+        dotnet vstest src\SonOfPicasso.Core.Tests\bin\Release\netcoreapp3.0\publish\SonOfPicasso.Core.Tests.dll `
           --logger "trx;LogFileName=SonOfPicasso.Core.Tests-netcoreapp3.0.results.trx" `
           --configuration "Release" `
           --results-directory "../../reports" `
@@ -34,7 +34,7 @@ jobs:
 #         name: codecov-umbrella #optional
     - name: Test SonOfPicasso.Data.Tests
       run: |-
-        dotnet vstest src\SonOfPicasso.Data.Tests\SonOfPicasso.Data.Tests.csproj `
+        dotnet vstest src\SonOfPicasso.Data.Tests\bin\Release\netcoreapp3.0\publish\SonOfPicasso.Data.Tests.dll `
           --logger "trx;LogFileName=SonOfPicasso.Data.Tests-netcoreapp3.0.results.trx" `
           --configuration "Release" `
           --results-directory "../../reports" `
@@ -42,7 +42,7 @@ jobs:
           --settings src\coverletArgs.runsettings
     - name: Test SonOfPicasso.UI.Tests
       run: |-
-        dotnet vstest src\SonOfPicasso.UI.Tests\SonOfPicasso.UI.Tests.csproj `
+        dotnet vstest src\SonOfPicasso.UI.Tests\bin\Release\netcoreapp3.0\publish\SonOfPicasso.UI.Tests.dll `
           --logger "trx;LogFileName=SonOfPicasso.UI.Tests-netcoreapp3.0.results.trx" `
           --configuration "Release" `
           --results-directory "../../reports" `
@@ -50,7 +50,7 @@ jobs:
           --settings src\coverletArgs.runsettings
     - name: Test SonOfPicasso.Tools.Tests
       run: |-
-        dotnet vstest src\SonOfPicasso.Tools.Tests\SonOfPicasso.Tools.Tests.csproj `
+        dotnet vstest src\SonOfPicasso.Tools.Tests\bin\Release\netcoreapp3.0\publish\SonOfPicasso.Tools.Tests.dll `
           --logger "trx;LogFileName=SonOfPicasso.Tools.Tests-netcoreapp3.0.results.trx" `
           --configuration "Release" `
           --results-directory "../../reports" `
@@ -58,7 +58,7 @@ jobs:
           --settings src\coverletArgs.runsettings
     - name: Test SonOfPicasso.Integration.Tests
       run: |-
-        dotnet vstest src\SonOfPicasso.Integration.Tests\SonOfPicasso.Integration.Tests.csproj `
+        dotnet vstest src\SonOfPicasso.Integration.Tests\bin\Release\netcoreapp3.0\publish\SonOfPicasso.Integration.Tests.dll `
           --logger "trx;LogFileName=SonOfPicasso.Integration.Tests-netcoreapp3.0.results.trx" `
           --configuration "Release" `
           --results-directory "../../reports" `
