@@ -18,13 +18,7 @@ jobs:
       run: |- 
         sudo npm install -g semantic-release @semantic-release/changelog @semantic-release/git commit-analyzer-cli
     - name: GitVersion 
-      run: |-
-        GitVersion /updateassemblyinfo ./src/common/SharedAssemblyInfo.cs /ensureassemblyinfo
-        cat ./src/common/SharedAssemblyInfo.cs
-        sed -i -E "s/AssemblyFileVersion\(\"(.*?)\"\)/AssemblyFileVersion(\"\1.0\")/" ./src/common/SharedAssemblyInfo.cs
-        sed -i -E "s/AssemblyVersion\(\"(.*?)\"\)/AssemblyVersion(\"\1.0\")/" ./src/common/SharedAssemblyInfo.cs
-        sed -i -E "s/AssemblyInformationalVersion\(\"(.*?)\"\)/AssemblyInformationalVersion(\"\1.0\")/" ./src/common/SharedAssemblyInfo.cs
-        cat ./src/common/SharedAssemblyInfo.cs
+      run: GitVersion /updateassemblyinfo ./src/common/SharedAssemblyInfo.cs /ensureassemblyinfo /output BuildServer
     - name: Run
       run: |-
         env
@@ -45,7 +39,7 @@ jobs:
       run: |- 
         sudo npm install -g semantic-release @semantic-release/changelog @semantic-release/git commit-analyzer-cli
     - name: GitVersion 
-      run: GitVersion /updateassemblyinfo ./src/common/SharedAssemblyInfo.cs /ensureassemblyinfo
+      run: GitVersion /updateassemblyinfo ./src/common/SharedAssemblyInfo.cs /ensureassemblyinfo /output BuildServer
     - name: Run
       run: env
 
@@ -61,7 +55,7 @@ jobs:
       run: |- 
         npm install -g semantic-release @semantic-release/changelog @semantic-release/git commit-analyzer-cli
     - name: GitVersion 
-      run: GitVersion /updateassemblyinfo src\common\SharedAssemblyInfo.cs /ensureassemblyinfo
+      run: GitVersion /updateassemblyinfo ./src/common/SharedAssemblyInfo.cs /ensureassemblyinfo /output BuildServer
     - name: Run
       run: |- 
         Get-ChildItem Env:
