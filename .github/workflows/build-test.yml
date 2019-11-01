@@ -27,31 +27,72 @@ jobs:
           --settings:"src\coverletArgs.runsettings"
         echo $output
         $ENV:lastCoverageReport = ($output -match "opencover").Trim()
-    - uses: codecov/codecov-action@v1.0.3
+    - name: Upload SonOfPicasso.Core.Tests to CodeCov
+      uses: codecov/codecov-action@v1.0.3
       with:
         token: ${{secrets.CODECOV_TOKEN}}
         file: $ENV:lastCoverageReport
         flags: coretests
     - name: Test SonOfPicasso.Data.Tests
       run: |-
-        dotnet vstest src\SonOfPicasso.Data.Tests\bin\Release\netcoreapp3.0\publish\SonOfPicasso.Data.Tests.dll `
+        $output = dotnet vstest src\SonOfPicasso.Data.Tests\bin\Release\netcoreapp3.0\publish\SonOfPicasso.Data.Tests.dll `
+          --logger:"trx;LogFileName=SonOfPicasso.Data.Tests.trx" `
+          --ResultsDirectory:reports `
           --collect:"XPlat code coverage" `
           --settings:"src\coverletArgs.runsettings"
+        echo $output
+        $ENV:lastCoverageReport = ($output -match "opencover").Trim()
+    - name: Upload SonOfPicasso.Data.Tests to CodeCov
+      uses: codecov/codecov-action@v1.0.3
+      with:
+        token: ${{secrets.CODECOV_TOKEN}}
+        file: $ENV:lastCoverageReport
+        flags: coretests
     - name: Test SonOfPicasso.UI.Tests
       run: |-
-        dotnet vstest src\SonOfPicasso.UI.Tests\bin\Release\netcoreapp3.0\publish\SonOfPicasso.UI.Tests.dll `
+        $output = dotnet vstest src\SonOfPicasso.UI.Tests\bin\Release\netcoreapp3.0\publish\SonOfPicasso.UI.Tests.dll `
+          --logger:"trx;LogFileName=SonOfPicasso.UI.Tests.trx" `
+          --ResultsDirectory:reports `
           --collect:"XPlat code coverage" `
           --settings:"src\coverletArgs.runsettings"
+        echo $output
+        $ENV:lastCoverageReport = ($output -match "opencover").Trim()
+    - name: Upload SonOfPicasso.UI.Tests to CodeCov
+      uses: codecov/codecov-action@v1.0.3
+      with:
+        token: ${{secrets.CODECOV_TOKEN}}
+        file: $ENV:lastCoverageReport
+        flags: coretests
     - name: Test SonOfPicasso.Tools.Tests
       run: |-
-        dotnet vstest src\SonOfPicasso.Tools.Tests\bin\Release\netcoreapp3.0\publish\SonOfPicasso.Tools.Tests.dll `
+        $output = dotnet vstest src\SonOfPicasso.Tools.Tests\bin\Release\netcoreapp3.0\publish\SonOfPicasso.Tools.Tests.dll `
+          --logger:"trx;LogFileName=SonOfPicasso.Tools.Tests.trx" `
+          --ResultsDirectory:reports `
           --collect:"XPlat code coverage" `
           --settings:"src\coverletArgs.runsettings"
+        echo $output
+        $ENV:lastCoverageReport = ($output -match "opencover").Trim()
+    - name: Upload SonOfPicasso.Tools.Tests to CodeCov
+      uses: codecov/codecov-action@v1.0.3
+      with:
+        token: ${{secrets.CODECOV_TOKEN}}
+        file: $ENV:lastCoverageReport
+        flags: coretests
     - name: Test SonOfPicasso.Integration.Tests
       run: |-
-        dotnet vstest src\SonOfPicasso.Integration.Tests\bin\Release\netcoreapp3.0\publish\SonOfPicasso.Integration.Tests.dll `
+        $output = dotnet vstest src\SonOfPicasso.Integration.Tests\bin\Release\netcoreapp3.0\publish\SonOfPicasso.Integration.Tests.dll ``
+          --logger:"trx;LogFileName=SonOfPicasso.Integration.Tests.trx" `
+          --ResultsDirectory:reports `
           --collect:"XPlat code coverage" `
           --settings:"src\coverletArgs.runsettings"
+        echo $output
+        $ENV:lastCoverageReport = ($output -match "opencover").Trim()
+    - name: Upload SonOfPicasso.Integration.Tests to CodeCov
+      uses: codecov/codecov-action@v1.0.3
+      with:
+        token: ${{secrets.CODECOV_TOKEN}}
+        file: $ENV:lastCoverageReport
+        flags: coretests
     - name: Run
       run: |-
         Get-ChildItem -Recurse
