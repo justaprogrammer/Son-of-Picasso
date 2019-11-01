@@ -25,7 +25,7 @@ jobs:
         ls
         env
     - name: Build
-      run: dotnet build ./src/SonOfPicasso.sln --configuration Release
+      run: dotnet build SonOfPicasso.sln --configuration Release
 
   build-macos:
     runs-on: macos-latest
@@ -50,7 +50,7 @@ jobs:
         ls
         env
     - name: Build
-      run: dotnet build ./src/SonOfPicasso.sln --configuration Release
+      run: dotnet build SonOfPicasso.sln --configuration Release
 
   build-windows:
     runs-on: windows-latest
@@ -69,8 +69,4 @@ jobs:
       run: |- 
         Get-ChildItem Env:
     - name: Build
-      run: dotnet build ./src/SonOfPicasso.sln --configuration Release
-
-      
-
-# deploy_script: semantic-release
+      run: dotnet build SonOfPicasso.sln --configuration Release
