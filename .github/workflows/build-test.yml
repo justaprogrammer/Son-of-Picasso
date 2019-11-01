@@ -15,7 +15,7 @@ jobs:
     - name: Install Codecov
       run: choco install codecov --no-progress --confirm
     - name: Install Semantic Release Tools
-      run: npm install -g semantic-release @semantic-release/changelog @semantic-release/git commit-analyzer-cli100
+      run: npm install -g semantic-release @semantic-release/changelog @semantic-release/git commit-analyzer-cli
     - name: GitVersion
       run: GitVersion /updateassemblyinfo src\common\SharedAssemblyInfo.cs /ensureassemblyinfo /output BuildServer
     - name: Build
