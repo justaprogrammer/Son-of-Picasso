@@ -2,56 +2,6 @@ name: Build and Test
 on: [push]
 
 jobs:
-  build-ubuntu:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v1
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 3.0.100
-    - name: Setup GitVersion
-      uses: StanleyGoldman/setup-gitversion@v1.0.0
-      with:
-          gitversion-version: 5.x
-    - name: Install other tools
-      run: |- 
-        sudo npm install -g semantic-release @semantic-release/changelog @semantic-release/git commit-analyzer-cli
-    - name: GitVersion 
-      run: GitVersion /updateassemblyinfo ./src/common/SharedAssemblyInfo.cs /ensureassemblyinfo /output buildserver
-    - name: Run
-      run: |-
-        pwd
-        ls
-        env
-    - name: Build
-      run: dotnet build SonOfPicasso.sln --configuration Release
-
-  build-macos:
-    runs-on: macos-latest
-    steps:
-    - uses: actions/checkout@v1
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 3.0.100
-    - name: Setup GitVersion
-      uses: StanleyGoldman/setup-gitversion@v1.0.0
-      with:
-          gitversion-version: 5.x
-    - name: Install other tools
-      run: |- 
-        sudo npm install -g semantic-release @semantic-release/changelog @semantic-release/git commit-analyzer-cli
-    - name: GitVersion 
-      run: GitVersion /updateassemblyinfo ./src/common/SharedAssemblyInfo.cs /ensureassemblyinfo /output buildserver
-    - name: Run
-      run: |-
-        pwd
-        ls
-        env
-    - name: Build
-      run: dotnet build SonOfPicasso.sln --configuration Release
-
   build-windows:
     runs-on: windows-latest
     steps:
