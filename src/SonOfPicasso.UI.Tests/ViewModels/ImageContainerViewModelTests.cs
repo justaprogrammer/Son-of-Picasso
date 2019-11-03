@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System.Collections.Generic;
+using FluentAssertions;
 using SonOfPicasso.Core.Model;
 using SonOfPicasso.Testing.Common;
 using SonOfPicasso.UI.ViewModels;
@@ -24,8 +25,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             var folderImageContainer = new FolderImageContainer(folder, MockFileSystem);
 
             imageContainerViewModel.Initialize(folderImageContainer, applicationViewModel);
-            ActivateContainerViewModel(2, imageContainerViewModel);
-
+            imageContainerViewModel.Activator.Activate();
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(1);
         }
     }

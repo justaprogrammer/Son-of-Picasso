@@ -39,15 +39,16 @@ namespace SonOfPicasso.UI.ViewModels
                             .Select(info =>
                             {
                                 var folderViewModel = folderViewModelFactory();
-                                folderViewModel.Initialize(info,_currentRules);
+                                folderViewModel.Initialize(info, _currentRules);
                                 return folderViewModel;
                             });
                     })
+                    .ToArray()
                     .SubscribeOn(schedulerProvider.TaskPool)
                     .ObserveOn(schedulerProvider.MainThreadScheduler)
-                    .Subscribe(folderViewModel =>
+                    .Subscribe(folderRuleViewModels =>
                     {
-                        _manageFolderViewModels.Add(folderViewModel);
+                        _manageFolderViewModels.AddRange(folderRuleViewModels);
                     })
                     .DisposeWith(disposable);
 
@@ -75,7 +76,7 @@ namespace SonOfPicasso.UI.ViewModels
         public string Name => _directoryInfo.Name;
 
         public IObservableCollection<FolderRuleViewModel> Children => _manageFolderViewModels;
-        
+
         IList<IFolderRuleInput> IFolderRuleInput.Children => _manageFolderViewModels.Cast<IFolderRuleInput>().ToArray();
 
         public void Initialize(IDirectoryInfo directoryInfo,
@@ -90,8 +91,8 @@ namespace SonOfPicasso.UI.ViewModels
             else
             {
                 _manageFolderState = FolderRuleActionEnum.Remove;
-            }   
-            
+            }
+
             _currentRules = currentRules;
         }
     }

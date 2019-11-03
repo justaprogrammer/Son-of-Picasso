@@ -1,6 +1,7 @@
 ﻿using System;
 using ReactiveUI;
 using SonOfPicasso.Core.Interfaces;
+using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Testing.Common;
 using SonOfPicasso.UI.ViewModels;
 using Xunit.Abstractions;
@@ -22,15 +23,15 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             Func<TrayImageViewModel> trayImageViewModelFactory = () =>
                 new TrayImageViewModel(new ViewModelActivator());
 
+            Func<FolderRuleViewModel> folderRuleViewModelFactory = () => new FolderRuleViewModel(AutoSubstitute.Resolve<ISchedulerProvider>(),
+                AutoSubstitute.Resolve<IDirectoryInfoPermissionsService>(),
+                AutoSubstitute.Resolve<Func<FolderRuleViewModel>>(),
+                new ViewModelActivator());
+
             AutoSubstitute.Provide(imageViewModelFactory);
             AutoSubstitute.Provide(imageContainerViewModelFactory);
             AutoSubstitute.Provide(trayImageViewModelFactory);
-        }
-
-        protected void ActivateContainerViewModel(int rowCount, params ImageContainerViewModel[] imageContainerViewModels)
-        {
-            foreach (var imageContainerViewModel in imageContainerViewModels)
-                imageContainerViewModel.Activator.Activate();
+            AutoSubstitute.Provide(folderRuleViewModelFactory);
         }
     }
 }

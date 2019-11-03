@@ -52,7 +52,8 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(2);
 
             applicationViewModel.ImageContainers.Count.Should().Be(2);
-            ActivateContainerViewModel(2, applicationViewModel.ImageContainers.ToArray());
+            foreach (var imageContainerViewModel in applicationViewModel.ImageContainers)
+                imageContainerViewModel.Activator.Activate();
 
             applicationViewModel.AlbumImageContainers.Count.Should().Be(0);
             applicationViewModel.Images.Count.Should().Be(8);
@@ -87,7 +88,8 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             TestSchedulerProvider.TaskPool.AdvanceBy(1);
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(2);
 
-            ActivateContainerViewModel(2, applicationViewModel.ImageContainers.ToArray());
+            foreach (var imageContainerViewModel in applicationViewModel.ImageContainers)
+                imageContainerViewModel.Activator.Activate();
 
             var randomImages = Faker.PickRandom(applicationViewModel.Images, 2)
                 .ToArray();
@@ -144,7 +146,8 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             TestSchedulerProvider.TaskPool.AdvanceBy(1);
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(2);
 
-            ActivateContainerViewModel(2, applicationViewModel.ImageContainers.ToArray());
+            foreach (var imageContainerViewModel in applicationViewModel.ImageContainers.ToArray())
+                imageContainerViewModel.Activator.Activate();
 
             var randomImages = Faker.PickRandom(applicationViewModel.Images, 4)
                 .Batch(2)
@@ -202,7 +205,8 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             TestSchedulerProvider.TaskPool.AdvanceBy(1);
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(2);
 
-            ActivateContainerViewModel(2, applicationViewModel.ImageContainers.ToArray());
+            foreach (var imageContainerViewModel in applicationViewModel.ImageContainers.ToArray())
+                imageContainerViewModel.Activator.Activate();
 
             var randomImages = Faker.PickRandom(applicationViewModel.Images, 4)
                 .ToArray();
@@ -274,7 +278,8 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             TestSchedulerProvider.TaskPool.AdvanceBy(1);
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(2);
 
-            ActivateContainerViewModel(2, applicationViewModel.ImageContainers.ToArray());
+            foreach (var imageContainerViewModel in applicationViewModel.ImageContainers.ToArray())
+                imageContainerViewModel.Activator.Activate();
 
             var randomImages = Faker.PickRandom(applicationViewModel.Images, 4)
                 .ToArray();
