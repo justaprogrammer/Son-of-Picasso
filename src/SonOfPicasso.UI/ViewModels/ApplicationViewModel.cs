@@ -361,7 +361,7 @@ namespace SonOfPicasso.UI.ViewModels
             });
         }
 
-        private IObservable<Unit> ExecuteFolderManager(Unit folderManagementViewModel)
+        private IObservable<Unit> ExecuteFolderManager(Unit unit)
         {
             return FolderManagerInteraction.Handle(Unit.Default)
                 .ObserveOn(_schedulerProvider.TaskPool)
@@ -369,49 +369,12 @@ namespace SonOfPicasso.UI.ViewModels
                 {
                     if (folderManagementViewModel != null)
                     {
-                        var folderRules = ComputeRuleset(folderManagementViewModel.Folders)
-                            .ToArray();
-
-                        return _folderRulesManagementService.ResetFolderManagementRules(folderRules);
+                        return _folderRulesManagementService.ResetFolderManagementRules(folderManagementViewModel.Folders);
                     }
 
                     return Observable.Return(Unit.Default);
                 })
                 .SelectMany(observable => observable);
-        }
-
-        private IEnumerable<FolderRule> ComputeRuleset(IEnumerable<FolderRuleViewModel> manageFolderViewModels)
-        {
-            return manageFolderViewModels
-                .Select(ComputeRuleset)
-                .SelectMany(rules => rules);
-        }
-
-        private IEnumerable<FolderRule> ComputeRuleset(FolderRuleViewModel folderRuleViewModel)
-        {
-            return ComputeInternal(folderRuleViewModel, null);
-        }
-
-        private IEnumerable<FolderRule> ComputeInternal(FolderRuleViewModel folderRuleViewModel,
-            FolderRuleActionEnum? state)
-        {
-            if (folderRuleViewModel.ManageFolderState != state)
-            {
-                if (state.HasValue || folderRuleViewModel.ManageFolderState != FolderRuleActionEnum.Remove)
-                {
-                    yield return new FolderRule
-                    {
-                        Path = folderRuleViewModel.FullName,
-                        Action = folderRuleViewModel.ManageFolderState
-                    };
-
-                    state = folderRuleViewModel.ManageFolderState;
-                }
-            }
-
-            foreach (var child in folderRuleViewModel.Children)
-            foreach (var manageFolderRule in ComputeInternal(child, state))
-                yield return manageFolderRule;
         }
     }
 }

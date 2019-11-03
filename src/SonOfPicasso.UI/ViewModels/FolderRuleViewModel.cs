@@ -1,17 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO.Abstractions;
+using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using DynamicData.Binding;
 using ReactiveUI;
+using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Data.Model;
 using SonOfPicasso.UI.ViewModels.Abstract;
 
 namespace SonOfPicasso.UI.ViewModels
 {
-    public class FolderRuleViewModel : ViewModelBase
+    public class FolderRuleViewModel : ViewModelBase, IFolderRuleInput
     {
         private readonly ObservableCollectionExtended<FolderRuleViewModel> _manageFolderViewModels =
             new ObservableCollectionExtended<FolderRuleViewModel>();
@@ -73,6 +75,8 @@ namespace SonOfPicasso.UI.ViewModels
         public string Name => _directoryInfo.Name;
 
         public IObservableCollection<FolderRuleViewModel> Children => _manageFolderViewModels;
+        
+        IList<IFolderRuleInput> IFolderRuleInput.Children => _manageFolderViewModels.Cast<IFolderRuleInput>().ToArray();
 
         public void Initialize(IDirectoryInfo directoryInfo,
             IReadOnlyDictionary<string, FolderRuleActionEnum> currentRules)

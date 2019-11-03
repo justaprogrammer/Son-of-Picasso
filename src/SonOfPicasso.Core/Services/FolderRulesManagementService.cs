@@ -26,6 +26,13 @@ namespace SonOfPicasso.Core.Services
             _schedulerProvider = schedulerProvider;
         }
 
+        public IObservable<Unit> ResetFolderManagementRules(IEnumerable<IFolderRuleInput> folderRuleInputs)
+        {
+            return Observable.Defer(() => Observable.Return(FolderRulesFactory.ComputeRuleset(folderRuleInputs)))
+                .SelectMany(ResetFolderManagementRules)
+                .SubscribeOn(_schedulerProvider.TaskPool);
+        }
+
         public IObservable<Unit> ResetFolderManagementRules(IEnumerable<FolderRule> folderRules)
         {
             return Observable.Defer(() =>
