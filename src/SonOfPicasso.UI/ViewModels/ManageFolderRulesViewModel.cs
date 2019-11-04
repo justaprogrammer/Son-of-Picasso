@@ -66,11 +66,11 @@ namespace SonOfPicasso.UI.ViewModels
             });
         }
 
-        public Interaction<Unit, Unit> ContinueInteraction { get; set; }
+        public Interaction<Unit, Unit> ContinueInteraction { get; }
 
         public ReactiveCommand<Unit, Unit> Continue { get; }
 
-        public Interaction<Unit, Unit> CancelInteraction { get; set; }
+        public Interaction<Unit, Unit> CancelInteraction { get; }
 
         public ReactiveCommand<Unit, Unit> Cancel { get; }
 
