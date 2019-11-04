@@ -112,6 +112,11 @@ namespace SonOfPicasso.UI.Windows
                         window => window.NewAlbum)
                     .DisposeWith(d);
 
+                this.BindCommand(ViewModel,
+                        model => model.FolderManager,
+                        window => window.FolderManager)
+                    .DisposeWith(d);
+
                 var observableSelectedTrayImageCount = ViewModel.WhenAnyValue(
                     model => model.TrayImages.Count,
                     model => model.SelectedTrayImages.Count,
