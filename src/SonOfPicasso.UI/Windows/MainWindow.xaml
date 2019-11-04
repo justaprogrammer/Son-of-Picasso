@@ -13,6 +13,7 @@
 
     <Window.Resources>
         <CollectionViewSource x:Key="ImageContainersViewSource" />
+        <CollectionViewSource x:Key="ImageRefsViewSource" />
         <CollectionViewSource x:Key="AlbumImageContainersViewSource" />
         <CollectionViewSource x:Key="ImagesCollectionViewSource" />
     </Window.Resources>
@@ -96,53 +97,55 @@
                           ShowsPreview="True"
                           Width="5" />
 
-            <ListView Name="ImagesList"
-                      Grid.Column="2"
-                      Grid.Row="0"
-                      ItemsSource="{Binding Source={StaticResource ImagesCollectionViewSource}}"
-                      VirtualizingStackPanel.IsVirtualizing="True"
-                      VirtualizingStackPanel.IsVirtualizingWhenGrouping="True"
-                      VirtualizingStackPanel.VirtualizationMode="Recycling"
-                      VirtualizingStackPanel.ScrollUnit="Pixel"
-                      SelectionMode="Extended">
+            <ListView Name="ImagesRefsList"
+                          ItemsSource="{Binding Source={StaticResource ImageRefsViewSource}}"
+                          VirtualizingStackPanel.IsVirtualizing="True"
+                          VirtualizingStackPanel.IsVirtualizingWhenGrouping="True"
+                          VirtualizingStackPanel.VirtualizationMode="Recycling"
+                          VirtualizingStackPanel.ScrollUnit="Pixel"
+                          SelectionMode="Extended"
+                          Grid.Column="2"
+                          Grid.Row="0">
 
-                <ListView.GroupStyle>
-                    <GroupStyle HidesIfEmpty="False">
-                        <GroupStyle.ContainerStyle>
-                            <Style TargetType="{x:Type GroupItem}">
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="{x:Type GroupItem}">
-                                            <StackPanel Width="{Binding ElementName=ImagesList, Path=ActualWidth}">
-                                                <ContentPresenter x:Name="PART_Header" />
-                                                <ItemsPresenter x:Name="ItemsPresenter" Margin="5,0,0,0" />
-                                            </StackPanel>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </GroupStyle.ContainerStyle>
+                    <ListView.GroupStyle>
+                        <GroupStyle HidesIfEmpty="False">
+                            <GroupStyle.ContainerStyle>
+                                <Style TargetType="{x:Type GroupItem}">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="{x:Type GroupItem}">
+                                                <StackPanel Width="{Binding ElementName=ImagesRefsList, Path=ActualWidth}">
+                                                    <ContentPresenter x:Name="PART_Header" />
+                                                    <ItemsPresenter x:Name="ItemsPresenter" Margin="5,0,0,0" />
+                                                </StackPanel>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </GroupStyle.ContainerStyle>
 
-                        <GroupStyle.HeaderTemplate>
-                            <DataTemplate DataType="CollectionViewGroup">
-                                <reactiveUi:ViewModelViewHost ViewModel="{Binding Name}" ViewContract="Detail" />
-                            </DataTemplate>
-                        </GroupStyle.HeaderTemplate>
-                    </GroupStyle>
-                </ListView.GroupStyle>
+                            <GroupStyle.HeaderTemplate>
+                                <DataTemplate DataType="CollectionViewGroup">
+                                    <StackPanel>
+                                        <Label Content="{Binding}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </GroupStyle.HeaderTemplate>
+                        </GroupStyle>
+                    </ListView.GroupStyle>
 
-                <ListView.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <WrapPanel />
-                    </ItemsPanelTemplate>
-                </ListView.ItemsPanel>
+                    <ListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel />
+                        </ItemsPanelTemplate>
+                    </ListView.ItemsPanel>
 
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <reactiveUi:ViewModelViewHost ViewModel="{Binding}" />
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                                    <Label Content="{Binding}" />
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
 
             <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3">
                 <Grid.ColumnDefinitions>
@@ -180,38 +183,37 @@
                                 <d:Style.DataContext>
                                     <x:Type Type="viewModels:ImageContainerViewModel" />
                                 </d:Style.DataContext>
-                                <EventSetter Event="Click" Handler="AlbumButton_AddImagesToAlbum_OnClick"></EventSetter>
+                                <EventSetter Event="Click" Handler="AlbumButton_AddImagesToAlbum_OnClick" />
                             </Style>
-                            
-                            <Style x:Key="OtherMenuItemStyle" TargetType="MenuItem">
-                            </Style>
+
+                            <Style x:Key="OtherMenuItemStyle" TargetType="MenuItem" />
 
                             <Style x:Key="SeparatorMenuItemStyle" TargetType="Separator" />
 
-                            <converters:AlbumContextMenuStyleSelector 
-                                        x:Key="MenuItemStyleConverter" 
-                                        AlbumModelStyle="{StaticResource AlbumMenuItemStyle}"
-                                        OtherMenuItemStyle="{StaticResource OtherMenuItemStyle}"
-                                        SeparatorMenuItemStyle="{StaticResource SeparatorMenuItemStyle}"
-                                        />
+                            <converters:AlbumContextMenuStyleSelector
+                                x:Key="MenuItemStyleConverter"
+                                AlbumModelStyle="{StaticResource AlbumMenuItemStyle}"
+                                OtherMenuItemStyle="{StaticResource OtherMenuItemStyle}"
+                                SeparatorMenuItemStyle="{StaticResource SeparatorMenuItemStyle}" />
                         </Button.Resources>
                         <Button.ContextMenu>
                             <ContextMenu ItemContainerStyleSelector="{StaticResource MenuItemStyleConverter}">
                                 <ContextMenu.ItemsSource>
                                     <CompositeCollection>
-                                        <MenuItem Header="Add Album"  Click="AlbumButton_AddAlbum_OnClick"/>
+                                        <MenuItem Header="Add Album" Click="AlbumButton_AddAlbum_OnClick" />
                                         <Separator />
-                                        <CollectionContainer Collection="{Binding Source={StaticResource AlbumImageContainersViewSource}}" />
+                                        <CollectionContainer
+                                            Collection="{Binding Source={StaticResource AlbumImageContainersViewSource}}" />
                                     </CompositeCollection>
                                 </ContextMenu.ItemsSource>
                                 <ContextMenu.ItemTemplate>
                                     <DataTemplate DataType="viewModels:ImageContainerViewModel">
-                                        <TextBlock Text="{Binding Name}"/>
+                                        <TextBlock Text="{Binding Name}" />
                                     </DataTemplate>
                                 </ContextMenu.ItemTemplate>
                             </ContextMenu>
                         </Button.ContextMenu>
-                        
+
                     </Button>
                 </DockPanel>
             </Grid>

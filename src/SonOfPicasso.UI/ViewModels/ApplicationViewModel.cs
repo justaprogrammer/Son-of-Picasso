@@ -36,6 +36,7 @@ namespace SonOfPicasso.UI.ViewModels
         private readonly Func<TrayImageViewModel> _trayImageViewModelFactory;
         private readonly Subject<IEnumerable<ImageViewModel>> _unselectImageSubject = new Subject<IEnumerable<ImageViewModel>>();
         private readonly Subject<IEnumerable<TrayImageViewModel>> _unselectTrayImageSubject = new Subject<IEnumerable<TrayImageViewModel>>();
+        private IObservableCache<ImageRef, string> _imageRefCache;
 
         public ApplicationViewModel(ISchedulerProvider schedulerProvider,
             IImageManagementService imageManagementService,
@@ -77,6 +78,12 @@ namespace SonOfPicasso.UI.ViewModels
             _imageContainerViewModelCache = _imageContainerCache
                 .Connect()
                 .Transform(CreateImageContainerViewModel)
+                .DisposeMany()
+                .AsObservableCache();
+
+            _imageRefCache = _imageContainerCache
+                .Connect()
+                .TransformMany(model => model.ImageRefs, imageRef => imageRef.Id)
                 .DisposeMany()
                 .AsObservableCache();
 
@@ -144,6 +151,13 @@ namespace SonOfPicasso.UI.ViewModels
                     .Subscribe()
                     .DisposeWith(d);
 
+                _imageRefCache
+                    .Connect()
+                    .ObserveOn(_schedulerProvider.MainThreadScheduler)
+                    .Bind(ImageRefs)
+                    .Subscribe()
+                    .DisposeWith(d);
+
                 _imageViewModelCache
                     .Connect()
                     .ObserveOn(_schedulerProvider.MainThreadScheduler)
@@ -181,6 +195,9 @@ namespace SonOfPicasso.UI.ViewModels
 
         public IObservableCollection<ImageContainerViewModel> AlbumImageContainers { get; } =
             new ObservableCollectionExtended<ImageContainerViewModel>();
+
+        public IObservableCollection<ImageRef> ImageRefs { get; } =
+            new ObservableCollectionExtended<ImageRef>();
 
         public IObservableCollection<ImageViewModel> Images { get; } =
             new ObservableCollectionExtended<ImageViewModel>();

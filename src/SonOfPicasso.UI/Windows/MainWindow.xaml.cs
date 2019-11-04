@@ -15,6 +15,7 @@ using DynamicData.Binding;
 using ReactiveUI;
 using Serilog;
 using SonOfPicasso.Core.Interfaces;
+using SonOfPicasso.Core.Model;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.UI.ViewModels;
 using SonOfPicasso.UI.Windows.Dialogs;
@@ -35,6 +36,7 @@ namespace SonOfPicasso.UI.Windows
         private readonly IFileSystem _fileSystem;
         private readonly ILogger _logger;
         private readonly ISchedulerProvider _schedulerProvider;
+        private CollectionViewSource imageRefsViewSource;
         private CollectionViewSource imageCollectionViewSource;
         private CollectionViewSource imageContainersViewSource;
         private CollectionViewSource albumImageContainersViewSource;
@@ -59,6 +61,7 @@ namespace SonOfPicasso.UI.Windows
             InitializeComponent();
 
             imageCollectionViewSource = (CollectionViewSource) FindResource("ImagesCollectionViewSource");
+            imageRefsViewSource = (CollectionViewSource) FindResource("ImageRefsViewSource");
             imageContainersViewSource = (CollectionViewSource) FindResource("ImageContainersViewSource");
             albumImageContainersViewSource = (CollectionViewSource) FindResource("AlbumImageContainersViewSource");
 
@@ -66,9 +69,7 @@ namespace SonOfPicasso.UI.Windows
             {
                 imageCollectionViewSource.Source = ViewModel.Images;
 
-                var propertyGroupDescription = new PropertyGroupDescription(nameof(ImageViewModel.ImageContainerViewModel));
-
-                imageCollectionViewSource.GroupDescriptions.Add(propertyGroupDescription);
+                imageCollectionViewSource.GroupDescriptions.Add(new PropertyGroupDescription(nameof(ImageViewModel.ImageContainerViewModel)));
                 imageCollectionViewSource.SortDescriptions.Add(new SortDescription(nameof(ImageViewModel.ContainerType),
                     ListSortDirection.Ascending));
                 imageCollectionViewSource.SortDescriptions.Add(new SortDescription(nameof(ImageViewModel.ContainerDate),
@@ -101,6 +102,30 @@ namespace SonOfPicasso.UI.Windows
                 albumImageContainersViewSource.IsLiveFilteringRequested = true;
                 albumImageContainersViewSource.IsLiveGroupingRequested = true;
                 albumImageContainersViewSource.IsLiveSortingRequested = true;
+
+                imageRefsViewSource.Source = ViewModel.ImageRefs;
+
+                imageRefsViewSource.GroupDescriptions.Add(new PropertyGroupDescription(nameof(ImageRef.ContainerId)));
+                imageRefsViewSource.SortDescriptions.Add(new SortDescription(nameof(ImageRef.ContainerType),
+                    ListSortDirection.Ascending));
+                imageRefsViewSource.SortDescriptions.Add(new SortDescription(nameof(ImageRef.ContainerDate),
+                    ListSortDirection.Descending));
+                imageRefsViewSource.SortDescriptions.Add(new SortDescription(nameof(ImageRef.Date),
+                    ListSortDirection.Ascending));
+
+                imageRefsViewSource.IsLiveFilteringRequested = true;
+                imageRefsViewSource.IsLiveGroupingRequested = true;
+                imageRefsViewSource.IsLiveSortingRequested = true;
+
+                imageContainersViewSource.IsLiveFilteringRequested = true;
+                imageContainersViewSource.IsLiveGroupingRequested = true;
+                imageContainersViewSource.IsLiveSortingRequested = true;
+
+                albumImageContainersViewSource.Source = ViewModel.AlbumImageContainers;
+                albumImageContainersViewSource.SortDescriptions.Add(
+                    new SortDescription(nameof(ImageRef.ContainerYear), ListSortDirection.Descending));
+                albumImageContainersViewSource.SortDescriptions.Add(
+                    new SortDescription(nameof(ImageRef.ContainerDate), ListSortDirection.Descending));
 
                 this.BindCommand(ViewModel,
                         model => model.AddFolder,

@@ -14,6 +14,7 @@ namespace SonOfPicasso.Core.Model
             ContainerId = imageContainer.Id;
             ContainerType = imageContainer.ContainerType;
             ContainerDate = imageContainer.Date;
+            ContainerYear = imageContainer.Date.Year;
         }
         
         public string Id { get; }
@@ -23,5 +24,6 @@ namespace SonOfPicasso.Core.Model
         public string ContainerId { get; }
         public ImageContainerTypeEnum ContainerType { get; }
         public DateTime ContainerDate { get; }
+        public int ContainerYear { get; }
     }
 }
