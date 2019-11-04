@@ -13,11 +13,12 @@ using ReactiveUI;
 using Serilog;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
+using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.ViewModels.Abstract;
 
 namespace SonOfPicasso.UI.ViewModels
 {
-    public class ManageFolderRulesViewModel : ViewModelBase
+    public class ManageFolderRulesViewModel : ViewModelBase, IManageFolderRulesViewModel
     {
         private readonly IDriveInfoFactory _driveInfoFactory;
         private readonly IDirectoryInfoPermissionsService _directoryInfoPermissionsService;

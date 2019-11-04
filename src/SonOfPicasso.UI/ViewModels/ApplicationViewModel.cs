@@ -12,6 +12,7 @@ using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Model;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Data.Model;
+using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.ViewModels.Abstract;
 
 namespace SonOfPicasso.UI.ViewModels
@@ -167,13 +168,13 @@ namespace SonOfPicasso.UI.ViewModels
         
         public IObservable<IEnumerable<TrayImageViewModel>> UnselectTrayImage => _unselectTrayImageSubject;
 
-        public Interaction<Unit, string> AddFolderInteraction { get; set; } = new Interaction<Unit, string>();
+        public Interaction<Unit, string> AddFolderInteraction { get; } = new Interaction<Unit, string>();
 
-        public Interaction<Unit, AddAlbumViewModel> NewAlbumInteraction { get; set; } =
+        public Interaction<Unit, AddAlbumViewModel> NewAlbumInteraction { get; } =
             new Interaction<Unit, AddAlbumViewModel>();
 
-        public Interaction<Unit, ManageFolderRulesViewModel> FolderManagerInteraction { get; set; } =
-            new Interaction<Unit, ManageFolderRulesViewModel>();
+        public Interaction<Unit, IManageFolderRulesViewModel> FolderManagerInteraction { get; } =
+            new Interaction<Unit, IManageFolderRulesViewModel>();
 
         public IObservableCollection<ImageContainerViewModel> ImageContainers { get; } =
             new ObservableCollectionExtended<ImageContainerViewModel>();
@@ -194,7 +195,7 @@ namespace SonOfPicasso.UI.ViewModels
 
         public ReactiveCommand<Unit, ImageContainerViewModel> NewAlbum { get; }
 
-        public ReactiveCommand<(IEnumerable<ImageViewModel>, ImageContainerViewModel), ImageContainerViewModel> AddImagesToAlbum { get; set; }
+        public ReactiveCommand<(IEnumerable<ImageViewModel>, ImageContainerViewModel), ImageContainerViewModel> AddImagesToAlbum { get; }
     
         public ReactiveCommand<IEnumerable<ImageViewModel>, ImageContainerViewModel> NewAlbumWithImages { get; }
 
@@ -202,7 +203,7 @@ namespace SonOfPicasso.UI.ViewModels
 
         public ReactiveCommand<(IEnumerable<TrayImageViewModel>, bool), Unit> ClearTrayItems { get; }
 
-        public Interaction<Unit, bool> ConfirmClearTrayItemsInteraction { get; set; } = new Interaction<Unit, bool>();
+        public Interaction<Unit, bool> ConfirmClearTrayItemsInteraction { get; } = new Interaction<Unit, bool>();
 
         public ReactiveCommand<Unit, Unit> AddTrayItemsToAlbum { get; }
 
