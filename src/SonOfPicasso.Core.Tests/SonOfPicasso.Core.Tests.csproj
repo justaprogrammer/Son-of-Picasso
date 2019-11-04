@@ -11,6 +11,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="..\..\lib\flat-color-icons-8eccbb\svg\folder.svg" Link="Resources\FlatColorIcons\folder.svg" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="akavache" Version="6.9.1" />
     <PackageReference Include="Autofac" Version="4.9.4" />
     <PackageReference Include="Autofac.Extras.NSubstitute" Version="1.1.0" />

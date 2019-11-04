@@ -13,6 +13,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="..\..\lib\flat-color-icons-8eccbb\svg\folder.svg" Link="Resources\FlatColorIcons\folder.svg" />
+    <EmbeddedResource Include="..\..\lib\flat-color-icons-8eccbb\svg\opened_folder.svg" Link="Resources\FlatColorIcons\opened_folder.svg" />
+    <EmbeddedResource Include="..\..\lib\flat-color-icons-8eccbb\svg\checkmark.svg" Link="Resources\FlatColorIcons\checkmark.svg" />
+    <EmbeddedResource Include="..\..\lib\flat-color-icons-8eccbb\svg\cancel.svg" Link="Resources\FlatColorIcons\cancel.svg" />
+    <EmbeddedResource Include="..\..\lib\flat-color-icons-8eccbb\svg\synchronize.svg" Link="Resources\FlatColorIcons\synchronize.svg" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Ardalis.GuardClauses" Version="1.2.9" />
     <PackageReference Include="Autofac" Version="4.9.4" />
     <PackageReference Include="AutofacSerilogIntegration" Version="2.1.0" />

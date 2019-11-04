@@ -28,6 +28,8 @@ namespace SonOfPicasso.UI.Windows
     public partial class MainWindow : ReactiveWindow<ApplicationViewModel>
     {
         private readonly Func<AddAlbumViewModel> _addAlbumViewModelFactory;
+        private readonly Func<FolderManagementWindow> _folderManagementWindowFactory;
+        private readonly Func<ManageFolderRulesViewModel> _folderManagementViewModelFactory;
         private readonly Func<AddAlbumWindow> _addAlbumWindowFactory;
         private readonly IEnvironmentService _environmentService;
         private readonly IFileSystem _fileSystem;
@@ -38,8 +40,12 @@ namespace SonOfPicasso.UI.Windows
         private CollectionViewSource albumImageContainersViewSource;
 
         public MainWindow(ILogger logger, IEnvironmentService environmentService, IFileSystem fileSystem,
-            ISchedulerProvider schedulerProvider, Func<AddAlbumWindow> addAlbumWindowFactory,
-            Func<AddAlbumViewModel> addAlbumViewModelFactory)
+            ISchedulerProvider schedulerProvider, 
+            Func<AddAlbumWindow> addAlbumWindowFactory,
+            Func<AddAlbumViewModel> addAlbumViewModelFactory,
+            Func<FolderManagementWindow> folderManagementWindowFactory,
+            Func<ManageFolderRulesViewModel> folderManagementViewModelFactory
+            )
         {
             _logger = logger;
             _environmentService = environmentService;
@@ -47,6 +53,8 @@ namespace SonOfPicasso.UI.Windows
             _schedulerProvider = schedulerProvider;
             _addAlbumWindowFactory = addAlbumWindowFactory;
             _addAlbumViewModelFactory = addAlbumViewModelFactory;
+            _folderManagementWindowFactory = folderManagementWindowFactory;
+            _folderManagementViewModelFactory = folderManagementViewModelFactory;
 
             InitializeComponent();
 
@@ -215,9 +223,28 @@ namespace SonOfPicasso.UI.Windows
                     {
                         var messageBoxResult = MessageBox.Show("This will clear items in the tray. Are you sure?", "Confirmation", MessageBoxButton.YesNo);
                         context.SetOutput(messageBoxResult == MessageBoxResult.Yes);
+                        
                         return Observable.Return(Unit.Default);
                     }).SubscribeOn(_schedulerProvider.MainThreadScheduler);
                 }).DisposeWith(d);
+
+                ViewModel.FolderManagerInteraction.RegisterHandler(context =>
+                    {
+                        return Observable.Defer(() =>
+                        {
+                            var folderManagementWindow = _folderManagementWindowFactory();
+                            var folderManagementViewModel = _folderManagementViewModelFactory();
+
+                            folderManagementWindow.ViewModel = folderManagementViewModel;
+
+                            ManageFolderRulesViewModel result = null;
+                            if (folderManagementWindow.ShowDialog() == true) result = folderManagementWindow.ViewModel;
+
+                            context.SetOutput(result);
+                            return Observable.Return(Unit.Default);
+                        }).SubscribeOn(_schedulerProvider.MainThreadScheduler);
+                    })
+                    .DisposeWith(d);
             });
         }
 

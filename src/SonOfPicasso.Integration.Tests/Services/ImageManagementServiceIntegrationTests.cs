@@ -17,7 +17,7 @@ using SonOfPicasso.UI.Services;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace SonOfPicasso.Integration.Tests
+namespace SonOfPicasso.Integration.Tests.Services
 {
     public class ImageManagementServiceIntegrationTests : IntegrationTestsBase, IDisposable
     {
@@ -37,7 +37,7 @@ namespace SonOfPicasso.Integration.Tests
             containerBuilder.RegisterType<ImageGenerationService>().AsSelf();
             _container = containerBuilder.Build();
 
-            _imagesPath = FileSystem.Path.Combine(TestRoot, "Images");
+            _imagesPath = FileSystem.Path.Combine(TestPath, "Images");
             FileSystem.Directory.CreateDirectory(_imagesPath);
 
             _imageCount = Faker.Random.Int(50, 75);

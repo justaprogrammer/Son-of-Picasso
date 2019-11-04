@@ -11,6 +11,8 @@ using ReactiveUI;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Model;
 using SonOfPicasso.Core.Scheduling;
+using SonOfPicasso.Data.Model;
+using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.ViewModels.Abstract;
 
 namespace SonOfPicasso.UI.ViewModels
@@ -23,6 +25,7 @@ namespace SonOfPicasso.UI.ViewModels
         private readonly Func<ImageContainerViewModel> _imageContainerViewModelFactory;
         private readonly IImageManagementService _imageManagementService;
         private readonly IObservableCache<ImageViewModel, string> _imageViewModelCache;
+        private readonly IFolderRulesManagementService _folderRulesManagementService;
         private readonly Func<ImageViewModel> _imageViewModelFactory;
         private readonly ISchedulerProvider _schedulerProvider;
 
@@ -36,6 +39,7 @@ namespace SonOfPicasso.UI.ViewModels
 
         public ApplicationViewModel(ISchedulerProvider schedulerProvider,
             IImageManagementService imageManagementService,
+            IFolderRulesManagementService folderRulesManagementService,
             Func<ImageContainerViewModel> imageContainerViewModelFactory,
             Func<ImageViewModel> imageViewModelFactory,
             Func<TrayImageViewModel> trayImageViewModelFactory,
@@ -43,12 +47,14 @@ namespace SonOfPicasso.UI.ViewModels
         {
             _schedulerProvider = schedulerProvider;
             _imageManagementService = imageManagementService;
+            _folderRulesManagementService = folderRulesManagementService;
             _imageContainerViewModelFactory = imageContainerViewModelFactory;
             _imageViewModelFactory = imageViewModelFactory;
             _trayImageViewModelFactory = trayImageViewModelFactory;
 
             _selectedImagesSourceCache = new SourceCache<ImageViewModel, int>(model => model.ImageId);
 
+            FolderManager = ReactiveCommand.CreateFromObservable<Unit, Unit>(ExecuteFolderManager);
             AddFolder = ReactiveCommand.CreateFromObservable<Unit, Unit>(ExecuteAddFolder);
             NewAlbum = ReactiveCommand.CreateFromObservable<Unit, ImageContainerViewModel>(ExecuteNewAlbum);
             NewAlbumWithImages = ReactiveCommand.CreateFromObservable<IEnumerable<ImageViewModel>, ImageContainerViewModel>(ExecuteNewAlbumWithImages);
@@ -162,10 +168,13 @@ namespace SonOfPicasso.UI.ViewModels
         
         public IObservable<IEnumerable<TrayImageViewModel>> UnselectTrayImage => _unselectTrayImageSubject;
 
-        public Interaction<Unit, string> AddFolderInteraction { get; set; } = new Interaction<Unit, string>();
+        public Interaction<Unit, string> AddFolderInteraction { get; } = new Interaction<Unit, string>();
 
-        public Interaction<Unit, AddAlbumViewModel> NewAlbumInteraction { get; set; } =
+        public Interaction<Unit, AddAlbumViewModel> NewAlbumInteraction { get; } =
             new Interaction<Unit, AddAlbumViewModel>();
+
+        public Interaction<Unit, IManageFolderRulesViewModel> FolderManagerInteraction { get; } =
+            new Interaction<Unit, IManageFolderRulesViewModel>();
 
         public IObservableCollection<ImageContainerViewModel> ImageContainers { get; } =
             new ObservableCollectionExtended<ImageContainerViewModel>();
@@ -186,7 +195,7 @@ namespace SonOfPicasso.UI.ViewModels
 
         public ReactiveCommand<Unit, ImageContainerViewModel> NewAlbum { get; }
 
-        public ReactiveCommand<(IEnumerable<ImageViewModel>, ImageContainerViewModel), ImageContainerViewModel> AddImagesToAlbum { get; set; }
+        public ReactiveCommand<(IEnumerable<ImageViewModel>, ImageContainerViewModel), ImageContainerViewModel> AddImagesToAlbum { get; }
     
         public ReactiveCommand<IEnumerable<ImageViewModel>, ImageContainerViewModel> NewAlbumWithImages { get; }
 
@@ -194,9 +203,11 @@ namespace SonOfPicasso.UI.ViewModels
 
         public ReactiveCommand<(IEnumerable<TrayImageViewModel>, bool), Unit> ClearTrayItems { get; }
 
-        public Interaction<Unit, bool> ConfirmClearTrayItemsInteraction { get; set; } = new Interaction<Unit, bool>();
+        public Interaction<Unit, bool> ConfirmClearTrayItemsInteraction { get; } = new Interaction<Unit, bool>();
 
         public ReactiveCommand<Unit, Unit> AddTrayItemsToAlbum { get; }
+
+        public ReactiveCommand<Unit, Unit> FolderManager { get; }
 
         public void Dispose()
         {
@@ -349,6 +360,22 @@ namespace SonOfPicasso.UI.ViewModels
                 updater.AddOrUpdate(added);
                 updater.Remove(removed);
             });
+        }
+
+        private IObservable<Unit> ExecuteFolderManager(Unit unit)
+        {
+            return FolderManagerInteraction.Handle(Unit.Default)
+                .ObserveOn(_schedulerProvider.TaskPool)
+                .Select(folderManagementViewModel =>
+                {
+                    if (folderManagementViewModel != null)
+                    {
+                        return _folderRulesManagementService.ResetFolderManagementRules(folderManagementViewModel.Folders);
+                    }
+
+                    return Observable.Return(Unit.Default);
+                })
+                .SelectMany(observable => observable);
         }
     }
 }

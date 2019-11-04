@@ -10,6 +10,7 @@ namespace SonOfPicasso.Data.Interfaces
         IGenericRepository<Image> ImageRepository { get; }
         IGenericRepository<Folder> FolderRepository { get; }
         IGenericRepository<AlbumImage> AlbumImageRepository { get; }
+        IGenericRepository<FolderRule> FolderRuleRepository { get; }
         void Save();
     }
 }
