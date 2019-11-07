@@ -70,9 +70,9 @@ namespace SonOfPicasso.Core.Tests.Services
 
             TestSchedulerProvider.TaskPool.AdvanceBy(1);
 
-            WaitOne();
+            WaitOne(2000);
 
-            unitOfWork.ImageRepository.DidNotReceive().Insert(Arg.Any<Image>());
+            unitOfWork.ImageRepository.DidNotReceiveWithAnyArgs().Insert(default);
 
             directory.Images.Count.Should().Be(1);
 
