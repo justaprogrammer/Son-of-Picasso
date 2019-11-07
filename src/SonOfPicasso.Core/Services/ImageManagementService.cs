@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO.Abstractions;
 using System.Linq;
-using System.Reactive;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Model;
@@ -34,58 +32,62 @@ namespace SonOfPicasso.Core.Services
             _exifDataService = exifDataService;
         }
 
-        public IObservable<ImageContainer> ScanFolder(string path)
+        public IObservable<IImageContainer> ScanFolder(string path)
         {
-            return Observable.Create<Folder>(async observer =>
-                {
-                    using (var unitOfWork = _unitOfWorkFactory())
+            return Observable.Using(_unitOfWorkFactory, unitOfWork =>
+            {
+                var imagesAtPath = unitOfWork.ImageRepository
+                    .Get(image => image.Path.StartsWith(path))
+                    .Select(image => image.Path)
+                    .ToHashSet();
+
+                return _imageLocationService
+                    .GetImages(path)
+                    .Where(imagePath => !imagesAtPath.Contains(imagePath))
+                    .GroupBy(s => _fileSystem.Path.GetDirectoryName(s))
+                    .SelectMany(async groupedObservable =>
                     {
-                        await _imageLocationService.GetImages(path)
-                            .Where(imagePath => !unitOfWork.ImageRepository.Get(image => image.Path == imagePath).Any())
-                            .SelectMany(imagePath => _exifDataService.GetExifData(imagePath).Select(exifData =>
-                                (_fileSystem.Path.GetDirectoryName(imagePath),
-                                    new Image {Path = imagePath, ExifData = exifData})))
-                            .GroupBy(tuple => tuple.Item1, tuple => tuple.Item2)
-                            .SelectMany(observable => observable.ToArray().Select(images => (observable.Key, images)))
-                            .Select(tuple =>
-                            {
-                                var folder = unitOfWork.FolderRepository
-                                    .Get(d => d.Path == tuple.Key, includeProperties: "Images,Images.ExifData")
-                                    .FirstOrDefault();
-
-                                if (folder == null)
+                        var folderPath = groupedObservable.Key;
+                        var images = await groupedObservable
+                            .SelectMany(imagePath => _exifDataService
+                                .GetExifData(imagePath)
+                                .Select(exifData => new Image
                                 {
-                                    var minDate = tuple.images.Select((image, i) => image.ExifData.DateTime).Min();
+                                    Path = imagePath,
+                                    ExifData = exifData
+                                }))
+                            .ToArray();
 
-                                    folder = new Folder
-                                    {
-                                        Path = tuple.Key,
-                                        Images = new List<Image>(),
-                                        Date = minDate.Date
-                                    };
+                        var folder = unitOfWork.FolderRepository
+                            .Get(d => d.Path == folderPath, includeProperties: "Images,Images.ExifData")
+                            .FirstOrDefault();
 
-                                    unitOfWork.FolderRepository.Insert(folder);
-                                }
+                        if (folder != null)
+                        {
+                            folder.Images.AddRange(images);
+                        }
+                        else
+                        {
+                            var minDate = images.Select(image => image.ExifData.DateTime).Min();
 
-                                folder.Images ??= new List<Image>();
-                                folder.Images.AddRange(tuple.images);
+                            folder = new Folder
+                            {
+                                Path = folderPath,
+                                Images = images.ToList(),
+                                Date = minDate.Date
+                            };
 
-                                unitOfWork.Save();
+                            unitOfWork.FolderRepository.Insert(folder);
+                        }
 
-                                observer.OnNext(folder);
+                        unitOfWork.Save();
 
-                                return Unit.Default;
-                            }).LastOrDefaultAsync();
-                    }
-
-                    observer.OnCompleted();
-                    return Disposable.Empty;
-                })
-                .Select(folder => (ImageContainer) new FolderImageContainer(folder, _fileSystem))
-                .SubscribeOn(_schedulerProvider.TaskPool);
+                        return (IImageContainer) new FolderImageContainer(folder, _fileSystem);
+                    });
+            });
         }
 
-        public IObservable<ImageContainer> CreateAlbum(ICreateAlbum createAlbum)
+        public IObservable<IImageContainer> CreateAlbum(ICreateAlbum createAlbum)
         {
             return Observable.Defer(() =>
                 {
@@ -103,13 +105,13 @@ namespace SonOfPicasso.Core.Services
 
                     return Observable.Return(album);
                 })
-                .Select(album => (ImageContainer) new AlbumImageContainer(album))
+                .Select(album => (IImageContainer) new AlbumImageContainer(album))
                 .SubscribeOn(_schedulerProvider.TaskPool);
         }
 
-        public IObservable<ImageContainer> GetAllImageContainers()
+        public IObservable<IImageContainer> GetAllImageContainers()
         {
-            var selectFolders = Observable.Create<ImageContainer>(observer =>
+            var selectFolders = Observable.Create<IImageContainer>(observer =>
             {
                 var unitOfWork = _unitOfWorkFactory();
 
@@ -124,7 +126,7 @@ namespace SonOfPicasso.Core.Services
                 return unitOfWork;
             });
 
-            var selectAlbums = Observable.Create<ImageContainer>(observer =>
+            var selectAlbums = Observable.Create<IImageContainer>(observer =>
             {
                 var unitOfWork = _unitOfWorkFactory();
 
@@ -143,14 +145,43 @@ namespace SonOfPicasso.Core.Services
                 .SubscribeOn(_schedulerProvider.TaskPool);
         }
 
-        public IObservable<ImageContainer> GetAlbumImageContainer(int albumId)
+        public IObservable<IImageContainer> AddImagesToAlbum(int albumId, IEnumerable<int> imageIds)
         {
-            return Observable.Create<ImageContainer>(observer =>
+            return Observable.Create<IObservable<IImageContainer>>(observer =>
+                {
+                    var unitOfWork = _unitOfWorkFactory();
+
+                    var imageIdHash = unitOfWork.AlbumImageRepository.Get(image => image.AlbumId == albumId)
+                        .Select(image => image.ImageId)
+                        .ToHashSet();
+
+                    foreach (var imageId in imageIds)
+                        if (!imageIdHash.Contains(imageId))
+                            unitOfWork.AlbumImageRepository.Insert(new AlbumImage
+                            {
+                                ImageId = imageId,
+                                AlbumId = albumId
+                            });
+
+                    unitOfWork.Save();
+
+                    observer.OnNext(GetAlbumImageContainer(albumId));
+                    observer.OnCompleted();
+
+                    return unitOfWork;
+                })
+                .SelectMany(observable => observable);
+        }
+
+        public IObservable<IImageContainer> GetAlbumImageContainer(int albumId)
+        {
+            return Observable.Create<IImageContainer>(observer =>
             {
                 var unitOfWork = _unitOfWorkFactory();
 
                 var album = unitOfWork.AlbumRepository
-                    .Get(album => album.Id == albumId, includeProperties: "AlbumImages,AlbumImages.Image,AlbumImages.Image.ExifData")
+                    .Get(album => album.Id == albumId,
+                        includeProperties: "AlbumImages,AlbumImages.Image,AlbumImages.Image.ExifData")
                     .First();
 
                 observer.OnNext(new AlbumImageContainer(album));
@@ -158,38 +189,6 @@ namespace SonOfPicasso.Core.Services
 
                 return unitOfWork;
             }).SubscribeOn(_schedulerProvider.TaskPool);
-        }
-
-        public IObservable<ImageContainer> AddImagesToAlbum(int albumId, IEnumerable<int> imageIds)
-        {
-            return Observable.Create<IObservable<ImageContainer>>(observer =>
-            {
-                var unitOfWork = _unitOfWorkFactory();
-
-                var imageIdHash = unitOfWork.AlbumImageRepository.Get(image => image.AlbumId == albumId)
-                    .Select(image => image.ImageId)
-                    .ToHashSet();
-
-                foreach (var imageId in imageIds)
-                {
-                    if (!imageIdHash.Contains(imageId))
-                    {
-                        unitOfWork.AlbumImageRepository.Insert(new AlbumImage
-                        {
-                            ImageId = imageId,
-                            AlbumId = albumId
-                        });
-                    }
-                }
-
-                unitOfWork.Save();
-                
-                observer.OnNext(GetAlbumImageContainer(albumId));
-                observer.OnCompleted();
-
-                return unitOfWork;
-            })
-            .SelectMany(observable => observable);
         }
     }
 }

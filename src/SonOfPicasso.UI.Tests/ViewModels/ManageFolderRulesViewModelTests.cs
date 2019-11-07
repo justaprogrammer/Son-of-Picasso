@@ -97,14 +97,14 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(1);
 
             manageFolderRulesViewModel.Folders[0].Name.Should().Be(String.Empty);
-            manageFolderRulesViewModel.Folders[0].FullName.Should().Be(rootPath);
+            manageFolderRulesViewModel.Folders[0].Path.Should().Be(rootPath);
 
             manageFolderRulesViewModel.Folders[0].Children[0].Name.Should().Be(paths[0].Name);
-            manageFolderRulesViewModel.Folders[0].Children[0].FullName.Should().Be(paths[0].FullName);
+            manageFolderRulesViewModel.Folders[0].Children[0].Path.Should().Be(paths[0].FullName);
             manageFolderRulesViewModel.Folders[0].Children[0].Children.Count.Should().Be(0);
 
             manageFolderRulesViewModel.Folders[0].Children[1].Name.Should().Be(paths[1].Name);
-            manageFolderRulesViewModel.Folders[0].Children[1].FullName.Should().Be(paths[1].FullName);
+            manageFolderRulesViewModel.Folders[0].Children[1].Path.Should().Be(paths[1].FullName);
             manageFolderRulesViewModel.Folders[0].Children[1].Children.Count.Should().Be(0);
         }
 

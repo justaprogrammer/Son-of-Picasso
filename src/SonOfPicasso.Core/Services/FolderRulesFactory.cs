@@ -22,17 +22,17 @@ namespace SonOfPicasso.Core.Services
         private static IEnumerable<FolderRule> ComputeInternal(IFolderRuleInput folderRuleViewModel,
             FolderRuleActionEnum? state)
         {
-            if (folderRuleViewModel.ManageFolderState != state)
+            if (folderRuleViewModel.FolderRuleAction != state)
             {
-                if (state.HasValue || folderRuleViewModel.ManageFolderState != FolderRuleActionEnum.Remove)
+                if (state.HasValue || folderRuleViewModel.FolderRuleAction != FolderRuleActionEnum.Remove)
                 {
                     yield return new FolderRule
                     {
-                        Path = folderRuleViewModel.FullName,
-                        Action = folderRuleViewModel.ManageFolderState
+                        Path = folderRuleViewModel.Path,
+                        Action = folderRuleViewModel.FolderRuleAction
                     };
 
-                    state = folderRuleViewModel.ManageFolderState;
+                    state = folderRuleViewModel.FolderRuleAction;
                 }
             }
 

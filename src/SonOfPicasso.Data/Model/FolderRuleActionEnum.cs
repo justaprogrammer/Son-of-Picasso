@@ -2,8 +2,8 @@
 {
     public enum FolderRuleActionEnum
     {
-        Remove,
         Once,
+        Remove,
         Always
     }
 }

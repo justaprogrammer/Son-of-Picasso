@@ -19,7 +19,7 @@ namespace SonOfPicasso.UI.ViewModels
 {
     public class ApplicationViewModel : ViewModelBase, IDisposable
     {
-        private readonly SourceCache<ImageContainer, string> _imageContainerCache;
+        private readonly SourceCache<IImageContainer, string> _imageContainerCache;
         private readonly IObservableCache<ImageContainerViewModel, string> _imageContainerViewModelCache;
 
         private readonly Func<ImageContainerViewModel> _imageContainerViewModelFactory;
@@ -72,7 +72,7 @@ namespace SonOfPicasso.UI.ViewModels
             AddTrayItemsToAlbum =
                 ReactiveCommand.CreateFromObservable<Unit, Unit>(ExecuteAddTrayItemsToAlbum, hasItemsInTray);
 
-            _imageContainerCache = new SourceCache<ImageContainer, string>(imageContainer => imageContainer.Id);
+            _imageContainerCache = new SourceCache<IImageContainer, string>(imageContainer => imageContainer.Id);
 
             _imageContainerViewModelCache = _imageContainerCache
                 .Connect()
@@ -234,7 +234,7 @@ namespace SonOfPicasso.UI.ViewModels
             return imageViewModel;
         }
 
-        private ImageContainerViewModel CreateImageContainerViewModel(ImageContainer imageContainer)
+        private ImageContainerViewModel CreateImageContainerViewModel(IImageContainer imageContainer)
         {
             var imageContainerViewModel = _imageContainerViewModelFactory();
             imageContainerViewModel.Initialize(imageContainer, this);

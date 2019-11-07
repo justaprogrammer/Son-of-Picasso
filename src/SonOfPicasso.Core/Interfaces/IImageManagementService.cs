@@ -7,9 +7,9 @@ namespace SonOfPicasso.Core.Interfaces
 {
     public interface IImageManagementService
     {
-        IObservable<ImageContainer> ScanFolder(string path);
-        IObservable<ImageContainer> CreateAlbum(ICreateAlbum createAlbum);
-        IObservable<ImageContainer> GetAllImageContainers();
-        IObservable<ImageContainer> AddImagesToAlbum(int albumId, IEnumerable<int> imageIds);
+        IObservable<IImageContainer> ScanFolder(string path);
+        IObservable<IImageContainer> CreateAlbum(ICreateAlbum createAlbum);
+        IObservable<IImageContainer> GetAllImageContainers();
+        IObservable<IImageContainer> AddImagesToAlbum(int albumId, IEnumerable<int> imageIds);
     }
 }

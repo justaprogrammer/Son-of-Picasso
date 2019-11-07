@@ -52,26 +52,26 @@ namespace SonOfPicasso.UI.ViewModels
                     })
                     .DisposeWith(disposable);
 
-                this.WhenAny(model => model.ManageFolderState, change => change.Value)
+                this.WhenAny(model => model.FolderRuleAction, change => change.Value)
                     .ObserveOn(schedulerProvider.MainThreadScheduler)
                     .Subscribe(newState =>
                     {
                         foreach (var viewModel in Children)
                         {
-                            viewModel.ManageFolderState = newState;
+                            viewModel.FolderRuleAction = newState;
                         }
                     })
                     .DisposeWith(disposable);
             });
         }
 
-        public FolderRuleActionEnum ManageFolderState
+        public FolderRuleActionEnum FolderRuleAction
         {
             get => _manageFolderState;
             set => this.RaiseAndSetIfChanged(ref _manageFolderState, value);
         }
 
-        public string FullName => _directoryInfo.FullName;
+        public string Path => _directoryInfo.FullName;
 
         public string Name => _directoryInfo.Name;
 

@@ -11,7 +11,7 @@ namespace SonOfPicasso.UI.ViewModels
     {
         private readonly ISchedulerProvider _schedulerProvider;
 
-        private ImageContainer _imageContainer;
+        private IImageContainer _imageContainer;
 
         public ImageContainerViewModel(
             ViewModelActivator activator, 
@@ -35,7 +35,7 @@ namespace SonOfPicasso.UI.ViewModels
 
         public ApplicationViewModel ApplicationViewModel { get; private set; }
 
-        public void Initialize(ImageContainer imageContainer, ApplicationViewModel applicationViewModel)
+        public void Initialize(IImageContainer imageContainer, ApplicationViewModel applicationViewModel)
         {
             _imageContainer = imageContainer ?? throw new ArgumentNullException(nameof(imageContainer));
             ApplicationViewModel =

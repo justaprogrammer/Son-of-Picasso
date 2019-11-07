@@ -19,7 +19,7 @@ using Xunit.Abstractions;
 
 namespace SonOfPicasso.Core.Tests.Services
 {
-    public class ImageManagementServiceTests : UnitTestsBase, IDisposable
+    public class ImageManagementServiceTests : UnitTestsBase
     {
         public ImageManagementServiceTests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
