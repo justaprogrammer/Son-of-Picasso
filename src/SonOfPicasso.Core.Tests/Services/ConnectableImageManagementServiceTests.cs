@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using DynamicData;
 using DynamicData.Binding;
@@ -8,6 +10,7 @@ using NSubstitute;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Model;
 using SonOfPicasso.Core.Services;
+using SonOfPicasso.Data.Model;
 using SonOfPicasso.Testing.Common;
 using SonOfPicasso.Testing.Common.Extensions;
 using Xunit;
@@ -92,6 +95,10 @@ namespace SonOfPicasso.Core.Tests.Services
         {
             var directoryPathWindows = Faker.System.DirectoryPathWindows();
          
+            var folderRulesManagementService = AutoSubstitute.Resolve<IFolderRulesManagementService>();
+            folderRulesManagementService.AddFolderManagementRule(default)
+                .ReturnsForAnyArgs(Observable.Return(Unit.Default));
+
             var imageManagementService = AutoSubstitute.Resolve<IImageManagementService>();
 
             var imageContainer = Substitute.For<IImageContainer>();
@@ -169,6 +176,23 @@ namespace SonOfPicasso.Core.Tests.Services
             WaitOne();
 
             imageRefs.Count.Should().Be(1);
+
+            folderRulesManagementService
+                .ReceivedWithAnyArgs(1)
+                .AddFolderManagementRule(default);
+
+            var folderRule = folderRulesManagementService
+                .ReceivedCalls()
+                .Where(call =>call.GetMethodInfo().Name.Equals(nameof(IFolderRulesManagementService.AddFolderManagementRule)))
+                .Select(call => call.GetArguments().First())
+                .Cast<FolderRule>()
+                .First();
+
+            folderRule.Should().BeEquivalentTo(new FolderRule
+            {
+                Path = directoryPathWindows,
+                Action = FolderRuleActionEnum.Once
+            });
         }
 
         [Fact]

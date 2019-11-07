@@ -71,7 +71,7 @@ namespace SonOfPicasso.Core.Tests.Services
             TestSchedulerProvider.TaskPool.AdvanceBy(1);
 
             WaitOne(2000);
-
+            
             unitOfWork.ImageRepository.DidNotReceiveWithAnyArgs().Insert(default);
 
             directory.Images.Count.Should().Be(1);
@@ -85,9 +85,6 @@ namespace SonOfPicasso.Core.Tests.Services
 
             unitOfWork.Received(1)
                 .Save();
-
-            unitOfWork.Received(1)
-                .Dispose();
         }
     }
 }

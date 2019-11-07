@@ -23,6 +23,56 @@ namespace SonOfPicasso.Core.Tests.Services
             {
             }
 
+            private FolderRule[] ShouldModifyFolderRules(FolderRule[] existingRules, FolderRule addRule)
+            {
+                var unitOfWork1 = Substitute.For<IUnitOfWork>();
+                unitOfWork1.FolderRuleRepository.Get()
+                    .Returns(existingRules);
+
+                UnitOfWorkQueue.Enqueue(unitOfWork1);
+
+                var unitOfWork2 = Substitute.For<IUnitOfWork>();
+                unitOfWork2.FolderRuleRepository.Get()
+                    .Returns(existingRules);
+
+                UnitOfWorkQueue.Enqueue(unitOfWork2);
+
+                var folderRulesManagementService = AutoSubstitute.Resolve<FolderRulesManagementService>();
+
+                folderRulesManagementService.AddFolderManagementRule(addRule)
+                    .Subscribe(
+                        list => { },
+                        () =>
+                        {
+                            AutoResetEvent.Set();
+                        });
+
+                TestSchedulerProvider.TaskPool.AdvanceBy(1);
+                TestSchedulerProvider.TaskPool.AdvanceBy(1);
+                TestSchedulerProvider.TaskPool.AdvanceBy(1);
+
+                AutoResetEvent.WaitOne();
+
+                unitOfWork1.DidNotReceive().Save();
+
+                using (new AssertionScope())
+                {
+                    unitOfWork2.FolderRuleRepository.ReceivedWithAnyArgs(existingRules.Length).Delete(default);
+                    foreach (var existingRule in existingRules)
+                        unitOfWork2.FolderRuleRepository.Received(1).Delete(existingRule);
+                }
+
+                var insertedFolderRules = unitOfWork2.FolderRuleRepository.ReceivedCalls()
+                    .Where(call => call.GetMethodInfo().Name.Equals(nameof(IGenericRepository<FolderRule>.Insert)))
+                    .Select(call => call.GetArguments().First())
+                    .Cast<FolderRule>()
+                    .ToArray();
+
+                unitOfWork2.Received(1).Save();
+
+                return insertedFolderRules;
+            }
+
             [Fact]
             public void ShouldNotAddChildWithSameAction()
             {
@@ -113,54 +163,51 @@ namespace SonOfPicasso.Core.Tests.Services
                 newFolderRules.Should().BeEquivalentTo(expected);
             }
 
-            private FolderRule[] ShouldModifyFolderRules(FolderRule[] existingRules, FolderRule addRule)
+            [Fact]
+            public void ShouldAddNewAction()
             {
-                var unitOfWork1 = Substitute.For<IUnitOfWork>();
-                unitOfWork1.FolderRuleRepository.Get()
-                    .Returns(existingRules);
-
-                UnitOfWorkQueue.Enqueue(unitOfWork1);
-
-                var unitOfWork2 = Substitute.For<IUnitOfWork>();
-                unitOfWork2.FolderRuleRepository.Get()
-                    .Returns(existingRules);
-
-                UnitOfWorkQueue.Enqueue(unitOfWork2);
-
-                var folderRulesManagementService = AutoSubstitute.Resolve<FolderRulesManagementService>();
-
-                folderRulesManagementService.AddFolderManagementRule(addRule)
-                    .Subscribe(
-                        list => { },
-                        () =>
-                        {
-                            AutoResetEvent.Set();
-                        });
-
-                TestSchedulerProvider.TaskPool.AdvanceBy(1);
-                TestSchedulerProvider.TaskPool.AdvanceBy(1);
-                TestSchedulerProvider.TaskPool.AdvanceBy(1);
-
-                AutoResetEvent.WaitOne();
-
-                unitOfWork1.DidNotReceive().Save();
-
-                using (new AssertionScope())
+                var existingRules = new[]
                 {
-                    unitOfWork2.FolderRuleRepository.ReceivedWithAnyArgs(existingRules.Length).Delete(default);
-                    foreach (var existingRule in existingRules)
-                        unitOfWork2.FolderRuleRepository.Received(1).Delete(existingRule);
-                }
+                    new FolderRule
+                    {
+                        Path = "c:\\Stanley\\Pictures",
+                        Action = FolderRuleActionEnum.Always
+                    },
+                    new FolderRule
+                    {
+                        Path = "D:\\Other\\Path",
+                        Action = FolderRuleActionEnum.Once
+                    }
+                };
 
-                var insertedFolderRules = unitOfWork2.FolderRuleRepository.ReceivedCalls()
-                    .Where(call => call.GetMethodInfo().Name.Equals(nameof(IGenericRepository<FolderRule>.Insert)))
-                    .Select(call => call.GetArguments().First())
-                    .Cast<FolderRule>()
-                    .ToArray();
+                var addRule = new FolderRule
+                {
+                    Path = "c:\\Stanley\\Screenshots",
+                    Action = FolderRuleActionEnum.Once
+                };
 
-                unitOfWork2.Received(1).Save();
+                var expected = new[]
+                {
+                    new FolderRule
+                    {
+                        Path = "c:\\Stanley\\Pictures",
+                        Action = FolderRuleActionEnum.Always
+                    },
+                    new FolderRule
+                    {
+                        Path = "c:\\Stanley\\Screenshots",
+                        Action = FolderRuleActionEnum.Once
+                    },
+                    new FolderRule
+                    {
+                        Path = "D:\\Other\\Path",
+                        Action = FolderRuleActionEnum.Once
+                    }
+                };
 
-                return insertedFolderRules;
+                var newFolderRules = ShouldModifyFolderRules(existingRules, addRule);
+
+                newFolderRules.Should().BeEquivalentTo(expected);
             }
         }
 
