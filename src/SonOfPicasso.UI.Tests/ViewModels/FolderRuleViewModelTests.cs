@@ -117,6 +117,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             MockFileSystem.AddDirectory(testPath);
 
             var paths = Faker.Random.WordsArray(Faker.Random.Int(5, 10))
+                .Distinct()
                 .Select(word => MockFileSystem.Path.Combine(testPath, word))
                 .ToArray();
 
@@ -133,8 +134,8 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             TestSchedulerProvider.TaskPool.AdvanceBy(1);
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(1);
 
-            folderRuleViewModel.Children.Count.Should().Be(paths.Length);
-            folderRuleViewModel.Children.Distinct().Count().Should().Be(paths.Length);
+            folderRuleViewModel.Children.Should().HaveCount(paths.Length);
+            folderRuleViewModel.Children.Distinct().Should().HaveCount(paths.Length);
 
             foreach (var childFolderRuleViewModel in folderRuleViewModel.Children)
             {
