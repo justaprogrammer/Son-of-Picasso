@@ -37,19 +37,27 @@ namespace SonOfPicasso.Core.Services
 
         public IObservable<IImageContainer> ScanFolder(string path)
         {
-            return Observable.Using(_unitOfWorkFactory, unitOfWork =>
+            return Observable.Defer(() =>
                 {
-                    var imagesAtPath = unitOfWork.ImageRepository
+                    using var unitOfWork = _unitOfWorkFactory();
+
+                    var imagesAtPathHashSet = unitOfWork.ImageRepository
                         .Get(image => image.Path.StartsWith(path))
                         .Select(image => image.Path)
                         .ToHashSet();
 
+                    return Observable.Return(imagesAtPathHashSet);
+                })
+                .SelectMany(imagesAtPath =>
+                {
                     return _imageLocationService
                         .GetImages(path)
                         .Where(imagePath => !imagesAtPath.Contains(imagePath))
                         .GroupBy(s => _fileSystem.Path.GetDirectoryName(s))
                         .SelectMany(async groupedObservable =>
                         {
+                            using var unitOfWork = _unitOfWorkFactory();
+
                             var folderPath = groupedObservable.Key;
                             var images = await groupedObservable
                                 .SelectMany(imagePath => _exifDataService
@@ -85,10 +93,10 @@ namespace SonOfPicasso.Core.Services
 
                             unitOfWork.Save();
 
-                            return (IImageContainer) new FolderImageContainer(folder, _fileSystem);
-                        });
-                })
-                .SubscribeOn(_schedulerProvider.TaskPool);
+                            return folder.Id;
+                        })
+                        .SelectMany(GetFolderImageContainer);
+                }).SubscribeOn(_schedulerProvider.TaskPool);
         }
 
         public IObservable<IImageContainer> CreateAlbum(ICreateAlbum createAlbum)

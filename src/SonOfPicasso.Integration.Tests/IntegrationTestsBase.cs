@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.Common;
 using System.IO.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using SonOfPicasso.Data.Repository;
@@ -13,8 +14,10 @@ namespace SonOfPicasso.Integration.Tests
         protected readonly DbContextOptions<DataContext> DbContextOptions;
         protected readonly FileSystem FileSystem;
         protected readonly string TestPath;
+        protected readonly DbConnection Connection;
+        private readonly DataContext _dataContext;
 
-        public IntegrationTestsBase(ITestOutputHelper testOutputHelper)
+        protected IntegrationTestsBase(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {
             FileSystem = new FileSystem();
@@ -30,13 +33,16 @@ namespace SonOfPicasso.Integration.Tests
                     .UseSqlite($"Data Source={DatabasePath}")
                     .Options;
 
-            using var dataContext = new DataContext(DbContextOptions);
-            dataContext.Database.Migrate();
+            _dataContext = new DataContext(DbContextOptions);
+            _dataContext.Database.Migrate();
+            _dataContext.Database.OpenConnection();
+            Connection = _dataContext.Database.GetDbConnection(); 
         }
 
         public override void Dispose()
         {
             base.Dispose();
+            _dataContext.Dispose();
 
             if (FileSystem.Directory.Exists(TestPath))
                 try

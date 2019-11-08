@@ -2,14 +2,19 @@
 using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using Autofac;
 using AutofacSerilogIntegration;
+using Dapper;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using NSubstitute;
 using SonOfPicasso.Core.Interfaces;
+using SonOfPicasso.Core.Model;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Core.Services;
 using SonOfPicasso.Data.Interfaces;
+using SonOfPicasso.Data.Model;
 using SonOfPicasso.Data.Repository;
 using SonOfPicasso.Data.Services;
 using SonOfPicasso.Tools.Services;
@@ -40,8 +45,11 @@ namespace SonOfPicasso.Integration.Tests.Services
             _imagesPath = FileSystem.Path.Combine(TestPath, "Images");
             FileSystem.Directory.CreateDirectory(_imagesPath);
 
-            _imageCount = Faker.Random.Int(50, 75);
-            _imageCount = 1;
+        }
+
+        private void GenerateImages(int count)
+        {
+            _imageCount = count;
 
             var imageGenerationService = _container.Resolve<ImageGenerationService>();
             var groupedObservable = imageGenerationService.GenerateImages(_imageCount, _imagesPath)
@@ -60,36 +68,99 @@ namespace SonOfPicasso.Integration.Tests.Services
 
         private readonly IContainer _container;
         private readonly string _imagesPath;
-        private readonly int _directoryCount;
-        private readonly int _imageCount;
+        private int _directoryCount;
+        private int _imageCount;
 
         [Fact]
-        public void ShouldScanAndGetAllImageContainers()
+        public async Task ShouldScan()
         {
+            GenerateImages(50);
+
             var imageManagementService = _container.Resolve<ImageManagementService>();
-            var imageContainers = imageManagementService.ScanFolder(_imagesPath)
-                .ToArray()
-                .Wait();
+            var imageContainers = await imageManagementService
+                .ScanFolder(_imagesPath)
+                .ToArray();
 
             imageContainers.Length.Should().Be(_directoryCount);
 
-            var unitOfWorkFactory = _container.Resolve<Func<UnitOfWork>>();
-            using (var unitOfWork = unitOfWorkFactory())
-            {
-                var i = unitOfWork.ImageRepository.Get().ToArray();
-                i.Length.Should().Be(_imageCount);
+            var images = (await Connection.QueryAsync<Image>("SELECT * FROM Images"))
+                .ToArray();
 
-                var d = unitOfWork.FolderRepository.Get().ToArray();
-                d.Length.Should().Be(_directoryCount);
-            }
+            images.Length.Should().Be(_imageCount);
 
-            var containers = imageManagementService.GetAllImageContainers()
-                .ToArray()
-                .Wait();
+            var folders = (await Connection.QueryAsync<Folder>("SELECT * FROM Folders"))
+                .ToArray();
+
+            folders.Length.Should().Be(_directoryCount);
+
+            var containers = await imageManagementService
+                .GetAllImageContainers()
+                .ToArray();
 
             containers.Length
                 .Should()
                 .Be(_directoryCount);
+        }
+
+
+        [Fact]
+        public async Task ShouldCreateAlbum()
+        {
+            var imageCount = 10;
+            var albumImageCount = 5;
+            
+            GenerateImages(imageCount);
+
+            var imageManagementService = _container.Resolve<ImageManagementService>();
+            var imageContainers = await imageManagementService
+                .ScanFolder(_imagesPath)
+                .ToArray();
+
+            var imageRefs = Faker.PickRandom(imageContainers.SelectMany(container => container.ImageRefs.Select(imageRef => imageRef)), albumImageCount)
+                .ToArray();
+
+            var imageIds = imageRefs.Select(imageRef => imageRef.ImageId)
+                .ToArray();
+
+            ICreateAlbum createAlbum = new TestCreateAlbum
+            {
+                AlbumName = Faker.Random.Word(),
+                AlbumDate = imageRefs
+                    .Select(imageRef => imageRef.ContainerDate)
+                    .Min()
+                    .Date
+            };
+
+            var imageContainer = await imageManagementService.CreateAlbum(createAlbum);
+            imageContainer.Name.Should().Be(createAlbum.AlbumName);
+            imageContainer.Date.Should().Be(createAlbum.AlbumDate);
+            imageContainer.ContainerType.Should().Be(ImageContainerTypeEnum.Album);
+            imageContainer.ImageRefs.Should().BeEmpty();
+            imageContainer.Year.Should().Be(createAlbum.AlbumDate.Year);
+
+            imageContainer = await imageManagementService.AddImagesToAlbum(imageContainer.ContainerTypeId, imageIds);
+            imageContainer.Name.Should().Be(createAlbum.AlbumName);
+            imageContainer.Date.Should().Be(createAlbum.AlbumDate);
+            imageContainer.ContainerType.Should().Be(ImageContainerTypeEnum.Album);
+            imageContainer.ImageRefs.Should().HaveCount(albumImageCount);
+            imageContainer.Year.Should().Be(createAlbum.AlbumDate.Year);
+
+            var albums = (await Connection.QueryAsync<Album>("SELECT * FROM Albums"))
+                .ToArray();
+
+            albums.Should().HaveCount(1);
+
+            var albumImages = (await Connection.QueryAsync<AlbumImage>("SELECT * FROM AlbumImages"))
+                .ToArray();
+
+            albumImages.Should().HaveCount(5);
+        }
+
+        class TestCreateAlbum : ICreateAlbum
+        {
+            public string AlbumName { get; set; }
+
+            public DateTime AlbumDate { get; set; }
         }
     }
 }
