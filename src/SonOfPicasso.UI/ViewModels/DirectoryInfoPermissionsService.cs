@@ -20,7 +20,7 @@ namespace SonOfPicasso.UI.ViewModels
                 rules = di.GetAccessControl().GetAccessRules(true, true, typeof(SecurityIdentifier));
                 identity = WindowsIdentity.GetCurrent();
             }
-            catch (UnauthorizedAccessException uae)
+            catch (UnauthorizedAccessException)
             {
                 return false;
             }

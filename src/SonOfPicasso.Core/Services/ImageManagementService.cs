@@ -5,7 +5,6 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using Serilog;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Model;
 using SonOfPicasso.Core.Scheduling;
@@ -19,18 +18,15 @@ namespace SonOfPicasso.Core.Services
         private readonly IExifDataService _exifDataService;
         private readonly IFileSystem _fileSystem;
         private readonly IImageLocationService _imageLocationService;
-        private readonly ILogger _logger;
         private readonly ISchedulerProvider _schedulerProvider;
         private readonly Func<IUnitOfWork> _unitOfWorkFactory;
 
-        public ImageManagementService(ILogger logger,
-            IFileSystem fileSystem,
+        public ImageManagementService(IFileSystem fileSystem,
             IImageLocationService imageLocationService,
             Func<IUnitOfWork> unitOfWorkFactory,
             ISchedulerProvider schedulerProvider,
             IExifDataService exifDataService)
         {
-            _logger = logger;
             _fileSystem = fileSystem;
             _imageLocationService = imageLocationService;
             _unitOfWorkFactory = unitOfWorkFactory;
