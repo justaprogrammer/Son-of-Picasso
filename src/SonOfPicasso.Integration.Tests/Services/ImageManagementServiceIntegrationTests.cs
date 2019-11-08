@@ -81,17 +81,17 @@ namespace SonOfPicasso.Integration.Tests.Services
                 .ScanFolder(_imagesPath)
                 .ToArray();
 
-            imageContainers.Length.Should().Be(_directoryCount);
+            imageContainers.Should().HaveCount(_directoryCount);
 
             var images = (await Connection.QueryAsync<Image>("SELECT * FROM Images"))
                 .ToArray();
 
-            images.Length.Should().Be(_imageCount);
+            images.Should().HaveCount(_imageCount);
 
             var folders = (await Connection.QueryAsync<Folder>("SELECT * FROM Folders"))
                 .ToArray();
 
-            folders.Length.Should().Be(_directoryCount);
+            folders.Should().HaveCount(_directoryCount);
 
             var containers = await imageManagementService
                 .GetAllImageContainers()

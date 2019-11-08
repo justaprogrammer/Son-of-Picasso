@@ -95,12 +95,12 @@ namespace SonOfPicasso.Core.Tests.Services
 
             WaitOne();
 
-            imageContainers.Count.Should().Be(1);
+            imageContainers.Should().HaveCount(1);
 
             TestSchedulerProvider.TaskPool.AdvanceBy(1);
             WaitOne();
 
-            imageRefs.Count.Should().Be(1);
+            imageRefs.Should().HaveCount(1);
 
             folderWatcherService.Received(1)
                 .WatchFolders(currentFolderRules);
@@ -174,8 +174,8 @@ namespace SonOfPicasso.Core.Tests.Services
 
             WaitOne();
      
-            imageContainers.Count.Should().Be(0);
-            imageRefs.Count.Should().Be(0);
+            imageContainers.Should().HaveCount(0);
+            imageRefs.Should().HaveCount(0);
             
             connectableImageManagementService
                 .ScanFolder(directoryPathWindows)
@@ -186,12 +186,12 @@ namespace SonOfPicasso.Core.Tests.Services
     
             WaitOne();
      
-            imageContainers.Count.Should().Be(1);
+            imageContainers.Should().HaveCount(1);
 
             TestSchedulerProvider.TaskPool.AdvanceBy(1);
             WaitOne();
 
-            imageRefs.Count.Should().Be(1);
+            imageRefs.Should().HaveCount(1);
 
             folderRulesManagementService
                 .ReceivedWithAnyArgs(1)
@@ -282,12 +282,12 @@ namespace SonOfPicasso.Core.Tests.Services
 
             WaitOne();
 
-            imageContainers.Count.Should().Be(1);
+            imageContainers.Should().HaveCount(1);
 
             TestSchedulerProvider.TaskPool.AdvanceBy(1);
             WaitOne();
 
-            imageRefs.Count.Should().Be(1);
+            imageRefs.Should().HaveCount(1);
 
             folderWatcherService.Received(1)
                 .WatchFolders(currentFolderRules);

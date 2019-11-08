@@ -79,14 +79,14 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             TestSchedulerProvider.TaskPool.AdvanceBy(1);
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(1);
 
-            manageFolderRulesViewModel.Folders.Count.Should().Be(1);
+            manageFolderRulesViewModel.Folders.Should().HaveCount(1);
 
             manageFolderRulesViewModel.Folders[0].Activator.Activate();
 
             TestSchedulerProvider.TaskPool.AdvanceBy(1);
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(1);
 
-            manageFolderRulesViewModel.Folders[0].Children.Count.Should().Be(2);
+            manageFolderRulesViewModel.Folders[0].Children.Should().HaveCount(2);
 
             manageFolderRulesViewModel.Folders[0].Children[0].Activator.Activate();
             TestSchedulerProvider.TaskPool.AdvanceBy(1);
@@ -101,11 +101,11 @@ namespace SonOfPicasso.UI.Tests.ViewModels
 
             manageFolderRulesViewModel.Folders[0].Children[0].Name.Should().Be(paths[0].Name);
             manageFolderRulesViewModel.Folders[0].Children[0].Path.Should().Be(paths[0].FullName);
-            manageFolderRulesViewModel.Folders[0].Children[0].Children.Count.Should().Be(0);
+            manageFolderRulesViewModel.Folders[0].Children[0].Children.Should().HaveCount(0);
 
             manageFolderRulesViewModel.Folders[0].Children[1].Name.Should().Be(paths[1].Name);
             manageFolderRulesViewModel.Folders[0].Children[1].Path.Should().Be(paths[1].FullName);
-            manageFolderRulesViewModel.Folders[0].Children[1].Children.Count.Should().Be(0);
+            manageFolderRulesViewModel.Folders[0].Children[1].Children.Should().HaveCount(0);
         }
 
         [Fact]

@@ -87,9 +87,9 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             TestSchedulerProvider.TaskPool.AdvanceBy(1);
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(1);
 
-            folderRuleViewModel.Children.Count.Should().Be(paths.Length);
-            folderRuleViewModel.Children.Distinct().Count().Should().Be(paths.Length);
-            ((IFolderRuleInput) folderRuleViewModel).Children.Count.Should().Be(paths.Length);
+            folderRuleViewModel.Children.Should().HaveCount(paths.Length);
+            folderRuleViewModel.Children.Distinct().Should().HaveCount(paths.Length);
+            ((IFolderRuleInput) folderRuleViewModel).Children.Should().HaveCount(paths.Length);
 
             foreach (var childFolderRuleViewModel in folderRuleViewModel.Children)
             {
