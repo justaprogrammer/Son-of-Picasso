@@ -102,10 +102,10 @@ namespace SonOfPicasso.Core.Services
             return folderRuleInputs;
         }
 
-        private FolderRuleInput CreateFolderRuleInput(string fullName, Dictionary<string, string[]> dictionary,
-            Dictionary<string, FolderRuleActionEnum> dic3)
+        private FolderRuleInput CreateFolderRuleInput(string fullName, Dictionary<string, string[]> knownPathsGroupedByParent,
+            Dictionary<string, FolderRuleActionEnum> pathRuleDictionary)
         {
-            if (!dic3.TryGetValue(fullName, out var folderRuleAction)) folderRuleAction = FolderRuleActionEnum.Remove;
+            if (!pathRuleDictionary.TryGetValue(fullName, out var folderRuleAction)) folderRuleAction = FolderRuleActionEnum.Remove;
 
             var folderRuleInput = new FolderRuleInput
             {
@@ -113,9 +113,9 @@ namespace SonOfPicasso.Core.Services
                 FolderRuleAction = folderRuleAction
             };
 
-            if (dictionary.TryGetValue(fullName, out var children))
+            if (knownPathsGroupedByParent.TryGetValue(fullName, out var children))
                 folderRuleInput.Children.AddRange(children.Select(child =>
-                    CreateFolderRuleInput(child, dictionary, dic3)));
+                    CreateFolderRuleInput(child, knownPathsGroupedByParent, pathRuleDictionary)));
 
             return folderRuleInput;
         }

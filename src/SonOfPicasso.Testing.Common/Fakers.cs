@@ -135,5 +135,13 @@ namespace SonOfPicasso.Testing.Common
                     .RuleFor(image => image.FolderId, (faker, image) => image.Folder.Id)
                     .RuleFor(image => image.Path, (faker, image) => Path.Join(image.Folder.Path, faker.System.FileName("jpg"))))
             );
+
+        public static Faker<FolderRule> FolderRuleFaker => LazyFolderRuleFaker.Value;
+        private static readonly Lazy<Faker<FolderRule>> LazyFolderRuleFaker = new Lazy<Faker<FolderRule>>(() => 
+            new Faker<FolderRule>()
+                .RuleFor(rule => rule.Id, 0)
+                .RuleFor(rule => rule.Path, faker => faker.System.DirectoryPathWindows())
+                .RuleFor(rule => rule.Action, faker => faker.PickRandom<FolderRuleActionEnum>())
+                .StrictMode(true));
     }
 }

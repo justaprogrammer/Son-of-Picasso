@@ -11,5 +11,9 @@ namespace SonOfPicasso.Core.Interfaces
         IObservable<IImageContainer> CreateAlbum(ICreateAlbum createAlbum);
         IObservable<IImageContainer> GetAllImageContainers();
         IObservable<IImageContainer> AddImagesToAlbum(int albumId, IEnumerable<int> imageIds);
+        IObservable<IImageContainer> AddImage(string path);
+        IObservable<IImageContainer> DeleteImage(string path);
+        IObservable<IImageContainer> UpdateImage(string path);
+        IObservable<IImageContainer> RenameImage(string oldPath, string newPath);
     }
 }

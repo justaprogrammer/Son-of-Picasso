@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using DynamicData;
 using DynamicData.Binding;
 using FluentAssertions;
@@ -27,6 +29,17 @@ namespace SonOfPicasso.Core.Tests.Services
         [Fact]
         public void ShouldStart()
         {
+            var folderWatcherService = AutoSubstitute.Resolve<IFolderWatcherService>();
+            
+            var folderRulesManagementService = AutoSubstitute.Resolve<IFolderRulesManagementService>();
+
+            var currentFolderRules = Fakers.FolderRuleFaker
+                .GenerateLazy(3)
+                .ToList();
+
+            folderRulesManagementService.GetFolderManagementRules()
+                .ReturnsForAnyArgs(Observable.Return(currentFolderRules));
+
             var imageManagementService = AutoSubstitute.Resolve<IImageManagementService>();
 
             var imageContainer = Substitute.For<IImageContainer>();
@@ -88,6 +101,9 @@ namespace SonOfPicasso.Core.Tests.Services
             WaitOne();
 
             imageRefs.Count.Should().Be(1);
+
+            folderWatcherService.Received(1)
+                .WatchFolders(currentFolderRules);
         }
 
         [Fact]
@@ -198,6 +214,21 @@ namespace SonOfPicasso.Core.Tests.Services
         [Fact]
         public void ShouldWatch()
         {
+            var folderWatcherSubject = new Subject<FileSystemEventArgs>();
+
+            var folderWatcherService = AutoSubstitute.Resolve<IFolderWatcherService>();
+            folderWatcherService.WatchFolders(default)
+                .ReturnsForAnyArgs(folderWatcherSubject.AsObservable());
+
+            var folderRulesManagementService = AutoSubstitute.Resolve<IFolderRulesManagementService>();
+
+            var currentFolderRules = Fakers.FolderRuleFaker
+                .GenerateLazy(3)
+                .ToList();
+
+            folderRulesManagementService.GetFolderManagementRules()
+                .ReturnsForAnyArgs(Observable.Return(currentFolderRules));
+
             var imageManagementService = AutoSubstitute.Resolve<IImageManagementService>();
 
             var imageContainer = Substitute.For<IImageContainer>();
@@ -257,6 +288,23 @@ namespace SonOfPicasso.Core.Tests.Services
             WaitOne();
 
             imageRefs.Count.Should().Be(1);
+
+            folderWatcherService.Received(1)
+                .WatchFolders(currentFolderRules);
+
+            var fileSystemEventArgs = new FileSystemEventArgs(
+                WatcherChangeTypes.Created, 
+                Faker.System.DirectoryPathWindows(), 
+                Faker.System.FileName("jpg"));
+
+            folderWatcherSubject.OnNext(fileSystemEventArgs);
+            
+            fileSystemEventArgs = new FileSystemEventArgs(
+                WatcherChangeTypes.Deleted, 
+                Faker.System.DirectoryPathWindows(), 
+                Faker.System.FileName("jpg"));
+
+            folderWatcherSubject.OnNext(fileSystemEventArgs);
         }
     }
 }

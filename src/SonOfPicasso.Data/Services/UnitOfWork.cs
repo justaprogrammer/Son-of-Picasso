@@ -8,18 +8,21 @@ namespace SonOfPicasso.Data.Services
 {
     public class UnitOfWork : IUnitOfWork
     {
-        private readonly DataContext _dataContext;
         private readonly Lazy<GenericRepository<AlbumImage>> _albumImageRepository;
         private readonly Lazy<GenericRepository<Album>> _albumRepository;
+        private readonly DataContext _dataContext;
         private readonly Lazy<GenericRepository<Folder>> _directoryRepository;
+        private readonly Lazy<GenericRepository<ExifData>> _exifDataRepository;
+        private readonly Lazy<GenericRepository<FolderRule>> _folderRuleRepository;
         private readonly Lazy<GenericRepository<Image>> _imageRepository;
-        private  readonly Lazy<GenericRepository<FolderRule>> _folderRuleRepository;
         internal bool Disposed;
 
         public UnitOfWork(DbContextOptions<DataContext> dataContextOptions)
         {
             _dataContext = new DataContext(dataContextOptions);
             _albumRepository = new Lazy<GenericRepository<Album>>(() => new GenericRepository<Album>(_dataContext));
+            _exifDataRepository =
+                new Lazy<GenericRepository<ExifData>>(() => new GenericRepository<ExifData>(_dataContext));
             _imageRepository = new Lazy<GenericRepository<Image>>(() => new GenericRepository<Image>(_dataContext));
             _directoryRepository =
                 new Lazy<GenericRepository<Folder>>(() => new GenericRepository<Folder>(_dataContext));
@@ -34,6 +37,7 @@ namespace SonOfPicasso.Data.Services
         public IGenericRepository<Folder> FolderRepository => _directoryRepository.Value;
         public IGenericRepository<AlbumImage> AlbumImageRepository => _albumImageRepository.Value;
         public IGenericRepository<FolderRule> FolderRuleRepository => _folderRuleRepository.Value;
+        public IGenericRepository<ExifData> ExifDataRepository => _exifDataRepository.Value;
 
         public void Save()
         {

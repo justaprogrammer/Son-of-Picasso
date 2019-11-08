@@ -215,20 +215,14 @@ namespace SonOfPicasso.Core.Tests.Services
         {
             public BasicOperation(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
             {
-                _fakeFolderRule = new Faker<FolderRule>()
-                    .RuleFor(rule => rule.Id, 0)
-                    .RuleFor(rule => rule.Path, Faker.System.DirectoryPathWindows())
-                    .RuleFor(rule => rule.Action, faker => faker.PickRandom<FolderRuleActionEnum>());
             }
-
-            private readonly Faker<FolderRule> _fakeFolderRule;
 
             [Fact]
             public void ShouldGetExistingRules()
             {
                 var unitOfWork = Substitute.For<IUnitOfWork>();
                 unitOfWork.FolderRuleRepository.Get()
-                    .Returns(_fakeFolderRule.GenerateLazy(3));
+                    .Returns(Fakers.FolderRuleFaker.GenerateLazy(3));
 
                 UnitOfWorkQueue.Enqueue(unitOfWork);
 
@@ -253,7 +247,7 @@ namespace SonOfPicasso.Core.Tests.Services
             [Fact]
             public void ShouldResetRules()
             {
-                var originals = _fakeFolderRule.GenerateLazy(3)
+                var originals = Fakers.FolderRuleFaker.GenerateLazy(3)
                     .ToArray();
 
                 var unitOfWork = Substitute.For<IUnitOfWork>();
@@ -263,7 +257,7 @@ namespace SonOfPicasso.Core.Tests.Services
 
                 UnitOfWorkQueue.Enqueue(unitOfWork);
 
-                var input = _fakeFolderRule.GenerateLazy(3);
+                var input = Fakers.FolderRuleFaker.GenerateLazy(3);
 
                 var folderRulesManagementService = AutoSubstitute.Resolve<FolderRulesManagementService>();
                 folderRulesManagementService.ResetFolderManagementRules(input)

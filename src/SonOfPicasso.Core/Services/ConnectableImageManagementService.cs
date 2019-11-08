@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Reactive;
 using System.Reactive.Linq;
 using DynamicData;
@@ -17,6 +18,7 @@ namespace SonOfPicasso.Core.Services
         private readonly SourceCache<IImageContainer, string> _imageContainerCache;
         private readonly IImageManagementService _imageManagementService;
         private readonly IObservableCache<ImageRef, string> _imageRefCache;
+        private IDisposable folderManagementDisposable;
 
         public ConnectableImageManagementService(IImageManagementService imageManagementService,
             IFolderWatcherService folderWatcherService,
@@ -40,6 +42,7 @@ namespace SonOfPicasso.Core.Services
 
         public void Dispose()
         {
+            folderManagementDisposable?.Dispose();
             _imageContainerCache?.Dispose();
             _imageRefCache?.Dispose();
         }
@@ -48,12 +51,48 @@ namespace SonOfPicasso.Core.Services
         {
             return _imageManagementService.GetAllImageContainers()
                 .Do(container => _imageContainerCache.AddOrUpdate(container))
-                .Select(container => Unit.Default)
-                .LastOrDefaultAsync();
+                .LastOrDefaultAsync()
+                .Select(_ => Unit.Default)
+                .Do(_ => StartWatcher());
+        }
+
+        private void StartWatcher()
+        {
+            folderManagementDisposable = _folderRulesManagementService.GetFolderManagementRules()
+                .SelectMany(list => _folderWatcherService.WatchFolders(list))
+                .Subscribe(HandlerFolderWatcherEvent);
+        }
+
+        private void HandlerFolderWatcherEvent(FileSystemEventArgs args)
+        {
+            switch (args.ChangeType)
+            {
+                case WatcherChangeTypes.Created:
+                    _imageContainerCache.PopulateFrom(_imageManagementService.AddImage(args.FullPath));
+                    break;
+
+                case WatcherChangeTypes.Deleted:
+                    _imageContainerCache.PopulateFrom(_imageManagementService.DeleteImage(args.FullPath));
+                    break;
+
+                case WatcherChangeTypes.Changed:
+                    _imageContainerCache.PopulateFrom(_imageManagementService.UpdateImage(args.FullPath));
+                    break;
+
+                case WatcherChangeTypes.Renamed:
+                    var renamedEventArgs = (RenamedEventArgs)args;
+                    _imageContainerCache.PopulateFrom(_imageManagementService.RenameImage(renamedEventArgs.OldFullPath, renamedEventArgs.FullPath));
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         public void Stop()
         {
+            folderManagementDisposable?.Dispose();
+            folderManagementDisposable = null;
         }
 
         public IObservable<Unit> ScanFolder(string path)
@@ -70,7 +109,7 @@ namespace SonOfPicasso.Core.Services
                         new FolderRule
                         {
                             Path = path,
-                            Action = FolderRuleActionEnum.Once,
+                            Action = FolderRuleActionEnum.Once
                         }));
         }
     }
