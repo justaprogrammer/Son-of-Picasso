@@ -148,7 +148,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             var albums = (await Connection.QueryAsync<Album>("SELECT * FROM Albums"))
                 .ToArray();
 
-            albums.Should().HaveCount(1);
+            albums.Should().ContainSingle();
 
             var albumImages = (await Connection.QueryAsync<AlbumImage>("SELECT * FROM AlbumImages"))
                 .ToArray();

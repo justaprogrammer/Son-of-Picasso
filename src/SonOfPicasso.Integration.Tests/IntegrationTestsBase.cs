@@ -42,7 +42,8 @@ namespace SonOfPicasso.Integration.Tests
         public override void Dispose()
         {
             base.Dispose();
-            _dataContext.Dispose();
+            Connection?.Dispose();
+            _dataContext?.Dispose();
 
             if (FileSystem.Directory.Exists(TestPath))
                 try
