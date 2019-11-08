@@ -91,11 +91,9 @@ namespace SonOfPicasso.Tools.Services
                                     var xPos = x * cellWidth;
                                     var yPos = y * cellHeight;
 
-                                    using (var brush = new SolidBrush(GetColor(colors, x, y)))
-                                    {
-                                        var rectangle = new Rectangle(xPos, yPos, cellWidth, cellHeight);
-                                        graphics.FillRectangle(brush, rectangle);
-                                    }
+                                    using var brush = new SolidBrush(GetColor(colors, x, y));
+                                    var rectangle = new Rectangle(xPos, yPos, cellWidth, cellHeight);
+                                    graphics.FillRectangle(brush, rectangle);
                                 }
                         }
 
