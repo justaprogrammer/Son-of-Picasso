@@ -135,7 +135,333 @@ namespace SonOfPicasso.Integration.Tests.Services
             exifDatas = (await Connection.QueryAsync("SELECT * FROM ExifData"))
                 .ToArray();
 
-            exifDatas.Should().HaveCount(imagesCount + 1);
+            exifDatas.Should().HaveCount(imagesCount);
+        }
+
+        [Fact]
+        public async Task ShouldScanAndUpdateImage()
+        {
+            var imagesCount = 5;
+            var generatedImages = await GenerateImages(imagesCount);
+
+            var imagesDirectoryInfo = FileSystem.DirectoryInfo.FromDirectoryName(_imagesPath);
+            var directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
+
+            var imageManagementService = _container.Resolve<ImageManagementService>();
+            var imageContainers = await imageManagementService
+                .ScanFolder(_imagesPath)
+                .ToArray();
+
+            imageContainers.Should().HaveCount(directoryCount);
+
+            var images = (await Connection.QueryAsync<Image>("SELECT * FROM Images"))
+                .ToArray();
+
+            images.Should().HaveCount(imagesCount);
+
+            var folders = (await Connection.QueryAsync<Folder>("SELECT * FROM Folders"))
+                .ToArray();
+
+            folders.Should().HaveCount(directoryCount);
+
+            var exifDatas = (await Connection.QueryAsync("SELECT * FROM ExifData"))
+                .ToArray();
+
+            exifDatas.Should().HaveCount(imagesCount);
+
+            var containers = await imageManagementService
+                .GetAllImageContainers()
+                .ToArray();
+
+            containers.Length
+                .Should()
+                .Be(directoryCount);
+
+            containers.SelectMany(container => container.ImageRefs)
+                .Should().HaveCount(imagesCount);
+
+            var imageToUpdate = Faker.PickRandom(images);
+            var imageToUpdateExifData = exifDatas.First(o => imageToUpdate.ExifDataId == (int) o.Id);
+
+            var fileInfo = FileSystem.FileInfo.FromFileName(imageToUpdate.Path);
+            
+            var generatedImages2 = await GenerateImages(1, fileInfo.DirectoryName);
+            var imagePathToUpdateWith = generatedImages2.First().Value.First();
+
+            FileSystem.File.Delete(imageToUpdate.Path);
+            FileSystem.File.Move(imagePathToUpdateWith, imageToUpdate.Path);
+
+            var imageContainer = await imageManagementService.UpdateImage(imageToUpdate.Path);
+
+            images = (await Connection.QueryAsync<Image>("SELECT * FROM Images"))
+                .ToArray();
+
+            images.Should().HaveCount(imagesCount);
+
+            folders = (await Connection.QueryAsync<Folder>("SELECT * FROM Folders"))
+                .ToArray();
+
+            folders.Should().HaveCount(directoryCount);
+
+            exifDatas = (await Connection.QueryAsync("SELECT * FROM ExifData"))
+                .ToArray();
+
+            exifDatas.Should().HaveCount(imagesCount);
+
+            var updatedExifData = exifDatas.First(o => (int) imageToUpdateExifData.Id == (int) o.Id);
+
+            ((object) imageToUpdateExifData)
+                .Should()
+                .NotBeEquivalentTo((object) updatedExifData);
+        }
+
+        [Fact]
+        public async Task ShouldScanAndRenameImageToSameFolder()
+        {
+            var imagesCount = 5;
+            var generatedImages = await GenerateImages(imagesCount);
+
+            var imagesDirectoryInfo = FileSystem.DirectoryInfo.FromDirectoryName(_imagesPath);
+            var directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
+
+            var imageManagementService = _container.Resolve<ImageManagementService>();
+            var imageContainers = await imageManagementService
+                .ScanFolder(_imagesPath)
+                .ToArray();
+
+            imageContainers.Should().HaveCount(directoryCount);
+
+            var images = (await Connection.QueryAsync<Image>("SELECT * FROM Images"))
+                .ToArray();
+
+            images.Should().HaveCount(imagesCount);
+
+            var folders = (await Connection.QueryAsync<Folder>("SELECT * FROM Folders"))
+                .ToArray();
+
+            folders.Should().HaveCount(directoryCount);
+
+            var exifDatas = (await Connection.QueryAsync("SELECT * FROM ExifData"))
+                .ToArray();
+
+            exifDatas.Should().HaveCount(imagesCount);
+
+            var containers = await imageManagementService
+                .GetAllImageContainers()
+                .ToArray();
+
+            containers.Length
+                .Should()
+                .Be(directoryCount);
+
+            containers.SelectMany(container => container.ImageRefs)
+                .Should().HaveCount(imagesCount);
+
+            var imageToRename = Faker.PickRandom(images);
+
+            var directoryName = FileSystem.Path.GetDirectoryName(imageToRename.Path);
+            var imageExtension = FileSystem.Path.GetExtension(imageToRename.Path);
+            var renamePath = FileSystem.Path.Combine(directoryName, Faker.System.FileName(imageExtension));
+
+            FileSystem.File.Move(imageToRename.Path, renamePath);
+
+            var updatedImageContainers = await imageManagementService.RenameImage(imageToRename.Path, renamePath).ToArray();
+            updatedImageContainers.Should().ContainSingle();
+            updatedImageContainers.First().ContainerTypeId.Should().Be(imageToRename.FolderId);
+
+            images = (await Connection.QueryAsync<Image>("SELECT * FROM Images"))
+                .ToArray();
+
+            images.Should().HaveCount(imagesCount);
+
+            folders = (await Connection.QueryAsync<Folder>("SELECT * FROM Folders"))
+                .ToArray();
+
+            folders.Should().HaveCount(directoryCount);
+
+            exifDatas = (await Connection.QueryAsync("SELECT * FROM ExifData"))
+                .ToArray();
+
+            exifDatas.Should().HaveCount(imagesCount);
+
+            var renamedImage = (await Connection.QueryAsync<Image>("SELECT * FROM Images WHERE Images.Path=@Path",
+                    new {Path = renamePath}))
+                .First();
+
+            imageToRename.FolderId
+                .Should()
+                .Be(renamedImage.FolderId);
+        }
+
+        [Fact]
+        public async Task ShouldScanAndRenameImageToOtherFolder()
+        {
+            var imagesCount = 15;
+            var generatedImages = await GenerateImages(imagesCount);
+
+            var imagesDirectoryInfo = FileSystem.DirectoryInfo.FromDirectoryName(_imagesPath);
+            var directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
+
+            var imageManagementService = _container.Resolve<ImageManagementService>();
+            var imageContainers = await imageManagementService
+                .ScanFolder(_imagesPath)
+                .ToArray();
+
+            imageContainers.Should().HaveCount(directoryCount);
+
+            var images = (await Connection.QueryAsync<Image>("SELECT * FROM Images"))
+                .ToArray();
+
+            images.Should().HaveCount(imagesCount);
+
+            var folders = (await Connection.QueryAsync<Folder>("SELECT * FROM Folders"))
+                .ToArray();
+
+            folders.Should().HaveCount(directoryCount);
+
+            var exifDatas = (await Connection.QueryAsync("SELECT * FROM ExifData"))
+                .ToArray();
+
+            exifDatas.Should().HaveCount(imagesCount);
+
+            var containers = await imageManagementService
+                .GetAllImageContainers()
+                .ToArray();
+
+            containers.Length
+                .Should()
+                .Be(directoryCount);
+
+            containers.SelectMany(container => container.ImageRefs)
+                .Should().HaveCount(imagesCount);
+
+            var imageToRename = images.First(i => i.Path == generatedImages.First().Value.First());
+            var imageExtension = FileSystem.Path.GetExtension(imageToRename.Path);
+            
+            var folderPathToMoveTo = generatedImages.Skip(1).First().Key;
+            var folderToMoveTo = (await Connection.QueryAsync<Folder>("SELECT * FROM Folders WHERE Folders.Path=@Path",
+                    new {Path = folderPathToMoveTo}))
+                .First();
+
+            imageToRename.FolderId
+                .Should()
+                .NotBe(folderToMoveTo.Id);
+
+            var renamePath = FileSystem.Path.Combine(folderPathToMoveTo, Faker.System.FileName(imageExtension));
+
+            FileSystem.File.Move(imageToRename.Path, renamePath);
+
+            var updatedImageContainers = await imageManagementService.RenameImage(imageToRename.Path, renamePath).ToArray();
+            updatedImageContainers.Should().HaveCount(2);
+            updatedImageContainers.Select(container => container.ContainerTypeId)
+                .Should()
+                .BeEquivalentTo(new[] {imageToRename.FolderId, folderToMoveTo.Id});
+
+            var imagesAfter = (await Connection.QueryAsync<Image>("SELECT * FROM Images"))
+                .ToArray();
+
+            imagesAfter.Should().HaveCount(imagesCount);
+
+            var foldersAfter = (await Connection.QueryAsync<Folder>("SELECT * FROM Folders"))
+                .ToArray();
+
+            foldersAfter.Should().HaveCount(directoryCount);
+
+            var exifDatasAfter = (await Connection.QueryAsync("SELECT * FROM ExifData"))
+                .ToArray();
+
+            exifDatasAfter.Should().HaveCount(imagesCount);
+
+            var renamedImage = (await Connection.QueryAsync<Image>("SELECT * FROM Images WHERE Images.Path=@Path",
+                    new {Path = renamePath}))
+                .First();
+
+            imageToRename.FolderId
+                .Should()
+                .NotBe(renamedImage.FolderId);
+
+            renamedImage.FolderId
+                .Should()
+                .Be(folderToMoveTo.Id);
+        }
+
+        [Fact]
+        public async Task ShouldScanAndRenameImageToNewFolder()
+        {
+            var imagesCount = 3;
+            var generatedImages = await GenerateImages(imagesCount);
+
+            var imagesDirectoryInfo = FileSystem.DirectoryInfo.FromDirectoryName(_imagesPath);
+            var directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
+
+            var imageManagementService = _container.Resolve<ImageManagementService>();
+            var imageContainers = await imageManagementService
+                .ScanFolder(_imagesPath)
+                .ToArray();
+
+            imageContainers.Should().HaveCount(directoryCount);
+
+            var images = (await Connection.QueryAsync<Image>("SELECT * FROM Images"))
+                .ToArray();
+
+            images.Should().HaveCount(imagesCount);
+
+            var folders = (await Connection.QueryAsync<Folder>("SELECT * FROM Folders"))
+                .ToArray();
+
+            folders.Should().HaveCount(directoryCount);
+
+            var exifDatas = (await Connection.QueryAsync("SELECT * FROM ExifData"))
+                .ToArray();
+
+            exifDatas.Should().HaveCount(imagesCount);
+
+            var containers = await imageManagementService
+                .GetAllImageContainers()
+                .ToArray();
+
+            containers.Length
+                .Should()
+                .Be(directoryCount);
+
+            containers.SelectMany(container => container.ImageRefs)
+                .Should().HaveCount(imagesCount);
+
+            var imageToRename = images.First(i => i.Path == generatedImages.First().Value.First());
+            var imageExtension = FileSystem.Path.GetExtension(imageToRename.Path);
+            
+            var folderPathToMoveTo = FileSystem.Path.Combine(_imagesPath, "Custom");
+            FileSystem.Directory.CreateDirectory(folderPathToMoveTo);
+            
+            var renamePath = FileSystem.Path.Combine(folderPathToMoveTo, Faker.System.FileName(imageExtension));
+
+            FileSystem.File.Move(imageToRename.Path, renamePath);
+
+            var updatedImageContainers = await imageManagementService.RenameImage(imageToRename.Path, renamePath).ToArray();
+            updatedImageContainers.Should().HaveCount(2);
+
+            var imagesAfter = (await Connection.QueryAsync<Image>("SELECT * FROM Images"))
+                .ToArray();
+
+            imagesAfter.Should().HaveCount(imagesCount);
+
+            var foldersAfter = (await Connection.QueryAsync<Folder>("SELECT * FROM Folders"))
+                .ToArray();
+
+            foldersAfter.Should().HaveCount(directoryCount + 1);
+
+            var exifDatasAfter = (await Connection.QueryAsync("SELECT * FROM ExifData"))
+                .ToArray();
+
+            exifDatasAfter.Should().HaveCount(imagesCount);
+
+            var renamedImage = (await Connection.QueryAsync<Image>("SELECT * FROM Images WHERE Images.Path=@Path",
+                    new {Path = renamePath}))
+                .First();
+
+            imageToRename.FolderId
+                .Should()
+                .NotBe(renamedImage.FolderId);
         }
 
         [Fact]
@@ -374,6 +700,61 @@ namespace SonOfPicasso.Integration.Tests.Services
                 .ToArray();
 
             albumImages.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task ShouldCreateAndGetAllContainers()
+        {
+            var imageCount = 10;
+            var albumImageCount = 5;
+
+            await GenerateImages(imageCount);
+
+            var imageManagementService = _container.Resolve<ImageManagementService>();
+            var imageContainers = await imageManagementService
+                .ScanFolder(_imagesPath)
+                .ToArray();
+
+            var imageRefs = Faker
+                .PickRandom(imageContainers.SelectMany(container => container.ImageRefs.Select(imageRef => imageRef)),
+                    albumImageCount)
+                .ToArray();
+
+            var imageIds = imageRefs.Select(imageRef => imageRef.ImageId)
+                .ToArray();
+
+            ICreateAlbum createAlbum = new TestCreateAlbum
+            {
+                AlbumName = Faker.Random.Word(),
+                AlbumDate = imageRefs
+                    .Select(imageRef => imageRef.ContainerDate)
+                    .Min()
+                    .Date
+            };
+
+            var imageContainer = await imageManagementService.CreateAlbum(createAlbum);
+            imageContainer = await imageManagementService.AddImagesToAlbum(imageContainer.ContainerTypeId, imageIds);
+
+            var albums = (await Connection.QueryAsync<Album>("SELECT * FROM Albums"))
+                .ToArray();
+
+            albums.Should().ContainSingle();
+
+            var albumImages = (await Connection.QueryAsync<AlbumImage>("SELECT * FROM AlbumImages"))
+                .ToArray();
+
+            albumImages.Should().HaveCount(5);
+
+            var imageContainersAfter = await imageManagementService.GetAllImageContainers()
+                .ToArray();
+
+            imageContainersAfter
+                .Should()
+                .HaveCount(imageContainers.Length + 1);
+
+            var albumImageContainer = imageContainersAfter.First(container => container.ContainerType == ImageContainerTypeEnum.Album);
+            albumImageContainer.Name.Should().Be(createAlbum.AlbumName);
+            albumImageContainer.Date.Should().Be(createAlbum.AlbumDate);
         }
 
         [Fact]

@@ -251,6 +251,7 @@ namespace SonOfPicasso.Core.Services
 
                     var imageFolderId = image.FolderId;
                     unitOfWork.ImageRepository.Delete(image);
+                    unitOfWork.ExifDataRepository.Delete(image.ExifDataId);
                     unitOfWork.Save();
 
                     return Observable.Return(imageFolderId);
@@ -323,6 +324,8 @@ namespace SonOfPicasso.Core.Services
                     {
                         image.FolderId = folder.Id;
                     }
+
+                    unitOfWork.Save();
 
                     return new[] {oldFolderId, folder.Id}.ToObservable();
                 })
