@@ -60,7 +60,7 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             FileSystem.File.Move(testFilePath1, testFilePath2);
 
-            WaitOne();
+            WaitOne(TimeSpan.FromSeconds(5));
         }
 
         [Fact]
@@ -146,7 +146,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                     }
                 }, () => AutoResetEvent.Set());
 
-            WaitOne();
+            WaitOne(TimeSpan.FromSeconds(5));
 
             eventsList.Should().HaveCount(jpgFiles.Length * 2);
         }
