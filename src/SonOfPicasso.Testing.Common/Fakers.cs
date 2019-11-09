@@ -15,7 +15,6 @@ namespace SonOfPicasso.Testing.Common
         private static readonly Lazy<Faker<ExifData>> LazyExifDataFaker = new Lazy<Faker<ExifData>>(() => 
             new Faker<ExifData>()
                 .RuleFor(data => data.Id, faker => faker.Random.Int(1))
-                .RuleFor(data => data.Image, (Image) null)
                 .RuleFor(data => data.Make, faker => faker.Random.Words())
                 .RuleFor(data => data.Model, faker => faker.Random.Words())
                 .RuleFor(data => data.Software, faker => faker.Random.Words())

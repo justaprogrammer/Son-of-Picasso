@@ -1,4 +1,5 @@
 using System;
+using Microsoft.EntityFrameworkCore.Storage;
 using SonOfPicasso.Data.Model;
 using SonOfPicasso.Data.Repository;
 
@@ -13,5 +14,6 @@ namespace SonOfPicasso.Data.Interfaces
         IGenericRepository<AlbumImage> AlbumImageRepository { get; }
         IGenericRepository<FolderRule> FolderRuleRepository { get; }
         void Save();
+        IDbContextTransaction BeginTransaction();
     }
 }

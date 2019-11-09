@@ -68,6 +68,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             MockFileSystem.AddDirectory(testPath);
 
             var paths = Faker.Random.WordsArray(Faker.Random.Int(5, 10))
+                .Distinct()
                 .Select(word => MockFileSystem.Path.Combine(testPath, word))
                 .ToArray();
 

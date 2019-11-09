@@ -70,9 +70,9 @@ namespace SonOfPicasso.Testing.Common
             AutoResetEvent = new AutoResetEvent(false);
         }
 
-        protected void WaitOne(int timeout = 500)
+        protected void WaitOne(TimeSpan? timespan = null)
         {
-            AutoResetEvent.WaitOne(timeout).Should().BeTrue();
+            AutoResetEvent.WaitOne(timespan ?? TimeSpan.FromTicks(500)).Should().BeTrue();
         }
 
         public virtual void Dispose()

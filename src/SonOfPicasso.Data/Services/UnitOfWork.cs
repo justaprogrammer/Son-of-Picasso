@@ -1,5 +1,6 @@
 using System;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using SonOfPicasso.Data.Interfaces;
 using SonOfPicasso.Data.Model;
 using SonOfPicasso.Data.Repository;
@@ -44,6 +45,11 @@ namespace SonOfPicasso.Data.Services
             _dataContext.SaveChanges();
         }
 
+        public IDbContextTransaction BeginTransaction()
+        {
+            return _dataContext.Database.BeginTransaction();
+        }
+
         public void Dispose()
         {
             Dispose(true);
@@ -54,7 +60,9 @@ namespace SonOfPicasso.Data.Services
         {
             if (!Disposed)
                 if (disposing)
+                {
                     _dataContext.Dispose();
+                }
             Disposed = true;
         }
     }

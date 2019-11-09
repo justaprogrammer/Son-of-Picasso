@@ -1,69 +1,40 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Autofac;
-using AutofacSerilogIntegration;
 using Dapper;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Model;
-using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Core.Services;
-using SonOfPicasso.Data.Interfaces;
 using SonOfPicasso.Data.Model;
-using SonOfPicasso.Data.Repository;
-using SonOfPicasso.Data.Services;
-using SonOfPicasso.Tools.Services;
-using SonOfPicasso.UI.Services;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace SonOfPicasso.Integration.Tests.Services
 {
-    public class ImageManagementServiceIntegrationTests : IntegrationTestsBase, IDisposable
+    public class ImageManagementServiceIntegrationTests : IntegrationTestsBase
     {
-        public ImageManagementServiceIntegrationTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        public ImageManagementServiceIntegrationTests(ITestOutputHelper testOutputHelper)
+            : base(testOutputHelper)
         {
-            var containerBuilder = new ContainerBuilder();
-            containerBuilder.RegisterLogger();
-            containerBuilder.RegisterType<ImageManagementService>().AsSelf();
-            containerBuilder.RegisterType<FileSystem>().As<IFileSystem>();
-            containerBuilder.RegisterType<ImageLocationService>().As<IImageLocationService>();
-            containerBuilder.RegisterInstance(DbContextOptions).As<DbContextOptions<DataContext>>();
-            containerBuilder.RegisterType<UnitOfWork>()
-                .As<IUnitOfWork>()
-                .AsSelf();
-            containerBuilder.RegisterType<SchedulerProvider>().As<ISchedulerProvider>();
+            var containerBuilder = GetContainerBuilder();
+            containerBuilder.RegisterType<ImageManagementService>();
             containerBuilder.RegisterType<ExifDataService>().As<IExifDataService>();
-            containerBuilder.RegisterType<ImageGenerationService>().AsSelf();
-            _container = containerBuilder.Build();
-
-            _imageGenerationService = _container.Resolve<ImageGenerationService>();
-            _imagesPath = FileSystem.Path.Combine(TestPath, "Images");
-            FileSystem.Directory.CreateDirectory(_imagesPath);
+            containerBuilder.RegisterType<ImageLocationService>().As<IImageLocationService>();
+            Container = containerBuilder.Build();
         }
+
+        protected override IContainer Container { get; }
 
         public override void Dispose()
         {
             base.Dispose();
 
-            _container.Dispose();
+            Container.Dispose();
         }
-
-        private async Task<IDictionary<string, string[]>> GenerateImages(int count, string imagesPath = null)
-        {
-            return await _imageGenerationService.GenerateImages(count, imagesPath ?? _imagesPath, imagesPath == null)
-                .SelectMany(observable => observable.ToArray().Select(items => (observable.Key, items)))
-                .ToDictionary(tuple => tuple.Key, tuple => tuple.items);
-        }
-
-        private readonly IContainer _container;
-        private readonly string _imagesPath;
-        private readonly ImageGenerationService _imageGenerationService;
 
         private class TestCreateAlbum : ICreateAlbum
         {
@@ -75,30 +46,32 @@ namespace SonOfPicasso.Integration.Tests.Services
         [Fact]
         public async Task ShouldScanAndDeleteImage()
         {
+            await InitializeDataContextAsync();
+            await using var connection = DataContext.Database.GetDbConnection();
             var imagesCount = 5;
-            var generatedImages = await GenerateImages(imagesCount);
+            var generatedImages = await GenerateImagesAsync(imagesCount);
 
-            var imagesDirectoryInfo = FileSystem.DirectoryInfo.FromDirectoryName(_imagesPath);
+            var imagesDirectoryInfo = FileSystem.DirectoryInfo.FromDirectoryName(ImagesPath);
             var directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
 
-            var imageManagementService = _container.Resolve<ImageManagementService>();
+            var imageManagementService = Container.Resolve<ImageManagementService>();
             var imageContainers = await imageManagementService
-                .ScanFolder(_imagesPath)
+                .ScanFolder(ImagesPath)
                 .ToArray();
 
             imageContainers.Should().HaveCount(directoryCount);
 
-            var images = (await Connection.QueryAsync<Image>("SELECT * FROM Images"))
+            var images = (await connection.QueryAsync<Image>("SELECT * FROM Images"))
                 .ToArray();
 
             images.Should().HaveCount(imagesCount);
 
-            var folders = (await Connection.QueryAsync<Folder>("SELECT * FROM Folders"))
+            var folders = (await connection.QueryAsync<Folder>("SELECT * FROM Folders"))
                 .ToArray();
 
             folders.Should().HaveCount(directoryCount);
 
-            var exifDatas = (await Connection.QueryAsync("SELECT * FROM ExifData"))
+            var exifDatas = (await connection.QueryAsync("SELECT * FROM ExifData"))
                 .ToArray();
 
             exifDatas.Should().HaveCount(imagesCount);
@@ -122,17 +95,17 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             imagesCount -= 1;
 
-            images = (await Connection.QueryAsync<Image>("SELECT * FROM Images"))
+            images = (await connection.QueryAsync<Image>("SELECT * FROM Images"))
                 .ToArray();
 
             images.Should().HaveCount(imagesCount);
 
-            folders = (await Connection.QueryAsync<Folder>("SELECT * FROM Folders"))
+            folders = (await connection.QueryAsync<Folder>("SELECT * FROM Folders"))
                 .ToArray();
 
             folders.Should().HaveCount(directoryCount);
 
-            exifDatas = (await Connection.QueryAsync("SELECT * FROM ExifData"))
+            exifDatas = (await connection.QueryAsync("SELECT * FROM ExifData"))
                 .ToArray();
 
             exifDatas.Should().HaveCount(imagesCount);
@@ -141,30 +114,33 @@ namespace SonOfPicasso.Integration.Tests.Services
         [Fact]
         public async Task ShouldScanAndUpdateImage()
         {
-            var imagesCount = 5;
-            var generatedImages = await GenerateImages(imagesCount);
+            await InitializeDataContextAsync();
+            await using var connection = DataContext.Database.GetDbConnection();
 
-            var imagesDirectoryInfo = FileSystem.DirectoryInfo.FromDirectoryName(_imagesPath);
+            var imagesCount = 5;
+            var generatedImages = await GenerateImagesAsync(imagesCount);
+
+            var imagesDirectoryInfo = FileSystem.DirectoryInfo.FromDirectoryName(ImagesPath);
             var directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
 
-            var imageManagementService = _container.Resolve<ImageManagementService>();
+            var imageManagementService = Container.Resolve<ImageManagementService>();
             var imageContainers = await imageManagementService
-                .ScanFolder(_imagesPath)
+                .ScanFolder(ImagesPath)
                 .ToArray();
 
             imageContainers.Should().HaveCount(directoryCount);
 
-            var images = (await Connection.QueryAsync<Image>("SELECT * FROM Images"))
+            var images = (await connection.QueryAsync<Image>("SELECT * FROM Images"))
                 .ToArray();
 
             images.Should().HaveCount(imagesCount);
 
-            var folders = (await Connection.QueryAsync<Folder>("SELECT * FROM Folders"))
+            var folders = (await connection.QueryAsync<Folder>("SELECT * FROM Folders"))
                 .ToArray();
 
             folders.Should().HaveCount(directoryCount);
 
-            var exifDatas = (await Connection.QueryAsync("SELECT * FROM ExifData"))
+            var exifDatas = (await connection.QueryAsync("SELECT * FROM ExifData"))
                 .ToArray();
 
             exifDatas.Should().HaveCount(imagesCount);
@@ -184,8 +160,8 @@ namespace SonOfPicasso.Integration.Tests.Services
             var imageToUpdateExifData = exifDatas.First(o => imageToUpdate.ExifDataId == (int) o.Id);
 
             var fileInfo = FileSystem.FileInfo.FromFileName(imageToUpdate.Path);
-            
-            var generatedImages2 = await GenerateImages(1, fileInfo.DirectoryName);
+
+            var generatedImages2 = await GenerateImagesAsync(1, fileInfo.DirectoryName);
             var imagePathToUpdateWith = generatedImages2.First().Value.First();
 
             FileSystem.File.Delete(imageToUpdate.Path);
@@ -193,17 +169,17 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             var imageContainer = await imageManagementService.UpdateImage(imageToUpdate.Path);
 
-            images = (await Connection.QueryAsync<Image>("SELECT * FROM Images"))
+            images = (await connection.QueryAsync<Image>("SELECT * FROM Images"))
                 .ToArray();
 
             images.Should().HaveCount(imagesCount);
 
-            folders = (await Connection.QueryAsync<Folder>("SELECT * FROM Folders"))
+            folders = (await connection.QueryAsync<Folder>("SELECT * FROM Folders"))
                 .ToArray();
 
             folders.Should().HaveCount(directoryCount);
 
-            exifDatas = (await Connection.QueryAsync("SELECT * FROM ExifData"))
+            exifDatas = (await connection.QueryAsync("SELECT * FROM ExifData"))
                 .ToArray();
 
             exifDatas.Should().HaveCount(imagesCount);
@@ -218,30 +194,33 @@ namespace SonOfPicasso.Integration.Tests.Services
         [Fact]
         public async Task ShouldScanAndRenameImageToSameFolder()
         {
-            var imagesCount = 5;
-            var generatedImages = await GenerateImages(imagesCount);
+            await InitializeDataContextAsync();
+            await using var connection = DataContext.Database.GetDbConnection();
 
-            var imagesDirectoryInfo = FileSystem.DirectoryInfo.FromDirectoryName(_imagesPath);
+            var imagesCount = 5;
+            var generatedImages = await GenerateImagesAsync(imagesCount);
+
+            var imagesDirectoryInfo = FileSystem.DirectoryInfo.FromDirectoryName(ImagesPath);
             var directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
 
-            var imageManagementService = _container.Resolve<ImageManagementService>();
+            var imageManagementService = Container.Resolve<ImageManagementService>();
             var imageContainers = await imageManagementService
-                .ScanFolder(_imagesPath)
+                .ScanFolder(ImagesPath)
                 .ToArray();
 
             imageContainers.Should().HaveCount(directoryCount);
 
-            var images = (await Connection.QueryAsync<Image>("SELECT * FROM Images"))
+            var images = (await connection.QueryAsync<Image>("SELECT * FROM Images"))
                 .ToArray();
 
             images.Should().HaveCount(imagesCount);
 
-            var folders = (await Connection.QueryAsync<Folder>("SELECT * FROM Folders"))
+            var folders = (await connection.QueryAsync<Folder>("SELECT * FROM Folders"))
                 .ToArray();
 
             folders.Should().HaveCount(directoryCount);
 
-            var exifDatas = (await Connection.QueryAsync("SELECT * FROM ExifData"))
+            var exifDatas = (await connection.QueryAsync("SELECT * FROM ExifData"))
                 .ToArray();
 
             exifDatas.Should().HaveCount(imagesCount);
@@ -265,26 +244,27 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             FileSystem.File.Move(imageToRename.Path, renamePath);
 
-            var updatedImageContainers = await imageManagementService.RenameImage(imageToRename.Path, renamePath).ToArray();
+            var updatedImageContainers =
+                await imageManagementService.RenameImage(imageToRename.Path, renamePath).ToArray();
             updatedImageContainers.Should().ContainSingle();
             updatedImageContainers.First().ContainerTypeId.Should().Be(imageToRename.FolderId);
 
-            images = (await Connection.QueryAsync<Image>("SELECT * FROM Images"))
+            images = (await connection.QueryAsync<Image>("SELECT * FROM Images"))
                 .ToArray();
 
             images.Should().HaveCount(imagesCount);
 
-            folders = (await Connection.QueryAsync<Folder>("SELECT * FROM Folders"))
+            folders = (await connection.QueryAsync<Folder>("SELECT * FROM Folders"))
                 .ToArray();
 
             folders.Should().HaveCount(directoryCount);
 
-            exifDatas = (await Connection.QueryAsync("SELECT * FROM ExifData"))
+            exifDatas = (await connection.QueryAsync("SELECT * FROM ExifData"))
                 .ToArray();
 
             exifDatas.Should().HaveCount(imagesCount);
 
-            var renamedImage = (await Connection.QueryAsync<Image>("SELECT * FROM Images WHERE Images.Path=@Path",
+            var renamedImage = (await connection.QueryAsync<Image>("SELECT * FROM Images WHERE Images.Path=@Path",
                     new {Path = renamePath}))
                 .First();
 
@@ -296,30 +276,33 @@ namespace SonOfPicasso.Integration.Tests.Services
         [Fact]
         public async Task ShouldScanAndRenameImageToOtherFolder()
         {
-            var imagesCount = 15;
-            var generatedImages = await GenerateImages(imagesCount);
+            await InitializeDataContextAsync();
+            await using var connection = DataContext.Database.GetDbConnection();
 
-            var imagesDirectoryInfo = FileSystem.DirectoryInfo.FromDirectoryName(_imagesPath);
+            var imagesCount = 15;
+            var generatedImages = await GenerateImagesAsync(imagesCount);
+
+            var imagesDirectoryInfo = FileSystem.DirectoryInfo.FromDirectoryName(ImagesPath);
             var directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
 
-            var imageManagementService = _container.Resolve<ImageManagementService>();
+            var imageManagementService = Container.Resolve<ImageManagementService>();
             var imageContainers = await imageManagementService
-                .ScanFolder(_imagesPath)
+                .ScanFolder(ImagesPath)
                 .ToArray();
 
             imageContainers.Should().HaveCount(directoryCount);
 
-            var images = (await Connection.QueryAsync<Image>("SELECT * FROM Images"))
+            var images = (await connection.QueryAsync<Image>("SELECT * FROM Images"))
                 .ToArray();
 
             images.Should().HaveCount(imagesCount);
 
-            var folders = (await Connection.QueryAsync<Folder>("SELECT * FROM Folders"))
+            var folders = (await connection.QueryAsync<Folder>("SELECT * FROM Folders"))
                 .ToArray();
 
             folders.Should().HaveCount(directoryCount);
 
-            var exifDatas = (await Connection.QueryAsync("SELECT * FROM ExifData"))
+            var exifDatas = (await connection.QueryAsync("SELECT * FROM ExifData"))
                 .ToArray();
 
             exifDatas.Should().HaveCount(imagesCount);
@@ -337,9 +320,9 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             var imageToRename = images.First(i => i.Path == generatedImages.First().Value.First());
             var imageExtension = FileSystem.Path.GetExtension(imageToRename.Path);
-            
+
             var folderPathToMoveTo = generatedImages.Skip(1).First().Key;
-            var folderToMoveTo = (await Connection.QueryAsync<Folder>("SELECT * FROM Folders WHERE Folders.Path=@Path",
+            var folderToMoveTo = (await connection.QueryAsync<Folder>("SELECT * FROM Folders WHERE Folders.Path=@Path",
                     new {Path = folderPathToMoveTo}))
                 .First();
 
@@ -351,28 +334,29 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             FileSystem.File.Move(imageToRename.Path, renamePath);
 
-            var updatedImageContainers = await imageManagementService.RenameImage(imageToRename.Path, renamePath).ToArray();
+            var updatedImageContainers =
+                await imageManagementService.RenameImage(imageToRename.Path, renamePath).ToArray();
             updatedImageContainers.Should().HaveCount(2);
             updatedImageContainers.Select(container => container.ContainerTypeId)
                 .Should()
                 .BeEquivalentTo(new[] {imageToRename.FolderId, folderToMoveTo.Id});
 
-            var imagesAfter = (await Connection.QueryAsync<Image>("SELECT * FROM Images"))
+            var imagesAfter = (await connection.QueryAsync<Image>("SELECT * FROM Images"))
                 .ToArray();
 
             imagesAfter.Should().HaveCount(imagesCount);
 
-            var foldersAfter = (await Connection.QueryAsync<Folder>("SELECT * FROM Folders"))
+            var foldersAfter = (await connection.QueryAsync<Folder>("SELECT * FROM Folders"))
                 .ToArray();
 
             foldersAfter.Should().HaveCount(directoryCount);
 
-            var exifDatasAfter = (await Connection.QueryAsync("SELECT * FROM ExifData"))
+            var exifDatasAfter = (await connection.QueryAsync("SELECT * FROM ExifData"))
                 .ToArray();
 
             exifDatasAfter.Should().HaveCount(imagesCount);
 
-            var renamedImage = (await Connection.QueryAsync<Image>("SELECT * FROM Images WHERE Images.Path=@Path",
+            var renamedImage = (await connection.QueryAsync<Image>("SELECT * FROM Images WHERE Images.Path=@Path",
                     new {Path = renamePath}))
                 .First();
 
@@ -388,30 +372,33 @@ namespace SonOfPicasso.Integration.Tests.Services
         [Fact]
         public async Task ShouldScanAndRenameImageToNewFolder()
         {
-            var imagesCount = 3;
-            var generatedImages = await GenerateImages(imagesCount);
+            await InitializeDataContextAsync();
+            await using var connection = DataContext.Database.GetDbConnection();
 
-            var imagesDirectoryInfo = FileSystem.DirectoryInfo.FromDirectoryName(_imagesPath);
+            var imagesCount = 3;
+            var generatedImages = await GenerateImagesAsync(imagesCount);
+
+            var imagesDirectoryInfo = FileSystem.DirectoryInfo.FromDirectoryName(ImagesPath);
             var directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
 
-            var imageManagementService = _container.Resolve<ImageManagementService>();
+            var imageManagementService = Container.Resolve<ImageManagementService>();
             var imageContainers = await imageManagementService
-                .ScanFolder(_imagesPath)
+                .ScanFolder(ImagesPath)
                 .ToArray();
 
             imageContainers.Should().HaveCount(directoryCount);
 
-            var images = (await Connection.QueryAsync<Image>("SELECT * FROM Images"))
+            var images = (await connection.QueryAsync<Image>("SELECT * FROM Images"))
                 .ToArray();
 
             images.Should().HaveCount(imagesCount);
 
-            var folders = (await Connection.QueryAsync<Folder>("SELECT * FROM Folders"))
+            var folders = (await connection.QueryAsync<Folder>("SELECT * FROM Folders"))
                 .ToArray();
 
             folders.Should().HaveCount(directoryCount);
 
-            var exifDatas = (await Connection.QueryAsync("SELECT * FROM ExifData"))
+            var exifDatas = (await connection.QueryAsync("SELECT * FROM ExifData"))
                 .ToArray();
 
             exifDatas.Should().HaveCount(imagesCount);
@@ -429,33 +416,34 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             var imageToRename = images.First(i => i.Path == generatedImages.First().Value.First());
             var imageExtension = FileSystem.Path.GetExtension(imageToRename.Path);
-            
-            var folderPathToMoveTo = FileSystem.Path.Combine(_imagesPath, "Custom");
+
+            var folderPathToMoveTo = FileSystem.Path.Combine(ImagesPath, "Custom");
             FileSystem.Directory.CreateDirectory(folderPathToMoveTo);
-            
+
             var renamePath = FileSystem.Path.Combine(folderPathToMoveTo, Faker.System.FileName(imageExtension));
 
             FileSystem.File.Move(imageToRename.Path, renamePath);
 
-            var updatedImageContainers = await imageManagementService.RenameImage(imageToRename.Path, renamePath).ToArray();
+            var updatedImageContainers =
+                await imageManagementService.RenameImage(imageToRename.Path, renamePath).ToArray();
             updatedImageContainers.Should().HaveCount(2);
 
-            var imagesAfter = (await Connection.QueryAsync<Image>("SELECT * FROM Images"))
+            var imagesAfter = (await connection.QueryAsync<Image>("SELECT * FROM Images"))
                 .ToArray();
 
             imagesAfter.Should().HaveCount(imagesCount);
 
-            var foldersAfter = (await Connection.QueryAsync<Folder>("SELECT * FROM Folders"))
+            var foldersAfter = (await connection.QueryAsync<Folder>("SELECT * FROM Folders"))
                 .ToArray();
 
             foldersAfter.Should().HaveCount(directoryCount + 1);
 
-            var exifDatasAfter = (await Connection.QueryAsync("SELECT * FROM ExifData"))
+            var exifDatasAfter = (await connection.QueryAsync("SELECT * FROM ExifData"))
                 .ToArray();
 
             exifDatasAfter.Should().HaveCount(imagesCount);
 
-            var renamedImage = (await Connection.QueryAsync<Image>("SELECT * FROM Images WHERE Images.Path=@Path",
+            var renamedImage = (await connection.QueryAsync<Image>("SELECT * FROM Images WHERE Images.Path=@Path",
                     new {Path = renamePath}))
                 .First();
 
@@ -467,30 +455,33 @@ namespace SonOfPicasso.Integration.Tests.Services
         [Fact]
         public async Task ShouldScanAndAddImageToNewFolder()
         {
-            var imagesCount = 50;
-            await GenerateImages(imagesCount);
+            await InitializeDataContextAsync();
+            await using var connection = DataContext.Database.GetDbConnection();
 
-            var imagesDirectoryInfo = FileSystem.DirectoryInfo.FromDirectoryName(_imagesPath);
+            var imagesCount = 50;
+            await GenerateImagesAsync(imagesCount);
+
+            var imagesDirectoryInfo = FileSystem.DirectoryInfo.FromDirectoryName(ImagesPath);
             var directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
 
-            var imageManagementService = _container.Resolve<ImageManagementService>();
+            var imageManagementService = Container.Resolve<ImageManagementService>();
             var imageContainers = await imageManagementService
-                .ScanFolder(_imagesPath)
+                .ScanFolder(ImagesPath)
                 .ToArray();
 
             imageContainers.Should().HaveCount(directoryCount);
 
-            var images = (await Connection.QueryAsync<Image>("SELECT * FROM Images"))
+            var images = (await connection.QueryAsync<Image>("SELECT * FROM Images"))
                 .ToArray();
 
             images.Should().HaveCount(imagesCount);
 
-            var folders = (await Connection.QueryAsync<Folder>("SELECT * FROM Folders"))
+            var folders = (await connection.QueryAsync<Folder>("SELECT * FROM Folders"))
                 .ToArray();
 
             folders.Should().HaveCount(directoryCount);
 
-            var exifDatas = (await Connection.QueryAsync("SELECT * FROM ExifData"))
+            var exifDatas = (await connection.QueryAsync("SELECT * FROM ExifData"))
                 .ToArray();
 
             exifDatas.Should().HaveCount(imagesCount);
@@ -506,10 +497,10 @@ namespace SonOfPicasso.Integration.Tests.Services
             containers.SelectMany(container => container.ImageRefs)
                 .Should().HaveCount(imagesCount);
 
-            var customPath = FileSystem.Path.Combine(_imagesPath, "CustomPath");
+            var customPath = FileSystem.Path.Combine(ImagesPath, "CustomPath");
             FileSystem.Directory.CreateDirectory(customPath);
 
-            var generatedData = await GenerateImages(1, customPath);
+            var generatedData = await GenerateImagesAsync(1, customPath);
             imagesCount = imagesCount + 1;
 
             var file = generatedData.First().Value.First();
@@ -520,20 +511,26 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
 
-            images = (await Connection.QueryAsync<Image>("SELECT * FROM Images"))
+            var imagesAfter = (await connection.QueryAsync<Image>("SELECT * FROM Images"))
                 .ToArray();
 
-            images.Should().HaveCount(imagesCount);
+            imagesAfter.Should().HaveCount(imagesCount);
 
-            folders = (await Connection.QueryAsync<Folder>("SELECT * FROM Folders"))
+            imagesAfter.FirstOrDefault(image => image.Path == file)
+                .Should().NotBeNull();
+
+            var foldersAfter = (await connection.QueryAsync<Folder>("SELECT * FROM Folders"))
                 .ToArray();
 
-            folders.Should().HaveCount(directoryCount);
+            foldersAfter.Should().HaveCount(directoryCount);
 
-            exifDatas = (await Connection.QueryAsync("SELECT * FROM ExifData"))
+            foldersAfter.FirstOrDefault(folder => folder.Path == customPath)
+                .Should().NotBeNull();
+
+            var exifDatasAfter = (await connection.QueryAsync("SELECT * FROM ExifData"))
                 .ToArray();
 
-            exifDatas.Should().HaveCount(imagesCount);
+            exifDatasAfter.Should().HaveCount(imagesCount);
 
             containers = await imageManagementService
                 .GetAllImageContainers()
@@ -550,30 +547,33 @@ namespace SonOfPicasso.Integration.Tests.Services
         [Fact]
         public async Task ShouldScanAndAddImageToExistingFolder()
         {
-            var imagesCount = 5;
-            await GenerateImages(imagesCount);
+            await InitializeDataContextAsync();
+            await using var connection = DataContext.Database.GetDbConnection();
 
-            var imagesDirectoryInfo = FileSystem.DirectoryInfo.FromDirectoryName(_imagesPath);
+            var imagesCount = 5;
+            await GenerateImagesAsync(imagesCount);
+
+            var imagesDirectoryInfo = FileSystem.DirectoryInfo.FromDirectoryName(ImagesPath);
             var directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
 
-            var imageManagementService = _container.Resolve<ImageManagementService>();
+            var imageManagementService = Container.Resolve<ImageManagementService>();
             var imageContainers = await imageManagementService
-                .ScanFolder(_imagesPath)
+                .ScanFolder(ImagesPath)
                 .ToArray();
 
             imageContainers.Should().HaveCount(directoryCount);
 
-            var images = (await Connection.QueryAsync<Image>("SELECT * FROM Images"))
+            var images = (await connection.QueryAsync<Image>("SELECT * FROM Images"))
                 .ToArray();
 
             images.Should().HaveCount(imagesCount);
 
-            var folders = (await Connection.QueryAsync<Folder>("SELECT * FROM Folders"))
+            var folders = (await connection.QueryAsync<Folder>("SELECT * FROM Folders"))
                 .ToArray();
 
             folders.Should().HaveCount(directoryCount);
 
-            var exifDatas = (await Connection.QueryAsync("SELECT * FROM ExifData"))
+            var exifDatas = (await connection.QueryAsync("SELECT * FROM ExifData"))
                 .ToArray();
 
             exifDatas.Should().HaveCount(imagesCount);
@@ -591,7 +591,7 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             var existingDirectory = Faker.PickRandom(imagesDirectoryInfo.EnumerateDirectories()).FullName;
 
-            var generatedData = await GenerateImages(1, existingDirectory);
+            var generatedData = await GenerateImagesAsync(1, existingDirectory);
             imagesCount = imagesCount + 1;
 
             var file = generatedData.First().Value.First();
@@ -602,17 +602,17 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
 
-            images = (await Connection.QueryAsync<Image>("SELECT * FROM Images"))
+            images = (await connection.QueryAsync<Image>("SELECT * FROM Images"))
                 .ToArray();
 
             images.Should().HaveCount(imagesCount);
 
-            folders = (await Connection.QueryAsync<Folder>("SELECT * FROM Folders"))
+            folders = (await connection.QueryAsync<Folder>("SELECT * FROM Folders"))
                 .ToArray();
 
             folders.Should().HaveCount(directoryCount);
 
-            exifDatas = (await Connection.QueryAsync("SELECT * FROM ExifData"))
+            exifDatas = (await connection.QueryAsync("SELECT * FROM ExifData"))
                 .ToArray();
 
             exifDatas.Should().HaveCount(imagesCount);
@@ -632,14 +632,17 @@ namespace SonOfPicasso.Integration.Tests.Services
         [Fact]
         public async Task ShouldCreateAndDeleteAlbum()
         {
+            await InitializeDataContextAsync();
+            await using var connection = DataContext.Database.GetDbConnection();
+
             var imageCount = 10;
             var albumImageCount = 5;
 
-            await GenerateImages(imageCount);
+            await GenerateImagesAsync(imageCount);
 
-            var imageManagementService = _container.Resolve<ImageManagementService>();
+            var imageManagementService = Container.Resolve<ImageManagementService>();
             var imageContainers = await imageManagementService
-                .ScanFolder(_imagesPath)
+                .ScanFolder(ImagesPath)
                 .ToArray();
 
             var imageRefs = Faker
@@ -673,12 +676,12 @@ namespace SonOfPicasso.Integration.Tests.Services
             imageContainer.ImageRefs.Should().HaveCount(albumImageCount);
             imageContainer.Year.Should().Be(createAlbum.AlbumDate.Year);
 
-            var albums = (await Connection.QueryAsync<Album>("SELECT * FROM Albums"))
+            var albums = (await connection.QueryAsync<Album>("SELECT * FROM Albums"))
                 .ToArray();
 
             albums.Should().ContainSingle();
 
-            var albumImages = (await Connection.QueryAsync<AlbumImage>("SELECT * FROM AlbumImages"))
+            var albumImages = (await connection.QueryAsync<AlbumImage>("SELECT * FROM AlbumImages"))
                 .ToArray();
 
             albumImages.Should().HaveCount(5);
@@ -691,12 +694,12 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             WaitOne();
 
-            albums = (await Connection.QueryAsync<Album>("SELECT * FROM Albums"))
+            albums = (await connection.QueryAsync<Album>("SELECT * FROM Albums"))
                 .ToArray();
 
             albums.Should().BeEmpty();
 
-            albumImages = (await Connection.QueryAsync<AlbumImage>("SELECT * FROM AlbumImages"))
+            albumImages = (await connection.QueryAsync<AlbumImage>("SELECT * FROM AlbumImages"))
                 .ToArray();
 
             albumImages.Should().BeEmpty();
@@ -705,14 +708,17 @@ namespace SonOfPicasso.Integration.Tests.Services
         [Fact]
         public async Task ShouldCreateAndGetAllContainers()
         {
+            await InitializeDataContextAsync();
+            await using var connection = DataContext.Database.GetDbConnection();
+
             var imageCount = 10;
             var albumImageCount = 5;
 
-            await GenerateImages(imageCount);
+            await GenerateImagesAsync(imageCount);
 
-            var imageManagementService = _container.Resolve<ImageManagementService>();
+            var imageManagementService = Container.Resolve<ImageManagementService>();
             var imageContainers = await imageManagementService
-                .ScanFolder(_imagesPath)
+                .ScanFolder(ImagesPath)
                 .ToArray();
 
             var imageRefs = Faker
@@ -735,12 +741,12 @@ namespace SonOfPicasso.Integration.Tests.Services
             var imageContainer = await imageManagementService.CreateAlbum(createAlbum);
             imageContainer = await imageManagementService.AddImagesToAlbum(imageContainer.ContainerTypeId, imageIds);
 
-            var albums = (await Connection.QueryAsync<Album>("SELECT * FROM Albums"))
+            var albums = (await connection.QueryAsync<Album>("SELECT * FROM Albums"))
                 .ToArray();
 
             albums.Should().ContainSingle();
 
-            var albumImages = (await Connection.QueryAsync<AlbumImage>("SELECT * FROM AlbumImages"))
+            var albumImages = (await connection.QueryAsync<AlbumImage>("SELECT * FROM AlbumImages"))
                 .ToArray();
 
             albumImages.Should().HaveCount(5);
@@ -752,7 +758,8 @@ namespace SonOfPicasso.Integration.Tests.Services
                 .Should()
                 .HaveCount(imageContainers.Length + 1);
 
-            var albumImageContainer = imageContainersAfter.First(container => container.ContainerType == ImageContainerTypeEnum.Album);
+            var albumImageContainer =
+                imageContainersAfter.First(container => container.ContainerType == ImageContainerTypeEnum.Album);
             albumImageContainer.Name.Should().Be(createAlbum.AlbumName);
             albumImageContainer.Date.Should().Be(createAlbum.AlbumDate);
         }
@@ -760,31 +767,34 @@ namespace SonOfPicasso.Integration.Tests.Services
         [Fact]
         public async Task ShouldScanAndRescan()
         {
+            await InitializeDataContextAsync();
+            await using var connection = DataContext.Database.GetDbConnection();
+
             var imageCount = 5;
             var addImages = 5;
-            await GenerateImages(imageCount);
+            await GenerateImagesAsync(imageCount);
 
-            var imagesDirectoryInfo = FileSystem.DirectoryInfo.FromDirectoryName(_imagesPath);
+            var imagesDirectoryInfo = FileSystem.DirectoryInfo.FromDirectoryName(ImagesPath);
             var directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
 
-            var imageManagementService = _container.Resolve<ImageManagementService>();
+            var imageManagementService = Container.Resolve<ImageManagementService>();
             var imageContainers = await imageManagementService
-                .ScanFolder(_imagesPath)
+                .ScanFolder(ImagesPath)
                 .ToArray();
 
             imageContainers.Should().HaveCount(directoryCount);
 
-            var images = (await Connection.QueryAsync<Image>("SELECT * FROM Images"))
+            var images = (await connection.QueryAsync<Image>("SELECT * FROM Images"))
                 .ToArray();
 
             images.Should().HaveCount(imageCount);
 
-            var exifDatas = (await Connection.QueryAsync("SELECT * FROM ExifData"))
+            var exifDatas = (await connection.QueryAsync("SELECT * FROM ExifData"))
                 .ToArray();
 
             exifDatas.Should().HaveCount(imageCount);
 
-            var folders = (await Connection.QueryAsync<Folder>("SELECT * FROM Folders"))
+            var folders = (await connection.QueryAsync<Folder>("SELECT * FROM Folders"))
                 .ToArray();
 
             folders.Should().HaveCount(directoryCount);
@@ -797,26 +807,26 @@ namespace SonOfPicasso.Integration.Tests.Services
                 .Should()
                 .Be(directoryCount);
 
-            await GenerateImages(addImages);
+            await GenerateImagesAsync(addImages);
             imageCount += addImages;
 
             await imageManagementService
-                .ScanFolder(_imagesPath)
+                .ScanFolder(ImagesPath)
                 .ToArray();
 
             directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
 
-            images = (await Connection.QueryAsync<Image>("SELECT * FROM Images"))
+            images = (await connection.QueryAsync<Image>("SELECT * FROM Images"))
                 .ToArray();
 
             images.Should().HaveCount(imageCount);
 
-            exifDatas = (await Connection.QueryAsync("SELECT * FROM ExifData"))
+            exifDatas = (await connection.QueryAsync("SELECT * FROM ExifData"))
                 .ToArray();
 
             exifDatas.Should().HaveCount(imageCount);
 
-            folders = (await Connection.QueryAsync<Folder>("SELECT * FROM Folders"))
+            folders = (await connection.QueryAsync<Folder>("SELECT * FROM Folders"))
                 .ToArray();
 
             folders.Should().HaveCount(directoryCount);

@@ -127,11 +127,6 @@ namespace SonOfPicasso.Tools.Services
             foreach (var propertyInfo in properties)
                 try
                 {
-                    if (propertyInfo.Name.Equals(nameof(ExifData.Image)))
-                    {
-                        continue;
-                    }
-
                     var exifTag = (ExifTag)Enum.Parse(typeof(ExifTag), propertyInfo.Name, true);
 
                     var exifTagType = GetExifTagType(exifTag);

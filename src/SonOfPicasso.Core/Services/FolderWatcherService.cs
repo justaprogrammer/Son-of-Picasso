@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive.Linq;
+using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Data.Model;
 
@@ -21,7 +22,7 @@ namespace SonOfPicasso.Core.Services
             _schedulerProvider = schedulerProvider;
         }
 
-        public IObservable<FileSystemEventArgs> WatchFolders(IEnumerable<FolderRule> folderRules)
+        public IObservable<FileSystemEventArgs> WatchFolders(IEnumerable<FolderRule> folderRules, IEnumerable<string> extensionFilters = null)
         {
             var itemsDictionary = new Dictionary<string, List<FolderRule>>();
 
@@ -42,7 +43,7 @@ namespace SonOfPicasso.Core.Services
                 }
             }
 
-            return itemsDictionary
+            var observable = itemsDictionary
                 .ToObservable()
                 .Select(keyValuePair =>
                 {
@@ -84,8 +85,17 @@ namespace SonOfPicasso.Core.Services
                         });
                 })
                 .ToArray()
-                .Select(observables => Observable.Merge(observables))
-                .SelectMany(observable => observable);
+                .SelectMany(observables => Observable.Merge(observables))
+                .Where(args => ! _fileSystem.File.GetAttributes(args.FullPath).HasFlag(FileAttributes.Directory));
+
+            if (extensionFilters != null)
+            {
+                var extensionsHash = extensionFilters.ToHashSet();
+                observable = observable
+                    .Where(args => extensionsHash.Contains(_fileSystem.Path.GetExtension(args.FullPath)));
+            }
+
+            return observable;
         }
 
         private FileSystemEventArgs InRuleSet(FileSystemEventArgs fileSystemEventArgs, IList<FolderRule> folderRules)
