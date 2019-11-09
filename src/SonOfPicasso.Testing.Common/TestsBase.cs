@@ -72,7 +72,7 @@ namespace SonOfPicasso.Testing.Common
 
         protected void WaitOne(TimeSpan? timespan = null)
         {
-            AutoResetEvent.WaitOne(timespan ?? TimeSpan.FromTicks(500)).Should().BeTrue();
+            AutoResetEvent.WaitOne(timespan ?? TimeSpan.FromSeconds(0.5)).Should().BeTrue();
         }
 
         public virtual void Dispose()
