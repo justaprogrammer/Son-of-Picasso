@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data.Common;
+using System.IO;
 using System.IO.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using SonOfPicasso.Data.Repository;
@@ -14,8 +15,8 @@ namespace SonOfPicasso.Integration.Tests
         protected readonly DbContextOptions<DataContext> DbContextOptions;
         protected readonly FileSystem FileSystem;
         protected readonly string TestPath;
-        protected readonly DbConnection Connection;
-        private readonly DataContext _dataContext;
+        protected DbConnection Connection;
+        private DataContext _dataContext;
 
         protected IntegrationTestsBase(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
@@ -35,15 +36,20 @@ namespace SonOfPicasso.Integration.Tests
 
             _dataContext = new DataContext(DbContextOptions);
             _dataContext.Database.Migrate();
-            _dataContext.Database.OpenConnection();
-            Connection = _dataContext.Database.GetDbConnection(); 
+            Connection = _dataContext.Database.GetDbConnection();
+            Connection.Open();
         }
 
         public override void Dispose()
         {
             base.Dispose();
-            Connection?.Dispose();
+            
+            Connection.Close();
+            Connection.Dispose();
+            Connection = null;
+
             _dataContext?.Dispose();
+            _dataContext = null;
 
             if (FileSystem.Directory.Exists(TestPath))
                 try
@@ -52,7 +58,20 @@ namespace SonOfPicasso.Integration.Tests
                 }
                 catch (Exception e)
                 {
-                    Logger.Error(e, "Unable to delete test directory {TestPath}", TestPath);
+                    Logger.Warning(e, "Unable to delete test directory {TestPath}", TestPath);
+
+                    foreach (var file in FileSystem.Directory.EnumerateFiles(TestPath, "*.*",
+                        SearchOption.AllDirectories))
+                    {
+                        try
+                        {
+                            FileSystem.File.Delete(file);
+                        }
+                        catch (Exception e1)
+                        {
+                            Logger.Error(e1, "Unable to delete file {File}", file);
+                        }
+                    }
                 }
         }
     }

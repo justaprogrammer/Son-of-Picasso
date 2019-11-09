@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO.Abstractions;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Model;
@@ -213,6 +214,7 @@ namespace SonOfPicasso.Core.Services
 
                     if (folder != null)
                     {
+                        folder.Images ??= new List<Image>();
                         folder.Images.Add(image);
                     }
                     else
@@ -325,6 +327,19 @@ namespace SonOfPicasso.Core.Services
                     return new[] {oldFolderId, folder.Id}.ToObservable();
                 })
                 .SelectMany(GetFolderImageContainer)
+                .SubscribeOn(_schedulerProvider.TaskPool);
+        }
+
+        public IObservable<Unit> DeleteAlbum(int albumId)
+        {
+            return Observable.Defer(() =>
+                {
+                    using var unitOfWork = _unitOfWorkFactory();
+                    unitOfWork.AlbumRepository.Delete(albumId);
+                    unitOfWork.Save();
+
+                    return Observable.Return(Unit.Default);
+                })
                 .SubscribeOn(_schedulerProvider.TaskPool);
         }
 
