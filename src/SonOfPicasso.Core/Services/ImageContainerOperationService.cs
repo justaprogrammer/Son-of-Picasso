@@ -13,7 +13,7 @@ using SonOfPicasso.Data.Model;
 
 namespace SonOfPicasso.Core.Services
 {
-    public class ImageManagementService : IImageManagementService
+    public class ImageContainerOperationService : IImageContainerOperationService
     {
         private const string AlbumDefaultProperties = "AlbumImages,AlbumImages.Image,AlbumImages.Image.ExifData";
         private const string FolderDefaultProperties = "Images,Images.ExifData";
@@ -26,7 +26,7 @@ namespace SonOfPicasso.Core.Services
         private readonly Func<IUnitOfWork> _unitOfWorkFactory;
         private readonly object _writeLock = new object();
 
-        public ImageManagementService(IFileSystem fileSystem,
+        public ImageContainerOperationService(IFileSystem fileSystem,
             ILogger logger,
             IImageLocationService imageLocationService,
             Func<IUnitOfWork> unitOfWorkFactory,

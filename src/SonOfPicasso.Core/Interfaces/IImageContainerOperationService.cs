@@ -6,7 +6,7 @@ using SonOfPicasso.Data.Model;
 
 namespace SonOfPicasso.Core.Interfaces
 {
-    public interface IImageManagementService
+    public interface IImageContainerOperationService
     {
         IObservable<IImageContainer> ScanFolder(string path);
         IObservable<IImageContainer> CreateAlbum(ICreateAlbum createAlbum);

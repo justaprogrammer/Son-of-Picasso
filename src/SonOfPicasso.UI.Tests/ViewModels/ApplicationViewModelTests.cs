@@ -28,7 +28,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
         [Fact]
         public void ShouldInitializeAndActivate()
         {
-            var imageManagementService = AutoSubstitute.Resolve<IImageManagementService>();
+            var imageManagementService = AutoSubstitute.Resolve<IImageContainerOperationService>();
 
             var folders = Fakers.FolderFaker
                 .GenerateForever("default,withImages")
@@ -65,7 +65,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
         [Fact]
         public void ShouldSelectAndPinImages()
         {
-            var imageManagementService = AutoSubstitute.Resolve<IImageManagementService>();
+            var imageManagementService = AutoSubstitute.Resolve<IImageContainerOperationService>();
 
             var folders = Fakers.FolderFaker
                 .GenerateForever("default,withImages")
@@ -123,7 +123,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
         [Fact]
         public void ShouldDisplayPinnedAndNonPinned()
         {
-            var imageManagementService = AutoSubstitute.Resolve<IImageManagementService>();
+            var imageManagementService = AutoSubstitute.Resolve<IImageContainerOperationService>();
 
             var folders = Fakers.FolderFaker
                 .GenerateForever("default,withImages")
@@ -182,7 +182,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
         [Fact]
         public void ShouldClearPinnedAllIfNoneSelectedAndConfirm()
         {
-            var imageManagementService = AutoSubstitute.Resolve<IImageManagementService>();
+            var imageManagementService = AutoSubstitute.Resolve<IImageContainerOperationService>();
 
             var folders = Fakers.FolderFaker
                 .GenerateForever("default,withImages")
@@ -255,7 +255,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
         [Fact]
         public void ShouldClearPinnedAllIfNoneSelectedAndDecline()
         {
-            var imageManagementService = AutoSubstitute.Resolve<IImageManagementService>();
+            var imageManagementService = AutoSubstitute.Resolve<IImageContainerOperationService>();
 
             var folders = Fakers.FolderFaker
                 .GenerateForever("default,withImages")
@@ -328,7 +328,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
         [Fact]
         public void ShouldExecuteFolderManagerAndCancel()
         {
-            var imageManagementService = AutoSubstitute.Resolve<IImageManagementService>();
+            var imageManagementService = AutoSubstitute.Resolve<IImageContainerOperationService>();
             var folderRulesManagementService = AutoSubstitute.Resolve<IFolderRulesManagementService>();
 
             var folders = Fakers.FolderFaker
@@ -382,7 +382,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
         [Fact]
         public void ShouldExecuteFolderManagerAndContinue()
         {
-            var imageManagementService = AutoSubstitute.Resolve<IImageManagementService>();
+            var imageManagementService = AutoSubstitute.Resolve<IImageContainerOperationService>();
             var folderRulesManagementService = AutoSubstitute.Resolve<IFolderRulesManagementService>();
 
             var folders = Fakers.FolderFaker

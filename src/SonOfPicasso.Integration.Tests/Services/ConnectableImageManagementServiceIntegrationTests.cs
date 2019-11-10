@@ -26,9 +26,9 @@ namespace SonOfPicasso.Integration.Tests.Services
             var containerBuilder = GetContainerBuilder();
             containerBuilder.RegisterType<ExifDataService>().As<IExifDataService>();
             containerBuilder.RegisterType<ImageLocationService>().As<IImageLocationService>();
-            containerBuilder.RegisterType<ConnectableImageManagementService>();
+            containerBuilder.RegisterType<ImageContainerImageManagementService>();
             containerBuilder.RegisterType<FolderRulesManagementService>().As<IFolderRulesManagementService>();
-            containerBuilder.RegisterType<ImageManagementService>().As<IImageManagementService>();
+            containerBuilder.RegisterType<ImageContainerOperationService>().As<IImageContainerOperationService>();
             containerBuilder.RegisterType<FolderWatcherService>().As<IFolderWatcherService>();
 
             Container = containerBuilder.Build();
@@ -44,7 +44,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             var imageCount = 50;
             var generateImagesAsync = await GenerateImagesAsync(imageCount);
 
-            var connectableImageManagementService = Container.Resolve<ConnectableImageManagementService>();
+            var connectableImageManagementService = Container.Resolve<ImageContainerImageManagementService>();
 
             var imageContainers = new ObservableCollectionExtended<IImageContainer>();
             connectableImageManagementService.ImageContainerCache
@@ -79,7 +79,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                 Path = ImagesPath
             });
 
-            var connectableImageManagementService = Container.Resolve<ConnectableImageManagementService>();
+            var connectableImageManagementService = Container.Resolve<ImageContainerImageManagementService>();
 
             var imageContainers = new ObservableCollectionExtended<IImageContainer>();
             connectableImageManagementService.ImageContainerCache

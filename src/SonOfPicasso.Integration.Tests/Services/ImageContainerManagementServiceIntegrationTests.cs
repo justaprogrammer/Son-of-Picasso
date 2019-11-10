@@ -15,13 +15,13 @@ using Xunit.Abstractions;
 
 namespace SonOfPicasso.Integration.Tests.Services
 {
-    public class ImageManagementServiceIntegrationTests : IntegrationTestsBase
+    public class ImageContainerManagementServiceIntegrationTests : IntegrationTestsBase
     {
-        public ImageManagementServiceIntegrationTests(ITestOutputHelper testOutputHelper)
+        public ImageContainerManagementServiceIntegrationTests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {
             var containerBuilder = GetContainerBuilder();
-            containerBuilder.RegisterType<ImageManagementService>();
+            containerBuilder.RegisterType<ImageContainerOperationService>();
             containerBuilder.RegisterType<ExifDataService>().As<IExifDataService>();
             containerBuilder.RegisterType<ImageLocationService>().As<IImageLocationService>();
             Container = containerBuilder.Build();
@@ -54,7 +54,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             var imagesDirectoryInfo = FileSystem.DirectoryInfo.FromDirectoryName(ImagesPath);
             var directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
 
-            var imageManagementService = Container.Resolve<ImageManagementService>();
+            var imageManagementService = Container.Resolve<ImageContainerOperationService>();
             var imageContainers = await imageManagementService
                 .ScanFolder(ImagesPath)
                 .ToArray();
@@ -123,7 +123,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             var imagesDirectoryInfo = FileSystem.DirectoryInfo.FromDirectoryName(ImagesPath);
             var directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
 
-            var imageManagementService = Container.Resolve<ImageManagementService>();
+            var imageManagementService = Container.Resolve<ImageContainerOperationService>();
             var imageContainers = await imageManagementService
                 .ScanFolder(ImagesPath)
                 .ToArray();
@@ -203,7 +203,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             var imagesDirectoryInfo = FileSystem.DirectoryInfo.FromDirectoryName(ImagesPath);
             var directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
 
-            var imageManagementService = Container.Resolve<ImageManagementService>();
+            var imageManagementService = Container.Resolve<ImageContainerOperationService>();
             var imageContainers = await imageManagementService
                 .ScanFolder(ImagesPath)
                 .ToArray();
@@ -285,7 +285,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             var imagesDirectoryInfo = FileSystem.DirectoryInfo.FromDirectoryName(ImagesPath);
             var directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
 
-            var imageManagementService = Container.Resolve<ImageManagementService>();
+            var imageManagementService = Container.Resolve<ImageContainerOperationService>();
             var imageContainers = await imageManagementService
                 .ScanFolder(ImagesPath)
                 .ToArray();
@@ -381,7 +381,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             var imagesDirectoryInfo = FileSystem.DirectoryInfo.FromDirectoryName(ImagesPath);
             var directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
 
-            var imageManagementService = Container.Resolve<ImageManagementService>();
+            var imageManagementService = Container.Resolve<ImageContainerOperationService>();
             var imageContainers = await imageManagementService
                 .ScanFolder(ImagesPath)
                 .ToArray();
@@ -464,7 +464,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             var imagesDirectoryInfo = FileSystem.DirectoryInfo.FromDirectoryName(ImagesPath);
             var directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
 
-            var imageManagementService = Container.Resolve<ImageManagementService>();
+            var imageManagementService = Container.Resolve<ImageContainerOperationService>();
             var imageContainers = await imageManagementService
                 .ScanFolder(ImagesPath)
                 .ToArray();
@@ -556,7 +556,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             var imagesDirectoryInfo = FileSystem.DirectoryInfo.FromDirectoryName(ImagesPath);
             var directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
 
-            var imageManagementService = Container.Resolve<ImageManagementService>();
+            var imageManagementService = Container.Resolve<ImageContainerOperationService>();
             var imageContainers = await imageManagementService
                 .ScanFolder(ImagesPath)
                 .ToArray();
@@ -640,7 +640,7 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             await GenerateImagesAsync(imageCount);
 
-            var imageManagementService = Container.Resolve<ImageManagementService>();
+            var imageManagementService = Container.Resolve<ImageContainerOperationService>();
             var imageContainers = await imageManagementService
                 .ScanFolder(ImagesPath)
                 .ToArray();
@@ -716,7 +716,7 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             await GenerateImagesAsync(imageCount);
 
-            var imageManagementService = Container.Resolve<ImageManagementService>();
+            var imageManagementService = Container.Resolve<ImageContainerOperationService>();
             var imageContainers = await imageManagementService
                 .ScanFolder(ImagesPath)
                 .ToArray();
@@ -777,7 +777,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             var imagesDirectoryInfo = FileSystem.DirectoryInfo.FromDirectoryName(ImagesPath);
             var directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
 
-            var imageManagementService = Container.Resolve<ImageManagementService>();
+            var imageManagementService = Container.Resolve<ImageContainerOperationService>();
             var imageContainers = await imageManagementService
                 .ScanFolder(ImagesPath)
                 .ToArray();

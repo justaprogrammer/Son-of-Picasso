@@ -97,8 +97,8 @@ namespace SonOfPicasso.Tools
                         .As<ISchedulerProvider>()
                         .InstancePerLifetimeScope();
 
-                    containerBuilder.RegisterType<ImageManagementService>()
-                        .As<IImageManagementService>()
+                    containerBuilder.RegisterType<ImageContainerOperationService>()
+                        .As<IImageContainerOperationService>()
                         .InstancePerLifetimeScope();
 
                     containerBuilder.RegisterType<ImageLocationService>()

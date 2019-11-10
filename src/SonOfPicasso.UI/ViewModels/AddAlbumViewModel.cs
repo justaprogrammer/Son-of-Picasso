@@ -15,7 +15,7 @@ namespace SonOfPicasso.UI.ViewModels
     public class AddAlbumViewModel : ValidatedViewModelBase<AddAlbumViewModel>, ICreateAlbum, IDisposable
     {
         private readonly ObservableAsPropertyHelper<bool> _displayAlbumNameError;
-        private readonly IImageManagementService _imageManagementService;
+        private readonly IImageContainerOperationService _imageContainerOperationService;
         private readonly ILogger _logger;
         private readonly ISchedulerProvider _schedulerProvider;
 
@@ -23,11 +23,11 @@ namespace SonOfPicasso.UI.ViewModels
         private string _albumName = string.Empty;
 
         public AddAlbumViewModel(ViewModelActivator activator, ILogger logger,
-            IImageManagementService imageManagementService, ISchedulerProvider schedulerProvider) : base(
+            IImageContainerOperationService imageContainerOperationService, ISchedulerProvider schedulerProvider) : base(
             activator, schedulerProvider.TaskPool)
         {
             _logger = logger;
-            _imageManagementService = imageManagementService;
+            _imageContainerOperationService = imageContainerOperationService;
             _schedulerProvider = schedulerProvider;
 
             AlbumNameRule =

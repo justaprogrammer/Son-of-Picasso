@@ -20,9 +20,9 @@ using Xunit.Abstractions;
 
 namespace SonOfPicasso.Core.Tests.Services
 {
-    public class ConnectableImageManagementServiceTests : UnitTestsBase
+    public class ImageContainerManagementServiceTests : UnitTestsBase
     {
-        public ConnectableImageManagementServiceTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        public ImageContainerManagementServiceTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
         {
         }
 
@@ -44,7 +44,7 @@ namespace SonOfPicasso.Core.Tests.Services
             folderRulesManagementService.GetFolderManagementRules()
                 .ReturnsForAnyArgs(Observable.Return(currentFolderRules));
 
-            var imageManagementService = AutoSubstitute.Resolve<IImageManagementService>();
+            var imageManagementService = AutoSubstitute.Resolve<IImageContainerOperationService>();
 
             var imageContainer = Substitute.For<IImageContainer>();
             imageContainer.Id.Returns(Faker.Random.String());
@@ -67,7 +67,7 @@ namespace SonOfPicasso.Core.Tests.Services
             imageManagementService.GetAllImageContainers()
                 .Returns(Observable.Return(imageContainer));
 
-            var connectableImageManagementService = AutoSubstitute.Resolve<ConnectableImageManagementService>();
+            var connectableImageManagementService = AutoSubstitute.Resolve<ImageContainerImageManagementService>();
 
             var imageContainers = new ObservableCollectionExtended<IImageContainer>();
 
@@ -125,7 +125,7 @@ namespace SonOfPicasso.Core.Tests.Services
             folderRulesManagementService.AddFolderManagementRule(default)
                 .ReturnsForAnyArgs(Observable.Return(Unit.Default));
 
-            var imageManagementService = AutoSubstitute.Resolve<IImageManagementService>();
+            var imageManagementService = AutoSubstitute.Resolve<IImageContainerOperationService>();
 
             var imageContainer = Substitute.For<IImageContainer>();
             imageContainer.Id.Returns(Faker.Random.String());
@@ -151,7 +151,7 @@ namespace SonOfPicasso.Core.Tests.Services
             imageManagementService.GetAllImageContainers()
                 .Returns(Observable.Empty<IImageContainer>());
 
-            var connectableImageManagementService = AutoSubstitute.Resolve<ConnectableImageManagementService>();
+            var connectableImageManagementService = AutoSubstitute.Resolve<ImageContainerImageManagementService>();
 
             var imageContainers = new ObservableCollectionExtended<IImageContainer>();
 
@@ -239,7 +239,7 @@ namespace SonOfPicasso.Core.Tests.Services
             folderRulesManagementService.GetFolderManagementRules()
                 .ReturnsForAnyArgs(Observable.Return(currentFolderRules));
 
-            var imageManagementService = AutoSubstitute.Resolve<IImageManagementService>();
+            var imageManagementService = AutoSubstitute.Resolve<IImageContainerOperationService>();
 
             var imageContainer = Substitute.For<IImageContainer>();
             imageContainer.Id.Returns(Faker.Random.String());
@@ -262,7 +262,7 @@ namespace SonOfPicasso.Core.Tests.Services
             imageManagementService.GetAllImageContainers()
                 .Returns(Observable.Return(imageContainer));
 
-            var connectableImageManagementService = AutoSubstitute.Resolve<ConnectableImageManagementService>();
+            var connectableImageManagementService = AutoSubstitute.Resolve<ImageContainerImageManagementService>();
 
             var imageContainers = new ObservableCollectionExtended<IImageContainer>();
 
