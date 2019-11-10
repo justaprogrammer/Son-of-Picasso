@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using Autofac;
+using DynamicData.Binding;
 using FluentAssertions;
 using SonOfPicasso.Core.Services;
 using SonOfPicasso.Data.Model;
@@ -67,7 +68,7 @@ namespace SonOfPicasso.Integration.Tests.Services
         [Fact]
         public void ShouldWatchFileCreate()
         {
-            var eventsList = new List<FileSystemEventArgs>();
+            var eventsList = new ObservableCollectionExtended<FileSystemEventArgs>();
 
             var folderWatcherService = Container.Resolve<FolderWatcherService>();
             using var disposable = folderWatcherService.WatchFolders(new[]
@@ -86,29 +87,33 @@ namespace SonOfPicasso.Integration.Tests.Services
                 .Distinct()
                 .ToList();
 
+            eventsList.WhenPropertyChanged(e => e.Count)
+                .Subscribe(propertyValue =>
+                {
+                    if (propertyValue.Value == 20)
+                    {
+                        AutoResetEvent.Set();
+                    }
+                });
+
             files
                 .ToObservable()
                 .ObserveOn(SchedulerProvider.TaskPool)
                 .Subscribe(s =>
                 {
-                    using (var streamWriter = FileSystem.File.CreateText(s))
-                    {
-                        streamWriter.WriteLine("Hello World!");
-                        streamWriter.Flush();
-                        streamWriter.Close();
-                    }
-                }, () => AutoResetEvent.Set());
-
+                    using var streamWriter = FileSystem.File.CreateText(s);
+                    streamWriter.WriteLine("Hello World!");
+                    streamWriter.Flush();
+                    streamWriter.Close();
+                });
 
             WaitOne();
-
-            eventsList.Should().HaveCount(files.Count * 2);
         }
 
         [Fact]
         public void ShouldWatchFileCreateWithFilter()
         {
-            var eventsList = new List<FileSystemEventArgs>();
+            var eventsList = new ObservableCollectionExtended<FileSystemEventArgs>();
 
             var folderWatcherService = Container.Resolve<FolderWatcherService>();
             using var disposable = folderWatcherService.WatchFolders(new[]
@@ -136,22 +141,27 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             allFiles = Faker.Random.ListItems(allFiles, allFiles.Count);
 
+            eventsList.WhenPropertyChanged(e => e.Count)
+                .Subscribe(propertyValue =>
+                {
+                    if (propertyValue.Value == jpgFiles.Length * 2)
+                    {
+                        AutoResetEvent.Set();
+                    }
+                });
+
             allFiles
                 .ToObservable()
                 .ObserveOn(SchedulerProvider.TaskPool)
                 .Subscribe(s =>
                 {
-                    using (var streamWriter = FileSystem.File.CreateText(s))
-                    {
-                        streamWriter.WriteLine("Hello World!");
-                        streamWriter.Flush();
-                        streamWriter.Close();
-                    }
-                }, () => AutoResetEvent.Set());
+                    using var streamWriter = FileSystem.File.CreateText(s);
+                    streamWriter.WriteLine("Hello World!");
+                    streamWriter.Flush();
+                    streamWriter.Close();
+                });
 
-            WaitOne(TimeSpan.FromSeconds(5));
-
-            eventsList.Should().HaveCount(jpgFiles.Length * 2);
+            WaitOne(TimeSpan.FromSeconds(15));
         }
 
         [Fact]
@@ -160,7 +170,6 @@ namespace SonOfPicasso.Integration.Tests.Services
             var folderPath = FileSystem.Path.Combine(TestPath, "folder1");
 
             FileSystem.Directory.CreateDirectory(folderPath);
-
 
             var testFilePath1 = FileSystem.Path.Combine(folderPath, "Hello.txt");
             var testFilePath2 = FileSystem.Path.Combine(folderPath, "Hello1.txt");
@@ -172,7 +181,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                 streamWriter.Close();
             }
 
-            var eventsList = new List<FileSystemEventArgs>();
+            var eventsList = new ObservableCollectionExtended<FileSystemEventArgs>();
             var folderWatcherService = Container.Resolve<FolderWatcherService>();
             using var disposable = folderWatcherService.WatchFolders(new[]
             {
@@ -184,8 +193,16 @@ namespace SonOfPicasso.Integration.Tests.Services
             }).Subscribe(fileSystemEventArgs =>
             {
                 eventsList.Add(fileSystemEventArgs);
-                AutoResetEvent.Set();
             });
+
+            eventsList.WhenPropertyChanged(e => e.Count)
+                .Subscribe(propertyValue =>
+                {
+                    if (propertyValue.Value == 1)
+                    {
+                        AutoResetEvent.Set();
+                    }
+                });
 
             FileSystem.File.Move(testFilePath1, testFilePath2);
 
