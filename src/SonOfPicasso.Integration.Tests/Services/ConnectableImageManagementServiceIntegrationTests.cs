@@ -110,7 +110,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                     }
                 });
 
-            WaitOne(TimeSpan.FromSeconds(5));
+            WaitOne(TimeSpan.FromSeconds(10));
 
             await using var connection = DataContext.Database.GetDbConnection();
 
