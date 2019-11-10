@@ -9,5 +9,6 @@ namespace SonOfPicasso.Core.Interfaces
     {
         IObservable<Unit> ResetFolderManagementRules(IEnumerable<IFolderRuleInput> folderRules);
         IObservable<IList<FolderRule>> GetFolderManagementRules();
+        IObservable<Unit> AddFolderManagementRule(FolderRule folderRule);
     }
 }

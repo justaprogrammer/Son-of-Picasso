@@ -80,7 +80,7 @@ namespace SonOfPicasso.Tools.Tests.Services
 
             WaitOne();
 
-            MockFileSystem.Directory.EnumerateFiles(imageFolder, "*.*", SearchOption.AllDirectories).ToArray().Length.Should().Be(5);
+            MockFileSystem.Directory.EnumerateFiles(imageFolder, "*.*", SearchOption.AllDirectories).ToArray().Should().HaveCount(5);
         }
     }
 }

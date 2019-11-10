@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using System.IO.Abstractions;
 using System.Linq;
-using Microsoft.VisualBasic;
 using SonOfPicasso.Data.Model;
 
 namespace SonOfPicasso.Core.Model
 {
-    public class FolderImageContainer : ImageContainer
+    public class FolderImageContainer : IImageContainer
     {
         public FolderImageContainer(Folder folder, IFileSystem fileSystem)
         {
@@ -19,13 +18,13 @@ namespace SonOfPicasso.Core.Model
             ImageRefs = folder.Images.Select(image => new ImageRef(image, this)).ToArray();
         }
 
-        public override int ContainerTypeId { get; }
-        public override string Id { get; }
-        public override string Name { get; }
-        public override int Year { get; }
-        public override DateTime Date { get; }
-        public override ImageContainerTypeEnum ContainerType => ImageContainerTypeEnum.Folder;
-        public override IList<ImageRef> ImageRefs { get; }
+        public int ContainerTypeId { get; }
+        public string Id { get; }
+        public string Name { get; }
+        public int Year { get; }
+        public DateTime Date { get; }
+        public ImageContainerTypeEnum ContainerType => ImageContainerTypeEnum.Folder;
+        public IList<ImageRef> ImageRefs { get; }
 
         public static string GetContainerId(Folder folder)
         {

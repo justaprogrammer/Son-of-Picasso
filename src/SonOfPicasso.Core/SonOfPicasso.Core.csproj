@@ -14,7 +14,9 @@
     <PackageReference Include="akavache.core" Version="6.9.10" />
     <PackageReference Include="Ardalis.GuardClauses" Version="1.2.9" />
     <PackageReference Include="Autofac" Version="4.9.4" />
+    <PackageReference Include="DynamicData" Version="6.13.20" />
     <PackageReference Include="ExifLibNet" Version="2.1.1" />
+    <PackageReference Include="morelinq" Version="3.2.0" />
     <PackageReference Include="Roslyn.System.IO.Abstractions.Analyzers" Version="6.0.32">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

@@ -16,6 +16,7 @@ using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Data.Model;
 using SonOfPicasso.Testing.Common;
 using SonOfPicasso.Tools.Extensions;
+using Image = System.Drawing.Image;
 
 namespace SonOfPicasso.Tools.Services
 {
@@ -34,7 +35,7 @@ namespace SonOfPicasso.Tools.Services
             _schedulerProvider = schedulerProvider;
         }
 
-        public IObservable<IGroupedObservable<string, string>> GenerateImages(int count, string fileRoot)
+        public IObservable<IGroupedObservable<string, string>> GenerateImages(int count, string fileRoot, bool inDateNamedDirectory = true)
         {
             return Observable.Generate(
                 initialState: 0,
@@ -42,10 +43,10 @@ namespace SonOfPicasso.Tools.Services
                 iterate: value => value + 1,
                 resultSelector: value =>
                 {
-                    _logger.Debug("GenerateImages {Count} {FileRoot}", count, fileRoot);
+                    _logger.Verbose("GenerateImages {Count} {FileRoot}", count, fileRoot);
 
                     var time = Faker.Date.Between(DateTime.Now, DateTime.Now.AddDays(-30));
-                    var directoryPath = _fileSystem.Path.Combine(fileRoot, time.ToString("yyyy-MM-dd"));
+                    var directoryPath = inDateNamedDirectory ? _fileSystem.Path.Combine(fileRoot, time.ToString("yyyy-MM-dd")) : fileRoot;
                     _fileSystem.Directory.CreateDirectory(directoryPath);
 
                     var fileName = $"{time.ToString("s").Replace("-", "_").Replace(":", "_")}.jpg";

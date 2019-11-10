@@ -12,8 +12,6 @@ namespace SonOfPicasso.Core.Services
 {
     public class ImageLocationService: IImageLocationService
     {
-        private static readonly string[] ImageExtensions = { ".jpg", ".jpeg", ".png", ".tif", ".tiff", ".bmp" };
-
         private readonly IFileSystem _fileSystem;
         private readonly ISchedulerProvider _schedulerProvider;
         private readonly ILogger _logger;
@@ -38,7 +36,7 @@ namespace SonOfPicasso.Core.Services
                 {
                     fileInfoBases = _fileSystem.DirectoryInfo.FromDirectoryName(path)
                         .EnumerateFiles("*.*", SearchOption.AllDirectories)
-                        .Where(file => ImageExtensions.Contains(file.Extension.ToLowerInvariant()))
+                        .Where(file => Constants.ImageExtensions.Contains(file.Extension.ToLowerInvariant()))
                         .Select(file => file.FullName)
                         .ToArray();
                 }

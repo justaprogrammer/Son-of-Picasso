@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
@@ -50,7 +51,9 @@ namespace SonOfPicasso.UI.Tests.ViewModels
         {
             var rootPath = "C:\\";
 
-            var paths = Faker.Random.WordsArray(2)
+            var paths = Faker.Random.WordsArray(5)
+                .Distinct()
+                .Take(2)
                 .Select(s => MockFileSystem.Path.Combine(rootPath, s))
                 .Select(s => MockFileSystem.DirectoryInfo.FromDirectoryName(s))
                 .ToArray();
@@ -79,14 +82,14 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             TestSchedulerProvider.TaskPool.AdvanceBy(1);
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(1);
 
-            manageFolderRulesViewModel.Folders.Count.Should().Be(1);
+            manageFolderRulesViewModel.Folders.Should().HaveCount(1);
 
             manageFolderRulesViewModel.Folders[0].Activator.Activate();
 
             TestSchedulerProvider.TaskPool.AdvanceBy(1);
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(1);
 
-            manageFolderRulesViewModel.Folders[0].Children.Count.Should().Be(2);
+            manageFolderRulesViewModel.Folders[0].Children.Should().HaveCount(2);
 
             manageFolderRulesViewModel.Folders[0].Children[0].Activator.Activate();
             TestSchedulerProvider.TaskPool.AdvanceBy(1);
@@ -97,15 +100,15 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(1);
 
             manageFolderRulesViewModel.Folders[0].Name.Should().Be(String.Empty);
-            manageFolderRulesViewModel.Folders[0].FullName.Should().Be(rootPath);
+            manageFolderRulesViewModel.Folders[0].Path.Should().Be(rootPath);
 
             manageFolderRulesViewModel.Folders[0].Children[0].Name.Should().Be(paths[0].Name);
-            manageFolderRulesViewModel.Folders[0].Children[0].FullName.Should().Be(paths[0].FullName);
-            manageFolderRulesViewModel.Folders[0].Children[0].Children.Count.Should().Be(0);
+            manageFolderRulesViewModel.Folders[0].Children[0].Path.Should().Be(paths[0].FullName);
+            manageFolderRulesViewModel.Folders[0].Children[0].Children.Should().HaveCount(0);
 
             manageFolderRulesViewModel.Folders[0].Children[1].Name.Should().Be(paths[1].Name);
-            manageFolderRulesViewModel.Folders[0].Children[1].FullName.Should().Be(paths[1].FullName);
-            manageFolderRulesViewModel.Folders[0].Children[1].Children.Count.Should().Be(0);
+            manageFolderRulesViewModel.Folders[0].Children[1].Path.Should().Be(paths[1].FullName);
+            manageFolderRulesViewModel.Folders[0].Children[1].Children.Should().HaveCount(0);
         }
 
         [Fact]
@@ -113,7 +116,9 @@ namespace SonOfPicasso.UI.Tests.ViewModels
         {
             var rootPath = "C:\\";
 
-            var paths = Faker.Random.WordsArray(2)
+            var paths = Faker.Random.WordsArray(5)
+                .Distinct()
+                .Take(2)
                 .Select(s => MockFileSystem.Path.Combine(rootPath, s))
                 .Select(s => MockFileSystem.DirectoryInfo.FromDirectoryName(s))
                 .ToArray();
@@ -175,7 +180,9 @@ namespace SonOfPicasso.UI.Tests.ViewModels
         {
             var rootPath = "C:\\";
 
-            var paths = Faker.Random.WordsArray(2)
+            var paths = Faker.Random.WordsArray(5)
+                .Distinct()
+                .Take(2)
                 .Select(s => MockFileSystem.Path.Combine(rootPath, s))
                 .Select(s => MockFileSystem.DirectoryInfo.FromDirectoryName(s))
                 .ToArray();

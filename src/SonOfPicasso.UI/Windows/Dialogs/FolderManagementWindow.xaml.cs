@@ -39,17 +39,17 @@ namespace SonOfPicasso.UI.Windows.Dialogs
                     .DisposeWith(d);
 
                 this.OneWayBind(ViewModel,
-                    model => model.SelectedItem.ManageFolderState,
+                    model => model.SelectedItem.FolderRuleAction,
                     window => window.SelectedItemAlwaysRadioButton.IsChecked,
                     manageFolderStateEnum => manageFolderStateEnum == FolderRuleActionEnum.Always);
 
                 this.OneWayBind(ViewModel,
-                    model => model.SelectedItem.ManageFolderState,
+                    model => model.SelectedItem.FolderRuleAction,
                     window => window.SelectedItemNeverRadioButton.IsChecked,
                     manageFolderStateEnum => manageFolderStateEnum == FolderRuleActionEnum.Remove);
 
                 this.OneWayBind(ViewModel,
-                    model => model.SelectedItem.ManageFolderState,
+                    model => model.SelectedItem.FolderRuleAction,
                     window => window.SelectedItemOnceRadioButton.IsChecked,
                     manageFolderStateEnum => manageFolderStateEnum == FolderRuleActionEnum.Once);
 
@@ -86,17 +86,17 @@ namespace SonOfPicasso.UI.Windows.Dialogs
 
         private void SelectedItemNeverRadioButton_OnClick(object sender, RoutedEventArgs e)
         {
-            ViewModel.SelectedItem.ManageFolderState = FolderRuleActionEnum.Remove;
+            ViewModel.SelectedItem.FolderRuleAction = FolderRuleActionEnum.Remove;
         }
 
         private void SelectedItemOnceRadioButton_OnClick(object sender, RoutedEventArgs e)
         {
-            ViewModel.SelectedItem.ManageFolderState = FolderRuleActionEnum.Once;
+            ViewModel.SelectedItem.FolderRuleAction = FolderRuleActionEnum.Once;
         }
 
         private void SelectedItemAlwaysRadioButton_OnClick(object sender, RoutedEventArgs e)
         {
-            ViewModel.SelectedItem.ManageFolderState = FolderRuleActionEnum.Always;
+            ViewModel.SelectedItem.FolderRuleAction = FolderRuleActionEnum.Always;
         }
     }
 }

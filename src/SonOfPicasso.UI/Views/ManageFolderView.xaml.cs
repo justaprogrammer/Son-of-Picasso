@@ -21,13 +21,13 @@ namespace SonOfPicasso.UI.Views
             {
                 this.OneWayBind(ViewModel, model => model.Name, view => view.NameLabel.Content);
 
-                this.OneWayBind(ViewModel, model => model.ManageFolderState, view => view.CancelImage.Visibility,
+                this.OneWayBind(ViewModel, model => model.FolderRuleAction, view => view.CancelImage.Visibility,
                     value => value == FolderRuleActionEnum.Remove ? Visibility.Visible : Visibility.Collapsed);
 
-                this.OneWayBind(ViewModel, model => model.ManageFolderState, view => view.CheckmarkImage.Visibility,
+                this.OneWayBind(ViewModel, model => model.FolderRuleAction, view => view.CheckmarkImage.Visibility,
                     value => value == FolderRuleActionEnum.Once ? Visibility.Visible : Visibility.Collapsed);
 
-                this.OneWayBind(ViewModel, model => model.ManageFolderState, view => view.SynchronizeImage.Visibility,
+                this.OneWayBind(ViewModel, model => model.FolderRuleAction, view => view.SynchronizeImage.Visibility,
                     value => value == FolderRuleActionEnum.Always ? Visibility.Visible : Visibility.Collapsed);
             });
         }

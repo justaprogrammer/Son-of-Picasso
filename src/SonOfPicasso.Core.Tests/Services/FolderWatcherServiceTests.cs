@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
+using System.IO.Abstractions.TestingHelpers;
 using FluentAssertions;
 using NSubstitute;
 using NSubstitute.Core.Events;
@@ -52,6 +53,8 @@ namespace SonOfPicasso.Core.Tests.Services
             FileSystemWatcherFactory.Received(1)
                 .FromPath(path);
 
+            MockFileSystem.AddFile(MockFileSystem.Path.Combine(path, "hello.txt"), new MockFileData("Hello World!"));
+
             fileSystemWatcher.Created += 
                 Raise.Event<FileSystemEventHandler>(this, 
                     new FileSystemEventArgs(WatcherChangeTypes.Created, path, "hello.txt"));
@@ -101,6 +104,9 @@ namespace SonOfPicasso.Core.Tests.Services
 
             FileSystemWatcherFactory.Received(1)
                 .FromPath(rootPath);
+
+            MockFileSystem.AddFile(MockFileSystem.Path.Combine(rootPath, "hello.txt"), new MockFileData("Hello World!"));
+            MockFileSystem.AddFile(MockFileSystem.Path.Combine(excludePath, "hello.txt"), new MockFileData("Hello World!"));
 
             fileSystemWatcher1.Created +=
                 Raise.Event<FileSystemEventHandler>(this,
@@ -166,6 +172,9 @@ namespace SonOfPicasso.Core.Tests.Services
             FileSystemWatcherFactory.Received(1)
                 .FromPath(rootPath);
 
+            MockFileSystem.AddFile(MockFileSystem.Path.Combine(rootPath, "hello.txt"), new MockFileData("Hello World!"));
+            MockFileSystem.AddFile(MockFileSystem.Path.Combine(includePath, "hello.txt"), new MockFileData("Hello World!"));
+
             fileSystemWatcher1.Created +=
                 Raise.Event<FileSystemEventHandler>(this,
                     new FileSystemEventArgs(WatcherChangeTypes.Created, rootPath, "hello.txt"));
@@ -226,6 +235,9 @@ namespace SonOfPicasso.Core.Tests.Services
             FileSystemWatcherFactory.Received(1)
                 .FromPath(path2);
 
+            MockFileSystem.AddFile(MockFileSystem.Path.Combine(path1, "hello.txt"), new MockFileData("Hello World!"));
+            MockFileSystem.AddFile(MockFileSystem.Path.Combine(path2, "hello.txt"), new MockFileData("Hello World!"));
+
             fileSystemWatcher1.Created +=
                 Raise.Event<FileSystemEventHandler>(this,
                     new FileSystemEventArgs(WatcherChangeTypes.Created, path1, "hello.txt"));
@@ -274,6 +286,8 @@ namespace SonOfPicasso.Core.Tests.Services
 
             FileSystemWatcherFactory.Received(1)
                 .FromPath(path);
+
+            MockFileSystem.AddFile(MockFileSystem.Path.Combine(path, "hello1.txt"), new MockFileData("Hello World!"));
 
             fileSystemWatcher1.Renamed +=
                 Raise.Event<RenamedEventHandler>(this,

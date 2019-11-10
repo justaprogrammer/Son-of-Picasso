@@ -5,7 +5,7 @@ using SonOfPicasso.Data.Model;
 
 namespace SonOfPicasso.Core.Model
 {
-    public class AlbumImageContainer : ImageContainer
+    public class AlbumImageContainer : IImageContainer
     {
         public AlbumImageContainer(Album album)
         {
@@ -17,17 +17,22 @@ namespace SonOfPicasso.Core.Model
             ImageRefs = album.AlbumImages.Select(albumImage => new ImageRef(albumImage.Image, this)).ToArray();
         }
 
-        public override string Id { get; }
-        public override string Name { get; }
-        public override int Year { get; }
-        public override DateTime Date { get; }
-        public override ImageContainerTypeEnum ContainerType => ImageContainerTypeEnum.Album;
-        public override int ContainerTypeId { get; }
-        public override IList<ImageRef> ImageRefs { get; }
+        public string Id { get; }
+        public string Name { get; }
+        public int Year { get; }
+        public DateTime Date { get; }
+        public ImageContainerTypeEnum ContainerType => ImageContainerTypeEnum.Album;
+        public int ContainerTypeId { get; }
+        public IList<ImageRef> ImageRefs { get; }
 
         public static string GetContainerId(Album album)
         {
-            return $"Album:{album.Id}";
+            return GetContainerId(album.Id);
+        }
+        
+        public static string GetContainerId(int albumId)
+        {
+            return $"Album:{albumId}";
         }
     }
 }

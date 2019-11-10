@@ -5,8 +5,8 @@ namespace SonOfPicasso.Core.Interfaces
 {
     public interface IFolderRuleInput
     {
-        string FullName { get; }
-        FolderRuleActionEnum ManageFolderState { get; set; }
+        string Path { get; }
+        FolderRuleActionEnum FolderRuleAction { get; }
         IList<IFolderRuleInput> Children { get; }
     }
 }
