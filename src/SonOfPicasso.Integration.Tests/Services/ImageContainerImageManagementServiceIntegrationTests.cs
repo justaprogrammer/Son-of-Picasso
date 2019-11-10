@@ -18,9 +18,9 @@ using Xunit.Abstractions;
 
 namespace SonOfPicasso.Integration.Tests.Services
 {
-    public class ConnectableImageManagementServiceIntegrationTests : IntegrationTestsBase
+    public class ImageContainerImageManagementServiceIntegrationTests : IntegrationTestsBase
     {
-        public ConnectableImageManagementServiceIntegrationTests(ITestOutputHelper testOutputHelper)
+        public ImageContainerImageManagementServiceIntegrationTests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {
             var containerBuilder = GetContainerBuilder();
@@ -63,8 +63,17 @@ namespace SonOfPicasso.Integration.Tests.Services
             await connectableImageManagementService.Start();
             await connectableImageManagementService.ScanFolder(ImagesPath);
 
-            imageContainers.Should().HaveCount(generateImagesAsync.Count);
-            imageRefs.Should().HaveCount(imageCount);
+            imageContainers.WhenPropertyChanged(items => items.Count)
+                .CombineLatest(imageRefs.WhenPropertyChanged(items => items.Count),(pV1, pV2) => (pV1.Value, pV2.Value))
+                .Subscribe(tuple =>
+                {
+                    if (tuple.Item1 == generateImagesAsync.Count && tuple.Item2 == imageCount)
+                    {
+                        AutoResetEvent.Set();
+                    }
+                });
+
+            WaitOne(TimeSpan.FromSeconds(10));
         }
 
         [Fact]
