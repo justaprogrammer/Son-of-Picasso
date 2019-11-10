@@ -5,6 +5,7 @@ using NSubstitute;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Data.Model;
 using SonOfPicasso.Testing.Common.Extensions;
+using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.ViewModels;
 using Xunit;
 using Xunit.Abstractions;
@@ -27,7 +28,9 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             MockFileSystem.AddDirectory(testPath);
             var directoryInfo = MockFileSystem.DirectoryInfo.FromDirectoryName(testPath);
 
-            folderRuleViewModel.Initialize(directoryInfo,
+            var manageFolderRulesViewModel = AutoSubstitute.Resolve<IManageFolderRulesViewModel>();
+
+            folderRuleViewModel.Initialize(manageFolderRulesViewModel, directoryInfo,
                 new Dictionary<string, FolderRuleActionEnum>());
 
             folderRuleViewModel.Name.Should().Be(directoryInfo.Name);
@@ -44,7 +47,9 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             MockFileSystem.AddDirectory(testPath);
             var directoryInfo = MockFileSystem.DirectoryInfo.FromDirectoryName(testPath);
 
-            folderRuleViewModel.Initialize(directoryInfo,
+            var manageFolderRulesViewModel = AutoSubstitute.Resolve<IManageFolderRulesViewModel>();
+            
+            folderRuleViewModel.Initialize(manageFolderRulesViewModel, directoryInfo,
                 new Dictionary<string, FolderRuleActionEnum>
                 {
                     {testPath, FolderRuleActionEnum.Always}
@@ -76,7 +81,9 @@ namespace SonOfPicasso.UI.Tests.ViewModels
 
             var directoryInfo = MockFileSystem.DirectoryInfo.FromDirectoryName(testPath);
 
-            folderRuleViewModel.Initialize(directoryInfo,
+            var manageFolderRulesViewModel = AutoSubstitute.Resolve<IManageFolderRulesViewModel>();
+        
+            folderRuleViewModel.Initialize(manageFolderRulesViewModel, directoryInfo,
                 new Dictionary<string, FolderRuleActionEnum>
                 {
                     {testPath, FolderRuleActionEnum.Always}
@@ -126,7 +133,9 @@ namespace SonOfPicasso.UI.Tests.ViewModels
 
             var directoryInfo = MockFileSystem.DirectoryInfo.FromDirectoryName(testPath);
 
-            folderRuleViewModel.Initialize(directoryInfo,
+            var manageFolderRulesViewModel = AutoSubstitute.Resolve<IManageFolderRulesViewModel>();
+
+            folderRuleViewModel.Initialize(manageFolderRulesViewModel, directoryInfo,
                 new Dictionary<string, FolderRuleActionEnum>());
 
             folderRuleViewModel.FolderRuleAction.Should().Be(FolderRuleActionEnum.Remove);

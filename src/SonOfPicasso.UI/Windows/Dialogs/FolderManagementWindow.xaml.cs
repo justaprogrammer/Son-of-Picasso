@@ -27,7 +27,7 @@ namespace SonOfPicasso.UI.Windows.Dialogs
             this.WhenActivated(d =>
             {
                 FoldersListView.ItemsSource = ViewModel.Folders;
-                
+
                 this.BindCommand(ViewModel,
                         model => model.Continue,
                         window => window.OkButton)
@@ -37,6 +37,10 @@ namespace SonOfPicasso.UI.Windows.Dialogs
                         model => model.Cancel,
                         window => window.CancelButton)
                     .DisposeWith(d);
+
+                this.Bind(ViewModel,
+                    model => model.HideUnselected,
+                    window => window.DisplaySelectedItemsCheckbox.IsChecked);
 
                 this.OneWayBind(ViewModel,
                     model => model.SelectedItem.FolderRuleAction,

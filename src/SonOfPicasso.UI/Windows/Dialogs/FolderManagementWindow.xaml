@@ -17,38 +17,48 @@
             <Button Name="CancelButton" Content="Cancel" />
         </StackPanel>
 
-        <Grid DockPanel.Dock="Top">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="2*" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <TreeView Name="FoldersListView"
-                      VirtualizingStackPanel.IsVirtualizing="True"
-                      VirtualizingStackPanel.IsVirtualizingWhenGrouping="True"
-                      VirtualizingStackPanel.VirtualizationMode="Recycling"
-                      VirtualizingStackPanel.ScrollUnit="Pixel"
-                      SelectedItemChanged="FoldersListView_OnSelectedItemChanged"
-                      Grid.Row="0" Grid.Column="0">
-                <TreeView.Resources>
-                    <HierarchicalDataTemplate DataType="{x:Type viewModels:FolderRuleViewModel}"
-                                              ItemsSource="{Binding Path=Children}">
-                        <reactiveUi:ViewModelViewHost ViewModel="{Binding}" />
-                    </HierarchicalDataTemplate>
-                </TreeView.Resources>
-            </TreeView>
-
-            <GridSplitter Grid.Row="0" Grid.Column="1" 
-                          HorizontalAlignment="Center"
-                          VerticalAlignment="Stretch"
-                          ShowsPreview="True"
-                          Width="5" />
-
-            <StackPanel Grid.Row="0" Grid.Column="2">
-                <RadioButton Name="SelectedItemNeverRadioButton" Click="SelectedItemNeverRadioButton_OnClick">Never</RadioButton>
-                <RadioButton Name="SelectedItemOnceRadioButton" Click="SelectedItemOnceRadioButton_OnClick">Once</RadioButton>
-                <RadioButton Name="SelectedItemAlwaysRadioButton" Click="SelectedItemAlwaysRadioButton_OnClick">Always</RadioButton>
+        <DockPanel DockPanel.Dock="Top">
+            <StackPanel DockPanel.Dock="Bottom">
+                <CheckBox Content="Display Selected Items" Name="DisplaySelectedItemsCheckbox" />
             </StackPanel>
-        </Grid>
+            <Grid DockPanel.Dock="Top">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TreeView Name="FoldersListView"
+                          VirtualizingStackPanel.IsVirtualizing="True"
+                          VirtualizingStackPanel.IsVirtualizingWhenGrouping="True"
+                          VirtualizingStackPanel.VirtualizationMode="Recycling"
+                          VirtualizingStackPanel.ScrollUnit="Pixel"
+                          SelectedItemChanged="FoldersListView_OnSelectedItemChanged"
+                          Grid.Row="0" Grid.Column="0">
+                    <TreeView.ItemTemplate>
+                        <HierarchicalDataTemplate DataType="{x:Type viewModels:FolderRuleViewModel}"
+                                                  ItemsSource="{Binding Path=Children}">
+                            <reactiveUi:ViewModelViewHost ViewModel="{Binding}" />
+                        </HierarchicalDataTemplate>
+                    </TreeView.ItemTemplate>
+                    <TreeView.ItemContainerStyle>
+                        <Style TargetType="TreeViewItem">
+                        </Style>
+                    </TreeView.ItemContainerStyle>
+                </TreeView>
+
+                <GridSplitter Grid.Row="0" Grid.Column="1"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Stretch"
+                              ShowsPreview="True"
+                              Width="5" />
+
+                <StackPanel Grid.Row="0" Grid.Column="2">
+                    <RadioButton Name="SelectedItemNeverRadioButton" Click="SelectedItemNeverRadioButton_OnClick">Never</RadioButton>
+                    <RadioButton Name="SelectedItemOnceRadioButton" Click="SelectedItemOnceRadioButton_OnClick">Once</RadioButton>
+                    <RadioButton Name="SelectedItemAlwaysRadioButton" Click="SelectedItemAlwaysRadioButton_OnClick">Always</RadioButton>
+                </StackPanel>
+            </Grid>
+
+        </DockPanel>
     </DockPanel>
 </reactiveUi:ReactiveWindow>

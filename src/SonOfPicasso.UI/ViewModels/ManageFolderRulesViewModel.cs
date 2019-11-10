@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
-using DynamicData;
 using DynamicData.Binding;
 using ReactiveUI;
 using Serilog;
@@ -20,15 +17,16 @@ namespace SonOfPicasso.UI.ViewModels
 {
     public class ManageFolderRulesViewModel : ViewModelBase, IManageFolderRulesViewModel
     {
-        private readonly IDriveInfoFactory _driveInfoFactory;
         private readonly IDirectoryInfoPermissionsService _directoryInfoPermissionsService;
-        private readonly IFolderRulesManagementService _folderRulesManagementService;
+        private readonly IDriveInfoFactory _driveInfoFactory;
         private readonly IFileSystem _fileSystem;
+        private readonly IFolderRulesManagementService _folderRulesManagementService;
         private readonly ObservableCollectionExtended<FolderRuleViewModel> _foldersObservableCollection;
 
         private readonly ILogger _logger;
         private readonly Func<FolderRuleViewModel> _manageFolderViewModelFactory;
         private readonly ISchedulerProvider _schedulerProvider;
+        private bool _hideUnselected;
         private FolderRuleViewModel _selectedItem;
 
         public ManageFolderRulesViewModel(ViewModelActivator activator,
@@ -67,6 +65,12 @@ namespace SonOfPicasso.UI.ViewModels
             });
         }
 
+        public bool HideUnselected
+        {
+            get => _hideUnselected;
+            set => this.RaiseAndSetIfChanged(ref _hideUnselected, value);
+        }
+
         public Interaction<Unit, Unit> ContinueInteraction { get; }
 
         public ReactiveCommand<Unit, Unit> Continue { get; }
@@ -103,7 +107,7 @@ namespace SonOfPicasso.UI.ViewModels
                                 .Select(directoryInfo =>
                                 {
                                     var folderViewModel = _manageFolderViewModelFactory();
-                                    folderViewModel.Initialize(directoryInfo, folderManagmentRules);
+                                    folderViewModel.Initialize(this, directoryInfo, folderManagmentRules);
                                     return folderViewModel;
                                 });
                         })
