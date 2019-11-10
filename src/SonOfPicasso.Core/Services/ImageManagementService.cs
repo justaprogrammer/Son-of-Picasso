@@ -311,6 +311,7 @@ namespace SonOfPicasso.Core.Services
                             .Get(i => i.Path.Equals(path))
                             .First();
 
+                        exifData.Id = image.ExifDataId;
 
                         unitOfWork.ExifDataRepository.Update(exifData);
                         unitOfWork.Save();
@@ -345,6 +346,7 @@ namespace SonOfPicasso.Core.Services
                         if (oldDirectoryPath == newDirectoryPath)
                         {
                             unitOfWork.Save();
+                            transaction.Commit();
                             return Observable.Return(image.FolderId);
                         }
 
@@ -452,7 +454,7 @@ namespace SonOfPicasso.Core.Services
 
                         unitOfWork.Save();
                         transaction.Commit();
-                    return Observable.Return(image.FolderId);
+                        return Observable.Return(image.FolderId);
                     }
                 })
                 .SelectMany(GetFolderImageContainer)

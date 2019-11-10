@@ -68,26 +68,6 @@ namespace SonOfPicasso.Core.Services
         {
             _folderManagementDisposable = _folderRulesManagementService.GetFolderManagementRules()
                 .SelectMany(list => _folderWatcherService.WatchFolders(list))
-                .Buffer(TimeSpan.FromSeconds(1), _schedulerProvider.TaskPool)
-                .SelectMany(list =>
-                {
-                    var hashSet = new HashSet<string>();
-                    return list.Where(args =>
-                    {
-                        if (args.ChangeType == WatcherChangeTypes.Created)
-                        {
-                            hashSet.Add(args.FullPath);
-                            return true;
-                        }
-
-                        if (args.ChangeType == WatcherChangeTypes.Changed)
-                        {
-                            return !hashSet.Contains(args.FullPath);
-                        }
-
-                        return true;
-                    });
-                })
                 .Subscribe(HandlerFolderWatcherEvent);
         }
 
@@ -98,6 +78,8 @@ namespace SonOfPicasso.Core.Services
             switch (args.ChangeType)
             {
                 case WatcherChangeTypes.Created:
+                    break;
+
                 case WatcherChangeTypes.Changed:
                     _imageContainerCache.PopulateFrom(_imageManagementService.AddOrUpdateImage(args.FullPath));
                     break;

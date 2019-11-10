@@ -249,20 +249,20 @@ namespace SonOfPicasso.Integration.Tests.Services
             updatedImageContainers.Should().ContainSingle();
             updatedImageContainers.First().ContainerTypeId.Should().Be(imageToRename.FolderId);
 
-            images = (await connection.QueryAsync<Image>("SELECT * FROM Images"))
+            var imagesAfter = (await connection.QueryAsync<Image>("SELECT * FROM Images"))
                 .ToArray();
 
-            images.Should().HaveCount(imagesCount);
+            imagesAfter.Should().HaveCount(imagesCount);
 
-            folders = (await connection.QueryAsync<Folder>("SELECT * FROM Folders"))
+            var foldersAfter = (await connection.QueryAsync<Folder>("SELECT * FROM Folders"))
                 .ToArray();
 
-            folders.Should().HaveCount(directoryCount);
+            foldersAfter.Should().HaveCount(directoryCount);
 
-            exifDatas = (await connection.QueryAsync("SELECT * FROM ExifData"))
+            var exifDatasAfter = (await connection.QueryAsync("SELECT * FROM ExifData"))
                 .ToArray();
 
-            exifDatas.Should().HaveCount(imagesCount);
+            exifDatasAfter.Should().HaveCount(imagesCount);
 
             var renamedImage = (await connection.QueryAsync<Image>("SELECT * FROM Images WHERE Images.Path=@Path",
                     new {Path = renamePath}))

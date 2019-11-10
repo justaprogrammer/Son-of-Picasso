@@ -41,6 +41,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             {
                 streamWriter.WriteLine("Hello World!");
                 streamWriter.Flush();
+                streamWriter.Close();
             }
 
             var eventsList = new List<FileSystemEventArgs>();
@@ -94,6 +95,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                     {
                         streamWriter.WriteLine("Hello World!");
                         streamWriter.Flush();
+                        streamWriter.Close();
                     }
                 }, () => AutoResetEvent.Set());
 
@@ -143,6 +145,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                     {
                         streamWriter.WriteLine("Hello World!");
                         streamWriter.Flush();
+                        streamWriter.Close();
                     }
                 }, () => AutoResetEvent.Set());
 
@@ -166,6 +169,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             {
                 streamWriter.WriteLine("Hello World!");
                 streamWriter.Flush();
+                streamWriter.Close();
             }
 
             var eventsList = new List<FileSystemEventArgs>();

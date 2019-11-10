@@ -5,7 +5,6 @@ using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive.Linq;
 using SonOfPicasso.Core.Interfaces;
-using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Data.Model;
 
 namespace SonOfPicasso.Core.Services
@@ -13,13 +12,10 @@ namespace SonOfPicasso.Core.Services
     public class FolderWatcherService : IFolderWatcherService
     {
         private readonly IFileSystem _fileSystem;
-        private readonly ISchedulerProvider _schedulerProvider;
 
-        public FolderWatcherService(IFileSystem fileSystem,
-            ISchedulerProvider schedulerProvider)
+        public FolderWatcherService(IFileSystem fileSystem)
         {
             _fileSystem = fileSystem;
-            _schedulerProvider = schedulerProvider;
         }
 
         public IObservable<FileSystemEventArgs> WatchFolders(IEnumerable<FolderRule> folderRules, IEnumerable<string> extensionFilters = null)
@@ -84,9 +80,9 @@ namespace SonOfPicasso.Core.Services
                                     .Where(args => args != null);
                         });
                 })
-                .ToArray()
                 .SelectMany(observables => Observable.Merge(observables))
-                .Where(args => ! _fileSystem.File.GetAttributes(args.FullPath).HasFlag(FileAttributes.Directory));
+                .Where(args => args.ChangeType == WatcherChangeTypes.Deleted
+                               || !_fileSystem.File.GetAttributes(args.FullPath).HasFlag(FileAttributes.Directory));
 
             if (extensionFilters != null)
             {

@@ -29,7 +29,11 @@ namespace SonOfPicasso.Core.Tests.Services
         [Fact]
         public void ShouldStart()
         {
+            var folderWatcherSubject = new Subject<FileSystemEventArgs>();
+
             var folderWatcherService = AutoSubstitute.Resolve<IFolderWatcherService>();
+            folderWatcherService.WatchFolders(default)
+                .ReturnsForAnyArgs(folderWatcherSubject.AsObservable());
             
             var folderRulesManagementService = AutoSubstitute.Resolve<IFolderRulesManagementService>();
 
@@ -109,6 +113,12 @@ namespace SonOfPicasso.Core.Tests.Services
         [Fact]
         public void ShouldScan()
         {
+            var folderWatcherSubject = new Subject<FileSystemEventArgs>();
+
+            var folderWatcherService = AutoSubstitute.Resolve<IFolderWatcherService>();
+            folderWatcherService.WatchFolders(default)
+                .ReturnsForAnyArgs(folderWatcherSubject.AsObservable());
+
             var directoryPathWindows = Faker.System.DirectoryPathWindows();
          
             var folderRulesManagementService = AutoSubstitute.Resolve<IFolderRulesManagementService>();
