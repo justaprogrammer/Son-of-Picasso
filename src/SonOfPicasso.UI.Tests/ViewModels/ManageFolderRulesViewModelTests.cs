@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
@@ -50,7 +51,9 @@ namespace SonOfPicasso.UI.Tests.ViewModels
         {
             var rootPath = "C:\\";
 
-            var paths = Faker.Random.WordsArray(2)
+            var paths = Faker.Random.WordsArray(5)
+                .Distinct()
+                .Take(2)
                 .Select(s => MockFileSystem.Path.Combine(rootPath, s))
                 .Select(s => MockFileSystem.DirectoryInfo.FromDirectoryName(s))
                 .ToArray();
@@ -113,7 +116,9 @@ namespace SonOfPicasso.UI.Tests.ViewModels
         {
             var rootPath = "C:\\";
 
-            var paths = Faker.Random.WordsArray(2)
+            var paths = Faker.Random.WordsArray(5)
+                .Distinct()
+                .Take(2)
                 .Select(s => MockFileSystem.Path.Combine(rootPath, s))
                 .Select(s => MockFileSystem.DirectoryInfo.FromDirectoryName(s))
                 .ToArray();
@@ -175,7 +180,9 @@ namespace SonOfPicasso.UI.Tests.ViewModels
         {
             var rootPath = "C:\\";
 
-            var paths = Faker.Random.WordsArray(2)
+            var paths = Faker.Random.WordsArray(5)
+                .Distinct()
+                .Take(2)
                 .Select(s => MockFileSystem.Path.Combine(rootPath, s))
                 .Select(s => MockFileSystem.DirectoryInfo.FromDirectoryName(s))
                 .ToArray();
