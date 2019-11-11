@@ -56,44 +56,44 @@ namespace SonOfPicasso.UI.ViewModels
 
             this.WhenActivated(disposable =>
             {
-                Observable.Defer(() =>
-                    {
-                        return _directoryInfo
-                            .EnumerateDirectories()
-                            .ToObservable()
-                            .Where(_directoryInfoPermissionsService.IsReadable)
-                            .Select(info => CreateFolderViewModel(info));
-                    })
-                    .SubscribeOn(_schedulerProvider.TaskPool)
-                    .Subscribe(folderRuleViewModel =>
-                    {
-                        _manageFolderViewModelsSourceCache.AddOrUpdate(folderRuleViewModel);
-                    });
-
-                _manageFolderViewModelsSourceCache
-                    .Connect()
-                    .ObserveOn(schedulerProvider.TaskPool)
-                    .Filter(_manageFolderRulesViewModel
-                        .WhenPropertyChanged(model => model.HideUnselected)
-                        .ObserveOn(schedulerProvider.TaskPool)
-                        .Select(value => value.Value)
-                        .Select(hideUnselected =>
-                        {
-                            return (Func<FolderRuleViewModel, bool>) (model =>
-                                hideUnselected == false || model.ShouldShow);
-                        }))
-                    .ObserveOn(schedulerProvider.MainThreadScheduler)
-                    .Bind(_children)
-                    .Subscribe();
-
-                this.WhenAny(model => model.FolderRuleAction, change => change.Value)
-                    .ObserveOn(schedulerProvider.MainThreadScheduler)
-                    .Subscribe(newState =>
-                    {
-                        foreach (var viewModel in Children) viewModel.FolderRuleAction = newState;
-                    })
-                    .DisposeWith(disposable);
+                Activate(disposable);
             });
+        }
+
+        private void Activate(CompositeDisposable disposable, bool forced = false)
+        {
+            
+
+            _manageFolderViewModelsSourceCache
+                .Connect()
+                .ObserveOn(_schedulerProvider.TaskPool)
+                .Filter(_manageFolderRulesViewModel
+                    .WhenPropertyChanged(model => model.HideUnselected)
+                    .ObserveOn(_schedulerProvider.TaskPool)
+                    .Select(value => value.Value)
+                    .Select(hideUnselected =>
+                    {
+                        return (Func<FolderRuleViewModel, bool>) (model =>
+                            hideUnselected == false || model.ShouldShow);
+                    }))
+                .ObserveOn(_schedulerProvider.MainThreadScheduler)
+                .Bind(_children)
+                .Subscribe();
+
+            this.WhenAny(model => model.FolderRuleAction, change => change.Value)
+                .ObserveOn(_schedulerProvider.MainThreadScheduler)
+                .Subscribe(newState =>
+                {
+                    foreach (var viewModel in Children) viewModel.FolderRuleAction = newState;
+                })
+                .DisposeWith(disposable);
+
+            _directoryInfo
+                .EnumerateDirectories()
+                .ToObservable()
+                .Where(_directoryInfoPermissionsService.IsReadable)
+                .Select(info => CreateFolderViewModel(info))
+                .Do(model => _manageFolderViewModelsSourceCache.AddOrUpdate(model));
         }
 
         private FolderRuleViewModel CreateFolderViewModel(IDirectoryInfo info)
