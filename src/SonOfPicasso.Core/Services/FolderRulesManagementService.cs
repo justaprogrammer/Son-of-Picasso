@@ -133,14 +133,14 @@ namespace SonOfPicasso.Core.Services
 
             return result;
         }
-    }
 
-    public class FolderRuleInput : IFolderRuleInput
-    {
-        public string Path { get; set; }
+        private class FolderRuleInput : IFolderRuleInput
+        {
+            public string Path { get; set; }
 
-        public FolderRuleActionEnum FolderRuleAction { get; set; }
+            public FolderRuleActionEnum FolderRuleAction { get; set; }
 
-        public IList<IFolderRuleInput> Children { get; } = new List<IFolderRuleInput>();
+            public IList<IFolderRuleInput> Children { get; } = new List<IFolderRuleInput>();
+        }
     }
 }
