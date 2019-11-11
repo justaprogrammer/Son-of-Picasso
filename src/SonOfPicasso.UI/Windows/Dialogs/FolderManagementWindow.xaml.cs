@@ -91,7 +91,7 @@ namespace SonOfPicasso.UI.Windows.Dialogs
 
         private void FoldersListView_OnSelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            ViewModel.SelectedItem = (CustomFolderRuleInput) e.NewValue;
+            ViewModel.SelectedItem = (FolderRuleInputViewModel) e.NewValue;
         }
 
         private void SelectedItemNeverRadioButton_OnClick(object sender, RoutedEventArgs e)
@@ -112,7 +112,7 @@ namespace SonOfPicasso.UI.Windows.Dialogs
         private void TreeViewItem_OnExpanded(object sender, RoutedEventArgs e)
         {
             var treeViewItem = (TreeViewItem)sender;
-            var customFolderRuleInput = (CustomFolderRuleInput) treeViewItem.DataContext;
+            var customFolderRuleInput = (FolderRuleInputViewModel) treeViewItem.DataContext;
             foreach (var folderRuleInput in customFolderRuleInput.Children)
             {
                 ViewModel.PopulateFolderRuleInput(folderRuleInput);

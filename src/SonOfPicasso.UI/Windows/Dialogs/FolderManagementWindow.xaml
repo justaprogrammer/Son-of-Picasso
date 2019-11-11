@@ -73,13 +73,10 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <TreeView Name="FoldersListView"
-                          VirtualizingStackPanel.IsVirtualizing="True"
-                          VirtualizingStackPanel.VirtualizationMode="Standard"
-                          VirtualizingStackPanel.ScrollUnit="Pixel"
                           SelectedItemChanged="FoldersListView_OnSelectedItemChanged"
                           Grid.Row="0" Grid.Column="0">
                     <TreeView.ItemTemplate>
-                        <HierarchicalDataTemplate DataType="{x:Type viewModels:CustomFolderRuleInput}"
+                        <HierarchicalDataTemplate DataType="{x:Type viewModels:FolderRuleInputViewModel}"
                                                   ItemsSource="{Binding Path=Children}">
                             <StackPanel Orientation="Horizontal">
                                 <Image Height="16" Width="16"

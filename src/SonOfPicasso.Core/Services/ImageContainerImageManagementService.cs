@@ -129,7 +129,7 @@ namespace SonOfPicasso.Core.Services
         private void StartWatcher()
         {
             _folderManagementDisposable = _folderRulesManagementService.GetFolderManagementRules()
-                .SelectMany(list => _folderWatcherService.WatchFolders(list))
+                .SelectMany(list => _folderWatcherService.WatchFolders(list, Constants.ImageExtensions))
                 .Subscribe(HandlerFolderWatcherEvent);
         }
 

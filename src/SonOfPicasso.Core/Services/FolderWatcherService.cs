@@ -18,7 +18,8 @@ namespace SonOfPicasso.Core.Services
             _fileSystem = fileSystem;
         }
 
-        public IObservable<FileSystemEventArgs> WatchFolders(IEnumerable<FolderRule> folderRules, IEnumerable<string> extensionFilters = null)
+        public IObservable<FileSystemEventArgs> WatchFolders(IEnumerable<FolderRule> folderRules,
+            IEnumerable<string> extensionFilters = null)
         {
             var itemsDictionary = new Dictionary<string, List<FolderRule>>();
 
@@ -27,7 +28,6 @@ namespace SonOfPicasso.Core.Services
                 .OrderBy(rule => rule.Path, StringComparer.InvariantCultureIgnoreCase);
 
             foreach (var folderRule in folderRules)
-            {
                 if (firstRoot == null || !folderRule.Path.StartsWith(firstRoot))
                 {
                     firstRoot = folderRule.Path;
@@ -35,9 +35,8 @@ namespace SonOfPicasso.Core.Services
                 }
                 else
                 {
-                    itemsDictionary[firstRoot].Add(folderRule);    
+                    itemsDictionary[firstRoot].Add(folderRule);
                 }
-            }
 
             var observable = itemsDictionary
                 .ToObservable()
@@ -80,9 +79,7 @@ namespace SonOfPicasso.Core.Services
                                     .Where(args => args != null);
                         });
                 })
-                .SelectMany(observables => Observable.Merge(observables))
-                .Where(args => args.ChangeType == WatcherChangeTypes.Deleted
-                               || !_fileSystem.File.GetAttributes(args.FullPath).HasFlag(FileAttributes.Directory));
+                .SelectMany(observables => Observable.Merge(observables));
 
             if (extensionFilters != null)
             {
@@ -90,6 +87,21 @@ namespace SonOfPicasso.Core.Services
                 observable = observable
                     .Where(args => extensionsHash.Contains(_fileSystem.Path.GetExtension(args.FullPath)));
             }
+
+            observable = observable
+                .Where(args =>
+                {
+                    if (args.ChangeType == WatcherChangeTypes.Deleted) return true;
+
+                    try
+                    {
+                        return !_fileSystem.File.GetAttributes(args.FullPath).HasFlag(FileAttributes.Directory);
+                    }
+                    catch (FileNotFoundException)
+                    {
+                        return false;
+                    }
+                });
 
             return observable;
         }
@@ -102,17 +114,12 @@ namespace SonOfPicasso.Core.Services
                 case WatcherChangeTypes.Deleted:
                 case WatcherChangeTypes.Changed:
                     foreach (var folderRule in folderRules)
-                    {
                         if (fileSystemEventArgs.FullPath.StartsWith(folderRule.Path))
                         {
-                            if (folderRule.Action == FolderRuleActionEnum.Always)
-                            {
-                                return fileSystemEventArgs;
-                            }
+                            if (folderRule.Action == FolderRuleActionEnum.Always) return fileSystemEventArgs;
 
                             return null;
                         }
-                    }
 
                     return fileSystemEventArgs;
 
