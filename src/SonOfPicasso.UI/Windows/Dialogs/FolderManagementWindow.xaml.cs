@@ -1,10 +1,13 @@
-﻿using System.Reactive;
+﻿using System;
+using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Forms;
 using ReactiveUI;
 using SonOfPicasso.Core.Scheduling;
+using SonOfPicasso.Core.Services;
 using SonOfPicasso.Data.Model;
 using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.ViewModels;
@@ -16,10 +19,12 @@ namespace SonOfPicasso.UI.Windows.Dialogs
     /// </summary>
     public partial class FolderManagementWindow : ReactiveWindow<ManageFolderRulesViewModel>
     {
+        private readonly ISchedulerProvider _schedulerProvider;
         public IImageProvider ImageProvider { get; }
 
         public FolderManagementWindow(ISchedulerProvider schedulerProvider, IImageProvider imageProvider)
         {
+            _schedulerProvider = schedulerProvider;
             ImageProvider = imageProvider;
             
             InitializeComponent();
@@ -86,7 +91,7 @@ namespace SonOfPicasso.UI.Windows.Dialogs
 
         private void FoldersListView_OnSelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            ViewModel.SelectedItem = (FolderRuleViewModel) e.NewValue;
+            ViewModel.SelectedItem = (CustomFolderRuleInput) e.NewValue;
         }
 
         private void SelectedItemNeverRadioButton_OnClick(object sender, RoutedEventArgs e)
@@ -102,6 +107,16 @@ namespace SonOfPicasso.UI.Windows.Dialogs
         private void SelectedItemAlwaysRadioButton_OnClick(object sender, RoutedEventArgs e)
         {
             ViewModel.SelectedItem.FolderRuleAction = FolderRuleActionEnum.Always;
+        }
+
+        private void TreeViewItem_OnExpanded(object sender, RoutedEventArgs e)
+        {
+            var treeViewItem = (TreeViewItem)sender;
+            var customFolderRuleInput = (CustomFolderRuleInput) treeViewItem.DataContext;
+            foreach (var folderRuleInput in customFolderRuleInput.Children)
+            {
+                ViewModel.PopulateFolderRuleInput(folderRuleInput);
+            }
         }
     }
 }

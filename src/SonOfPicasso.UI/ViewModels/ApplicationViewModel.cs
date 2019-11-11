@@ -362,7 +362,7 @@ namespace SonOfPicasso.UI.ViewModels
                 {
                     if (folderManagementViewModel != null)
                     {
-                        return _folderRulesManagementService.ResetFolderManagementRules(folderManagementViewModel.Folders);
+                        // return _folderRulesManagementService.ResetFolderManagementRules(folderManagementViewModel.Folders);
                     }
 
                     return Observable.Return(Unit.Default);

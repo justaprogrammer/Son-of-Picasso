@@ -6,10 +6,55 @@
                            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                            xmlns:reactiveUi="http://reactiveui.net"
                            xmlns:viewModels="clr-namespace:SonOfPicasso.UI.ViewModels"
+                           xmlns:services="clr-namespace:SonOfPicasso.Core.Services;assembly=SonOfPicasso.Core"
+                           xmlns:model="clr-namespace:SonOfPicasso.Data.Model;assembly=SonOfPicasso.Data"
                            mc:Ignorable="d"
                            Title="Manage Folders"
                            Name="Window"
                            Height="750" Width="500">
+    <Window.Resources>
+        <ResourceDictionary>
+            <Style x:Key="FolderImageStyle" TargetType="Image">
+                <Setter Property="Source" Value="{Binding ElementName=Window, Path=ImageProvider.Folder}"></Setter>
+                <Style.Triggers>
+                    <DataTrigger
+                        Binding="{Binding RelativeSource={RelativeSource AncestorType=TreeViewItem}, Path=IsExpanded}"
+                        Value="True">
+                        <DataTrigger.Setters>
+                            <Setter Property="Source" Value="{Binding ElementName=Window, Path=ImageProvider.OpenedFolder}"></Setter>
+                        </DataTrigger.Setters>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="OnceImageStyle" TargetType="Image">
+                <Setter Property="Visibility" Value="Collapsed"></Setter>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Path=FolderRuleAction}" Value="{x:Static model:FolderRuleActionEnum.Once}">
+                        <Setter Property="Visibility" Value="Visible" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="RemoveImageStyle"  TargetType="Image">
+                <Setter Property="Visibility" Value="Collapsed"></Setter>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Path=FolderRuleAction}" Value="{x:Static model:FolderRuleActionEnum.Remove}">
+                        <Setter Property="Visibility" Value="Visible" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="AlwaysImageStyle" TargetType="Image">
+                <Setter Property="Visibility" Value="Collapsed"></Setter>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Path=FolderRuleAction}" Value="{x:Static model:FolderRuleActionEnum.Always}">
+                        <Setter Property="Visibility" Value="Visible" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
     <DockPanel LastChildFill="True">
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right"
                     VerticalAlignment="Bottom">
@@ -34,14 +79,34 @@
                           SelectedItemChanged="FoldersListView_OnSelectedItemChanged"
                           Grid.Row="0" Grid.Column="0">
                     <TreeView.ItemTemplate>
-                        <HierarchicalDataTemplate DataType="{x:Type viewModels:FolderRuleViewModel}"
+                        <HierarchicalDataTemplate DataType="{x:Type viewModels:CustomFolderRuleInput}"
                                                   ItemsSource="{Binding Path=Children}">
-                            <reactiveUi:ViewModelViewHost ViewModel="{Binding}" />
+                            <StackPanel Orientation="Horizontal">
+                                <Image Height="16" Width="16"
+                                       Style="{StaticResource FolderImageStyle}"/>
+
+                                <Image Height="16" Width="16"
+                                       Name="CheckmarkImage"
+                                       Source="{Binding ElementName=Window, Path=ImageProvider.Checkmark}"
+                                       Style="{StaticResource OnceImageStyle}" />
+
+                                <Image Height="16" Width="16"
+                                       Name="CancelImage"
+                                       Source="{Binding ElementName=Window, Path=ImageProvider.Cancel}"
+                                       Style="{StaticResource RemoveImageStyle}" />
+
+                                <Image Height="16" Width="16"
+                                       Name="SynchronizeImage"
+                                       Source="{Binding ElementName=Window, Path=ImageProvider.Synchronize}"
+                                       Style="{StaticResource AlwaysImageStyle}" />
+
+                                <Label Name="NameLabel" Content="{Binding Name}" />
+                            </StackPanel>
                         </HierarchicalDataTemplate>
                     </TreeView.ItemTemplate>
                     <TreeView.ItemContainerStyle>
                         <Style TargetType="TreeViewItem">
-                            <Setter Property="IsExpanded" Value="{Binding Mode=OneTime,Path=ShouldShow}"></Setter>
+                            <EventSetter Event="Expanded" Handler="TreeViewItem_OnExpanded"></EventSetter>
                         </Style>
                     </TreeView.ItemContainerStyle>
                 </TreeView>
