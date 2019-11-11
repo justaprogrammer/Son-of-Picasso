@@ -106,7 +106,8 @@
                     </TreeView.ItemTemplate>
                     <TreeView.ItemContainerStyle>
                         <Style TargetType="TreeViewItem">
-                            <EventSetter Event="Expanded" Handler="TreeViewItem_OnExpanded"></EventSetter>
+                            <Setter Property="IsExpanded" Value="{Binding Path=ShouldShow}" />
+                            <EventSetter Event="Expanded" Handler="TreeViewItem_OnExpanded" />
                         </Style>
                     </TreeView.ItemContainerStyle>
                 </TreeView>
