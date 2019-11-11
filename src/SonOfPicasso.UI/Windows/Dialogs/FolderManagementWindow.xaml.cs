@@ -27,6 +27,7 @@ namespace SonOfPicasso.UI.Windows.Dialogs
             this.WhenActivated(d =>
             {
                 FoldersListView.ItemsSource = ViewModel.Folders;
+                WatchedPathsList.ItemsSource = ViewModel.WatchedPaths;
 
                 this.BindCommand(ViewModel,
                         model => model.Continue,

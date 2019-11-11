@@ -9,7 +9,7 @@
                            mc:Ignorable="d"
                            Title="Manage Folders"
                            Name="Window"
-                           Height="150" Width="300">
+                           Height="750" Width="500">
     <DockPanel LastChildFill="True">
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right"
                     VerticalAlignment="Bottom">
@@ -29,8 +29,7 @@
                 </Grid.ColumnDefinitions>
                 <TreeView Name="FoldersListView"
                           VirtualizingStackPanel.IsVirtualizing="True"
-                          VirtualizingStackPanel.IsVirtualizingWhenGrouping="True"
-                          VirtualizingStackPanel.VirtualizationMode="Recycling"
+                          VirtualizingStackPanel.VirtualizationMode="Standard"
                           VirtualizingStackPanel.ScrollUnit="Pixel"
                           SelectedItemChanged="FoldersListView_OnSelectedItemChanged"
                           Grid.Row="0" Grid.Column="0">
@@ -42,6 +41,7 @@
                     </TreeView.ItemTemplate>
                     <TreeView.ItemContainerStyle>
                         <Style TargetType="TreeViewItem">
+                            <Setter Property="IsExpanded" Value="{Binding Mode=OneTime,Path=ShouldShow}"></Setter>
                         </Style>
                     </TreeView.ItemContainerStyle>
                 </TreeView>
@@ -52,10 +52,18 @@
                               ShowsPreview="True"
                               Width="5" />
 
-                <StackPanel Grid.Row="0" Grid.Column="2">
-                    <RadioButton Name="SelectedItemNeverRadioButton" Click="SelectedItemNeverRadioButton_OnClick">Never</RadioButton>
-                    <RadioButton Name="SelectedItemOnceRadioButton" Click="SelectedItemOnceRadioButton_OnClick">Once</RadioButton>
-                    <RadioButton Name="SelectedItemAlwaysRadioButton" Click="SelectedItemAlwaysRadioButton_OnClick">Always</RadioButton>
+                <StackPanel Grid.Row="0" Grid.Column="2" VerticalAlignment="Center">
+                    <StackPanel>
+                        <Label>For the current folder:</Label>
+                        <RadioButton Name="SelectedItemNeverRadioButton" Click="SelectedItemNeverRadioButton_OnClick">Never</RadioButton>
+                        <RadioButton Name="SelectedItemOnceRadioButton" Click="SelectedItemOnceRadioButton_OnClick">Once</RadioButton>
+                        <RadioButton Name="SelectedItemAlwaysRadioButton" Click="SelectedItemAlwaysRadioButton_OnClick">Always</RadioButton>
+                    </StackPanel>
+
+                    <StackPanel>
+                        <Label>Watched Folders:</Label>
+                        <ListView Name="WatchedPathsList" />
+                    </StackPanel>
                 </StackPanel>
             </Grid>
 

@@ -24,7 +24,6 @@ namespace SonOfPicasso.UI.Tests.ViewModels
                 new TrayImageViewModel(new ViewModelActivator());
 
             Func<FolderRuleViewModel> folderRuleViewModelFactory = () => new FolderRuleViewModel(AutoSubstitute.Resolve<ISchedulerProvider>(),
-                AutoSubstitute.Resolve<IDirectoryInfoPermissionsService>(),
                 AutoSubstitute.Resolve<Func<FolderRuleViewModel>>(),
                 new ViewModelActivator());
 

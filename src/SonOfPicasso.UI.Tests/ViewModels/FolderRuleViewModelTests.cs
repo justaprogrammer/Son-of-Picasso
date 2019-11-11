@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using FluentAssertions;
 using NSubstitute;
 using SonOfPicasso.Core.Interfaces;
@@ -34,7 +35,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             var manageFolderRulesViewModel = AutoSubstitute.Resolve<IManageFolderRulesViewModel>();
 
             folderRuleViewModel.Initialize(manageFolderRulesViewModel, directoryInfo,
-                new Dictionary<string, FolderRuleActionEnum>());
+                new Dictionary<string, FolderRuleActionEnum>(), FolderRuleActionEnum.Remove, new Subject<FolderRuleViewModel>());
 
             folderRuleViewModel.Name.Should().Be(directoryInfo.Name);
             folderRuleViewModel.Path.Should().Be(directoryInfo.FullName);
@@ -56,7 +57,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
                 new Dictionary<string, FolderRuleActionEnum>
                 {
                     {testPath, FolderRuleActionEnum.Always}
-                });
+                }, FolderRuleActionEnum.Remove, new Subject<FolderRuleViewModel>());
 
             folderRuleViewModel.Name.Should().Be(directoryInfo.Name);
             folderRuleViewModel.Path.Should().Be(directoryInfo.FullName);
@@ -90,7 +91,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
                 new Dictionary<string, FolderRuleActionEnum>
                 {
                     {testPath, FolderRuleActionEnum.Always}
-                });
+                }, FolderRuleActionEnum.Remove, new Subject<FolderRuleViewModel>());
 
             folderRuleViewModel.FolderRuleAction.Should().Be(FolderRuleActionEnum.Always);
 
@@ -139,7 +140,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             var manageFolderRulesViewModel = AutoSubstitute.Resolve<IManageFolderRulesViewModel>();
 
             folderRuleViewModel.Initialize(manageFolderRulesViewModel, directoryInfo,
-                new Dictionary<string, FolderRuleActionEnum>());
+                new Dictionary<string, FolderRuleActionEnum>(), FolderRuleActionEnum.Remove, new Subject<FolderRuleViewModel>());
 
             folderRuleViewModel.FolderRuleAction.Should().Be(FolderRuleActionEnum.Remove);
 

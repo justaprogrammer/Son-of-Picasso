@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
+using System.IO.Abstractions;
 using DynamicData.Binding;
 using ReactiveUI;
 using SonOfPicasso.UI.ViewModels;
@@ -9,5 +11,6 @@ namespace SonOfPicasso.UI.Interfaces
     {
         IObservableCollection<FolderRuleViewModel> Folders { get; }
         bool HideUnselected { get; set; }
+        IObservable<IDirectoryInfo[]> GetAccesibleChildDirectories(IDirectoryInfo directoryInfo);
     }
 }
