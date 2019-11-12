@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using DynamicData.Binding;
+using Serilog;
 using ReactiveUI;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Data.Model;
@@ -22,11 +23,16 @@ namespace SonOfPicasso.UI.Windows.Dialogs
     public partial class FolderManagementWindow : ReactiveWindow<ManageFolderRulesViewModel>
     {
         private readonly ISchedulerProvider _schedulerProvider;
+        private readonly ILogger _logger;
+
         public IImageProvider ImageProvider { get; }
 
-        public FolderManagementWindow(ISchedulerProvider schedulerProvider, IImageProvider imageProvider)
+        public FolderManagementWindow(ISchedulerProvider schedulerProvider,
+            IImageProvider imageProvider,
+            ILogger logger)
         {
             _schedulerProvider = schedulerProvider;
+            _logger = logger;
             ImageProvider = imageProvider;
             
             InitializeComponent();
@@ -178,9 +184,11 @@ namespace SonOfPicasso.UI.Windows.Dialogs
         {
             var treeViewItem = (TreeViewItem)sender;
             var customFolderRuleInput = (FolderRuleViewModel) treeViewItem.DataContext;
+
             foreach (var folderRuleInput in customFolderRuleInput.Children)
             {
-                ViewModel.PopulateFolderRuleInput(folderRuleInput);
+                ViewModel.PopulateFolderRuleInput(folderRuleInput)
+                    .Subscribe();
             }
         }
 

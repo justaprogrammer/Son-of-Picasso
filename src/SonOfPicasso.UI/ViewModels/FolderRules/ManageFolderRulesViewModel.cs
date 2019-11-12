@@ -11,7 +11,6 @@ using System.Reactive.Linq;
 using DynamicData;
 using DynamicData.Binding;
 using ReactiveUI;
-using Serilog;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Core.Services;
@@ -23,38 +22,31 @@ namespace SonOfPicasso.UI.ViewModels.FolderRules
 {
     public class ManageFolderRulesViewModel : ViewModelBase, IManageFolderRulesViewModel, IDisposable
     {
+        private readonly IObservable<IDictionary<string, FolderRuleActionEnum>> _currentFolderManagementRules;
         private readonly IDirectoryInfoPermissionsService _directoryInfoPermissionsService;
         private readonly CompositeDisposable _disposables;
         private readonly IDriveInfoFactory _driveInfoFactory;
-        private readonly IFileSystem _fileSystem;
         private readonly IFolderRulesManagementService _folderRulesManagementService;
+        private readonly ConcurrentDictionary<string, FolderRuleViewModel> _folderRuleViewModelDictionary;
         private readonly ObservableCollectionExtended<FolderRuleViewModel> _foldersObservableCollection;
-        private readonly ILogger _logger;
         private readonly ISchedulerProvider _schedulerProvider;
         private readonly ReadOnlyObservableCollection<FolderRule> _watchedPaths;
 
         private readonly SourceCache<FolderRule, string> _watchedPathsSourceCache;
-        private IObservable<IDictionary<string, FolderRuleActionEnum>> _currentFolderManagementRules;
-        private readonly ConcurrentDictionary<string, FolderRuleViewModel> _folderRuleViewModelDictionary;
 
         private bool _hideUnselected;
         private FolderRuleViewModel _selectedItem;
 
         public ManageFolderRulesViewModel(ViewModelActivator activator,
-            IFileSystem fileSystem,
             IDriveInfoFactory driveInfoFactory,
             IDirectoryInfoPermissionsService directoryInfoPermissionsService,
             IFolderRulesManagementService folderRulesManagementService,
-            ISchedulerProvider schedulerProvider,
-            ILogger logger
-        ) : base(activator)
+            ISchedulerProvider schedulerProvider) : base(activator)
         {
-            _fileSystem = fileSystem;
             _driveInfoFactory = driveInfoFactory;
             _directoryInfoPermissionsService = directoryInfoPermissionsService;
             _folderRulesManagementService = folderRulesManagementService;
             _schedulerProvider = schedulerProvider;
-            _logger = logger;
             _disposables = new CompositeDisposable();
 
             _watchedPathsSourceCache = new SourceCache<FolderRule, string>(model => model.Path);
@@ -74,7 +66,7 @@ namespace SonOfPicasso.UI.ViewModels.FolderRules
             CancelInteraction = new Interaction<Unit, Unit>();
 
             _foldersObservableCollection = new ObservableCollectionExtended<FolderRuleViewModel>();
-            
+
             _currentFolderManagementRules = Observable
                 .StartAsync(async () => await _folderRulesManagementService
                     .GetFolderManagementRules()
@@ -85,11 +77,79 @@ namespace SonOfPicasso.UI.ViewModels.FolderRules
                     })
                     .ToDictionary(rule => rule.Path, rule => rule.Action));
 
-            GetFolderViewModels()
-                .ObserveOn(_schedulerProvider.MainThreadScheduler)
-                .Subscribe(item => _foldersObservableCollection.Add(item))
-                .DisposeWith(_disposables);
             _folderRuleViewModelDictionary = new ConcurrentDictionary<string, FolderRuleViewModel>();
+        }
+
+        public IObservable<Unit> Initialize()
+        {
+            return _currentFolderManagementRules
+                .SelectMany(folderRules =>
+                {
+                    return _driveInfoFactory
+                        .GetDrives()
+                        .ToObservable()
+                        .SubscribeOn(_schedulerProvider.TaskPool)
+                        .Where(driveInfo => driveInfo.DriveType == DriveType.Fixed)
+                        .Where(driveInfo => driveInfo.IsReady)
+                        .Select(driveInfo => driveInfo.RootDirectory)
+                        .SelectMany(async directoryInfo =>
+                        {
+                            var customFolderRuleInput = CreateCustomFolderRuleInput(directoryInfo, folderRules);
+
+                            var tracers = new Dictionary<string, FolderRuleViewModel>
+                            {
+                                {customFolderRuleInput.Path, customFolderRuleInput}
+                            };
+
+                            while (tracers.Any())
+                            {
+                                var currentTracers = tracers.Select(tracerPair =>
+                                {
+                                    var isRule = folderRules.ContainsKey(directoryInfo.FullName);
+
+                                    var isParentOfRule = !isRule &&
+                                                         folderRules.Any(pair =>
+                                                             pair.Value != FolderRuleActionEnum.Remove
+                                                             && pair.Key.Length > tracerPair.Value.Path.Length
+                                                             && pair.Key.StartsWith(tracerPair.Value.Path));
+
+                                    return (tracerPair, isRule, isParentOfRule);
+                                }).ToArray();
+
+                                foreach (var currentTracer in currentTracers)
+                                {
+                                    tracers.Remove(currentTracer.Item1.Key);
+
+                                    var currentFolderRuleViewModel = currentTracer.Item1.Value;
+
+                                    var populateFolderRuleInput =
+                                        PopulateFolderRuleInput(currentFolderRuleViewModel);
+
+                                    if (currentTracer.isRule || currentTracer.isParentOfRule)
+                                    {
+                                        await populateFolderRuleInput;
+
+                                        foreach (var child in currentFolderRuleViewModel.Children)
+                                            tracers.Add(child.Path, child);
+                                    }
+                                    else
+                                    {
+                                        populateFolderRuleInput.Subscribe();
+                                    }
+                                }
+                            }
+
+                            return customFolderRuleInput;
+                        });
+                })
+                .ToArray()
+                .ObserveOn(_schedulerProvider.MainThreadScheduler)
+                .Select(folderRuleViewModels =>
+                {
+                    _foldersObservableCollection.Add(folderRuleViewModels.OrderBy(model => model.Path));
+                    return Unit.Default;
+                })
+                .LastAsync();
         }
 
         public IReadOnlyDictionary<string, FolderRuleViewModel> FolderRuleViewModelDictionary =>
@@ -134,51 +194,37 @@ namespace SonOfPicasso.UI.ViewModels.FolderRules
                 .GetDirectories()
                 .ToObservable()
                 .SubscribeOn(_schedulerProvider.TaskPool)
-                .Where(info => !info.Name.StartsWith("."))
+                .Where(info => !(info.Name.StartsWith(".") || info.Name.StartsWith("$")))
                 .Where(_directoryInfoPermissionsService.IsReadable)
                 .ToArray();
         }
 
-        private IObservable<FolderRuleViewModel> GetFolderViewModels()
+        public IObservable<Unit> PopulateFolderRuleInput(FolderRuleViewModel folderRuleViewModel)
         {
-            return _currentFolderManagementRules
-                .SelectMany(managementRulesDictionary =>
-                {
-                    return _driveInfoFactory.GetDrives()
-                        .ToObservable()
-                        .SubscribeOn(_schedulerProvider.TaskPool)
-                        .Where(driveInfo => driveInfo.DriveType == DriveType.Fixed)
-                        .Where(driveInfo => driveInfo.IsReady)
-                        .Select(driveInfo => driveInfo.RootDirectory)
-                        .Select(directoryInfo =>
-                        {
-                            var customFolderRuleInput =
-                                CreateCustomFolderRuleInput(directoryInfo, managementRulesDictionary);
-                            PopulateFolderRuleInput(customFolderRuleInput);
-                            return customFolderRuleInput;
-                        });
-                });
-        }
-
-        public void PopulateFolderRuleInput(FolderRuleViewModel folderRuleViewModel)
-        {
-            if (folderRuleViewModel.IsLoaded) return;
+            if (folderRuleViewModel.IsLoaded) return Observable.Return(Unit.Default);
 
             folderRuleViewModel.IsLoaded = true;
 
-            GetAccesibleChildDirectories(folderRuleViewModel.DirectoryInfo)
+            return GetAccesibleChildDirectories(folderRuleViewModel.DirectoryInfo)
                 .CombineLatest(_currentFolderManagementRules,
                     (directoryInfos, folderRules) => (directoryInfos, folderRules))
                 .SelectMany(tuple => tuple.directoryInfos.Select(directoryInfo => (directoryInfo, tuple.folderRules)))
-                .Select(tuple => CreateCustomFolderRuleInput(tuple.directoryInfo, tuple.folderRules,
+                .Select(tuple => CreateCustomFolderRuleInput(tuple.directoryInfo,
+                    tuple.folderRules,
                     folderRuleViewModel.FolderRuleAction))
                 .ObserveOn(_schedulerProvider.MainThreadScheduler)
-                .Subscribe(item => folderRuleViewModel.Children.Add(item));
+                .Select(item =>
+                {
+                    folderRuleViewModel.Children.Add(item);
+                    return Unit.Default;
+                })
+                .LastOrDefaultAsync();
         }
 
         private FolderRuleViewModel CreateCustomFolderRuleInput(IDirectoryInfo directoryInfo,
             IDictionary<string, FolderRuleActionEnum> folderRules,
-            FolderRuleActionEnum defaultFolderRuleAction = FolderRuleActionEnum.Remove)
+            FolderRuleActionEnum defaultFolderRuleAction = FolderRuleActionEnum.Remove,
+            bool forcePopulateChildren = false)
         {
             var folderRuleInput = new FolderRuleViewModel(directoryInfo);
             _folderRuleViewModelDictionary.TryAdd(directoryInfo.FullName, folderRuleInput);
