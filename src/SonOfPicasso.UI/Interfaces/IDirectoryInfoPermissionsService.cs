@@ -1,7 +1,6 @@
-﻿using System.IO;
-using System.IO.Abstractions;
+﻿using System.IO.Abstractions;
 
-namespace SonOfPicasso.UI.ViewModels
+namespace SonOfPicasso.UI.Interfaces
 {
 
     public interface IDirectoryInfoPermissionsService

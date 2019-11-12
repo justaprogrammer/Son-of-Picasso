@@ -17,6 +17,7 @@ using Serilog;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.UI.ViewModels;
+using SonOfPicasso.UI.ViewModels.FolderRules;
 using SonOfPicasso.UI.Windows.Dialogs;
 using MessageBox = System.Windows.MessageBox;
 

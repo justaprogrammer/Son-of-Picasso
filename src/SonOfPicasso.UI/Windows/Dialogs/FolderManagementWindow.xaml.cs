@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -11,6 +12,9 @@ using SonOfPicasso.Core.Services;
 using SonOfPicasso.Data.Model;
 using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.ViewModels;
+using SonOfPicasso.UI.ViewModels.FolderRules;
+using ListView = System.Windows.Controls.ListView;
+using ListViewItem = System.Windows.Controls.ListViewItem;
 
 namespace SonOfPicasso.UI.Windows.Dialogs
 {
@@ -33,6 +37,11 @@ namespace SonOfPicasso.UI.Windows.Dialogs
             {
                 FoldersListView.ItemsSource = ViewModel.Folders;
                 WatchedPathsList.ItemsSource = ViewModel.WatchedPaths;
+
+                FoldersListView.Events()
+                    .SelectedItemChanged
+                    .Select(args => (FolderRuleViewModel) args.NewValue)
+                    .BindTo(ViewModel, model => model.SelectedItem);
 
                 this.BindCommand(ViewModel,
                         model => model.Continue,
@@ -89,11 +98,6 @@ namespace SonOfPicasso.UI.Windows.Dialogs
             });
         }
 
-        private void FoldersListView_OnSelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
-        {
-            ViewModel.SelectedItem = (FolderRuleInputViewModel) e.NewValue;
-        }
-
         private void SelectedItemNeverRadioButton_OnClick(object sender, RoutedEventArgs e)
         {
             ViewModel.SelectedItem.FolderRuleAction = FolderRuleActionEnum.Remove;
@@ -112,11 +116,53 @@ namespace SonOfPicasso.UI.Windows.Dialogs
         private void TreeViewItem_OnExpanded(object sender, RoutedEventArgs e)
         {
             var treeViewItem = (TreeViewItem)sender;
-            var customFolderRuleInput = (FolderRuleInputViewModel) treeViewItem.DataContext;
+            var customFolderRuleInput = (FolderRuleViewModel) treeViewItem.DataContext;
             foreach (var folderRuleInput in customFolderRuleInput.Children)
             {
                 ViewModel.PopulateFolderRuleInput(folderRuleInput);
             }
+        }
+
+        private void WatchedPathsList_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var listView = (ListView)sender;
+            var folderRule = (FolderRule)listView.SelectedValue;
+            if (ViewModel.FolderRuleViewModelDictionary.TryGetValue(folderRule.Path, out var folderRuleViewModel))
+            {
+                var treeViewItem = FindItem(FoldersListView.ItemContainerGenerator, folderRuleViewModel.Path);
+                if (treeViewItem != null)
+                {
+                    treeViewItem.IsSelected = true;
+                    treeViewItem.BringIntoView();
+
+                    Dispatcher.BeginInvoke(new Action(() => FoldersListView.Focus()));
+                }
+            }
+        }
+
+        private static TreeViewItem FindItem(ItemContainerGenerator itemContainerGenerator, string path)
+        {
+            var folderRuleViewModel = itemContainerGenerator
+                .Items
+                .Cast<FolderRuleViewModel>()
+                .Select<FolderRuleViewModel, (FolderRuleViewModel model, bool isPath, bool startWithPath)>(model => (
+                    model,
+                    path == model.DirectoryInfo.FullName,
+                    path.StartsWith(model.DirectoryInfo.FullName)))
+                .FirstOrDefault(tuple => tuple.Item2 || tuple.Item3);
+
+            if (folderRuleViewModel != default)
+            {
+                var containerFromItem = (TreeViewItem) itemContainerGenerator.ContainerFromItem(folderRuleViewModel.model);
+                if (folderRuleViewModel.isPath)
+                {
+                    return containerFromItem;
+                }
+
+                return FindItem(containerFromItem.ItemContainerGenerator, path);
+            }
+
+            return null;
         }
     }
 }

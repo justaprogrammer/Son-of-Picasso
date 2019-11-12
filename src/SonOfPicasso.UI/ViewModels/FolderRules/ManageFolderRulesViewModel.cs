@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -18,7 +19,7 @@ using SonOfPicasso.Data.Model;
 using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.ViewModels.Abstract;
 
-namespace SonOfPicasso.UI.ViewModels
+namespace SonOfPicasso.UI.ViewModels.FolderRules
 {
     public class ManageFolderRulesViewModel : ViewModelBase, IManageFolderRulesViewModel, IDisposable
     {
@@ -27,16 +28,17 @@ namespace SonOfPicasso.UI.ViewModels
         private readonly IDriveInfoFactory _driveInfoFactory;
         private readonly IFileSystem _fileSystem;
         private readonly IFolderRulesManagementService _folderRulesManagementService;
-        private readonly ObservableCollectionExtended<FolderRuleInputViewModel> _foldersObservableCollection;
+        private readonly ObservableCollectionExtended<FolderRuleViewModel> _foldersObservableCollection;
         private readonly ILogger _logger;
         private readonly ISchedulerProvider _schedulerProvider;
         private readonly ReadOnlyObservableCollection<FolderRule> _watchedPaths;
 
         private readonly SourceCache<FolderRule, string> _watchedPathsSourceCache;
         private IObservable<IDictionary<string, FolderRuleActionEnum>> _currentFolderManagementRules;
+        private readonly ConcurrentDictionary<string, FolderRuleViewModel> _folderRuleViewModelDictionary;
 
         private bool _hideUnselected;
-        private FolderRuleInputViewModel _selectedItem;
+        private FolderRuleViewModel _selectedItem;
 
         public ManageFolderRulesViewModel(ViewModelActivator activator,
             IFileSystem fileSystem,
@@ -71,13 +73,17 @@ namespace SonOfPicasso.UI.ViewModels
             Cancel = ReactiveCommand.CreateFromObservable(ExecuteCancel);
             CancelInteraction = new Interaction<Unit, Unit>();
 
-            _foldersObservableCollection = new ObservableCollectionExtended<FolderRuleInputViewModel>();
+            _foldersObservableCollection = new ObservableCollectionExtended<FolderRuleViewModel>();
 
             GetFolderViewModels()
                 .ObserveOn(_schedulerProvider.MainThreadScheduler)
                 .Subscribe(item => _foldersObservableCollection.Add(item))
                 .DisposeWith(_disposables);
+            _folderRuleViewModelDictionary = new ConcurrentDictionary<string, FolderRuleViewModel>();
         }
+
+        public IReadOnlyDictionary<string, FolderRuleViewModel> FolderRuleViewModelDictionary =>
+            _folderRuleViewModelDictionary;
 
         public ReadOnlyObservableCollection<FolderRule> WatchedPaths => _watchedPaths;
 
@@ -89,7 +95,7 @@ namespace SonOfPicasso.UI.ViewModels
 
         public ReactiveCommand<Unit, Unit> Cancel { get; }
 
-        public FolderRuleInputViewModel SelectedItem
+        public FolderRuleViewModel SelectedItem
         {
             get => _selectedItem;
             set => this.RaiseAndSetIfChanged(ref _selectedItem, value);
@@ -101,7 +107,7 @@ namespace SonOfPicasso.UI.ViewModels
             set => this.RaiseAndSetIfChanged(ref _hideUnselected, value);
         }
 
-        public IObservableCollection<FolderRuleInputViewModel> Folders => _foldersObservableCollection;
+        public IObservableCollection<FolderRuleViewModel> Folders => _foldersObservableCollection;
 
         public void Dispose()
         {
@@ -123,7 +129,7 @@ namespace SonOfPicasso.UI.ViewModels
                 .ToArray();
         }
 
-        private IObservable<FolderRuleInputViewModel> GetFolderViewModels()
+        private IObservable<FolderRuleViewModel> GetFolderViewModels()
         {
             _currentFolderManagementRules ??= Observable
                 .StartAsync(async () => await _folderRulesManagementService
@@ -154,27 +160,28 @@ namespace SonOfPicasso.UI.ViewModels
                 });
         }
 
-        public void PopulateFolderRuleInput(FolderRuleInputViewModel folderRuleInputViewModel)
+        public void PopulateFolderRuleInput(FolderRuleViewModel folderRuleViewModel)
         {
-            if (folderRuleInputViewModel.IsLoaded) return;
+            if (folderRuleViewModel.IsLoaded) return;
 
-            folderRuleInputViewModel.IsLoaded = true;
+            folderRuleViewModel.IsLoaded = true;
 
-            GetAccesibleChildDirectories(folderRuleInputViewModel.DirectoryInfo)
+            GetAccesibleChildDirectories(folderRuleViewModel.DirectoryInfo)
                 .CombineLatest(_currentFolderManagementRules,
                     (directoryInfos, folderRules) => (directoryInfos, folderRules))
                 .SelectMany(tuple => tuple.directoryInfos.Select(directoryInfo => (directoryInfo, tuple.folderRules)))
                 .Select(tuple => CreateCustomFolderRuleInput(tuple.directoryInfo, tuple.folderRules,
-                    folderRuleInputViewModel.FolderRuleAction))
+                    folderRuleViewModel.FolderRuleAction))
                 .ObserveOn(_schedulerProvider.MainThreadScheduler)
-                .Subscribe(item => folderRuleInputViewModel.Children.Add(item));
+                .Subscribe(item => folderRuleViewModel.Children.Add(item));
         }
 
-        private FolderRuleInputViewModel CreateCustomFolderRuleInput(IDirectoryInfo directoryInfo,
+        private FolderRuleViewModel CreateCustomFolderRuleInput(IDirectoryInfo directoryInfo,
             IDictionary<string, FolderRuleActionEnum> folderRules,
             FolderRuleActionEnum defaultFolderRuleAction = FolderRuleActionEnum.Remove)
         {
-            var folderRuleInput = new FolderRuleInputViewModel(directoryInfo);
+            var folderRuleInput = new FolderRuleViewModel(directoryInfo);
+            _folderRuleViewModelDictionary.TryAdd(directoryInfo.FullName, folderRuleInput);
 
             if (folderRules.TryGetValue(directoryInfo.FullName, out var folderRuleAction))
             {
@@ -190,15 +197,14 @@ namespace SonOfPicasso.UI.ViewModels
 
                 if (anyParentOfRule)
                     folderRuleInput.ShouldShowReason =
-                        FolderRuleInputViewModel.ShouldShowChildReasonEnum.IsParentOfRule;
+                        FolderRuleViewModel.ShouldShowChildReasonEnum.IsParentOfRule;
             }
 
             folderRuleInput.WhenPropertyChanged(model => model.FolderRuleAction, false)
                 .Select(value =>
                 {
                     var manageFolderViewModels = ((IManageFolderRulesViewModel) this).Folders;
-                    var items = FolderRulesFactory.ComputeRuleset(manageFolderViewModels);
-                    return items;
+                    return FolderRulesFactory.ComputeRuleset(manageFolderViewModels);
                 })
                 .ObserveOn(_schedulerProvider.MainThreadScheduler)
                 .Subscribe(items =>
@@ -227,77 +233,5 @@ namespace SonOfPicasso.UI.ViewModels
                 .SubscribeOn(_schedulerProvider.TaskPool)
                 .Select(unit => unit);
         }
-    }
-
-    public class FolderRuleInputViewModel : ReactiveObject, IFolderRuleInput, IDisposable
-    {
-        public enum ShouldShowChildReasonEnum
-        {
-            ShouldNot,
-            IsParentOfRule
-        }
-
-        private readonly CompositeDisposable _disposables;
-        private readonly ObservableAsPropertyHelper<bool> _shouldShowPropertyHelper;
-        private FolderRuleActionEnum _folderRuleAction;
-        private bool _isLoaded;
-        private ShouldShowChildReasonEnum _shouldShowReason = ShouldShowChildReasonEnum.ShouldNot;
-
-        public FolderRuleInputViewModel(IDirectoryInfo directoryInfo)
-        {
-            DirectoryInfo = directoryInfo;
-            Children = new ObservableCollectionExtended<FolderRuleInputViewModel>();
-
-            _disposables = new CompositeDisposable();
-
-            _shouldShowPropertyHelper = this.WhenPropertyChanged(model => model.ShouldShowReason)
-                .Select(propertyValue => propertyValue.Value != ShouldShowChildReasonEnum.ShouldNot)
-                .ToProperty(this, model => model.ShouldShow);
-
-            this
-                .WhenPropertyChanged(model => model.FolderRuleAction, false)
-                .Subscribe(propertyValue =>
-                {
-                    foreach (var customFolderRuleInput in Children)
-                        customFolderRuleInput.FolderRuleAction = propertyValue.Value;
-                })
-                .DisposeWith(_disposables);
-        }
-
-        public IDirectoryInfo DirectoryInfo { get; }
-
-        public bool ShouldShow => _shouldShowPropertyHelper.Value;
-
-        public string Name => DirectoryInfo.Name;
-
-        public bool IsLoaded
-        {
-            get => _isLoaded;
-            set => this.RaiseAndSetIfChanged(ref _isLoaded, value);
-        }
-
-        public IObservableCollection<FolderRuleInputViewModel> Children { get; }
-
-        public ShouldShowChildReasonEnum ShouldShowReason
-        {
-            get => _shouldShowReason;
-            set => this.RaiseAndSetIfChanged(ref _shouldShowReason, value);
-        }
-
-        public void Dispose()
-        {
-            _shouldShowPropertyHelper?.Dispose();
-            _disposables?.Dispose();
-        }
-
-        public string Path => DirectoryInfo.FullName;
-
-        public FolderRuleActionEnum FolderRuleAction
-        {
-            get => _folderRuleAction;
-            set => this.RaiseAndSetIfChanged(ref _folderRuleAction, value);
-        }
-
-        IList<IFolderRuleInput> IFolderRuleInput.Children => Children.Cast<IFolderRuleInput>().ToArray();
     }
 }
