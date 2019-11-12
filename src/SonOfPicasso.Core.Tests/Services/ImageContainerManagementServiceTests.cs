@@ -32,7 +32,7 @@ namespace SonOfPicasso.Core.Tests.Services
             var folderWatcherSubject = new Subject<FileSystemEventArgs>();
 
             var folderWatcherService = AutoSubstitute.Resolve<IFolderWatcherService>();
-            folderWatcherService.WatchFolders(default)
+            folderWatcherService.WatchFolders(default, default)
                 .ReturnsForAnyArgs(folderWatcherSubject.AsObservable());
             
             var folderRulesManagementService = AutoSubstitute.Resolve<IFolderRulesManagementService>();
@@ -107,7 +107,7 @@ namespace SonOfPicasso.Core.Tests.Services
             imageRefs.Should().HaveCount(1);
 
             folderWatcherService.Received(1)
-                .WatchFolders(currentFolderRules);
+                .WatchFolders(currentFolderRules, Constants.ImageExtensions);
         }
 
         [Fact]
@@ -116,7 +116,7 @@ namespace SonOfPicasso.Core.Tests.Services
             var folderWatcherSubject = new Subject<FileSystemEventArgs>();
 
             var folderWatcherService = AutoSubstitute.Resolve<IFolderWatcherService>();
-            folderWatcherService.WatchFolders(default)
+            folderWatcherService.WatchFolders(default, default)
                 .ReturnsForAnyArgs(folderWatcherSubject.AsObservable());
 
             var directoryPathWindows = Faker.System.DirectoryPathWindows();
@@ -227,7 +227,7 @@ namespace SonOfPicasso.Core.Tests.Services
             var folderWatcherSubject = new Subject<FileSystemEventArgs>();
 
             var folderWatcherService = AutoSubstitute.Resolve<IFolderWatcherService>();
-            folderWatcherService.WatchFolders(default)
+            folderWatcherService.WatchFolders(default, default)
                 .ReturnsForAnyArgs(folderWatcherSubject.AsObservable());
 
             var folderRulesManagementService = AutoSubstitute.Resolve<IFolderRulesManagementService>();
@@ -300,7 +300,7 @@ namespace SonOfPicasso.Core.Tests.Services
             imageRefs.Should().HaveCount(1);
 
             folderWatcherService.Received(1)
-                .WatchFolders(currentFolderRules);
+                .WatchFolders(currentFolderRules, Constants.ImageExtensions);
 
             var fileSystemEventArgs = new FileSystemEventArgs(
                 WatcherChangeTypes.Created, 
