@@ -74,6 +74,16 @@ namespace SonOfPicasso.UI.ViewModels.FolderRules
             CancelInteraction = new Interaction<Unit, Unit>();
 
             _foldersObservableCollection = new ObservableCollectionExtended<FolderRuleViewModel>();
+            
+            _currentFolderManagementRules = Observable
+                .StartAsync(async () => await _folderRulesManagementService
+                    .GetFolderManagementRules()
+                    .SelectMany(rule => rule)
+                    .Do(rule =>
+                    {
+                        if (rule.Action == FolderRuleActionEnum.Always) _watchedPathsSourceCache.AddOrUpdate(rule);
+                    })
+                    .ToDictionary(rule => rule.Path, rule => rule.Action));
 
             GetFolderViewModels()
                 .ObserveOn(_schedulerProvider.MainThreadScheduler)
@@ -131,16 +141,6 @@ namespace SonOfPicasso.UI.ViewModels.FolderRules
 
         private IObservable<FolderRuleViewModel> GetFolderViewModels()
         {
-            _currentFolderManagementRules ??= Observable
-                .StartAsync(async () => await _folderRulesManagementService
-                    .GetFolderManagementRules()
-                    .SelectMany(rule => rule)
-                    .Do(rule =>
-                    {
-                        if (rule.Action == FolderRuleActionEnum.Always) _watchedPathsSourceCache.AddOrUpdate(rule);
-                    })
-                    .ToDictionary(rule => rule.Path, rule => rule.Action));
-
             return _currentFolderManagementRules
                 .SelectMany(managementRulesDictionary =>
                 {

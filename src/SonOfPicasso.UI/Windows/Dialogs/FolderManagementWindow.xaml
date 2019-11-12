@@ -15,40 +15,44 @@
     <Window.Resources>
         <ResourceDictionary>
             <Style x:Key="FolderImageStyle" TargetType="Image">
-                <Setter Property="Source" Value="{Binding ElementName=Window, Path=ImageProvider.Folder}"></Setter>
+                <Setter Property="Source" Value="{Binding ElementName=Window, Path=ImageProvider.Folder}" />
                 <Style.Triggers>
                     <DataTrigger
                         Binding="{Binding RelativeSource={RelativeSource AncestorType=TreeViewItem}, Path=IsExpanded}"
                         Value="True">
                         <DataTrigger.Setters>
-                            <Setter Property="Source" Value="{Binding ElementName=Window, Path=ImageProvider.OpenedFolder}"></Setter>
+                            <Setter Property="Source"
+                                    Value="{Binding ElementName=Window, Path=ImageProvider.OpenedFolder}" />
                         </DataTrigger.Setters>
                     </DataTrigger>
                 </Style.Triggers>
             </Style>
 
             <Style x:Key="OnceImageStyle" TargetType="Image">
-                <Setter Property="Visibility" Value="Collapsed"></Setter>
+                <Setter Property="Visibility" Value="Collapsed" />
                 <Style.Triggers>
-                    <DataTrigger Binding="{Binding Path=FolderRuleAction}" Value="{x:Static model:FolderRuleActionEnum.Once}">
+                    <DataTrigger Binding="{Binding Path=FolderRuleAction}"
+                                 Value="{x:Static model:FolderRuleActionEnum.Once}">
                         <Setter Property="Visibility" Value="Visible" />
                     </DataTrigger>
                 </Style.Triggers>
             </Style>
 
-            <Style x:Key="RemoveImageStyle"  TargetType="Image">
-                <Setter Property="Visibility" Value="Collapsed"></Setter>
+            <Style x:Key="RemoveImageStyle" TargetType="Image">
+                <Setter Property="Visibility" Value="Collapsed" />
                 <Style.Triggers>
-                    <DataTrigger Binding="{Binding Path=FolderRuleAction}" Value="{x:Static model:FolderRuleActionEnum.Remove}">
+                    <DataTrigger Binding="{Binding Path=FolderRuleAction}"
+                                 Value="{x:Static model:FolderRuleActionEnum.Remove}">
                         <Setter Property="Visibility" Value="Visible" />
                     </DataTrigger>
                 </Style.Triggers>
             </Style>
 
             <Style x:Key="AlwaysImageStyle" TargetType="Image">
-                <Setter Property="Visibility" Value="Collapsed"></Setter>
+                <Setter Property="Visibility" Value="Collapsed" />
                 <Style.Triggers>
-                    <DataTrigger Binding="{Binding Path=FolderRuleAction}" Value="{x:Static model:FolderRuleActionEnum.Always}">
+                    <DataTrigger Binding="{Binding Path=FolderRuleAction}"
+                                 Value="{x:Static model:FolderRuleActionEnum.Always}">
                         <Setter Property="Visibility" Value="Visible" />
                     </DataTrigger>
                 </Style.Triggers>
@@ -76,10 +80,10 @@
                           Grid.Row="0" Grid.Column="0">
                     <TreeView.ItemTemplate>
                         <HierarchicalDataTemplate DataType="{x:Type folderRules:FolderRuleViewModel}"
-                                                  ItemsSource="{Binding Path=Children}" >
+                                                  ItemsSource="{Binding Path=Children}">
                             <StackPanel Orientation="Horizontal">
                                 <Image Height="16" Width="16"
-                                       Style="{StaticResource FolderImageStyle}"/>
+                                       Style="{StaticResource FolderImageStyle}" />
 
                                 <Image Height="16" Width="16"
                                        Name="CheckmarkImage"
@@ -117,17 +121,17 @@
                 <StackPanel Grid.Row="0" Grid.Column="2" VerticalAlignment="Center">
                     <StackPanel>
                         <Label>For the current folder:</Label>
-                        <RadioButton Name="SelectedItemNeverRadioButton" Click="SelectedItemNeverRadioButton_OnClick">Never</RadioButton>
-                        <RadioButton Name="SelectedItemOnceRadioButton" Click="SelectedItemOnceRadioButton_OnClick">Once</RadioButton>
-                        <RadioButton Name="SelectedItemAlwaysRadioButton" Click="SelectedItemAlwaysRadioButton_OnClick">Always</RadioButton>
+                        <RadioButton Name="SelectedItemNeverRadioButton">Never</RadioButton>
+                        <RadioButton Name="SelectedItemOnceRadioButton">Once</RadioButton>
+                        <RadioButton Name="SelectedItemAlwaysRadioButton">Always</RadioButton>
                     </StackPanel>
 
                     <StackPanel>
                         <Label>Watched Folders:</Label>
-                        <ListView Name="WatchedPathsList" MinHeight="150" SelectionChanged="WatchedPathsList_OnSelectionChanged">
+                        <ListView Name="WatchedPathsList" MinHeight="150">
                             <ListView.ItemTemplate>
                                 <DataTemplate DataType="{x:Type model:FolderRule}">
-                                    <Label Content="{Binding Path=Path}"/>
+                                    <Label Content="{Binding Path=Path}" />
                                 </DataTemplate>
                             </ListView.ItemTemplate>
                         </ListView>

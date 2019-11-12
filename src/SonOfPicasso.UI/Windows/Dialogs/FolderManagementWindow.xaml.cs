@@ -5,16 +5,14 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Forms;
+using System.Windows.Controls.Primitives;
+using DynamicData.Binding;
 using ReactiveUI;
 using SonOfPicasso.Core.Scheduling;
-using SonOfPicasso.Core.Services;
 using SonOfPicasso.Data.Model;
 using SonOfPicasso.UI.Interfaces;
-using SonOfPicasso.UI.ViewModels;
 using SonOfPicasso.UI.ViewModels.FolderRules;
 using ListView = System.Windows.Controls.ListView;
-using ListViewItem = System.Windows.Controls.ListViewItem;
 
 namespace SonOfPicasso.UI.Windows.Dialogs
 {
@@ -41,7 +39,85 @@ namespace SonOfPicasso.UI.Windows.Dialogs
                 FoldersListView.Events()
                     .SelectedItemChanged
                     .Select(args => (FolderRuleViewModel) args.NewValue)
-                    .BindTo(ViewModel, model => model.SelectedItem);
+                    .BindTo(ViewModel, model => model.SelectedItem)
+                    .DisposeWith(d);
+
+                ViewModel.WhenAnyValue(model => model.SelectedItem)
+                    .Subscribe(folderRuleViewModel =>
+                    {
+                        var folderRule = (FolderRule)WatchedPathsList.SelectedItem;
+                        if (folderRule != null)
+                        {
+                            if (!folderRule.Path.Equals(folderRuleViewModel.Path))
+                            {
+                                WatchedPathsList.SelectedItem = null;
+                            }
+                        }
+                    })
+                    .DisposeWith(d);
+
+                SelectedItemAlwaysRadioButton.Events()
+                    .Click
+                    .Subscribe(args =>
+                    {
+                        if (ViewModel.SelectedItem != null)
+                            ViewModel.SelectedItem.FolderRuleAction = FolderRuleActionEnum.Always;
+                    })
+                    .DisposeWith(d);
+
+                SelectedItemOnceRadioButton.Events()
+                    .Click
+                    .Subscribe(args =>
+                    {
+                        if (ViewModel.SelectedItem != null)
+                            ViewModel.SelectedItem.FolderRuleAction = FolderRuleActionEnum.Once;
+                    })
+                    .DisposeWith(d);
+
+                SelectedItemNeverRadioButton.Events()
+                    .Click
+                    .Subscribe(args =>
+                    {
+                        if (ViewModel.SelectedItem != null)
+                            ViewModel.SelectedItem.FolderRuleAction = FolderRuleActionEnum.Remove;
+                    })
+                    .DisposeWith(d);
+
+                WatchedPathsList.Events()
+                    .SelectionChanged
+                    .Subscribe(args =>
+                    {
+                        var listView = (ListView)args.Source;
+                        var folderRule = (FolderRule)listView.SelectedValue;
+                        if (folderRule != null && ViewModel.FolderRuleViewModelDictionary.TryGetValue(folderRule.Path, out var folderRuleViewModel))
+                        {
+                            var treeViewItem = FindItem(FoldersListView.ItemContainerGenerator, folderRuleViewModel.Path);
+                            if (treeViewItem != null)
+                            {
+                                treeViewItem.IsSelected = true;
+                                treeViewItem.BringIntoView();
+
+                                Dispatcher.BeginInvoke(new Action(() => FoldersListView.Focus()));
+                            }
+                        }
+                    })
+                    .DisposeWith(d);
+
+
+                this.OneWayBind(ViewModel,
+                    model => model.SelectedItem,
+                    window => window.SelectedItemAlwaysRadioButton.IsEnabled,
+                    selector: model => model != null);
+
+                this.OneWayBind(ViewModel,
+                    model => model.SelectedItem,
+                    window => window.SelectedItemNeverRadioButton.IsEnabled,
+                    selector: model => model != null);
+
+                this.OneWayBind(ViewModel,
+                    model => model.SelectedItem,
+                    window => window.SelectedItemOnceRadioButton.IsEnabled,
+                    selector: model => model != null);
 
                 this.BindCommand(ViewModel,
                         model => model.Continue,
@@ -98,21 +174,6 @@ namespace SonOfPicasso.UI.Windows.Dialogs
             });
         }
 
-        private void SelectedItemNeverRadioButton_OnClick(object sender, RoutedEventArgs e)
-        {
-            ViewModel.SelectedItem.FolderRuleAction = FolderRuleActionEnum.Remove;
-        }
-
-        private void SelectedItemOnceRadioButton_OnClick(object sender, RoutedEventArgs e)
-        {
-            ViewModel.SelectedItem.FolderRuleAction = FolderRuleActionEnum.Once;
-        }
-
-        private void SelectedItemAlwaysRadioButton_OnClick(object sender, RoutedEventArgs e)
-        {
-            ViewModel.SelectedItem.FolderRuleAction = FolderRuleActionEnum.Always;
-        }
-
         private void TreeViewItem_OnExpanded(object sender, RoutedEventArgs e)
         {
             var treeViewItem = (TreeViewItem)sender;
@@ -120,23 +181,6 @@ namespace SonOfPicasso.UI.Windows.Dialogs
             foreach (var folderRuleInput in customFolderRuleInput.Children)
             {
                 ViewModel.PopulateFolderRuleInput(folderRuleInput);
-            }
-        }
-
-        private void WatchedPathsList_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            var listView = (ListView)sender;
-            var folderRule = (FolderRule)listView.SelectedValue;
-            if (ViewModel.FolderRuleViewModelDictionary.TryGetValue(folderRule.Path, out var folderRuleViewModel))
-            {
-                var treeViewItem = FindItem(FoldersListView.ItemContainerGenerator, folderRuleViewModel.Path);
-                if (treeViewItem != null)
-                {
-                    treeViewItem.IsSelected = true;
-                    treeViewItem.BringIntoView();
-
-                    Dispatcher.BeginInvoke(new Action(() => FoldersListView.Focus()));
-                }
             }
         }
 

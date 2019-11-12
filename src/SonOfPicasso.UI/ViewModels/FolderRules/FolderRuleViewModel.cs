@@ -4,6 +4,7 @@ using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using DynamicData;
 using DynamicData.Binding;
 using ReactiveUI;
 using SonOfPicasso.Core.Interfaces;
@@ -28,6 +29,9 @@ namespace SonOfPicasso.UI.ViewModels.FolderRules
         public FolderRuleViewModel(IDirectoryInfo directoryInfo)
         {
             DirectoryInfo = directoryInfo;
+            
+            var childrenSourceCache = new SourceCache<FolderRuleViewModel, string>(model => model.Path);
+
             Children = new ObservableCollectionExtended<FolderRuleViewModel>();
 
             _disposables = new CompositeDisposable();
