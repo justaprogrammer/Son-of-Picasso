@@ -67,7 +67,7 @@ namespace SonOfPicasso.UI.Windows.Dialogs
                     .Subscribe(args =>
                     {
                         if (ViewModel.SelectedItem != null)
-                            ViewModel.SelectedItem.FolderRuleAction = FolderRuleActionEnum.Always;
+                            ViewModel.SetFolderRuleAction(ViewModel.SelectedItem, FolderRuleActionEnum.Always);
                     })
                     .DisposeWith(d);
 
@@ -76,7 +76,7 @@ namespace SonOfPicasso.UI.Windows.Dialogs
                     .Subscribe(args =>
                     {
                         if (ViewModel.SelectedItem != null)
-                            ViewModel.SelectedItem.FolderRuleAction = FolderRuleActionEnum.Once;
+                            ViewModel.SetFolderRuleAction(ViewModel.SelectedItem, FolderRuleActionEnum.Once);
                     })
                     .DisposeWith(d);
 
@@ -85,7 +85,7 @@ namespace SonOfPicasso.UI.Windows.Dialogs
                     .Subscribe(args =>
                     {
                         if (ViewModel.SelectedItem != null)
-                            ViewModel.SelectedItem.FolderRuleAction = FolderRuleActionEnum.Remove;
+                            ViewModel.SetFolderRuleAction(ViewModel.SelectedItem, FolderRuleActionEnum.Remove);
                     })
                     .DisposeWith(d);
 
@@ -185,7 +185,7 @@ namespace SonOfPicasso.UI.Windows.Dialogs
             var treeViewItem = (TreeViewItem)sender;
             var customFolderRuleInput = (FolderRuleViewModel) treeViewItem.DataContext;
 
-            foreach (var folderRuleInput in customFolderRuleInput.Children)
+            foreach (var folderRuleInput in customFolderRuleInput.VisibleChildren)
             {
                 ViewModel.PopulateFolderRuleInput(folderRuleInput)
                     .Subscribe();

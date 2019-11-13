@@ -17,6 +17,7 @@ namespace SonOfPicasso.Core.Interfaces
         IObservable<Unit> DeleteAlbum(int albumId);
         IConnectableCache<IImageContainer, string> ImageContainerCache { get; }
         IConnectableCache<ImageRef, string> ImageRefCache { get; }
+        IObservable<Unit> ResetFolderManagementRules(IEnumerable<IFolderRuleInput> folderRules);
         IObservable<Unit> Start();
         void Stop();
     }

@@ -1,27 +1,29 @@
 ﻿using System;
 using System.IO.Abstractions;
 using System.Windows;
+using Akavache;
 using Autofac;
 using AutofacSerilogIntegration;
 using Microsoft.EntityFrameworkCore;
 using ReactiveUI;
 using Serilog;
+using SonOfPicasso.Core;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Logging;
 using SonOfPicasso.Core.Services;
 using SonOfPicasso.Data.Repository;
 using SonOfPicasso.Data.Services;
-using SonOfPicasso.UI.Services;
 using SonOfPicasso.UI.ViewModels;
 using SonOfPicasso.UI.Views;
 using SonOfPicasso.UI.Windows;
 using Splat;
 using Splat.Serilog;
+using SQLitePCL;
 
 namespace SonOfPicasso.UI
 {
     /// <summary>
-    /// Interaction logic for App.xaml
+    ///     Interaction logic for App.xaml
     /// </summary>
     public partial class App : Application
     {
@@ -32,18 +34,25 @@ namespace SonOfPicasso.UI
             base.OnStartup(e);
 
             var loggerConfiguration = new LoggerConfiguration()
-                .MinimumLevel.Verbose()
+                .MinimumLevel.Debug()
                 .Enrich.WithThreadId()
                 .Enrich.With<CustomEnrichers>();
 
-#if DEBUG
-            loggerConfiguration
-                .WriteTo.Debug(outputTemplate: "{Timestamp:HH:mm:ss} [{Level:u4}] ({PaddedThreadId}) {ShortSourceContext} {Message}{NewLineIfException}{Exception}{NewLine}");
-#endif
+            var outputTemplate =
+                "{Timestamp:HH:mm:ss} [{Level:u4}] ({PaddedThreadId}) {ShortSourceContext} {Message}{NewLineIfException}{Exception}{NewLine}";
+
+            if (Common.IsDebug)
+                loggerConfiguration
+                    .WriteTo.Debug(outputTemplate: outputTemplate);
+            else if (Common.IsTrace)
+                loggerConfiguration
+                    .WriteTo.Trace(outputTemplate: outputTemplate);
+
+            if (Common.IsVerboseLoggingEnabled) loggerConfiguration = loggerConfiguration.MinimumLevel.Verbose();
 
             Log.Logger = loggerConfiguration.CreateLogger();
 
-            Akavache.BlobCache.ApplicationName = ApplicationName;
+            BlobCache.ApplicationName = ApplicationName;
 
             var containerBuilder = new ContainerBuilder();
 
@@ -56,12 +65,12 @@ namespace SonOfPicasso.UI
                 .InstancePerLifetimeScope();
 
             containerBuilder.Register(context =>
-            {
-                var environmentService = context.Resolve<IEnvironmentService>();
-                var fileSystem = context.Resolve<IFileSystem>();
+                {
+                    var environmentService = context.Resolve<IEnvironmentService>();
+                    var fileSystem = context.Resolve<IFileSystem>();
 
-                return BuildDbContextOptions(environmentService, fileSystem);
-            }).As<DbContextOptions<DataContext>>()
+                    return BuildDbContextOptions(environmentService, fileSystem);
+                }).As<DbContextOptions<DataContext>>()
                 .InstancePerLifetimeScope();
 
             containerBuilder.RegisterType<DataContext>()
@@ -115,7 +124,7 @@ namespace SonOfPicasso.UI
             Locator.CurrentMutable.RegisterPlatformBitmapLoader();
             Locator.CurrentMutable.UseSerilogFullLogger();
 
-            SQLitePCL.Batteries_V2.Init();
+            Batteries_V2.Init();
 
             var dataContext = container.Resolve<DataContext>();
             dataContext.Database.Migrate();
@@ -126,9 +135,10 @@ namespace SonOfPicasso.UI
             mainWindow.Show();
         }
 
-        internal static DbContextOptions<DataContext> BuildDbContextOptions(IEnvironmentService environmentService, IFileSystem fileSystem)
+        internal static DbContextOptions<DataContext> BuildDbContextOptions(IEnvironmentService environmentService,
+            IFileSystem fileSystem)
         {
-            string databasePath = environmentService.GetEnvironmentVariable("SonOfPicasso_DatabasePath");
+            var databasePath = environmentService.GetEnvironmentVariable("SonOfPicasso_DatabasePath");
             if (!string.IsNullOrWhiteSpace(databasePath))
             {
                 var databaseDirectory = fileSystem.Path.GetDirectoryName(databasePath);

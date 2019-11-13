@@ -4,7 +4,9 @@ using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive.Linq;
+using Serilog;
 using SonOfPicasso.Core.Interfaces;
+using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Data.Model;
 
 namespace SonOfPicasso.Core.Services
@@ -12,10 +14,14 @@ namespace SonOfPicasso.Core.Services
     public class FolderWatcherService : IFolderWatcherService
     {
         private readonly IFileSystem _fileSystem;
+        private readonly ILogger _logger;
+        private readonly ISchedulerProvider _schedulerProvider;
 
-        public FolderWatcherService(IFileSystem fileSystem)
+        public FolderWatcherService(IFileSystem fileSystem, ILogger logger, ISchedulerProvider schedulerProvider)
         {
             _fileSystem = fileSystem;
+            _logger = logger;
+            _schedulerProvider = schedulerProvider;
         }
 
         public IObservable<FileSystemEventArgs> WatchFolders(IEnumerable<FolderRule> folderRules,
@@ -49,21 +55,25 @@ namespace SonOfPicasso.Core.Services
                             var d1 = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
                                     action => fileSystemWatcher.Created += action,
                                     action => fileSystemWatcher.Created -= action)
+                                .ObserveOn(_schedulerProvider.TaskPool)
                                 .Select(pattern => pattern.EventArgs);
 
                             var d2 = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
                                     action => fileSystemWatcher.Deleted += action,
                                     action => fileSystemWatcher.Deleted -= action)
+                                .ObserveOn(_schedulerProvider.TaskPool)
                                 .Select(pattern => pattern.EventArgs);
 
                             var d3 = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
                                     action => fileSystemWatcher.Changed += action,
                                     action => fileSystemWatcher.Changed -= action)
+                                .ObserveOn(_schedulerProvider.TaskPool)
                                 .Select(pattern => pattern.EventArgs);
 
                             var d4 = Observable.FromEventPattern<RenamedEventHandler, RenamedEventArgs>(
                                     action => fileSystemWatcher.Renamed += action,
                                     action => fileSystemWatcher.Renamed -= action)
+                                .ObserveOn(_schedulerProvider.TaskPool)
                                 .Select(pattern => (FileSystemEventArgs) pattern.EventArgs);
 
                             fileSystemWatcher.IncludeSubdirectories = true;

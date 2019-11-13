@@ -105,13 +105,7 @@ namespace SonOfPicasso.UI.ViewModels.FolderRules
                             {
                                 var currentTracers = tracers.Select(tracerPair =>
                                 {
-                                    var isRule = folderRules.ContainsKey(directoryInfo.FullName);
-
-                                    var isParentOfRule = !isRule &&
-                                                         folderRules.Any(pair =>
-                                                             pair.Value != FolderRuleActionEnum.Remove
-                                                             && pair.Key.Length > tracerPair.Value.Path.Length
-                                                             && pair.Key.StartsWith(tracerPair.Value.Path));
+                                    var (isRule, isParentOfRule) = GetFolderRuleRelationshipToRules(folderRules, tracerPair.Value);
 
                                     return (tracerPair, isRule, isParentOfRule);
                                 }).ToArray();
@@ -129,7 +123,7 @@ namespace SonOfPicasso.UI.ViewModels.FolderRules
                                     {
                                         await populateFolderRuleInput;
 
-                                        foreach (var child in currentFolderRuleViewModel.Children)
+                                        foreach (var child in currentFolderRuleViewModel.VisibleChildren)
                                             tracers.Add(child.Path, child);
                                     }
                                     else
@@ -150,6 +144,20 @@ namespace SonOfPicasso.UI.ViewModels.FolderRules
                     return Unit.Default;
                 })
                 .LastAsync();
+        }
+
+        private static (bool isRule, bool isParentOfRule) GetFolderRuleRelationshipToRules(
+            IDictionary<string, FolderRuleActionEnum> folderRules, FolderRuleViewModel folderRuleViewModel)
+        {
+            var isRule = folderRules.ContainsKey(folderRuleViewModel.Path);
+
+            var isParentOfRule = !isRule &&
+                                 folderRules.Any(pair =>
+                                     pair.Value != FolderRuleActionEnum.Remove
+                                     && pair.Key.Length > folderRuleViewModel.Path.Length
+                                     && pair.Key.StartsWith(folderRuleViewModel.Path));
+
+            return (isRule, isParentOfRule);
         }
 
         public IReadOnlyDictionary<string, FolderRuleViewModel> FolderRuleViewModelDictionary =>
@@ -215,7 +223,7 @@ namespace SonOfPicasso.UI.ViewModels.FolderRules
                 .ObserveOn(_schedulerProvider.MainThreadScheduler)
                 .Select(item =>
                 {
-                    folderRuleViewModel.Children.Add(item);
+                    folderRuleViewModel.AddChild(item);
                     return Unit.Default;
                 })
                 .LastOrDefaultAsync();
@@ -226,42 +234,24 @@ namespace SonOfPicasso.UI.ViewModels.FolderRules
             FolderRuleActionEnum defaultFolderRuleAction = FolderRuleActionEnum.Remove,
             bool forcePopulateChildren = false)
         {
-            var folderRuleInput = new FolderRuleViewModel(directoryInfo);
+            var folderRuleInput = new FolderRuleViewModel(directoryInfo, this, _schedulerProvider);
             _folderRuleViewModelDictionary.TryAdd(directoryInfo.FullName, folderRuleInput);
 
             if (folderRules.TryGetValue(directoryInfo.FullName, out var folderRuleAction))
             {
                 folderRuleInput.FolderRuleAction = folderRuleAction;
+
+                folderRuleInput.IsActiveRule = true;
+
             }
             else
             {
                 folderRuleInput.FolderRuleAction = defaultFolderRuleAction;
 
-                var anyParentOfRule = folderRules.Any(s => s.Value != FolderRuleActionEnum.Remove
-                                                           && s.Key.Length > directoryInfo.FullName.Length
-                                                           && s.Key.StartsWith(directoryInfo.FullName));
-
-                if (anyParentOfRule)
-                    folderRuleInput.ShouldShowReason =
-                        FolderRuleViewModel.ShouldShowChildReasonEnum.IsParentOfRule;
+                folderRuleInput.IsParentOfRule = folderRules.Any(s => s.Value != FolderRuleActionEnum.Remove
+                                                                          && s.Key.Length > directoryInfo.FullName.Length
+                                                                          && s.Key.StartsWith(directoryInfo.FullName));
             }
-
-            folderRuleInput.WhenPropertyChanged(model => model.FolderRuleAction, false)
-                .Select(value =>
-                {
-                    var manageFolderViewModels = ((IManageFolderRulesViewModel) this).Folders;
-                    return FolderRulesFactory.ComputeRuleset(manageFolderViewModels);
-                })
-                .ObserveOn(_schedulerProvider.MainThreadScheduler)
-                .Subscribe(items =>
-                {
-                    _watchedPathsSourceCache.Edit(updater =>
-                    {
-                        updater.Clear();
-                        updater.AddOrUpdate(items);
-                    });
-                })
-                .DisposeWith(_disposables);
 
             return folderRuleInput;
         }
@@ -278,6 +268,59 @@ namespace SonOfPicasso.UI.ViewModels.FolderRules
             return ContinueInteraction.Handle(Unit.Default)
                 .SubscribeOn(_schedulerProvider.TaskPool)
                 .Select(unit => unit);
+        }
+
+        public void SetFolderRuleAction(FolderRuleViewModel folderRuleViewModel, FolderRuleActionEnum folderRuleAction)
+        {
+            CascadeSelection(folderRuleViewModel, folderRuleAction);
+            
+            var manageFolderViewModels = ((IManageFolderRulesViewModel) this).Folders;
+            var folderRules = FolderRulesFactory.ComputeRuleset(manageFolderViewModels)
+                .ToArray();
+
+            _watchedPathsSourceCache.Edit(updater =>
+            {
+                updater.Clear();
+                updater.AddOrUpdate(folderRules.Where(rule => rule.Action == FolderRuleActionEnum.Always));
+            });
+
+            var folderRuleDictionary = folderRules.ToDictionary(rule => rule.Path, rule => rule.Action);
+            foreach (var ruleViewModel in Folders)
+            {
+                CascadeViewableProperties(ruleViewModel, folderRuleDictionary);
+            }
+        }
+
+        private void CascadeViewableProperties(FolderRuleViewModel ruleViewModel, Dictionary<string, FolderRuleActionEnum> folderRuleDictionary, bool reset = false)
+        {
+            if (!reset)
+            {
+                var (isRule, isParentOfRule) = GetFolderRuleRelationshipToRules(folderRuleDictionary, ruleViewModel);
+                ruleViewModel.IsActiveRule = isRule;
+                ruleViewModel.IsParentOfRule = isParentOfRule;
+
+                foreach (var child in ruleViewModel.Children)
+                {
+                    CascadeViewableProperties(child, folderRuleDictionary, !isParentOfRule);
+                }
+            }
+            else
+            {
+                ruleViewModel.IsActiveRule = false;
+                ruleViewModel.IsParentOfRule = false;
+
+                foreach (var child in ruleViewModel.Children)
+                {
+                    CascadeViewableProperties(child, folderRuleDictionary, true);
+                }
+            }
+        }
+
+        private static void CascadeSelection(FolderRuleViewModel folderRuleViewModel, FolderRuleActionEnum folderRuleAction)
+        {
+            folderRuleViewModel.FolderRuleAction = folderRuleAction;
+            foreach (var child in folderRuleViewModel.Children) 
+                CascadeSelection(child, folderRuleAction);
         }
     }
 }

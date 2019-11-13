@@ -295,8 +295,8 @@ namespace SonOfPicasso.UI.ViewModels
                 {
                     return s != null
                         ? _imageContainerManagementService.ScanFolder(s)
-                            .LastAsync()
                             .Select(container => Unit.Default)
+                            .LastOrDefaultAsync()
                         : Observable.Return(Unit.Default);
                 })
                 .SelectMany(observable => observable);
@@ -362,7 +362,7 @@ namespace SonOfPicasso.UI.ViewModels
                 {
                     if (folderManagementViewModel != null)
                     {
-                        return _folderRulesManagementService.ResetFolderManagementRules(folderManagementViewModel.Folders);
+                        return _imageContainerManagementService.ResetFolderManagementRules(folderManagementViewModel.Folders);
                     }
 
                     return Observable.Return(Unit.Default);

@@ -80,7 +80,7 @@
                           Grid.Row="0" Grid.Column="0">
                     <TreeView.ItemTemplate>
                         <HierarchicalDataTemplate DataType="{x:Type folderRules:FolderRuleViewModel}"
-                                                  ItemsSource="{Binding Path=Children}">
+                                                  ItemsSource="{Binding Path=VisibleChildren}">
                             <StackPanel Orientation="Horizontal">
                                 <Image Height="16" Width="16"
                                        Style="{StaticResource FolderImageStyle}" />
@@ -106,7 +106,7 @@
                     </TreeView.ItemTemplate>
                     <TreeView.ItemContainerStyle>
                         <Style TargetType="TreeViewItem">
-                            <Setter Property="IsExpanded" Value="{Binding Path=ShouldShow}" />
+                            <Setter Property="IsExpanded" Value="{Binding Mode=OneTime,Path=IsParentOfRule}" />
                             <EventSetter Event="Expanded" Handler="TreeViewItem_OnExpanded" />
                         </Style>
                     </TreeView.ItemContainerStyle>
