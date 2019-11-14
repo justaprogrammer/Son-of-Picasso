@@ -44,7 +44,7 @@ namespace SonOfPicasso.Tools.Services
                 resultSelector: value =>
                 {
                     if(value == 0)
-                        _logger.Debug("GenerateImages {Count} {FileRoot}", count, fileRoot);
+                        _logger.Verbose("GenerateImages {Count} {FileRoot}", count, fileRoot);
 
                     var time = Faker.Date.Between(DateTime.Now, DateTime.Now.AddDays(-30));
                     var directoryPath = inDateNamedDirectory ? _fileSystem.Path.Combine(fileRoot, time.ToString("yyyy-MM-dd")) : fileRoot;
