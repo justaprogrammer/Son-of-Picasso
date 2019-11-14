@@ -16,6 +16,8 @@ BuildServer.install [
 let isAppveyor = AppVeyor.detect()
 let gitVersion = GitVersion.generateProperties id
 
+Environment.setEnvironVar "SonOfPicasso_Verbose" "true"
+
 let replacementVersion, fullSemver = 
     if (Git.Information.getBranchName(Shell.pwd()) = "master") then
       CreateProcess.fromRawCommandLine "node" (sprintf "%s\\npm\\node_modules\\commit-analyzer-cli\\bin\\index.js" (Environment.environVarOrFail "APPDATA"))
