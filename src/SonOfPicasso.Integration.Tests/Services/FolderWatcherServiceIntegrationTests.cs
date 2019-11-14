@@ -107,15 +107,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                     streamWriter.Close();
                 });
 
-            try
-            {
-                WaitOne(TimeSpan.FromSeconds(15));
-            }
-            catch (Exception e)
-            {
-                Logger.Warning("Found {Count} items", eventsList.Count);   
-                throw;
-            }
+            WaitOne(TimeSpan.FromSeconds(15));
         }
 
         [Fact]
@@ -169,15 +161,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                     streamWriter.Close();
                 });          
             
-            try
-            {
-                WaitOne(TimeSpan.FromSeconds(15));
-            }
-            catch (Exception e)
-            {
-                Logger.Warning("Found {Count} items", eventsList.Count);   
-                throw;
-            }
+            WaitOne(TimeSpan.FromSeconds(15));
         }
 
         [Fact]
@@ -222,7 +206,7 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             FileSystem.File.Move(testFilePath1, testFilePath2);
 
-            WaitOne();
+            WaitOne(TimeSpan.FromSeconds(15));
         }
     }
 }
