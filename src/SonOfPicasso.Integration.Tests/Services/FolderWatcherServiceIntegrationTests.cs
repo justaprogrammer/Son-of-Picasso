@@ -107,7 +107,15 @@ namespace SonOfPicasso.Integration.Tests.Services
                     streamWriter.Close();
                 });
 
-            WaitOne();
+            try
+            {
+                WaitOne(TimeSpan.FromSeconds(15));
+            }
+            catch (Exception e)
+            {
+                Logger.Warning("Found {Count} items", eventsList.Count);   
+                throw;
+            }
         }
 
         [Fact]
@@ -159,9 +167,17 @@ namespace SonOfPicasso.Integration.Tests.Services
                     streamWriter.WriteLine("Hello World!");
                     streamWriter.Flush();
                     streamWriter.Close();
-                });
-
-            WaitOne(TimeSpan.FromSeconds(15));
+                });          
+            
+            try
+            {
+                WaitOne(TimeSpan.FromSeconds(15));
+            }
+            catch (Exception e)
+            {
+                Logger.Warning("Found {Count} items", eventsList.Count);   
+                throw;
+            }
         }
 
         [Fact]
