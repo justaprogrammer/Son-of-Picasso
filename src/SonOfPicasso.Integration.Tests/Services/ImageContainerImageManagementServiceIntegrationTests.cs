@@ -106,7 +106,7 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             await connectableImageManagementService.Start();
 
-            var imageCount = 100;
+            var imageCount = 20;
             var generateImagesAsync = await GenerateImagesAsync(imageCount);
 
             imageContainers.WhenPropertyChanged(items => items.Count)
@@ -119,7 +119,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                     }
                 });
 
-            WaitOne(TimeSpan.FromSeconds(120));
+            WaitOne(TimeSpan.FromSeconds(60));
 
             await using var connection = DataContext.Database.GetDbConnection();
 
