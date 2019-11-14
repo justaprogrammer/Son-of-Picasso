@@ -375,8 +375,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             WaitOne(TimeSpan.FromSeconds(5));
 
             folderRulesManagementService
-                .DidNotReceive()
-                .ResetFolderManagementRules(default);
+                .DidNotReceive().ResetFolderManagementRules((IEnumerable<IFolderRuleInput>) default);
         }
     }
 }

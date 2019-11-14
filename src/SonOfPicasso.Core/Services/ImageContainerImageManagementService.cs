@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -39,11 +40,11 @@ namespace SonOfPicasso.Core.Services
             _folderRulesManagementService = folderRulesManagementService;
             _schedulerProvider = schedulerProvider;
             _logger = logger;
-            _imageContainerCache = new SourceCache<IImageContainer, string>(imageContainer => imageContainer.Id);
+            _imageContainerCache = new SourceCache<IImageContainer, string>(imageContainer => imageContainer.Key);
             _imageRefCache = _imageContainerCache
                 .Connect()
                 .ObserveOn(schedulerProvider.TaskPool)
-                .TransformMany(container => container.ImageRefs, imageRef => imageRef.Id)
+                .TransformMany(container => container.ImageRefs, imageRef => imageRef.Key)
                 .AsObservableCache();
 
             _disposables = new CompositeDisposable();
@@ -66,10 +67,29 @@ namespace SonOfPicasso.Core.Services
             _disposables?.Dispose();
         }
 
-        public IObservable<Unit> ResetFolderManagementRules(IEnumerable<IFolderRuleInput> folderRules)
+        public IObservable<Unit> ResetRules(IEnumerable<FolderRule> folderRules)
         {
-            return _folderRulesManagementService.ResetFolderManagementRules(folderRules)
-                .Do(unit => StartWatcher());
+            var folderRulesArray = folderRules.ToArray();
+
+            var resetRules = _folderRulesManagementService.ResetFolderManagementRules(folderRulesArray);
+
+            var applyImageChanges = _imageContainerOperationService.ApplyRuleChanges(folderRulesArray)
+                .Select(changes =>
+                {
+                    _imageContainerCache.Remove(changes.DeletedFolderIds.Select(FolderImageContainer.GetContainerId));
+
+                    return Unit.Default;
+                });
+
+            var result = resetRules
+                .Zip(applyImageChanges, (unit, _) => unit);
+
+            return result;
+        }
+
+        public IObservable<ResetChanges> PreviewResetRulesChanges(IEnumerable<FolderRule> folderRules)
+        {
+            return _imageContainerOperationService.PreviewRuleChangesEffect(folderRules);
         }
 
         public IObservable<Unit> Start()
@@ -139,7 +159,7 @@ namespace SonOfPicasso.Core.Services
         public IObservable<Unit> DeleteAlbum(int albumId)
         {
             return _imageContainerOperationService.DeleteAlbum(albumId)
-                .Do(container => _imageContainerCache.Remove(AlbumImageContainer.GetContainerId(albumId)));
+                .Do(container => _imageContainerCache.Remove(AlbumImageContainer.GetContainerKey(albumId)));
         }
 
         private void StartWatcher()

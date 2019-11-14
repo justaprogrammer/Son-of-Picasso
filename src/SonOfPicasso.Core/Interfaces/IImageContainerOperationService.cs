@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reactive;
 using SonOfPicasso.Core.Model;
+using SonOfPicasso.Core.Services;
 using SonOfPicasso.Data.Model;
 
 namespace SonOfPicasso.Core.Interfaces
@@ -18,5 +19,9 @@ namespace SonOfPicasso.Core.Interfaces
         IObservable<IImageContainer> RenameImage(string oldPath, string newPath);
         IObservable<Unit> DeleteAlbum(int albumId);
         IObservable<IImageContainer> AddOrUpdateImage(string path);
+        IObservable<ResetChanges> PreviewRuleChangesEffect(IEnumerable<FolderRule> folderRules);
+        IObservable<ResetChanges> ApplyRuleChanges(IEnumerable<FolderRule> folderRules);
+        IObservable<IImageContainer>  GetFolderImageContainer(int folderId);
+        IObservable<IImageContainer> GetAlbumImageContainer(int albumId);
     }
 }

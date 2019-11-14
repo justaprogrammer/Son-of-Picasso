@@ -258,6 +258,22 @@ namespace SonOfPicasso.UI.Windows
                         }).SubscribeOn(_schedulerProvider.MainThreadScheduler);
                     })
                     .DisposeWith(d);
+
+                ViewModel.FolderManagerConfirmationInteraction.RegisterHandler(context =>
+                {
+                    return Observable.Defer(() =>
+                    {
+                        var deletedCount = context.Input.DeletedImagePaths.Length;
+                        var imagesString = deletedCount == 0 ? "image" : "images";
+
+                        var messageBoxResult = MessageBox.Show($"This action will remove {deletedCount} {imagesString} from the database. Are you sure?",
+                            "Confirmation", MessageBoxButton.YesNo);
+
+                        context.SetOutput(messageBoxResult == MessageBoxResult.Yes);
+
+                        return Observable.Return(Unit.Default);
+                    }).SubscribeOn(_schedulerProvider.MainThreadScheduler);
+                });
             });
         }
 

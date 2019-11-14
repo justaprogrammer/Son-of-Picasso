@@ -6,12 +6,12 @@ namespace SonOfPicasso.Core.Model
 {
     public interface IImageContainer
     {
-        string Id { get; }
+        string Key { get; }
         string Name { get; }
         int Year { get; }
         DateTime Date { get; }
         ImageContainerTypeEnum ContainerType { get; }
         IList<ImageRef> ImageRefs { get; }
-        int ContainerTypeId { get; }
+        int Id { get; }
     }
 }

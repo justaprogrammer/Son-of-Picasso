@@ -91,7 +91,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             FileSystem.File.Delete(imageToDelete.Path);
 
             var deletedImageContainer = await imageManagementService.DeleteImage(imageToDelete.Path);
-            deletedImageContainer.ContainerTypeId.Should().Be(imageToDelete.FolderId);
+            deletedImageContainer.Id.Should().Be(imageToDelete.FolderId);
 
             imagesCount -= 1;
 
@@ -247,7 +247,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             var updatedImageContainers =
                 await imageManagementService.RenameImage(imageToRename.Path, renamePath).ToArray();
             updatedImageContainers.Should().ContainSingle();
-            updatedImageContainers.First().ContainerTypeId.Should().Be(imageToRename.FolderId);
+            updatedImageContainers.First().Id.Should().Be(imageToRename.FolderId);
 
             var imagesAfter = (await connection.QueryAsync<Image>("SELECT * FROM Images"))
                 .ToArray();
@@ -337,7 +337,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             var updatedImageContainers =
                 await imageManagementService.RenameImage(imageToRename.Path, renamePath).ToArray();
             updatedImageContainers.Should().HaveCount(2);
-            updatedImageContainers.Select(container => container.ContainerTypeId)
+            updatedImageContainers.Select(container => container.Id)
                 .Should()
                 .BeEquivalentTo(new[] {imageToRename.FolderId, folderToMoveTo.Id});
 
@@ -650,7 +650,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                     albumImageCount)
                 .ToArray();
 
-            var imageIds = imageRefs.Select(imageRef => imageRef.ImageId)
+            var imageIds = imageRefs.Select(imageRef => imageRef.Id)
                 .ToArray();
 
             ICreateAlbum createAlbum = new TestCreateAlbum
@@ -669,7 +669,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             imageContainer.ImageRefs.Should().BeEmpty();
             imageContainer.Year.Should().Be(createAlbum.AlbumDate.Year);
 
-            imageContainer = await imageManagementService.AddImagesToAlbum(imageContainer.ContainerTypeId, imageIds);
+            imageContainer = await imageManagementService.AddImagesToAlbum(imageContainer.Id, imageIds);
             imageContainer.Name.Should().Be(createAlbum.AlbumName);
             imageContainer.Date.Should().Be(createAlbum.AlbumDate);
             imageContainer.ContainerType.Should().Be(ImageContainerTypeEnum.Album);
@@ -686,7 +686,7 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             albumImages.Should().HaveCount(5);
 
-            imageManagementService.DeleteAlbum(imageContainer.ContainerTypeId)
+            imageManagementService.DeleteAlbum(imageContainer.Id)
                 .Subscribe(unit =>
                 {
                     AutoResetEvent.Set();
@@ -726,7 +726,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                     albumImageCount)
                 .ToArray();
 
-            var imageIds = imageRefs.Select(imageRef => imageRef.ImageId)
+            var imageIds = imageRefs.Select(imageRef => imageRef.Id)
                 .ToArray();
 
             ICreateAlbum createAlbum = new TestCreateAlbum
@@ -739,7 +739,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             };
 
             var imageContainer = await imageManagementService.CreateAlbum(createAlbum);
-            imageContainer = await imageManagementService.AddImagesToAlbum(imageContainer.ContainerTypeId, imageIds);
+            imageContainer = await imageManagementService.AddImagesToAlbum(imageContainer.Id, imageIds);
 
             var albums = (await connection.QueryAsync<Album>("SELECT * FROM Albums"))
                 .ToArray();

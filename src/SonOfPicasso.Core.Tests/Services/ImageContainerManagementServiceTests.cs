@@ -47,19 +47,17 @@ namespace SonOfPicasso.Core.Tests.Services
             var imageManagementService = AutoSubstitute.Resolve<IImageContainerOperationService>();
 
             var imageContainer = Substitute.For<IImageContainer>();
-            imageContainer.Id.Returns(Faker.Random.String());
+            imageContainer.Key.Returns(Faker.Random.String());
             imageContainer.Date.Returns(Faker.Date.Recent());
             imageContainer.ContainerType.Returns(Faker.PickRandom<ImageContainerTypeEnum>());
 
             var returnThis = new[]
             {
-                new ImageRef(Faker.Random.String(),
+                new ImageRef(Faker.Random.Int(1),
+                    Faker.Random.String(),
                     MockFileSystem.Path.Combine(Faker.System.DirectoryPathWindows(), Faker.System.FileName("png")),
-                    Faker.Random.Int(1),
                     Faker.Date.Recent(),
-                    imageContainer.Id,
-                    imageContainer.ContainerType,
-                    imageContainer.Date)
+                    imageContainer.Key, imageContainer.ContainerType, imageContainer.Date)
             };
 
             imageContainer.ImageRefs.Returns(returnThis);
@@ -128,19 +126,17 @@ namespace SonOfPicasso.Core.Tests.Services
             var imageManagementService = AutoSubstitute.Resolve<IImageContainerOperationService>();
 
             var imageContainer = Substitute.For<IImageContainer>();
-            imageContainer.Id.Returns(Faker.Random.String());
+            imageContainer.Key.Returns(Faker.Random.String());
             imageContainer.Date.Returns(Faker.Date.Recent());
             imageContainer.ContainerType.Returns(Faker.PickRandom<ImageContainerTypeEnum>());
 
             IList<ImageRef> returnThis = new[]
             {
-                new ImageRef(Faker.Random.String(),
+                new ImageRef(Faker.Random.Int(1),
+                    Faker.Random.String(),
                     MockFileSystem.Path.Combine(Faker.System.DirectoryPathWindows(), Faker.System.FileName("png")),
-                    Faker.Random.Int(1),
                     Faker.Date.Recent(),
-                    imageContainer.Id,
-                    imageContainer.ContainerType,
-                    imageContainer.Date)
+                    imageContainer.Key, imageContainer.ContainerType, imageContainer.Date)
             };
 
             imageContainer.ImageRefs.Returns(returnThis);
@@ -242,19 +238,17 @@ namespace SonOfPicasso.Core.Tests.Services
             var imageManagementService = AutoSubstitute.Resolve<IImageContainerOperationService>();
 
             var imageContainer = Substitute.For<IImageContainer>();
-            imageContainer.Id.Returns(Faker.Random.String());
+            imageContainer.Key.Returns(Faker.Random.String());
             imageContainer.Date.Returns(Faker.Date.Recent());
             imageContainer.ContainerType.Returns(Faker.PickRandom<ImageContainerTypeEnum>());
 
             var returnThis = new[]
             {
-                new ImageRef(Faker.Random.String(),
+                new ImageRef(Faker.Random.Int(1),
+                    Faker.Random.String(),
                     MockFileSystem.Path.Combine(Faker.System.DirectoryPathWindows(), Faker.System.FileName("png")),
-                    Faker.Random.Int(1),
                     Faker.Date.Recent(),
-                    imageContainer.Id,
-                    imageContainer.ContainerType,
-                    imageContainer.Date)
+                    imageContainer.Key, imageContainer.ContainerType, imageContainer.Date)
             };
 
             imageContainer.ImageRefs.Returns(returnThis);
