@@ -109,7 +109,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
 
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(1);
 
-            WaitOne();
+            WaitOne(TimeSpan.FromSeconds(5));
             
             applicationViewModel.TrayImages.Should().HaveCount(2);
             applicationViewModel.TrayImages.Select(model => model.Pinned).Should().AllBeEquivalentTo(true);
@@ -168,7 +168,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
 
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(1);
 
-            WaitOne();
+            WaitOne(TimeSpan.FromSeconds(5));
             
             applicationViewModel.TrayImages.Should().HaveCount(2);
             applicationViewModel.TrayImages.Select(model => model.Pinned).Should().AllBeEquivalentTo(true);
@@ -229,7 +229,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
 
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(1);
 
-            WaitOne();
+            WaitOne(TimeSpan.FromSeconds(5));
             
             applicationViewModel.ChangeSelectedImages(randomImageBatches[1], randomImageBatches[0]);
     
@@ -247,7 +247,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             TestSchedulerProvider.TaskPool.AdvanceBy(4);
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(4);
        
-            WaitOne();
+            WaitOne(TimeSpan.FromSeconds(5));
 
             applicationViewModel.TrayImages.Should().HaveCount(0);
         }
@@ -302,7 +302,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
 
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(1);
 
-            WaitOne();
+            WaitOne(TimeSpan.FromSeconds(5));
             
             applicationViewModel.ChangeSelectedImages(randomImageBatches[1], randomImageBatches[0]);
     
@@ -320,7 +320,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             TestSchedulerProvider.TaskPool.AdvanceBy(4);
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(4);
        
-            WaitOne();
+            WaitOne(TimeSpan.FromSeconds(5));
 
             applicationViewModel.TrayImages.Should().HaveCount(4);
         }
@@ -372,7 +372,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
 
             TestSchedulerProvider.TaskPool.AdvanceBy(2);
 
-            WaitOne();
+            WaitOne(TimeSpan.FromSeconds(5));
 
             folderRulesManagementService
                 .DidNotReceive()
