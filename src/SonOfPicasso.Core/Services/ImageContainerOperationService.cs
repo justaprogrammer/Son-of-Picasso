@@ -474,10 +474,6 @@ namespace SonOfPicasso.Core.Services
 
                     var (imagesDeleted, deleteFolderIds) = ImagesDeleted(folderRulesArray, images);
 
-                    var hashSet = images
-                        .Select(image => image.Path)
-                        .ToHashSet();
-
                     var deleted = imagesDeleted
                         .Select(image => image.Path)
                         .ToArray();

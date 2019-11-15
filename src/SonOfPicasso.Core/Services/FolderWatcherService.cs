@@ -61,6 +61,10 @@ namespace SonOfPicasso.Core.Services
                                 .ObserveOn(_schedulerProvider.TaskPool)
                                 .Select(pattern => (FileSystemEventArgs) pattern.EventArgs);
 
+                            // https://docs.microsoft.com/en-us/dotnet/api/system.io.filesystemwatcher.internalbuffersize?view=netframework-4.8
+                            // Default is 8k, Max is 64k, for best performance use multiples of 4k
+                            fileSystemWatcher.InternalBufferSize = 4096 * 8;
+
                             fileSystemWatcher.IncludeSubdirectories = true;
                             fileSystemWatcher.EnableRaisingEvents = true;
 
@@ -101,7 +105,7 @@ namespace SonOfPicasso.Core.Services
             return observable;
         }
 
-        private static Dictionary<string, List<FolderRule>> CreateTopLevelDictionary(IEnumerable<FolderRule> folderRules)
+        public static Dictionary<string, List<FolderRule>> CreateTopLevelDictionary(IEnumerable<FolderRule> folderRules)
         {
             var itemsDictionary = new Dictionary<string, List<FolderRule>>();
 

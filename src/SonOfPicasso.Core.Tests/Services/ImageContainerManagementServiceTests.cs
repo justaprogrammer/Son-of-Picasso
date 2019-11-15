@@ -65,7 +65,7 @@ namespace SonOfPicasso.Core.Tests.Services
             imageManagementService.GetAllImageContainers()
                 .Returns(Observable.Return(imageContainer));
 
-            var connectableImageManagementService = AutoSubstitute.Resolve<ImageContainerImageManagementService>();
+            var connectableImageManagementService = AutoSubstitute.Resolve<ImageContainerManagementService>();
 
             var imageContainers = new ObservableCollectionExtended<IImageContainer>();
 
@@ -147,7 +147,7 @@ namespace SonOfPicasso.Core.Tests.Services
             imageManagementService.GetAllImageContainers()
                 .Returns(Observable.Empty<IImageContainer>());
 
-            var connectableImageManagementService = AutoSubstitute.Resolve<ImageContainerImageManagementService>();
+            var connectableImageManagementService = AutoSubstitute.Resolve<ImageContainerManagementService>();
 
             var imageContainers = new ObservableCollectionExtended<IImageContainer>();
 
@@ -256,7 +256,7 @@ namespace SonOfPicasso.Core.Tests.Services
             imageManagementService.GetAllImageContainers()
                 .Returns(Observable.Return(imageContainer));
 
-            var connectableImageManagementService = AutoSubstitute.Resolve<ImageContainerImageManagementService>();
+            var connectableImageManagementService = AutoSubstitute.Resolve<ImageContainerManagementService>();
 
             var imageContainers = new ObservableCollectionExtended<IImageContainer>();
 

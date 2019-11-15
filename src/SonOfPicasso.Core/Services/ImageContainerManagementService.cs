@@ -16,7 +16,7 @@ using SonOfPicasso.Data.Model;
 
 namespace SonOfPicasso.Core.Services
 {
-    public class ImageContainerImageManagementService : IImageContainerManagementService
+    public class ImageContainerManagementService : IImageContainerManagementService
     {
         private readonly Subject<IObservable<FileSystemEventArgs>> _currentFileWatcherSubject;
         private readonly CompositeDisposable _disposables;
@@ -28,7 +28,7 @@ namespace SonOfPicasso.Core.Services
         private readonly ILogger _logger;
         private readonly ISchedulerProvider _schedulerProvider;
 
-        public ImageContainerImageManagementService(
+        public ImageContainerManagementService(
             IImageContainerOperationService imageContainerOperationService,
             IFolderWatcherService folderWatcherService,
             IFolderRulesManagementService folderRulesManagementService,
