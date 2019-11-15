@@ -14,10 +14,13 @@ using DynamicData;
 using DynamicData.Binding;
 using ReactiveUI;
 using Serilog;
+using Serilog.Events;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.UI.ViewModels;
+using SonOfPicasso.UI.ViewModels.FolderRules;
 using SonOfPicasso.UI.Windows.Dialogs;
+using SerilogMetrics;
 using MessageBox = System.Windows.MessageBox;
 
 namespace SonOfPicasso.UI.Windows
@@ -235,10 +238,15 @@ namespace SonOfPicasso.UI.Windows
 
                 ViewModel.FolderManagerInteraction.RegisterHandler(context =>
                     {
-                        return Observable.Defer(() =>
+                        return Observable.Defer(async () =>
                         {
                             var folderManagementWindow = _folderManagementWindowFactory();
                             var folderManagementViewModel = _folderManagementViewModelFactory();
+
+                            using (_logger.BeginTimedOperation("Initializing FolderManagementViewModel", level: LogEventLevel.Debug))
+                            {
+                                await folderManagementViewModel.Initialize();
+                            }
 
                             folderManagementWindow.ViewModel = folderManagementViewModel;
 
@@ -250,6 +258,22 @@ namespace SonOfPicasso.UI.Windows
                         }).SubscribeOn(_schedulerProvider.MainThreadScheduler);
                     })
                     .DisposeWith(d);
+
+                ViewModel.FolderManagerConfirmationInteraction.RegisterHandler(context =>
+                {
+                    return Observable.Defer(() =>
+                    {
+                        var deletedCount = context.Input.DeletedImagePaths.Length;
+                        var imagesString = deletedCount == 0 ? "image" : "images";
+
+                        var messageBoxResult = MessageBox.Show($"This action will remove {deletedCount} {imagesString} from the database. Are you sure?",
+                            "Confirmation", MessageBoxButton.YesNo);
+
+                        context.SetOutput(messageBoxResult == MessageBoxResult.Yes);
+
+                        return Observable.Return(Unit.Default);
+                    }).SubscribeOn(_schedulerProvider.MainThreadScheduler);
+                });
             });
         }
 

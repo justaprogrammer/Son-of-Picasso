@@ -109,7 +109,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
 
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(1);
 
-            WaitOne();
+            WaitOne(TimeSpan.FromSeconds(5));
             
             applicationViewModel.TrayImages.Should().HaveCount(2);
             applicationViewModel.TrayImages.Select(model => model.Pinned).Should().AllBeEquivalentTo(true);
@@ -168,7 +168,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
 
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(1);
 
-            WaitOne();
+            WaitOne(TimeSpan.FromSeconds(5));
             
             applicationViewModel.TrayImages.Should().HaveCount(2);
             applicationViewModel.TrayImages.Select(model => model.Pinned).Should().AllBeEquivalentTo(true);
@@ -229,7 +229,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
 
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(1);
 
-            WaitOne();
+            WaitOne(TimeSpan.FromSeconds(5));
             
             applicationViewModel.ChangeSelectedImages(randomImageBatches[1], randomImageBatches[0]);
     
@@ -247,7 +247,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             TestSchedulerProvider.TaskPool.AdvanceBy(4);
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(4);
        
-            WaitOne();
+            WaitOne(TimeSpan.FromSeconds(5));
 
             applicationViewModel.TrayImages.Should().HaveCount(0);
         }
@@ -302,7 +302,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
 
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(1);
 
-            WaitOne();
+            WaitOne(TimeSpan.FromSeconds(5));
             
             applicationViewModel.ChangeSelectedImages(randomImageBatches[1], randomImageBatches[0]);
     
@@ -320,7 +320,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             TestSchedulerProvider.TaskPool.AdvanceBy(4);
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(4);
        
-            WaitOne();
+            WaitOne(TimeSpan.FromSeconds(5));
 
             applicationViewModel.TrayImages.Should().HaveCount(4);
         }
@@ -372,70 +372,10 @@ namespace SonOfPicasso.UI.Tests.ViewModels
 
             TestSchedulerProvider.TaskPool.AdvanceBy(2);
 
-            WaitOne();
+            WaitOne(TimeSpan.FromSeconds(5));
 
             folderRulesManagementService
-                .DidNotReceive()
-                .ResetFolderManagementRules(default);
-        }
-
-        [Fact(Skip = "Broken")]
-        public void ShouldExecuteFolderManagerAndContinue()
-        {
-            var imageManagementService = AutoSubstitute.Resolve<IImageContainerOperationService>();
-            var folderRulesManagementService = AutoSubstitute.Resolve<IFolderRulesManagementService>();
-
-            var folders = Fakers.FolderFaker
-                .GenerateForever("default,withImages")
-                .DistinctBy(folder => folder.Date)
-                .Take(2)
-                .ToArray();
-
-            var imageContainers = folders
-                .Select(folder => new FolderImageContainer(folder, MockFileSystem))
-                .ToArray();
-
-            imageManagementService.GetAllImageContainers()
-                .Returns(imageContainers
-                    .ToObservable()
-                    .SubscribeOn(TestSchedulerProvider.TaskPool));
-
-            var applicationViewModel = AutoSubstitute.Resolve<ApplicationViewModel>();
-            applicationViewModel.Activator.Activate();
-
-            imageManagementService.Received(1)
-                .GetAllImageContainers();
-
-            TestSchedulerProvider.TaskPool.AdvanceBy(1);
-            TestSchedulerProvider.MainThreadScheduler.AdvanceBy(2);
-
-            applicationViewModel.ImageContainers.Should().HaveCount(2);
-            foreach (var imageContainerViewModel in applicationViewModel.ImageContainers)
-                imageContainerViewModel.Activator.Activate();
-
-            var folderRuleViewModels = AutoSubstitute.Resolve<IObservableCollection<FolderRuleViewModel>>();
-            
-            var manageFolderRulesViewModel = AutoSubstitute.Resolve<IManageFolderRulesViewModel>();
-            manageFolderRulesViewModel.Folders.Returns(folderRuleViewModels);
-
-            applicationViewModel.FolderManagerInteraction.RegisterHandler(context =>
-            {
-                context.SetOutput(manageFolderRulesViewModel);
-            });
-
-            applicationViewModel.FolderManager.Execute(Unit.Default)
-                .Subscribe(unit =>
-                {
-                    AutoResetEvent.Set();
-                });
-
-            TestSchedulerProvider.TaskPool.AdvanceBy(2);
-
-            WaitOne();
-
-            folderRulesManagementService
-                .Received(1)
-                .ResetFolderManagementRules(folderRuleViewModels);
+                .DidNotReceive().ResetFolderManagementRules((IEnumerable<IFolderRuleInput>) default);
         }
     }
 }

@@ -5,6 +5,13 @@
       "environmentVariables": {
         "SonOfPicasso_DatabasePath": "$(SolutionDir)db\\development.db"
       }
+    },
+    "SonOfPicasso.UI Verbose Logs": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "SonOfPicasso_DatabasePath": "$(SolutionDir)db\\development.db",
+        "SonOfPicasso_Verbose": "true"
+      }
     }
   }
 }

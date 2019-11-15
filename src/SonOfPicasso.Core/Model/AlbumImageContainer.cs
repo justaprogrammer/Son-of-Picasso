@@ -9,28 +9,28 @@ namespace SonOfPicasso.Core.Model
     {
         public AlbumImageContainer(Album album)
         {
-            Id = GetContainerId(album);
-            ContainerTypeId = album.Id;
+            Key = GetContainerKey(album);
+            Id = album.Id;
             Name = album.Name;
             Date = album.Date;
             Year = album.Date.Year;
             ImageRefs = album.AlbumImages.Select(albumImage => new ImageRef(albumImage.Image, this)).ToArray();
         }
 
-        public string Id { get; }
+        public int Id { get; }
+        public string Key { get; }
         public string Name { get; }
         public int Year { get; }
         public DateTime Date { get; }
         public ImageContainerTypeEnum ContainerType => ImageContainerTypeEnum.Album;
-        public int ContainerTypeId { get; }
         public IList<ImageRef> ImageRefs { get; }
 
-        public static string GetContainerId(Album album)
+        public static string GetContainerKey(Album album)
         {
-            return GetContainerId(album.Id);
+            return GetContainerKey(album.Id);
         }
         
-        public static string GetContainerId(int albumId)
+        public static string GetContainerKey(int albumId)
         {
             return $"Album:{albumId}";
         }

@@ -1,10 +1,16 @@
-﻿using DynamicData.Binding;
-using SonOfPicasso.UI.ViewModels;
+﻿using System;
+using System.Collections.Generic;
+using System.Reactive;
+using ReactiveUI;
+using SonOfPicasso.Core.Interfaces;
+using SonOfPicasso.Data.Model;
 
 namespace SonOfPicasso.UI.Interfaces
 {
-    public interface IManageFolderRulesViewModel
+    public interface IManageFolderRulesViewModel : IReactiveObject
     {
-        IObservableCollection<FolderRuleViewModel> Folders { get; }
+        IList<IFolderRuleInput> Folders { get; }
+        IObservable<Unit> Initialize();
+        bool HideUnselected { get; }
     }
 }

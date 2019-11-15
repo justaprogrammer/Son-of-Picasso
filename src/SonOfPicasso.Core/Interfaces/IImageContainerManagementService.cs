@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Reactive;
 using DynamicData;
 using SonOfPicasso.Core.Model;
+using SonOfPicasso.Core.Services;
+using SonOfPicasso.Data.Model;
 
 namespace SonOfPicasso.Core.Interfaces
 {
@@ -17,7 +19,9 @@ namespace SonOfPicasso.Core.Interfaces
         IObservable<Unit> DeleteAlbum(int albumId);
         IConnectableCache<IImageContainer, string> ImageContainerCache { get; }
         IConnectableCache<ImageRef, string> ImageRefCache { get; }
+        IObservable<Unit> ResetRules(IEnumerable<FolderRule> folderRules);
         IObservable<Unit> Start();
         void Stop();
+        IObservable<ResetChanges> PreviewResetRulesChanges(IEnumerable<FolderRule> folderRules);
     }
 }

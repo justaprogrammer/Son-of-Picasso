@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
+using System.Linq;
 using System.Reactive.Linq;
 using Ardalis.GuardClauses;
 using ExifLibrary;
@@ -37,6 +39,7 @@ namespace SonOfPicasso.Core.Services
                 }
 
                 var exifData = new ExifData();
+                var unhandledProperties = new Dictionary<string, string>();
                 foreach (var imageFileProperty in imageFile.Properties)
                 {
                     var tag = imageFileProperty.Tag;
@@ -161,8 +164,12 @@ namespace SonOfPicasso.Core.Services
                     else if (tag == ExifTag.LensSpecification)
                         exifData.LensSpecification = ReadLensSpecification(imageFileProperty);
                     else
-                        _logger.Verbose("Unhandled Exif Property {Tag} {Type}", tag,
-                            imageFileProperty.GetType().Name);
+                        unhandledProperties.Add(tag.ToString(), imageFileProperty.GetType().Name);
+                }
+
+                if (unhandledProperties.Any())
+                {
+                    _logger.Verbose("Unhandled Properties {@Properties}", unhandledProperties);
                 }
                 
                 return Observable.Return(exifData);

@@ -22,10 +22,10 @@ namespace SonOfPicasso.UI.ViewModels
 
         public string Name => _imageContainer.Name;
 
-        public string ContainerId => _imageContainer.Id;
+        public string ContainerId => _imageContainer.Key;
 
         public ImageContainerTypeEnum ContainerType => _imageContainer.ContainerType;
-        public int ContainerTypeId => _imageContainer.ContainerTypeId;
+        public int ContainerTypeId => _imageContainer.Id;
 
         public IList<ImageRef> ImageRefs => _imageContainer.ImageRefs;
 

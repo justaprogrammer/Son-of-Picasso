@@ -32,7 +32,7 @@ namespace SonOfPicasso.Core.Tests.Services
             var folderWatcherSubject = new Subject<FileSystemEventArgs>();
 
             var folderWatcherService = AutoSubstitute.Resolve<IFolderWatcherService>();
-            folderWatcherService.WatchFolders(default)
+            folderWatcherService.WatchFolders(default, default)
                 .ReturnsForAnyArgs(folderWatcherSubject.AsObservable());
             
             var folderRulesManagementService = AutoSubstitute.Resolve<IFolderRulesManagementService>();
@@ -47,19 +47,17 @@ namespace SonOfPicasso.Core.Tests.Services
             var imageManagementService = AutoSubstitute.Resolve<IImageContainerOperationService>();
 
             var imageContainer = Substitute.For<IImageContainer>();
-            imageContainer.Id.Returns(Faker.Random.String());
+            imageContainer.Key.Returns(Faker.Random.String());
             imageContainer.Date.Returns(Faker.Date.Recent());
             imageContainer.ContainerType.Returns(Faker.PickRandom<ImageContainerTypeEnum>());
 
             var returnThis = new[]
             {
-                new ImageRef(Faker.Random.String(),
+                new ImageRef(Faker.Random.Int(1),
+                    Faker.Random.String(),
                     MockFileSystem.Path.Combine(Faker.System.DirectoryPathWindows(), Faker.System.FileName("png")),
-                    Faker.Random.Int(1),
                     Faker.Date.Recent(),
-                    imageContainer.Id,
-                    imageContainer.ContainerType,
-                    imageContainer.Date)
+                    imageContainer.Key, imageContainer.ContainerType, imageContainer.Date)
             };
 
             imageContainer.ImageRefs.Returns(returnThis);
@@ -67,7 +65,7 @@ namespace SonOfPicasso.Core.Tests.Services
             imageManagementService.GetAllImageContainers()
                 .Returns(Observable.Return(imageContainer));
 
-            var connectableImageManagementService = AutoSubstitute.Resolve<ImageContainerImageManagementService>();
+            var connectableImageManagementService = AutoSubstitute.Resolve<ImageContainerManagementService>();
 
             var imageContainers = new ObservableCollectionExtended<IImageContainer>();
 
@@ -107,7 +105,7 @@ namespace SonOfPicasso.Core.Tests.Services
             imageRefs.Should().HaveCount(1);
 
             folderWatcherService.Received(1)
-                .WatchFolders(currentFolderRules);
+                .WatchFolders(currentFolderRules, Constants.ImageExtensions);
         }
 
         [Fact]
@@ -116,7 +114,7 @@ namespace SonOfPicasso.Core.Tests.Services
             var folderWatcherSubject = new Subject<FileSystemEventArgs>();
 
             var folderWatcherService = AutoSubstitute.Resolve<IFolderWatcherService>();
-            folderWatcherService.WatchFolders(default)
+            folderWatcherService.WatchFolders(default, default)
                 .ReturnsForAnyArgs(folderWatcherSubject.AsObservable());
 
             var directoryPathWindows = Faker.System.DirectoryPathWindows();
@@ -128,19 +126,17 @@ namespace SonOfPicasso.Core.Tests.Services
             var imageManagementService = AutoSubstitute.Resolve<IImageContainerOperationService>();
 
             var imageContainer = Substitute.For<IImageContainer>();
-            imageContainer.Id.Returns(Faker.Random.String());
+            imageContainer.Key.Returns(Faker.Random.String());
             imageContainer.Date.Returns(Faker.Date.Recent());
             imageContainer.ContainerType.Returns(Faker.PickRandom<ImageContainerTypeEnum>());
 
             IList<ImageRef> returnThis = new[]
             {
-                new ImageRef(Faker.Random.String(),
+                new ImageRef(Faker.Random.Int(1),
+                    Faker.Random.String(),
                     MockFileSystem.Path.Combine(Faker.System.DirectoryPathWindows(), Faker.System.FileName("png")),
-                    Faker.Random.Int(1),
                     Faker.Date.Recent(),
-                    imageContainer.Id,
-                    imageContainer.ContainerType,
-                    imageContainer.Date)
+                    imageContainer.Key, imageContainer.ContainerType, imageContainer.Date)
             };
 
             imageContainer.ImageRefs.Returns(returnThis);
@@ -151,7 +147,7 @@ namespace SonOfPicasso.Core.Tests.Services
             imageManagementService.GetAllImageContainers()
                 .Returns(Observable.Empty<IImageContainer>());
 
-            var connectableImageManagementService = AutoSubstitute.Resolve<ImageContainerImageManagementService>();
+            var connectableImageManagementService = AutoSubstitute.Resolve<ImageContainerManagementService>();
 
             var imageContainers = new ObservableCollectionExtended<IImageContainer>();
 
@@ -227,7 +223,7 @@ namespace SonOfPicasso.Core.Tests.Services
             var folderWatcherSubject = new Subject<FileSystemEventArgs>();
 
             var folderWatcherService = AutoSubstitute.Resolve<IFolderWatcherService>();
-            folderWatcherService.WatchFolders(default)
+            folderWatcherService.WatchFolders(default, default)
                 .ReturnsForAnyArgs(folderWatcherSubject.AsObservable());
 
             var folderRulesManagementService = AutoSubstitute.Resolve<IFolderRulesManagementService>();
@@ -242,19 +238,17 @@ namespace SonOfPicasso.Core.Tests.Services
             var imageManagementService = AutoSubstitute.Resolve<IImageContainerOperationService>();
 
             var imageContainer = Substitute.For<IImageContainer>();
-            imageContainer.Id.Returns(Faker.Random.String());
+            imageContainer.Key.Returns(Faker.Random.String());
             imageContainer.Date.Returns(Faker.Date.Recent());
             imageContainer.ContainerType.Returns(Faker.PickRandom<ImageContainerTypeEnum>());
 
             var returnThis = new[]
             {
-                new ImageRef(Faker.Random.String(),
+                new ImageRef(Faker.Random.Int(1),
+                    Faker.Random.String(),
                     MockFileSystem.Path.Combine(Faker.System.DirectoryPathWindows(), Faker.System.FileName("png")),
-                    Faker.Random.Int(1),
                     Faker.Date.Recent(),
-                    imageContainer.Id,
-                    imageContainer.ContainerType,
-                    imageContainer.Date)
+                    imageContainer.Key, imageContainer.ContainerType, imageContainer.Date)
             };
 
             imageContainer.ImageRefs.Returns(returnThis);
@@ -262,7 +256,7 @@ namespace SonOfPicasso.Core.Tests.Services
             imageManagementService.GetAllImageContainers()
                 .Returns(Observable.Return(imageContainer));
 
-            var connectableImageManagementService = AutoSubstitute.Resolve<ImageContainerImageManagementService>();
+            var connectableImageManagementService = AutoSubstitute.Resolve<ImageContainerManagementService>();
 
             var imageContainers = new ObservableCollectionExtended<IImageContainer>();
 
@@ -300,7 +294,7 @@ namespace SonOfPicasso.Core.Tests.Services
             imageRefs.Should().HaveCount(1);
 
             folderWatcherService.Received(1)
-                .WatchFolders(currentFolderRules);
+                .WatchFolders(currentFolderRules, Constants.ImageExtensions);
 
             var fileSystemEventArgs = new FileSystemEventArgs(
                 WatcherChangeTypes.Created, 

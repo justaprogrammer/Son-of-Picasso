@@ -4,7 +4,9 @@ using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive.Linq;
+using Serilog;
 using SonOfPicasso.Core.Interfaces;
+using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Data.Model;
 
 namespace SonOfPicasso.Core.Services
@@ -12,32 +14,20 @@ namespace SonOfPicasso.Core.Services
     public class FolderWatcherService : IFolderWatcherService
     {
         private readonly IFileSystem _fileSystem;
+        private readonly ILogger _logger;
+        private readonly ISchedulerProvider _schedulerProvider;
 
-        public FolderWatcherService(IFileSystem fileSystem)
+        public FolderWatcherService(IFileSystem fileSystem, ILogger logger, ISchedulerProvider schedulerProvider)
         {
             _fileSystem = fileSystem;
+            _logger = logger;
+            _schedulerProvider = schedulerProvider;
         }
 
-        public IObservable<FileSystemEventArgs> WatchFolders(IEnumerable<FolderRule> folderRules, IEnumerable<string> extensionFilters = null)
+        public IObservable<FileSystemEventArgs> WatchFolders(IEnumerable<FolderRule> folderRules,
+            IEnumerable<string> extensionFilters = null)
         {
-            var itemsDictionary = new Dictionary<string, List<FolderRule>>();
-
-            string firstRoot = null;
-            folderRules = folderRules
-                .OrderBy(rule => rule.Path, StringComparer.InvariantCultureIgnoreCase);
-
-            foreach (var folderRule in folderRules)
-            {
-                if (firstRoot == null || !folderRule.Path.StartsWith(firstRoot))
-                {
-                    firstRoot = folderRule.Path;
-                    itemsDictionary[firstRoot] = new List<FolderRule>();
-                }
-                else
-                {
-                    itemsDictionary[firstRoot].Add(folderRule);    
-                }
-            }
+            var itemsDictionary = CreateTopLevelDictionary(folderRules);
 
             var observable = itemsDictionary
                 .ToObservable()
@@ -50,22 +40,30 @@ namespace SonOfPicasso.Core.Services
                             var d1 = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
                                     action => fileSystemWatcher.Created += action,
                                     action => fileSystemWatcher.Created -= action)
+                                .ObserveOn(_schedulerProvider.TaskPool)
                                 .Select(pattern => pattern.EventArgs);
 
                             var d2 = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
                                     action => fileSystemWatcher.Deleted += action,
                                     action => fileSystemWatcher.Deleted -= action)
+                                .ObserveOn(_schedulerProvider.TaskPool)
                                 .Select(pattern => pattern.EventArgs);
 
                             var d3 = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
                                     action => fileSystemWatcher.Changed += action,
                                     action => fileSystemWatcher.Changed -= action)
+                                .ObserveOn(_schedulerProvider.TaskPool)
                                 .Select(pattern => pattern.EventArgs);
 
                             var d4 = Observable.FromEventPattern<RenamedEventHandler, RenamedEventArgs>(
                                     action => fileSystemWatcher.Renamed += action,
                                     action => fileSystemWatcher.Renamed -= action)
+                                .ObserveOn(_schedulerProvider.TaskPool)
                                 .Select(pattern => (FileSystemEventArgs) pattern.EventArgs);
+
+                            // https://docs.microsoft.com/en-us/dotnet/api/system.io.filesystemwatcher.internalbuffersize?view=netframework-4.8
+                            // Default is 8k, Max is 64k, for best performance use multiples of 4k
+                            fileSystemWatcher.InternalBufferSize = 4096 * 8;
 
                             fileSystemWatcher.IncludeSubdirectories = true;
                             fileSystemWatcher.EnableRaisingEvents = true;
@@ -80,9 +78,7 @@ namespace SonOfPicasso.Core.Services
                                     .Where(args => args != null);
                         });
                 })
-                .SelectMany(observables => Observable.Merge(observables))
-                .Where(args => args.ChangeType == WatcherChangeTypes.Deleted
-                               || !_fileSystem.File.GetAttributes(args.FullPath).HasFlag(FileAttributes.Directory));
+                .SelectMany(observables => Observable.Merge(observables));
 
             if (extensionFilters != null)
             {
@@ -91,7 +87,44 @@ namespace SonOfPicasso.Core.Services
                     .Where(args => extensionsHash.Contains(_fileSystem.Path.GetExtension(args.FullPath)));
             }
 
+            observable = observable
+                .Where(args =>
+                {
+                    if (args.ChangeType == WatcherChangeTypes.Deleted) return true;
+
+                    try
+                    {
+                        return !_fileSystem.File.GetAttributes(args.FullPath).HasFlag(FileAttributes.Directory);
+                    }
+                    catch (FileNotFoundException)
+                    {
+                        return false;
+                    }
+                });
+
             return observable;
+        }
+
+        public static Dictionary<string, List<FolderRule>> CreateTopLevelDictionary(IEnumerable<FolderRule> folderRules)
+        {
+            var itemsDictionary = new Dictionary<string, List<FolderRule>>();
+
+            string firstRoot = null;
+            folderRules = folderRules
+                .OrderBy(rule => rule.Path, StringComparer.InvariantCultureIgnoreCase);
+
+            foreach (var folderRule in folderRules)
+                if (firstRoot == null || !folderRule.Path.StartsWith(firstRoot))
+                {
+                    firstRoot = folderRule.Path;
+                    itemsDictionary[firstRoot] = new List<FolderRule>();
+                }
+                else
+                {
+                    itemsDictionary[firstRoot].Add(folderRule);
+                }
+
+            return itemsDictionary;
         }
 
         private FileSystemEventArgs InRuleSet(FileSystemEventArgs fileSystemEventArgs, IList<FolderRule> folderRules)
@@ -102,17 +135,12 @@ namespace SonOfPicasso.Core.Services
                 case WatcherChangeTypes.Deleted:
                 case WatcherChangeTypes.Changed:
                     foreach (var folderRule in folderRules)
-                    {
                         if (fileSystemEventArgs.FullPath.StartsWith(folderRule.Path))
                         {
-                            if (folderRule.Action == FolderRuleActionEnum.Always)
-                            {
-                                return fileSystemEventArgs;
-                            }
+                            if (folderRule.Action == FolderRuleActionEnum.Always) return fileSystemEventArgs;
 
                             return null;
                         }
-                    }
 
                     return fileSystemEventArgs;
 

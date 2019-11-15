@@ -7,33 +7,33 @@ namespace SonOfPicasso.Core.Model
     {
         public ImageRef(Image image, IImageContainer imageContainer)
         {
-            Id = $"{imageContainer.Id}:Image:{image.Id}";
-            ImageId = image.Id;
+            Id = image.Id;
+            Key = $"{imageContainer.Key}:Image:{image.Id}";
             ImagePath = image.Path;
             Date = image.ExifData.DateTime;
-            ContainerId = imageContainer.Id;
+            ContainerKey = imageContainer.Key;
             ContainerType = imageContainer.ContainerType;
             ContainerDate = imageContainer.Date;
         }
 
-        public ImageRef(string id, string imagePath, int imageId, DateTime date, string containerId,
+        public ImageRef(int id, string key, string imagePath, DateTime date, string containerKey,
             ImageContainerTypeEnum containerType, DateTime containerDate)
         {
             Id = id;
+            Key = key;
             ImagePath = imagePath;
-            ImageId = imageId;
             Date = date;
-            ContainerId = containerId;
+            ContainerKey = containerKey;
             ContainerType = containerType;
             ContainerDate = containerDate;
         }
 
-        public string Id { get; }
-        public string ImagePath { get; }
-        public int ImageId { get; }
-        public DateTime Date { get; }
-        public string ContainerId { get; }
-        public ImageContainerTypeEnum ContainerType { get; }
-        public DateTime ContainerDate { get; }
+        public int Id { get; set; }
+        public string Key { get; set; }
+        public string ImagePath { get; set; }
+        public DateTime Date { get; set; }
+        public string ContainerKey { get; set; }
+        public ImageContainerTypeEnum ContainerType { get; set; }
+        public DateTime ContainerDate { get; set; }
     }
 }

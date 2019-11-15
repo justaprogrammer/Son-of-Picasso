@@ -107,7 +107,6 @@ namespace SonOfPicasso.Core.Services
                                 transaction.Commit();
                                 return folder.Id;
                             }
-
                         })
                         .SelectMany(GetFolderImageContainer);
                 }).SubscribeOn(_schedulerProvider.TaskPool);
@@ -135,7 +134,7 @@ namespace SonOfPicasso.Core.Services
                         return Observable.Return(album);
                     }
                 })
-                .Select(album => (IImageContainer)new AlbumImageContainer(album))
+                .Select(album => (IImageContainer) new AlbumImageContainer(album))
                 .SubscribeOn(_schedulerProvider.TaskPool);
         }
 
@@ -251,7 +250,7 @@ namespace SonOfPicasso.Core.Services
                             {
                                 Path = directory,
                                 Date = exifData.DateTime.Date,
-                                Images = new List<Image> { image }
+                                Images = new List<Image> {image}
                             };
 
                             unitOfWork.FolderRepository.Insert(folder);
@@ -360,7 +359,7 @@ namespace SonOfPicasso.Core.Services
                             {
                                 Path = newDirectoryPath,
                                 Date = image.ExifData.DateTime.Date,
-                                Images = new List<Image> { image }
+                                Images = new List<Image> {image}
                             };
 
                             unitOfWork.FolderRepository.Insert(folder);
@@ -372,7 +371,7 @@ namespace SonOfPicasso.Core.Services
 
                         unitOfWork.Save();
                         transaction.Commit();
-                        return new[] { oldFolderId, folder.Id }.ToObservable();
+                        return new[] {oldFolderId, folder.Id}.ToObservable();
                     }
                 })
                 .SelectMany(GetFolderImageContainer)
@@ -446,7 +445,7 @@ namespace SonOfPicasso.Core.Services
                             {
                                 Path = directory,
                                 Date = exifData.DateTime.Date,
-                                Images = new List<Image> { image }
+                                Images = new List<Image> {image}
                             };
 
                             unitOfWork.FolderRepository.Insert(folder);
@@ -461,7 +460,115 @@ namespace SonOfPicasso.Core.Services
                 .SubscribeOn(_schedulerProvider.TaskPool);
         }
 
-        private IObservable<IImageContainer> GetFolderImageContainer(int folderId)
+        public IObservable<ResetChanges> PreviewRuleChangesEffect(IEnumerable<FolderRule> folderRules)
+        {
+            return Observable.Defer(() =>
+                {
+                    using var unitOfWork = _unitOfWorkFactory();
+                    
+                    var images = unitOfWork.ImageRepository.Get()
+                        .ToArray();
+
+                    var folderRulesArray = folderRules
+                        .ToArray();
+
+                    var (imagesDeleted, deleteFolderIds) = ImagesDeleted(folderRulesArray, images);
+
+                    var deleted = imagesDeleted
+                        .Select(image => image.Path)
+                        .ToArray();
+
+                    return Observable.Return(new ResetChanges
+                    {
+                        DeletedImagePaths = deleted,
+                        DeletedFolderIds = deleteFolderIds
+                    });
+                })
+                .SubscribeOn(_schedulerProvider.TaskPool);
+        }
+
+        public IObservable<ResetChanges> ApplyRuleChanges(IEnumerable<FolderRule> folderRules)
+        {
+            return Observable.Defer(() =>
+                {
+                    lock (_writeLock)
+                    {
+                        _logger.Debug("ApplyRuleChanges");
+
+                        using var unitOfWork = _unitOfWorkFactory();
+                        using var transaction = unitOfWork.BeginTransaction();
+
+                        var images = unitOfWork.ImageRepository.Get()
+                            .ToArray();
+
+                        var (imagesDeleted, deleteFolderIds) = ImagesDeleted(folderRules, images);
+
+                        foreach (var image in imagesDeleted)
+                        {
+                            unitOfWork.ImageRepository.Delete(image);
+                            unitOfWork.ExifDataRepository.Delete(image.ExifDataId);
+                        }
+
+                        foreach (var deleteFolderId in deleteFolderIds)
+                        {
+                            unitOfWork.FolderRepository.Delete(deleteFolderId);
+                        }
+
+                        var deleted = imagesDeleted
+                            .Select(image => image.Path)
+                            .ToArray();
+
+                        var observable = Observable.Return(new ResetChanges
+                        {
+                            DeletedImagePaths = deleted,
+                            DeletedFolderIds = deleteFolderIds
+                        });
+
+                        unitOfWork.Save();
+                        transaction.Commit();
+
+                        return observable;
+                    }
+                })
+                .SubscribeOn(_schedulerProvider.TaskPool);
+        }
+
+        private static (Image[] imagesDeleted, int[] deleteFolderIds) ImagesDeleted(IEnumerable<FolderRule> folderRules, IEnumerable<Image> images)
+        {
+            var dictionary = folderRules
+                .ToDictionary(rule => rule.Path, rule => rule.Action);
+
+            var keys = dictionary.Keys
+                .OrderByDescending(s => s.Length)
+                .ToArray();
+
+            var imagesDeleted = images
+                .Where(image =>
+                {
+                    FolderRuleActionEnum? applicableRule;
+                    if (dictionary.TryGetValue(image.Path, out var folderRuleAction))
+                        applicableRule = folderRuleAction;
+                    else
+                        applicableRule = keys
+                            .Where(key => image.Path.StartsWith(key))
+                            .Select(key => (FolderRuleActionEnum?) dictionary[key])
+                            .FirstOrDefault();
+
+                    if (applicableRule.HasValue) return applicableRule == FolderRuleActionEnum.Remove;
+
+                    return true;
+                })
+                .ToArray();
+
+            var deleteFolderIds = imagesDeleted
+                .Select(image => image.FolderId)
+                .Distinct()
+                .ToArray();
+
+            return (imagesDeleted, deleteFolderIds);
+        }
+
+        public IObservable<IImageContainer> GetFolderImageContainer(int folderId)
         {
             return Observable.Defer<IImageContainer>(() =>
             {
@@ -473,10 +580,10 @@ namespace SonOfPicasso.Core.Services
                     .First();
 
                 return Observable.Return(new FolderImageContainer(folder, _fileSystem));
-            });
+            }).SubscribeOn(_schedulerProvider.TaskPool);
         }
 
-        private IObservable<IImageContainer> GetAlbumImageContainer(int albumId)
+        public IObservable<IImageContainer> GetAlbumImageContainer(int albumId)
         {
             return Observable.Defer<IImageContainer>(() =>
             {
@@ -488,7 +595,7 @@ namespace SonOfPicasso.Core.Services
                     .First();
 
                 return Observable.Return(new AlbumImageContainer(album));
-            });
+            }).SubscribeOn(_schedulerProvider.TaskPool);;
         }
     }
 }

@@ -35,8 +35,7 @@ namespace SonOfPicasso.Core.Services
         {
             return Observable.Return(folderRuleInputs.ToList())
                 .Select(FolderRulesFactory.ComputeRuleset)
-                .SelectMany(ResetFolderManagementRules)
-                .SubscribeOn(_schedulerProvider.TaskPool);
+                .SelectMany(ResetFolderManagementRules);
         }
 
         public IObservable<IList<FolderRule>> GetFolderManagementRules()
@@ -74,8 +73,9 @@ namespace SonOfPicasso.Core.Services
         {
             return Observable.Defer(GetFolderManagementRules)
                 .Select(list => list.Append(folderRule).ToArray())
-                .Select(rules => CreateInputs(rules))
+                .Select(CreateInputs)
                 .SelectMany(ResetFolderManagementRules)
+                .Select(list => Unit.Default)
                 .SubscribeOn(_schedulerProvider.TaskPool);
         }
 

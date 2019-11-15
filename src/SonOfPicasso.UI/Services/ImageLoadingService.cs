@@ -31,7 +31,7 @@ namespace SonOfPicasso.UI.Services
                 stream => Observable.FromAsync(
                     () =>
                     {
-                        _logger.Debug("LoadImageFromPath {Path}", path);
+                        _logger.Verbose("LoadImageFromPath {Path}", path);
                         return BitmapLoader.Current.Load(stream, null, null);
                     }))
                 .SubscribeOn(_schedulerProvider.TaskPool);
