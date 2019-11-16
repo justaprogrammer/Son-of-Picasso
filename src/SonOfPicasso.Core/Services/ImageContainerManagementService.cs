@@ -22,6 +22,7 @@ namespace SonOfPicasso.Core.Services
         private readonly CompositeDisposable _disposables;
         private readonly IFolderRulesManagementService _folderRulesManagementService;
         private readonly IFolderWatcherService _folderWatcherService;
+        private readonly IImageContainerWatcherService _imageContainerWatcherService;
         private readonly SourceCache<IImageContainer, string> _imageContainerCache;
         private readonly IImageContainerOperationService _imageContainerOperationService;
         private readonly IObservableCache<ImageRef, string> _imageRefCache;
@@ -31,12 +32,14 @@ namespace SonOfPicasso.Core.Services
         public ImageContainerManagementService(
             IImageContainerOperationService imageContainerOperationService,
             IFolderWatcherService folderWatcherService,
+            IImageContainerWatcherService imageContainerWatcherService,
             IFolderRulesManagementService folderRulesManagementService,
             ISchedulerProvider schedulerProvider,
             ILogger logger)
         {
             _imageContainerOperationService = imageContainerOperationService;
             _folderWatcherService = folderWatcherService;
+            _imageContainerWatcherService = imageContainerWatcherService;
             _folderRulesManagementService = folderRulesManagementService;
             _schedulerProvider = schedulerProvider;
             _logger = logger;
@@ -164,6 +167,8 @@ namespace SonOfPicasso.Core.Services
 
         private void StartWatcher()
         {
+            _imageContainerWatcherService.Start(_imageRefCache);
+
             var observable = _folderRulesManagementService.GetFolderManagementRules()
                 .SelectMany(list => _folderWatcherService.WatchFolders(list, Constants.ImageExtensions));
 

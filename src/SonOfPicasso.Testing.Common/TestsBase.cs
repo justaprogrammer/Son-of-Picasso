@@ -32,7 +32,6 @@ namespace SonOfPicasso.Testing.Common
             {
                 loggerConfiguration = loggerConfiguration.MinimumLevel.Debug();
             }
-
             Log.Logger = loggerConfiguration
                 .CreateLogger();
 

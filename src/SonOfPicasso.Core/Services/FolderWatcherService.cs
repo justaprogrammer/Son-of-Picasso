@@ -5,6 +5,7 @@ using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive.Linq;
 using Serilog;
+using SonOfPicasso.Core.Extensions;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Data.Model;
@@ -27,7 +28,7 @@ namespace SonOfPicasso.Core.Services
         public IObservable<FileSystemEventArgs> WatchFolders(IEnumerable<FolderRule> folderRules,
             IEnumerable<string> extensionFilters = null)
         {
-            var itemsDictionary = CreateTopLevelDictionary(folderRules);
+            var itemsDictionary = folderRules.GetTopLevelItemDictionary();
 
             var observable = itemsDictionary
                 .ToObservable()
@@ -103,28 +104,6 @@ namespace SonOfPicasso.Core.Services
                 });
 
             return observable;
-        }
-
-        public static Dictionary<string, List<FolderRule>> CreateTopLevelDictionary(IEnumerable<FolderRule> folderRules)
-        {
-            var itemsDictionary = new Dictionary<string, List<FolderRule>>();
-
-            string firstRoot = null;
-            folderRules = folderRules
-                .OrderBy(rule => rule.Path, StringComparer.InvariantCultureIgnoreCase);
-
-            foreach (var folderRule in folderRules)
-                if (firstRoot == null || !folderRule.Path.StartsWith(firstRoot))
-                {
-                    firstRoot = folderRule.Path;
-                    itemsDictionary[firstRoot] = new List<FolderRule>();
-                }
-                else
-                {
-                    itemsDictionary[firstRoot].Add(folderRule);
-                }
-
-            return itemsDictionary;
         }
 
         private FileSystemEventArgs InRuleSet(FileSystemEventArgs fileSystemEventArgs, IList<FolderRule> folderRules)
