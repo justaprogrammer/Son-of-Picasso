@@ -29,7 +29,7 @@ namespace SonOfPicasso.Core.Services
         {
             return Observable.Defer(() =>
             {
-                _logger.Debug("GetImages {Path}", path);
+                _logger.Verbose("GetImages {Path}", path);
 
                 var fileInfoBases = Array.Empty<string>();
                 try

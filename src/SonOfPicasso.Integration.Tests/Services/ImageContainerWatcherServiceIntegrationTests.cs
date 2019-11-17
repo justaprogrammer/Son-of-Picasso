@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Autofac;
 using DynamicData;
 using FluentAssertions;
+using Serilog;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Model;
 using SonOfPicasso.Core.Services;
@@ -44,8 +45,6 @@ namespace SonOfPicasso.Integration.Tests.Services
         [Fact]
         public async Task ShouldStartWithNoExistingRules()
         {
-            Logger.Verbose("Running Test {Name}", nameof(ShouldStartWithNoExistingRules));
-
             await InitializeDataContextAsync();
 
             var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
@@ -53,14 +52,11 @@ namespace SonOfPicasso.Integration.Tests.Services
             imageContainerWatcherService.Start(imageRefCache).Subscribe(unit => { }, () => { AutoResetEvent.Set(); });
 
             WaitOne();
-            Logger.Verbose("Complete Test {Name}", nameof(ShouldStartWithNoExistingRules));
         }
 
         [Fact]
         public async Task ShouldOnlyDetectCreatedOrChangedFiles()
         {
-            Logger.Verbose("Running Test {Name}", nameof(ShouldOnlyDetectCreatedOrChangedFiles));
-
             await InitializeDataContextAsync();
 
             var folderRulesManagementService = Container.Resolve<IFolderRulesManagementService>();
@@ -92,15 +88,11 @@ namespace SonOfPicasso.Integration.Tests.Services
             list.Should().HaveCount(1);
 
             imageContainerWatcherService.Stop();
-
-            Logger.Verbose("Complete Test {Name}", nameof(ShouldOnlyDetectCreatedOrChangedFiles));
         }
 
         [Fact]
         public async Task ShouldOnlyDetectUnknownCreatedOrChangedFiles()
         {
-            Logger.Verbose("Running Test {Name}", nameof(ShouldOnlyDetectUnknownCreatedOrChangedFiles));
-
             await InitializeDataContextAsync();
 
             var folderRulesManagementService = Container.Resolve<IFolderRulesManagementService>();
@@ -134,15 +126,11 @@ namespace SonOfPicasso.Integration.Tests.Services
             WaitOne(5);
 
             list.Should().HaveCount(1);
-
-            Logger.Verbose("Complete Test {Name}", nameof(ShouldOnlyDetectUnknownCreatedOrChangedFiles));
         }
 
         [Fact]
         public async Task ShouldDetectFileDelete()
         {
-            Logger.Verbose("Running Test {Name}", nameof(ShouldDetectFileDelete));
-
             await InitializeDataContextAsync();
 
             var folderRulesManagementService = Container.Resolve<IFolderRulesManagementService>();
@@ -177,19 +165,56 @@ namespace SonOfPicasso.Integration.Tests.Services
             Logger.Verbose("Delete Path {Path}", path);
             FileSystem.File.Delete(path);
 
-            WaitOne(15);
+            WaitOne(5);
 
             list.Should().HaveCount(1);
             list.First().Should().Be(path);
+        }
 
-            Logger.Verbose("Complete Test {Name}", nameof(ShouldDetectFileDelete));
+        [Fact]
+        public async Task ShouldIgnoreUnknownFileDelete()
+        {
+            await InitializeDataContextAsync();
+
+            var folderRulesManagementService = Container.Resolve<IFolderRulesManagementService>();
+            await folderRulesManagementService.ResetFolderManagementRules(new[]
+            {
+                new FolderRule
+                {
+                    Path = ImagesPath,
+                    Action = FolderRuleActionEnum.Always
+                }
+            });
+
+            var generatedImages = await GenerateImagesAsync(1, ImagesPath);
+            var path = generatedImages.First().Value.First();
+
+            var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
+
+            var imageContainerWatcherService = Container.Resolve<ImageContainerWatcherService>();
+
+            var list = new List<string>();
+            imageContainerWatcherService.FileDeleted.Subscribe(info =>
+            {
+                list.Add(info);
+                Set();
+            });
+
+            await imageContainerWatcherService.Start(imageRefCache);
+
+            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(3));
+
+            Logger.Verbose("Delete Path {Path}", path);
+            FileSystem.File.Delete(path);
+
+            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(5)).Should().BeFalse();
+
+            list.Should().BeEmpty();
         }
 
         [Fact]
         public async Task ShouldDetectFileRename()
         {
-            Logger.Verbose("Running Test {Name}", nameof(ShouldDetectFileRename));
-
             await InitializeDataContextAsync();
 
             var folderRulesManagementService = Container.Resolve<IFolderRulesManagementService>();
@@ -204,24 +229,72 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             var generatedImages = await GenerateImagesAsync(1, ImagesPath);
             var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
-            imageRefCache.AddOrUpdate(CreateImageRef(generatedImages.First().Value.First()));
+            var imagePath = generatedImages.First().Value.First();
+            imageRefCache.AddOrUpdate(CreateImageRef(imagePath));
 
             var imageContainerWatcherService = Container.Resolve<ImageContainerWatcherService>();
+
+            var list = new List<(string oldFullPath, string fullPath)>();
+            imageContainerWatcherService.FileRenamed.Subscribe(tuple =>
+            {
+                list.Add(tuple);
+                Set();
+            });
+
+            await imageContainerWatcherService.Start(imageRefCache);
+
+            var movedTo = Path.Combine(generatedImages.First().Key, "a" + FileSystem.Path.GetFileName(imagePath));
+            FileSystem.File.Move(imagePath, movedTo);
+
+            Logger.Verbose("Moving File {Path} {ToPath}", imagePath, movedTo);
+
+            WaitOne(5);
+
+            list.Should().HaveCount(1);
+            list.First().Should().Be((imagePath, movedTo));
+        }
+
+        [Fact]
+        public async Task ShouldDetectUnknownFileRenameAsDiscover()
+        {
+            await InitializeDataContextAsync();
+
+            var folderRulesManagementService = Container.Resolve<IFolderRulesManagementService>();
+            await folderRulesManagementService.ResetFolderManagementRules(new[]
+            {
+                new FolderRule
+                {
+                    Path = ImagesPath,
+                    Action = FolderRuleActionEnum.Always
+                }
+            });
+
+            var generatedImages = await GenerateImagesAsync(1, ImagesPath);
+            var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
+
+            var imageContainerWatcherService = Container.Resolve<ImageContainerWatcherService>();
+
+            var list = new List<string>();
+            imageContainerWatcherService.FileDiscovered.Subscribe(info =>
+            {
+                list.Add(info);
+                Set();
+            });
+
             await imageContainerWatcherService.Start(imageRefCache);
 
             var file = generatedImages.First().Value.First();
             var movedTo = Path.Combine(generatedImages.First().Key, "a" + FileSystem.Path.GetFileName(file));
             FileSystem.File.Move(file, movedTo);
 
-            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(5));
-            Logger.Verbose("Complete Test {Name}", nameof(ShouldDetectFileRename));
+            WaitOne(5);
+            list.Should().HaveCount(1);
+            list.First().Should().Be(movedTo);
         }
 
         [Fact]
         public async Task ShouldDetectDirectoryCreate()
         {
-            Logger.Verbose("Running Test {Name}", nameof(ShouldDetectDirectoryCreate));
-
             await InitializeDataContextAsync();
 
             var folderRulesManagementService = Container.Resolve<IFolderRulesManagementService>();
@@ -238,17 +311,14 @@ namespace SonOfPicasso.Integration.Tests.Services
             var imageContainerWatcherService = Container.Resolve<ImageContainerWatcherService>();
             await imageContainerWatcherService.Start(imageRefCache);
 
-            ImagesDirectoryInfo.CreateSubdirectory("Test");
+            var directoryInfo = ImagesDirectoryInfo.CreateSubdirectory("Test");
 
-            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(5));
-            Logger.Verbose("Complete Test {Name}", nameof(ShouldDetectDirectoryCreate));
+            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(3));
         }
 
         [Fact]
         public async Task ShouldDetectDirectoryDelete()
         {
-            Logger.Verbose("Running Test {Name}", nameof(ShouldDetectDirectoryDelete));
-
             await InitializeDataContextAsync();
 
             var folderRulesManagementService = Container.Resolve<IFolderRulesManagementService>();
@@ -269,15 +339,12 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             subdirectory.Delete();
 
-            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(5));
-            Logger.Verbose("Complete Test {Name}", nameof(ShouldDetectDirectoryDelete));
+            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(3));
         }
 
         [Fact]
         public async Task ShouldDetectDirectoryRename()
         {
-            Logger.Verbose("Running Test {Name}", nameof(ShouldDetectDirectoryDelete));
-
             await InitializeDataContextAsync();
 
             var folderRulesManagementService = Container.Resolve<IFolderRulesManagementService>();
@@ -298,8 +365,7 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             subdirectory.MoveTo(FileSystem.Path.Combine(ImagesPath, "Test2"));
 
-            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(5));
-            Logger.Verbose("Complete Test {Name}", nameof(ShouldDetectDirectoryDelete));
+            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(3));
         }
     }
 }
