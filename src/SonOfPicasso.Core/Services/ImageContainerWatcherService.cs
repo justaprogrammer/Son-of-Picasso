@@ -22,7 +22,9 @@ namespace SonOfPicasso.Core.Services
         private const int DebounceDirectoryChangeSeconds = 2;
         private readonly Subject<IObservable<FileSystemEventArgs>> _currentStreamObservableSubject;
         private readonly CompositeDisposable _disposables;
+        private readonly Subject<string> _fileDeletedSubject;
         private readonly Subject<string> _fileDiscoveredSubject;
+        private readonly Subject<(string oldFullPath, string fullPath)> _fileRenamedSubject;
         private readonly IFileSystem _fileSystem;
         private readonly Subject<FileSystemEventArgs> _fileSystemEventArgsSubject;
         private readonly IFolderRulesManagementService _folderRulesManagementService;
@@ -50,6 +52,8 @@ namespace SonOfPicasso.Core.Services
                 .Subscribe(args => { _fileSystemEventArgsSubject.OnNext(args); });
 
             _fileDiscoveredSubject = new Subject<string>();
+            _fileDeletedSubject = new Subject<string>();
+            _fileRenamedSubject = new Subject<(string oldFullPath, string fullPath)>();
 
             _fileSystemEventArgsSubject.Subscribe(args =>
                 {
@@ -95,7 +99,7 @@ namespace SonOfPicasso.Core.Services
                             var imageRef = _imageRefCache.Lookup(imagePath);
                             if (!imageRef.HasValue)
                             {
-                                _logger.Verbose("Located Image {Path} {Exists}", imagePath, imageRef.HasValue);
+                                _logger.Verbose("Discovered {Path}", imagePath);
                                 _fileDiscoveredSubject.OnNext(imagePath);
                             }
                         });
@@ -105,7 +109,15 @@ namespace SonOfPicasso.Core.Services
             _fileSystemEventArgsSubject
                 .Where(args => args.ChangeType == WatcherChangeTypes.Deleted)
                 .Select(args => args.FullPath)
-                .Subscribe(path => { _logger.Verbose("Delete Event {Path}", path); })
+                .Subscribe(path =>
+                {
+                    var imageRef = _imageRefCache.Lookup(path);
+                    if (imageRef.HasValue)
+                    {
+                        _logger.Verbose("Deleted {Path}", path);
+                        _fileDeletedSubject.OnNext(path);
+                    }
+                })
                 .DisposeWith(_disposables);
 
             _fileSystemEventArgsSubject
@@ -116,12 +128,26 @@ namespace SonOfPicasso.Core.Services
                 .Subscribe(tuple =>
                 {
                     var (oldFullPath, fullPath) = tuple;
-                    _logger.Verbose("Renamed Event {OldPath} {Path}", oldFullPath, fullPath);
+                    var imageRef = _imageRefCache.Lookup(oldFullPath);
+                    if (!imageRef.HasValue)
+                    {
+                        _logger.Verbose("Renamed {OldPath} {Path}", oldFullPath, fullPath);
+                        _fileRenamedSubject.OnNext((oldFullPath, fullPath));
+                    }
+                    else
+                    {
+                        _logger.Verbose("Renamed; Previously unknown; Considering Discovered {Path}", fullPath);
+                        _fileDiscoveredSubject.OnNext(fullPath);
+                    }
                 })
                 .DisposeWith(_disposables);
         }
 
         public IObservable<string> FileDiscovered => _fileDiscoveredSubject.AsObservable();
+
+        public IObservable<string> FileDeleted => _fileDeletedSubject.AsObservable();
+
+        public IObservable<(string oldFullPath, string fullPath)> FileRenamed => _fileRenamedSubject.AsObservable();
 
         public void Dispose()
         {
@@ -184,28 +210,38 @@ namespace SonOfPicasso.Core.Services
                             {
                                 _logger.Verbose("Adding event handlers to watcher {Path}", pathDirectoryInfo.Name);
 
+                                fileSystemWatcher.Created += (sender, args) => { ; };
+                                fileSystemWatcher.Changed += (sender, args) => { ; };
+                                fileSystemWatcher.Deleted += (sender, args) => { ; };
+
                                 var d1 = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
                                         action => fileSystemWatcher.Created += action,
                                         action => fileSystemWatcher.Created -= action)
-                                    .ObserveOn(_schedulerProvider.TaskPool)
-                                    .Select(pattern => pattern.EventArgs);
+                                    .SubscribeOn(_schedulerProvider.TaskPool)
+                                    .Do(pattern => { ; })
+                                    .Select(pattern => pattern.EventArgs)
+                                    .Do(pattern => { ; });
 
                                 var d2 = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
                                         action => fileSystemWatcher.Deleted += action,
                                         action => fileSystemWatcher.Deleted -= action)
-                                    .ObserveOn(_schedulerProvider.TaskPool)
+                                    .Do(pattern => { ; })
+                                    .SubscribeOn(_schedulerProvider.TaskPool)
+                                    .Do(pattern => { ; })
                                     .Select(pattern => pattern.EventArgs);
 
                                 var d3 = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
                                         action => fileSystemWatcher.Changed += action,
                                         action => fileSystemWatcher.Changed -= action)
-                                    .ObserveOn(_schedulerProvider.TaskPool)
+                                    .Do(pattern => { ; })
+                                    .SubscribeOn(_schedulerProvider.TaskPool)
+                                    .Do(pattern => { ; })
                                     .Select(pattern => pattern.EventArgs);
 
                                 var d4 = Observable.FromEventPattern<RenamedEventHandler, RenamedEventArgs>(
                                         action => fileSystemWatcher.Renamed += action,
                                         action => fileSystemWatcher.Renamed -= action)
-                                    .ObserveOn(_schedulerProvider.TaskPool)
+                                    .SubscribeOn(_schedulerProvider.TaskPool)
                                     .Select(pattern => (FileSystemEventArgs) pattern.EventArgs);
 
                                 // https://docs.microsoft.com/en-us/dotnet/api/system.io.filesystemwatcher.internalbuffersize?view=netframework-4.8
@@ -223,6 +259,11 @@ namespace SonOfPicasso.Core.Services
                             () => { _logger.Verbose("Watcher Completed {Path}", path); });
                 })
                 .SelectMany(o => o);
+        }
+
+        public void Stop()
+        {
+            _currentStreamObservableSubject.OnNext(Observable.Never<FileSystemEventArgs>());
         }
     }
 }

@@ -58,7 +58,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                 .Subscribe();
 
             var imageRefs = new ObservableCollectionExtended<ImageRef>();
-            imageContainerManagementService.ImageRefCache
+            imageContainerManagementService.AlbumImageRefCache
                 .Connect()
                 .ObserveOn(SchedulerProvider.TaskPool)
                 .Bind(imageRefs)
@@ -129,7 +129,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                 .Subscribe();
 
             var imageRefs = new ObservableCollectionExtended<ImageRef>();
-            imageContainerManagementService.ImageRefCache
+            imageContainerManagementService.AlbumImageRefCache
                 .Connect()
                 .ObserveOn(SchedulerProvider.TaskPool)
                 .Bind(imageRefs)
@@ -197,7 +197,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                 .Subscribe();
 
             var imageRefs = new ObservableCollectionExtended<ImageRef>();
-            imageContainerManagementService.ImageRefCache
+            imageContainerManagementService.AlbumImageRefCache
                 .Connect()
                 .ObserveOn(SchedulerProvider.TaskPool)
                 .Bind(imageRefs)

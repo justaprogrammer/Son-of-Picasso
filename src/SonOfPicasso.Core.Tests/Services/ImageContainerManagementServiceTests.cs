@@ -80,7 +80,7 @@ namespace SonOfPicasso.Core.Tests.Services
             var imageRefs = new ObservableCollectionExtended<ImageRef>();
 
             connectableImageManagementService
-                .ImageRefCache
+                .AlbumImageRefCache
                 .Connect()
                 .Bind(imageRefs)
                 .Subscribe(set =>
@@ -163,7 +163,7 @@ namespace SonOfPicasso.Core.Tests.Services
             var imageRefs = new ObservableCollectionExtended<ImageRef>();
 
             connectableImageManagementService
-                .ImageRefCache
+                .AlbumImageRefCache
                 .Connect()
                 .Bind(imageRefs)
                 .Subscribe(set =>
@@ -269,7 +269,7 @@ namespace SonOfPicasso.Core.Tests.Services
             var imageRefs = new ObservableCollectionExtended<ImageRef>();
 
             connectableImageManagementService
-                .ImageRefCache
+                .AlbumImageRefCache
                 .Connect()
                 .Bind(imageRefs)
                 .Subscribe(set =>

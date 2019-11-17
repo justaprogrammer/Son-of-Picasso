@@ -25,7 +25,7 @@ namespace SonOfPicasso.Core.Services
         private readonly IImageContainerWatcherService _imageContainerWatcherService;
         private readonly SourceCache<IImageContainer, string> _imageContainerCache;
         private readonly IImageContainerOperationService _imageContainerOperationService;
-        private readonly IObservableCache<ImageRef, string> _imageRefCache;
+        private readonly IObservableCache<ImageRef, string> _albumImageRefCache;
         private readonly ILogger _logger;
         private readonly ISchedulerProvider _schedulerProvider;
 
@@ -44,10 +44,11 @@ namespace SonOfPicasso.Core.Services
             _schedulerProvider = schedulerProvider;
             _logger = logger;
             _imageContainerCache = new SourceCache<IImageContainer, string>(imageContainer => imageContainer.Key);
-            _imageRefCache = _imageContainerCache
+            _albumImageRefCache = _imageContainerCache
                 .Connect()
                 .ObserveOn(schedulerProvider.TaskPool)
-                .TransformMany(container => container.ImageRefs, imageRef => imageRef.Key)
+                .Filter(container => container.ContainerType == ImageContainerTypeEnum.Album)
+                .TransformMany(container => container.ImageRefs, imageRef => imageRef.ImagePath)
                 .AsObservableCache();
 
             _disposables = new CompositeDisposable();
@@ -60,12 +61,12 @@ namespace SonOfPicasso.Core.Services
 
         public IConnectableCache<IImageContainer, string> ImageContainerCache => _imageContainerCache;
 
-        public IConnectableCache<ImageRef, string> ImageRefCache => _imageRefCache;
+        public IConnectableCache<ImageRef, string> AlbumImageRefCache => _albumImageRefCache;
 
         public void Dispose()
         {
             _imageContainerCache?.Dispose();
-            _imageRefCache?.Dispose();
+            _albumImageRefCache?.Dispose();
             _currentFileWatcherSubject?.Dispose();
             _disposables?.Dispose();
         }
@@ -167,7 +168,7 @@ namespace SonOfPicasso.Core.Services
 
         private void StartWatcher()
         {
-            _imageContainerWatcherService.Start(_imageRefCache);
+            _imageContainerWatcherService.Start(_albumImageRefCache);
 
             var observable = _folderRulesManagementService.GetFolderManagementRules()
                 .SelectMany(list => _folderWatcherService.WatchFolders(list, Constants.ImageExtensions));
