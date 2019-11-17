@@ -39,9 +39,20 @@ namespace SonOfPicasso.Testing.Common
             AutoResetEvent = new AutoResetEvent(false);
         }
 
+        protected bool Set()
+        {
+            return AutoResetEvent.Set();
+        }
+
+        protected void WaitOne(int timespanSeconds)
+        {
+            WaitOne(TimeSpan.FromSeconds(timespanSeconds));
+        }
+
         protected void WaitOne(TimeSpan? timespan = null)
         {
-            AutoResetEvent.WaitOne(timespan ?? TimeSpan.FromSeconds(0.5)).Should().BeTrue();
+            timespan ??= TimeSpan.FromSeconds(0.5);
+            AutoResetEvent.WaitOne(timespan.Value).Should().BeTrue($"Set() was called in {timespan.Value.TotalSeconds:0.00}s");
         }
 
         public virtual void Dispose()
