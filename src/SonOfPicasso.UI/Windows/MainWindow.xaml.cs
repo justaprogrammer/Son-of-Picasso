@@ -97,9 +97,9 @@ namespace SonOfPicasso.UI.Windows
 
                 albumImageContainersViewSource.Source = ViewModel.AlbumImageContainers;
                 albumImageContainersViewSource.SortDescriptions.Add(
-                    new SortDescription("Year", ListSortDirection.Descending));
+                    new SortDescription(nameof(ImageContainerViewModel.Year), ListSortDirection.Descending));
                 albumImageContainersViewSource.SortDescriptions.Add(
-                    new SortDescription("Date", ListSortDirection.Descending));
+                    new SortDescription(nameof(ImageContainerViewModel.Date), ListSortDirection.Descending));
 
                 albumImageContainersViewSource.IsLiveFilteringRequested = true;
                 albumImageContainersViewSource.IsLiveGroupingRequested = true;

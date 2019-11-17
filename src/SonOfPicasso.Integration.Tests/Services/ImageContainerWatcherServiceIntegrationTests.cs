@@ -12,6 +12,7 @@ using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Model;
 using SonOfPicasso.Core.Services;
 using SonOfPicasso.Data.Model;
+using SonOfPicasso.Testing.Common;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -36,10 +37,7 @@ namespace SonOfPicasso.Integration.Tests.Services
 
         private ImageRef CreateImageRef(string imagePath)
         {
-            var imageRef = new ImageRef(Faker.Random.Int(), Faker.Random.String(), imagePath,
-                Faker.Date.Recent(), Faker.Random.String(), Faker.PickRandom<ImageContainerTypeEnum>(),
-                Faker.Date.Recent());
-            return imageRef;
+            return new ImageRef(Faker.Random.Int(), Faker.Random.String(), imagePath, Faker.Date.Recent(), Faker.Date.Recent(), Faker.Date.Recent(), Faker.Random.String(), Faker.PickRandom<ImageContainerTypeEnum>(), Faker.Date.Recent());
         }
 
         [Fact]
@@ -55,7 +53,7 @@ namespace SonOfPicasso.Integration.Tests.Services
         }
 
         [Fact]
-        public async Task ShouldOnlyDetectCreatedOrChangedFiles()
+        public async Task ShouldDetectCreatedOrChangedFiles()
         {
             await InitializeDataContextAsync();
 
@@ -91,7 +89,53 @@ namespace SonOfPicasso.Integration.Tests.Services
         }
 
         [Fact]
-        public async Task ShouldOnlyDetectUnknownCreatedOrChangedFiles()
+        public async Task ShouldDetectUpdatedFiles()
+        {
+            await InitializeDataContextAsync();
+
+            var folderRulesManagementService = Container.Resolve<IFolderRulesManagementService>();
+            await folderRulesManagementService.ResetFolderManagementRules(new[]
+            {
+                new FolderRule
+                {
+                    Path = ImagesPath,
+                    Action = FolderRuleActionEnum.Always
+                }
+            });
+
+            var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
+            var imageContainerWatcherService = Container.Resolve<ImageContainerWatcherService>();
+
+            var list = new List<string>();
+            imageContainerWatcherService.FileDiscovered.Subscribe(info =>
+            {
+                list.Add(info);
+                Set();
+            });
+
+            await imageContainerWatcherService.Start(imageRefCache);
+
+            var generatedImages = await GenerateImagesAsync(1);
+            var path = generatedImages.First().Value.First();
+
+            WaitOne(5);
+
+            list.Should().HaveCount(1);
+            list.First().Should().Be(path);
+
+            await ImageGenerationService.GenerateImage(path, Faker.Random.Int(200, 400), Faker.Random.Int(200, 400),
+                Fakers.ExifDataFaker);
+
+            WaitOne(5);
+
+            list.Should().HaveCount(2);
+            list.Skip(1).First().Should().Be(path);
+
+            imageContainerWatcherService.Stop();
+        }
+
+        [Fact]
+        public async Task ShouldDetectUnknownCreatedOrChangedFiles()
         {
             await InitializeDataContextAsync();
 

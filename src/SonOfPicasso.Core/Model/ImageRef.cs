@@ -6,34 +6,34 @@ namespace SonOfPicasso.Core.Model
     public class ImageRef
     {
         public ImageRef(Image image, IImageContainer imageContainer)
+            : this(image.Id, $"{imageContainer.Key}:Image:{image.Id}", image.Path, image.CreationTime,
+                image.LastWriteTime, image.ExifData.DateTime, imageContainer.Key, imageContainer.ContainerType,
+                imageContainer.Date)
         {
-            Id = image.Id;
-            Key = $"{imageContainer.Key}:Image:{image.Id}";
-            ImagePath = image.Path;
-            Date = image.ExifData.DateTime;
-            ContainerKey = imageContainer.Key;
-            ContainerType = imageContainer.ContainerType;
-            ContainerDate = imageContainer.Date;
         }
 
-        public ImageRef(int id, string key, string imagePath, DateTime date, string containerKey,
-            ImageContainerTypeEnum containerType, DateTime containerDate)
+        public ImageRef(int id, string key, string imagePath, DateTime creationTime, DateTime lastWriteTime,
+            DateTime exifDate, string containerKey, ImageContainerTypeEnum containerType, DateTime containerDate)
         {
             Id = id;
             Key = key;
             ImagePath = imagePath;
-            Date = date;
+            CreationTime = creationTime;
+            LastWriteTime = lastWriteTime;
+            ExifDate = exifDate;
             ContainerKey = containerKey;
             ContainerType = containerType;
             ContainerDate = containerDate;
         }
 
-        public int Id { get; set; }
-        public string Key { get; set; }
-        public string ImagePath { get; set; }
-        public DateTime Date { get; set; }
-        public string ContainerKey { get; set; }
-        public ImageContainerTypeEnum ContainerType { get; set; }
-        public DateTime ContainerDate { get; set; }
+        public int Id { get; }
+        public string Key { get; }
+        public string ImagePath { get; }
+        public DateTime CreationTime { get; }
+        public DateTime LastWriteTime { get; }
+        public DateTime ExifDate { get; }
+        public string ContainerKey { get; }
+        public ImageContainerTypeEnum ContainerType { get; }
+        public DateTime ContainerDate { get; }
     }
 }

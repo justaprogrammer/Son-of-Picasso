@@ -93,13 +93,19 @@ namespace SonOfPicasso.Core.Services
                     var (path, count) = tuple;
                     _logger.Verbose("Grouped Scanner Event {Path} {GroupCount}", path, count);
                     imageLocationService.GetImages(path)
-                        .Subscribe(imagePath =>
+                        .Subscribe(fileInfo =>
                         {
-                            var imageRef = _imageRefCache.Lookup(imagePath);
+                            var imageRef = _imageRefCache.Lookup(fileInfo.FullName);
                             if (!imageRef.HasValue)
                             {
-                                _logger.Verbose("Discovered {Path}", imagePath);
-                                _fileDiscoveredSubject.OnNext(imagePath);
+                                _logger.Verbose("Discovered {Path}", fileInfo);
+                                _fileDiscoveredSubject.OnNext(fileInfo.FullName);
+                            }
+                            else if((imageRef.Value.LastWriteTime != fileInfo.LastWriteTimeUtc) || imageRef.Value.CreationTime != fileInfo.CreationTimeUtc)
+                            {
+
+                                _logger.Verbose("File Updated {Path}", fileInfo);
+                                _fileDiscoveredSubject.OnNext(fileInfo.FullName);
                             }
                         });
                 })
