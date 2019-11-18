@@ -29,13 +29,14 @@ namespace SonOfPicasso.Integration.Tests.Services
             containerBuilder.RegisterType<ImageContainerManagementService>();
             containerBuilder.RegisterType<FolderRulesManagementService>().As<IFolderRulesManagementService>();
             containerBuilder.RegisterType<ImageContainerOperationService>().As<IImageContainerOperationService>();
+            containerBuilder.RegisterType<ImageContainerWatcherService>().As<IImageContainerWatcherService>();
 
             Container = containerBuilder.Build();
         }
 
         protected override IContainer Container { get; }
 
-        [Fact(Skip = "Broken")]
+        [Fact]
         public async Task ShouldScanExistingFolder()
         {
             await InitializeDataContextAsync();
@@ -106,7 +107,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             }
         }
 
-        [Fact(Skip = "Broken")]
+        [Fact]
         public async Task ShouldWatchFolderWithAlwaysRulePreset()
         {
             await InitializeDataContextAsync();
@@ -181,7 +182,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             }
         }
 
-        [Fact(Skip = "Broken")]
+        [Fact]
         public async Task ShouldWatchFolderWithResetAlwaysRule()
         {
             await InitializeDataContextAsync();
