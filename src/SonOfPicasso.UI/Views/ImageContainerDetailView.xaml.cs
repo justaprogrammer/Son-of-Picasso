@@ -14,9 +14,7 @@ namespace SonOfPicasso.UI.Views
 
             this.WhenActivated(d =>
             {
-                d(this.OneWayBind(ViewModel,
-                    model => model.Name,
-                    window => window.FolderName.Content));
+                FolderName.Content = ViewModel.Name;
             });
         }
     }
