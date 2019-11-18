@@ -403,6 +403,7 @@ namespace SonOfPicasso.Core.Services
             return Observable.DeferAsync(async token =>
                 {
                     var exifData = await _exifDataService.GetExifData(path);
+                    var fileInfo = _fileSystem.FileInfo.FromFileName(path);
                     var directory = _fileSystem.Path.GetDirectoryName(path);
 
                     lock (_writeLock)
@@ -421,7 +422,9 @@ namespace SonOfPicasso.Core.Services
                             image = new Image
                             {
                                 Path = path,
-                                ExifData = exifData
+                                ExifData = exifData,
+                                CreationTime = fileInfo.CreationTimeUtc,
+                                LastWriteTime = fileInfo.LastWriteTimeUtc
                             };
 
                             unitOfWork.ImageRepository.Insert(image);
