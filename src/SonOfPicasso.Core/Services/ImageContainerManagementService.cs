@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using DynamicData;
 using Serilog;
 using SonOfPicasso.Core.Extensions;
@@ -18,56 +16,60 @@ namespace SonOfPicasso.Core.Services
 {
     public class ImageContainerManagementService : IImageContainerManagementService
     {
-        private readonly Subject<IObservable<FileSystemEventArgs>> _currentFileWatcherSubject;
         private readonly CompositeDisposable _disposables;
+        private readonly IObservableCache<ImageRef, string> _folderImageRefCache;
         private readonly IFolderRulesManagementService _folderRulesManagementService;
-        private readonly IFolderWatcherService _folderWatcherService;
-        private readonly IImageContainerWatcherService _imageContainerWatcherService;
         private readonly SourceCache<IImageContainer, string> _imageContainerCache;
         private readonly IImageContainerOperationService _imageContainerOperationService;
-        private readonly IObservableCache<ImageRef, string> _albumImageRefCache;
+        private readonly IImageContainerWatcherService _imageContainerWatcherService;
         private readonly ILogger _logger;
         private readonly ISchedulerProvider _schedulerProvider;
 
         public ImageContainerManagementService(
             IImageContainerOperationService imageContainerOperationService,
-            IFolderWatcherService folderWatcherService,
             IImageContainerWatcherService imageContainerWatcherService,
             IFolderRulesManagementService folderRulesManagementService,
             ISchedulerProvider schedulerProvider,
             ILogger logger)
         {
+            _disposables = new CompositeDisposable();
             _imageContainerOperationService = imageContainerOperationService;
-            _folderWatcherService = folderWatcherService;
             _imageContainerWatcherService = imageContainerWatcherService;
             _folderRulesManagementService = folderRulesManagementService;
             _schedulerProvider = schedulerProvider;
             _logger = logger;
             _imageContainerCache = new SourceCache<IImageContainer, string>(imageContainer => imageContainer.Key);
-            _albumImageRefCache = _imageContainerCache
+            _folderImageRefCache = _imageContainerCache
                 .Connect()
                 .ObserveOn(schedulerProvider.TaskPool)
-                .Filter(container => container.ContainerType == ImageContainerTypeEnum.Album)
+                .Filter(container => container.ContainerType == ImageContainerTypeEnum.Folder)
                 .TransformMany(container => container.ImageRefs, imageRef => imageRef.ImagePath)
                 .AsObservableCache();
 
-            _disposables = new CompositeDisposable();
+            _imageContainerWatcherService.FileDiscovered
+                .SelectMany(path => _imageContainerOperationService.AddOrUpdateImage(path))
+                .Subscribe(container => _imageContainerCache.AddOrUpdate(container))
+                .DisposeWith(_disposables);
 
-            _currentFileWatcherSubject = new Subject<IObservable<FileSystemEventArgs>>();
-            _currentFileWatcherSubject.Switch()
-                .Subscribe(HandlerFolderWatcherEvent)
+            _imageContainerWatcherService.FileDeleted
+                .SelectMany(path => _imageContainerOperationService.DeleteImage(path))
+                .Subscribe(container => _imageContainerCache.AddOrUpdate(container))
+                .DisposeWith(_disposables);
+
+            _imageContainerWatcherService.FileRenamed
+                .SelectMany(tuple => imageContainerOperationService.RenameImage(tuple.oldFullPath, tuple.fullPath))
+                .Subscribe(container => _imageContainerCache.AddOrUpdate(container))
                 .DisposeWith(_disposables);
         }
 
         public IConnectableCache<IImageContainer, string> ImageContainerCache => _imageContainerCache;
 
-        public IConnectableCache<ImageRef, string> AlbumImageRefCache => _albumImageRefCache;
+        public IConnectableCache<ImageRef, string> FolderImageRefCache => _folderImageRefCache;
 
         public void Dispose()
         {
             _imageContainerCache?.Dispose();
-            _albumImageRefCache?.Dispose();
-            _currentFileWatcherSubject?.Dispose();
+            _folderImageRefCache?.Dispose();
             _disposables?.Dispose();
         }
 
@@ -86,7 +88,12 @@ namespace SonOfPicasso.Core.Services
                 });
 
             var result = resetRules
-                .Zip(applyImageChanges, (unit, _) => unit);
+                .Zip(applyImageChanges, (unit, _) => unit)
+                .SelectMany(unit =>
+                {
+                    _imageContainerWatcherService.Stop();
+                    return _imageContainerWatcherService.Start(_folderImageRefCache);
+                });
 
             return result;
         }
@@ -101,13 +108,12 @@ namespace SonOfPicasso.Core.Services
             return _imageContainerOperationService.GetAllImageContainers()
                 .Do(container => _imageContainerCache.AddOrUpdate(container))
                 .LastOrDefaultAsync()
-                .Select(_ => Unit.Default)
-                .Do(_ => StartWatcher());
+                .SelectMany(_ => _imageContainerWatcherService.Start(_folderImageRefCache));
         }
 
         public void Stop()
         {
-            _currentFileWatcherSubject.OnNext(Observable.Never<FileSystemEventArgs>());
+            _imageContainerWatcherService.Stop();
         }
 
         public IObservable<IImageContainer> ScanFolder(string path)
@@ -164,47 +170,6 @@ namespace SonOfPicasso.Core.Services
         {
             return _imageContainerOperationService.DeleteAlbum(albumId)
                 .Do(container => _imageContainerCache.Remove(AlbumImageContainer.GetContainerKey(albumId)));
-        }
-
-        private void StartWatcher()
-        {
-            _imageContainerWatcherService.Start(_albumImageRefCache);
-
-            var observable = _folderRulesManagementService.GetFolderManagementRules()
-                .SelectMany(list => _folderWatcherService.WatchFolders(list, Constants.ImageExtensions));
-
-            _currentFileWatcherSubject.OnNext(observable);
-        }
-
-        private void HandlerFolderWatcherEvent(FileSystemEventArgs args)
-        {
-            if (args.ChangeType != WatcherChangeTypes.Created)
-            {
-                _logger.Debug("HandlerFolderWatcherEvent {ChangeType} {Name}", args.ChangeType, args.Name);
-
-                switch (args.ChangeType)
-                {
-                    case WatcherChangeTypes.Changed:
-                        _imageContainerCache.PopulateFrom(
-                            _imageContainerOperationService.AddOrUpdateImage(args.FullPath));
-                        break;
-
-                    case WatcherChangeTypes.Deleted:
-                        _imageContainerCache.PopulateFrom(
-                            _imageContainerOperationService.DeleteImage(args.FullPath));
-                        break;
-
-                    case WatcherChangeTypes.Renamed:
-                        var renamedEventArgs = (RenamedEventArgs) args;
-                        _imageContainerCache.PopulateFrom(
-                            _imageContainerOperationService.RenameImage(renamedEventArgs.OldFullPath,
-                                renamedEventArgs.FullPath));
-                        break;
-
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
         }
     }
 }

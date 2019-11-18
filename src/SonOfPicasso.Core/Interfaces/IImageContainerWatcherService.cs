@@ -11,5 +11,6 @@ namespace SonOfPicasso.Core.Interfaces
         IObservable<string> FileDeleted { get; }
         IObservable<(string oldFullPath, string fullPath)> FileRenamed { get; }
         IObservable<Unit> Start(IObservableCache<ImageRef, string> imageRefCache);
+        void Stop();
     }
 }

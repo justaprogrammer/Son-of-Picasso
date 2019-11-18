@@ -31,10 +31,6 @@ namespace SonOfPicasso.Core.Tests.Services
         {
             var folderWatcherSubject = new Subject<FileSystemEventArgs>();
 
-            var folderWatcherService = AutoSubstitute.Resolve<IFolderWatcherService>();
-            folderWatcherService.WatchFolders(default)
-                .ReturnsForAnyArgs(folderWatcherSubject.AsObservable());
-
             var folderRulesManagementService = AutoSubstitute.Resolve<IFolderRulesManagementService>();
 
             var currentFolderRules = Fakers.FolderRuleFaker
@@ -76,7 +72,7 @@ namespace SonOfPicasso.Core.Tests.Services
             var imageRefs = new ObservableCollectionExtended<ImageRef>();
 
             connectableImageManagementService
-                .AlbumImageRefCache
+                .FolderImageRefCache
                 .Connect()
                 .Bind(imageRefs)
                 .Subscribe(set => { AutoResetEvent.Set(); });
@@ -93,19 +89,12 @@ namespace SonOfPicasso.Core.Tests.Services
             WaitOne();
 
             imageRefs.Should().HaveCount(1);
-
-            folderWatcherService.Received(1)
-                .WatchFolders(currentFolderRules, Constants.ImageExtensions);
         }
 
         [Fact(Skip = "Broken")]
         public void ShouldScan()
         {
             var folderWatcherSubject = new Subject<FileSystemEventArgs>();
-
-            var folderWatcherService = AutoSubstitute.Resolve<IFolderWatcherService>();
-            folderWatcherService.WatchFolders(default)
-                .ReturnsForAnyArgs(folderWatcherSubject.AsObservable());
 
             var directoryPathWindows = Faker.System.DirectoryPathWindows();
 
@@ -148,7 +137,7 @@ namespace SonOfPicasso.Core.Tests.Services
             var imageRefs = new ObservableCollectionExtended<ImageRef>();
 
             connectableImageManagementService
-                .AlbumImageRefCache
+                .FolderImageRefCache
                 .Connect()
                 .Bind(imageRefs)
                 .Subscribe(set => { AutoResetEvent.Set(); });
@@ -199,10 +188,6 @@ namespace SonOfPicasso.Core.Tests.Services
         {
             var folderWatcherSubject = new Subject<FileSystemEventArgs>();
 
-            var folderWatcherService = AutoSubstitute.Resolve<IFolderWatcherService>();
-            folderWatcherService.WatchFolders(default)
-                .ReturnsForAnyArgs(folderWatcherSubject.AsObservable());
-
             var folderRulesManagementService = AutoSubstitute.Resolve<IFolderRulesManagementService>();
 
             var currentFolderRules = Fakers.FolderRuleFaker
@@ -244,7 +229,7 @@ namespace SonOfPicasso.Core.Tests.Services
             var imageRefs = new ObservableCollectionExtended<ImageRef>();
 
             connectableImageManagementService
-                .AlbumImageRefCache
+                .FolderImageRefCache
                 .Connect()
                 .Bind(imageRefs)
                 .Subscribe(set => { AutoResetEvent.Set(); });
@@ -261,9 +246,6 @@ namespace SonOfPicasso.Core.Tests.Services
             WaitOne();
 
             imageRefs.Should().HaveCount(1);
-
-            folderWatcherService.Received(1)
-                .WatchFolders(currentFolderRules, Constants.ImageExtensions);
 
             var fileSystemEventArgs = new FileSystemEventArgs(
                 WatcherChangeTypes.Created,

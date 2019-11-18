@@ -29,7 +29,6 @@ namespace SonOfPicasso.Integration.Tests.Services
             containerBuilder.RegisterType<ImageContainerManagementService>();
             containerBuilder.RegisterType<FolderRulesManagementService>().As<IFolderRulesManagementService>();
             containerBuilder.RegisterType<ImageContainerOperationService>().As<IImageContainerOperationService>();
-            containerBuilder.RegisterType<FolderWatcherService>().As<IFolderWatcherService>();
 
             Container = containerBuilder.Build();
         }
@@ -58,7 +57,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                 .Subscribe();
 
             var imageRefs = new ObservableCollectionExtended<ImageRef>();
-            imageContainerManagementService.AlbumImageRefCache
+            imageContainerManagementService.FolderImageRefCache
                 .Connect()
                 .ObserveOn(SchedulerProvider.TaskPool)
                 .Bind(imageRefs)
@@ -129,7 +128,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                 .Subscribe();
 
             var imageRefs = new ObservableCollectionExtended<ImageRef>();
-            imageContainerManagementService.AlbumImageRefCache
+            imageContainerManagementService.FolderImageRefCache
                 .Connect()
                 .ObserveOn(SchedulerProvider.TaskPool)
                 .Bind(imageRefs)
@@ -197,7 +196,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                 .Subscribe();
 
             var imageRefs = new ObservableCollectionExtended<ImageRef>();
-            imageContainerManagementService.AlbumImageRefCache
+            imageContainerManagementService.FolderImageRefCache
                 .Connect()
                 .ObserveOn(SchedulerProvider.TaskPool)
                 .Bind(imageRefs)
