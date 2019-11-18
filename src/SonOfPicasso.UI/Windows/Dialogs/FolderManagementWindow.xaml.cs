@@ -6,14 +6,12 @@ using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using DynamicData.Binding;
-using Serilog;
 using ReactiveUI;
+using Serilog;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Data.Model;
 using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.ViewModels.FolderRules;
-using ListView = System.Windows.Controls.ListView;
 
 namespace SonOfPicasso.UI.Windows.Dialogs
 {
@@ -22,10 +20,8 @@ namespace SonOfPicasso.UI.Windows.Dialogs
     /// </summary>
     public partial class FolderManagementWindow : ReactiveWindow<ManageFolderRulesViewModel>
     {
-        private readonly ISchedulerProvider _schedulerProvider;
         private readonly ILogger _logger;
-
-        public IImageProvider ImageProvider { get; }
+        private readonly ISchedulerProvider _schedulerProvider;
 
         public FolderManagementWindow(ISchedulerProvider schedulerProvider,
             IImageProvider imageProvider,
@@ -34,7 +30,7 @@ namespace SonOfPicasso.UI.Windows.Dialogs
             _schedulerProvider = schedulerProvider;
             _logger = logger;
             ImageProvider = imageProvider;
-            
+
             InitializeComponent();
 
             this.WhenActivated(d =>
@@ -51,14 +47,10 @@ namespace SonOfPicasso.UI.Windows.Dialogs
                 ViewModel.WhenAnyValue(model => model.SelectedItem)
                     .Subscribe(folderRuleViewModel =>
                     {
-                        var folderRule = (FolderRule)WatchedPathsList.SelectedItem;
+                        var folderRule = (FolderRule) WatchedPathsList.SelectedItem;
                         if (folderRule != null)
-                        {
                             if (!folderRule.Path.Equals(folderRuleViewModel.Path))
-                            {
                                 WatchedPathsList.SelectedItem = null;
-                            }
-                        }
                     })
                     .DisposeWith(d);
 
@@ -93,11 +85,14 @@ namespace SonOfPicasso.UI.Windows.Dialogs
                     .SelectionChanged
                     .Subscribe(args =>
                     {
-                        var listView = (ListView)args.Source;
-                        var folderRule = (FolderRule)listView.SelectedValue;
-                        if (folderRule != null && ViewModel.FolderRuleViewModelDictionary.TryGetValue(folderRule.Path, out var folderRuleViewModel))
+                        var listView = (ListView) args.Source;
+                        var folderRule = (FolderRule) listView.SelectedValue;
+                        if (folderRule != null &&
+                            ViewModel.FolderRuleViewModelDictionary.TryGetValue(folderRule.Path,
+                                out var folderRuleViewModel))
                         {
-                            var treeViewItem = FindItem(FoldersListView.ItemContainerGenerator, folderRuleViewModel.Path);
+                            var treeViewItem = FindItem(FoldersListView.ItemContainerGenerator,
+                                folderRuleViewModel.Path);
                             if (treeViewItem != null)
                             {
                                 treeViewItem.IsSelected = true;
@@ -109,21 +104,28 @@ namespace SonOfPicasso.UI.Windows.Dialogs
                     })
                     .DisposeWith(d);
 
+                var hasSelectedItem = ViewModel
+                    .WhenAny(model => model.SelectedItem, change => change.Value != null)
+                    .Publish();
 
-                this.OneWayBind(ViewModel,
-                    model => model.SelectedItem,
-                    window => window.SelectedItemAlwaysRadioButton.IsEnabled,
-                    selector: model => model != null);
+                hasSelectedItem
+                    .BindTo(Window.SelectedItemOnceRadioButton, button => button.IsEnabled)
+                    .DisposeWith(d);
 
-                this.OneWayBind(ViewModel,
-                    model => model.SelectedItem,
-                    window => window.SelectedItemNeverRadioButton.IsEnabled,
-                    selector: model => model != null);
+                hasSelectedItem
+                    .BindTo(Window.SelectedItemAlwaysRadioButton, button => button.IsEnabled)
+                    .DisposeWith(d);
 
-                this.OneWayBind(ViewModel,
-                    model => model.SelectedItem,
-                    window => window.SelectedItemOnceRadioButton.IsEnabled,
-                    selector: model => model != null);
+                hasSelectedItem
+                    .BindTo(Window.SelectedItemNeverRadioButton, button => button.IsEnabled)
+                    .DisposeWith(d);
+
+                hasSelectedItem
+                    .BindTo(Window.SelectedItemOnceRadioButton, button => button.IsEnabled)
+                    .DisposeWith(d);
+
+                hasSelectedItem.Connect()
+                    .DisposeWith(d);
 
                 this.BindCommand(ViewModel,
                         model => model.Continue,
@@ -135,25 +137,34 @@ namespace SonOfPicasso.UI.Windows.Dialogs
                         window => window.CancelButton)
                     .DisposeWith(d);
 
-                this.Bind(ViewModel,
-                    model => model.HideUnselected,
-                    window => window.DisplaySelectedItemsCheckbox.IsChecked);
+                ViewModel
+                    .WhenAny(model => model.HideUnselected, change => change.Value)
+                    .BindTo(Window.DisplaySelectedItemsCheckbox, button => button.IsChecked)
+                    .DisposeWith(d);
 
-                this.OneWayBind(ViewModel,
-                    model => model.SelectedItem.FolderRuleAction,
-                    window => window.SelectedItemAlwaysRadioButton.IsChecked,
-                    manageFolderStateEnum => manageFolderStateEnum == FolderRuleActionEnum.Always);
+                var selectedFolderRuleAction = ViewModel
+                    .WhenAny(model => model.SelectedItem.FolderRuleAction, change => change.Value)
+                    .Publish();
 
-                this.OneWayBind(ViewModel,
-                    model => model.SelectedItem.FolderRuleAction,
-                    window => window.SelectedItemNeverRadioButton.IsChecked,
-                    manageFolderStateEnum => manageFolderStateEnum == FolderRuleActionEnum.Remove);
+                selectedFolderRuleAction
+                    .Select(folderRuleAction => folderRuleAction == FolderRuleActionEnum.Always)
+                    .BindTo(SelectedItemAlwaysRadioButton, button => button.IsChecked)
+                    .DisposeWith(d);
 
-                this.OneWayBind(ViewModel,
-                    model => model.SelectedItem.FolderRuleAction,
-                    window => window.SelectedItemOnceRadioButton.IsChecked,
-                    manageFolderStateEnum => manageFolderStateEnum == FolderRuleActionEnum.Once);
+                selectedFolderRuleAction
+                    .Select(folderRuleAction => folderRuleAction == FolderRuleActionEnum.Remove)
+                    .BindTo(SelectedItemNeverRadioButton, button => button.IsChecked)
+                    .DisposeWith(d);
 
+                selectedFolderRuleAction
+                    .Select(folderRuleAction => folderRuleAction == FolderRuleActionEnum.Once)
+                    .BindTo(SelectedItemOnceRadioButton, button => button.IsChecked)
+                    .DisposeWith(d);
+
+                selectedFolderRuleAction
+                    .Connect()
+                    .DisposeWith(d);
+                
                 ViewModel.CancelInteraction.RegisterHandler(context =>
                     {
                         return Observable.Defer(() =>
@@ -180,16 +191,16 @@ namespace SonOfPicasso.UI.Windows.Dialogs
             });
         }
 
+        public IImageProvider ImageProvider { get; }
+
         private void TreeViewItem_OnExpanded(object sender, RoutedEventArgs e)
         {
-            var treeViewItem = (TreeViewItem)sender;
+            var treeViewItem = (TreeViewItem) sender;
             var customFolderRuleInput = (FolderRuleViewModel) treeViewItem.DataContext;
 
             foreach (var folderRuleInput in customFolderRuleInput.VisibleChildren)
-            {
                 ViewModel.PopulateFolderRuleInput(folderRuleInput)
                     .Subscribe();
-            }
         }
 
         private static TreeViewItem FindItem(ItemContainerGenerator itemContainerGenerator, string path)
@@ -205,11 +216,9 @@ namespace SonOfPicasso.UI.Windows.Dialogs
 
             if (folderRuleViewModel != default)
             {
-                var containerFromItem = (TreeViewItem) itemContainerGenerator.ContainerFromItem(folderRuleViewModel.model);
-                if (folderRuleViewModel.isPath)
-                {
-                    return containerFromItem;
-                }
+                var containerFromItem =
+                    (TreeViewItem) itemContainerGenerator.ContainerFromItem(folderRuleViewModel.model);
+                if (folderRuleViewModel.isPath) return containerFromItem;
 
                 return FindItem(containerFromItem.ItemContainerGenerator, path);
             }
