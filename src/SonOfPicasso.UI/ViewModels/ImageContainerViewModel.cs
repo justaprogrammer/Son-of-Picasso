@@ -7,7 +7,7 @@ using SonOfPicasso.UI.ViewModels.Abstract;
 
 namespace SonOfPicasso.UI.ViewModels
 {
-    public class ImageContainerViewModel : ViewModelBase
+    public class ImageContainerViewModel : ViewModelBase, IDisposable
     {
         private readonly ISchedulerProvider _schedulerProvider;
 
@@ -29,6 +29,8 @@ namespace SonOfPicasso.UI.ViewModels
 
         public IList<ImageRef> ImageRefs => _imageContainer.ImageRefs;
 
+        public int Count => ImageRefs.Count;
+
         public int Year => _imageContainer.Year;
 
         public DateTime Date => _imageContainer.Date;
@@ -37,9 +39,15 @@ namespace SonOfPicasso.UI.ViewModels
 
         public void Initialize(IImageContainer imageContainer, ApplicationViewModel applicationViewModel)
         {
-            _imageContainer = imageContainer ?? throw new ArgumentNullException(nameof(imageContainer));
+            _imageContainer = 
+                imageContainer ?? throw new ArgumentNullException(nameof(imageContainer));
+
             ApplicationViewModel =
                 applicationViewModel ?? throw new ArgumentNullException(nameof(applicationViewModel));
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

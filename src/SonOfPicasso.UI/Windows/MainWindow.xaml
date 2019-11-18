@@ -83,8 +83,11 @@
                 </ListView.GroupStyle>
 
                 <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <reactiveUi:ViewModelViewHost ViewModel="{Binding}" ViewContract="ListItem" />
+                    <DataTemplate DataType="viewModels:ImageContainerViewModel">
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="{Binding Name}"></Label>
+                            <Label Content="{Binding Count}" ContentStringFormat="({0})" />
+                        </StackPanel>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
@@ -125,7 +128,7 @@
 
                         <GroupStyle.HeaderTemplate>
                             <DataTemplate DataType="CollectionViewGroup">
-                                <reactiveUi:ViewModelViewHost ViewModel="{Binding Name}" ViewContract="Detail" />
+                                <reactiveUi:ViewModelViewHost ViewModel="{Binding Name}" />
                             </DataTemplate>
                         </GroupStyle.HeaderTemplate>
                     </GroupStyle>
