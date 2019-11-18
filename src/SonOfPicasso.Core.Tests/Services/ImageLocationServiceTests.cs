@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Reactive.Linq;
@@ -37,7 +38,7 @@ namespace SonOfPicasso.Core.Tests.Services
 
             foreach (var file in files.Concat(otherFiles)) MockFileSystem.AddFile(file, new MockFileData(new byte[0]));
 
-            string[] imagePaths = null;
+            IFileInfo[] imagePaths = null;
 
             var imageLocationService = AutoSubstitute.Resolve<ImageLocationService>();
             imageLocationService.GetImages(directory)
@@ -52,7 +53,7 @@ namespace SonOfPicasso.Core.Tests.Services
             AutoResetEvent.WaitOne();
 
             imagePaths.Should().NotBeNull();
-            imagePaths.Select(fileInfo => fileInfo)
+            imagePaths.Select(fileInfo => fileInfo.FullName)
                 .Should().BeEquivalentTo(files);
         }
     }

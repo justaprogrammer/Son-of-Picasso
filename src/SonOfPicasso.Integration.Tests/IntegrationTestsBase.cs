@@ -20,13 +20,10 @@ namespace SonOfPicasso.Integration.Tests
 {
     public abstract class IntegrationTestsBase : TestsBase
     {
-        protected abstract IContainer Container { get; }
         protected readonly string DatabasePath;
         protected readonly DbContextOptions<DataContext> DbContextOptions;
         protected readonly FileSystem FileSystem;
-        protected  ImageGenerationService ImageGenerationService => Container.Resolve<ImageGenerationService>();
         protected readonly string ImagesPath;
-        protected ISchedulerProvider SchedulerProvider => Container.Resolve<ISchedulerProvider>();
         protected readonly string TestPath;
         protected DataContext DataContext;
 
@@ -49,6 +46,11 @@ namespace SonOfPicasso.Integration.Tests
                     .UseSqlite($"Data Source={DatabasePath}")
                     .Options;
         }
+
+        protected abstract IContainer Container { get; }
+        protected ImageGenerationService ImageGenerationService => Container.Resolve<ImageGenerationService>();
+        protected IDirectoryInfo ImagesDirectoryInfo => FileSystem.DirectoryInfo.FromDirectoryName(ImagesPath);
+        protected ISchedulerProvider SchedulerProvider => Container.Resolve<ISchedulerProvider>();
 
         protected ContainerBuilder GetContainerBuilder()
         {

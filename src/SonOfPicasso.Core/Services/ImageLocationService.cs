@@ -25,19 +25,18 @@ namespace SonOfPicasso.Core.Services
             _schedulerProvider = schedulerProvider;
         }
 
-        public IObservable<string> GetImages(string path)
+        public IObservable<IFileInfo> GetImages(string path)
         {
             return Observable.Defer(() =>
             {
-                _logger.Debug("GetImages {Path}", path);
+                _logger.Verbose("GetImages {Path}", path);
 
-                var fileInfoBases = Array.Empty<string>();
+                var fileInfoBases = Array.Empty<IFileInfo>();
                 try
                 {
                     fileInfoBases = _fileSystem.DirectoryInfo.FromDirectoryName(path)
                         .EnumerateFiles("*.*", SearchOption.AllDirectories)
                         .Where(file => Constants.ImageExtensions.Contains(file.Extension.ToLowerInvariant()))
-                        .Select(file => file.FullName)
                         .ToArray();
                 }
                 catch (Exception ex)

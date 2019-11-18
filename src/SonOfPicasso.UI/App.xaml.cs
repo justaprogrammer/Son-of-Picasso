@@ -42,11 +42,15 @@ namespace SonOfPicasso.UI
                 "{Timestamp:HH:mm:ss} [{Level:u4}] ({PaddedThreadId}) {ShortSourceContext} {Message}{NewLineIfException}{Exception}{NewLine}";
 
             if (Common.IsDebug)
-                loggerConfiguration
+                loggerConfiguration = loggerConfiguration
                     .WriteTo.Debug(outputTemplate: outputTemplate);
             else if (Common.IsTrace)
-                loggerConfiguration
+                loggerConfiguration = loggerConfiguration
                     .WriteTo.Trace(outputTemplate: outputTemplate);
+
+            loggerConfiguration = loggerConfiguration
+                .WriteTo
+                .File("SonOfPicasso.log", outputTemplate: outputTemplate);
 
             if (Common.IsVerboseLoggingEnabled) loggerConfiguration = loggerConfiguration.MinimumLevel.Verbose();
 

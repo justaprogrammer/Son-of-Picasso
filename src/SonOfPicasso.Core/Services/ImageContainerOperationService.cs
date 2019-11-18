@@ -60,16 +60,18 @@ namespace SonOfPicasso.Core.Services
                 {
                     return _imageLocationService
                         .GetImages(path)
-                        .Where(imagePath => !imagesAtPath.Contains(imagePath))
-                        .GroupBy(s => _fileSystem.Path.GetDirectoryName(s))
+                        .Where(fileInfo => !imagesAtPath.Contains(fileInfo.FullName))
+                        .GroupBy(fileInfo => fileInfo.DirectoryName)
                         .SelectMany(async groupedObservable =>
                         {
                             var images = await groupedObservable
-                                .SelectMany(imagePath => _exifDataService
-                                    .GetExifData(imagePath)
+                                .SelectMany(fileInfo => _exifDataService
+                                    .GetExifData(fileInfo.FullName)
                                     .Select(exifData => new Image
                                     {
-                                        Path = imagePath,
+                                        Path = fileInfo.FullName,
+                                        CreationTime = fileInfo.CreationTimeUtc,
+                                        LastWriteTime = fileInfo.LastWriteTimeUtc,
                                         ExifData = exifData
                                     }))
                                 .ToArray();
@@ -401,6 +403,7 @@ namespace SonOfPicasso.Core.Services
             return Observable.DeferAsync(async token =>
                 {
                     var exifData = await _exifDataService.GetExifData(path);
+                    var fileInfo = _fileSystem.FileInfo.FromFileName(path);
                     var directory = _fileSystem.Path.GetDirectoryName(path);
 
                     lock (_writeLock)
@@ -419,7 +422,9 @@ namespace SonOfPicasso.Core.Services
                             image = new Image
                             {
                                 Path = path,
-                                ExifData = exifData
+                                ExifData = exifData,
+                                CreationTime = fileInfo.CreationTimeUtc,
+                                LastWriteTime = fileInfo.LastWriteTimeUtc
                             };
 
                             unitOfWork.ImageRepository.Insert(image);
