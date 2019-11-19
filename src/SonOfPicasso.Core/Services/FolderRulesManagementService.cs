@@ -71,7 +71,12 @@ namespace SonOfPicasso.Core.Services
 
         public IObservable<Unit> AddFolderManagementRule(FolderRule folderRule)
         {
-            return Observable.Defer(GetFolderManagementRules)
+            return Observable.Defer(() =>
+                {
+                    _logger.Verbose("AddFolderManagementRule {Rule} {Path}", folderRule.Action, folderRule.Path);
+
+                    return GetFolderManagementRules();
+                })
                 .Select(list => list.Append(folderRule).ToArray())
                 .Select(CreateInputs)
                 .SelectMany(ResetFolderManagementRules)

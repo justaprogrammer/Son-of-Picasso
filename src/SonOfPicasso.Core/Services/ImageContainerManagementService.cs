@@ -118,22 +118,15 @@ namespace SonOfPicasso.Core.Services
 
         public IObservable<IImageContainer> ScanFolder(string path)
         {
-            return _imageContainerOperationService.ScanFolder(path)
-                .Do(container => _imageContainerCache.AddOrUpdate(container))
-                .ToArray()
-                .SelectMany(async containers =>
-                {
-                    await _folderRulesManagementService
-                        .AddFolderManagementRule(
-                            new FolderRule
-                            {
-                                Path = path,
-                                Action = FolderRuleActionEnum.Once
-                            });
-
-                    return containers;
-                })
-                .SelectMany(containers => containers);
+            return _folderRulesManagementService
+                .AddFolderManagementRule(
+                    new FolderRule
+                    {
+                        Path = path,
+                        Action = FolderRuleActionEnum.Once
+                    })
+                .SelectMany(unit =>_imageContainerOperationService.ScanFolder(path, _folderImageRefCache))
+                .Do(container => _imageContainerCache.AddOrUpdate(container));
         }
 
         public IObservable<IImageContainer> CreateAlbum(ICreateAlbum createAlbum)

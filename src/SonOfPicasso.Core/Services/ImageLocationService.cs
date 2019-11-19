@@ -31,22 +31,11 @@ namespace SonOfPicasso.Core.Services
             {
                 _logger.Verbose("GetImages {Path}", path);
 
-                var fileInfoBases = Array.Empty<IFileInfo>();
-                try
-                {
-                    fileInfoBases = _fileSystem.DirectoryInfo.FromDirectoryName(path)
+                return _fileSystem.DirectoryInfo.FromDirectoryName(path)
                         .EnumerateFiles("*.*", SearchOption.AllDirectories)
                         .Where(file => Constants.ImageExtensions.Contains(file.Extension.ToLowerInvariant()))
-                        .ToArray();
-                }
-                catch (Exception ex)
-                {
-                    _logger.Error(ex, "Error GetImages {Path}", path);
-                }
-
-                return Observable.Return(fileInfoBases);
-            }).SelectMany(strings => strings)
-                .SubscribeOn(_schedulerProvider.TaskPool);
+                        .ToObservable();
+            }).SubscribeOn(_schedulerProvider.TaskPool);
         }
     }
 }

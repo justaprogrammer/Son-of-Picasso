@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reactive;
+using DynamicData;
 using SonOfPicasso.Core.Model;
 using SonOfPicasso.Core.Services;
 using SonOfPicasso.Data.Model;
@@ -9,7 +10,7 @@ namespace SonOfPicasso.Core.Interfaces
 {
     public interface IImageContainerOperationService
     {
-        IObservable<IImageContainer> ScanFolder(string path);
+        IObservable<IImageContainer> ScanFolder(string path, IObservableCache<ImageRef, string> folderImageRefCache);
         IObservable<IImageContainer> CreateAlbum(ICreateAlbum createAlbum);
         IObservable<IImageContainer> GetAllImageContainers();
         IObservable<IImageContainer> AddImagesToAlbum(int albumId, IEnumerable<int> imageIds);
