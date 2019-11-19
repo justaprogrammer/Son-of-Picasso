@@ -24,6 +24,7 @@ namespace SonOfPicasso.Integration.Tests
         protected readonly DbContextOptions<DataContext> DbContextOptions;
         protected readonly FileSystem FileSystem;
         protected readonly string ImagesPath;
+        protected readonly ISchedulerProvider SchedulerProvider = new SchedulerProvider();
         protected readonly string TestPath;
         protected DataContext DataContext;
 
@@ -50,7 +51,6 @@ namespace SonOfPicasso.Integration.Tests
         protected abstract IContainer Container { get; }
         protected ImageGenerationService ImageGenerationService => Container.Resolve<ImageGenerationService>();
         protected IDirectoryInfo ImagesDirectoryInfo => FileSystem.DirectoryInfo.FromDirectoryName(ImagesPath);
-        protected ISchedulerProvider SchedulerProvider => Container.Resolve<ISchedulerProvider>();
 
         protected ContainerBuilder GetContainerBuilder()
         {
@@ -61,7 +61,7 @@ namespace SonOfPicasso.Integration.Tests
             containerBuilder.RegisterType<UnitOfWork>()
                 .As<IUnitOfWork>()
                 .AsSelf();
-            containerBuilder.RegisterType<SchedulerProvider>().As<ISchedulerProvider>();
+            containerBuilder.RegisterInstance(SchedulerProvider).As<ISchedulerProvider>();
             containerBuilder.RegisterType<ImageGenerationService>().AsSelf();
             return containerBuilder;
         }

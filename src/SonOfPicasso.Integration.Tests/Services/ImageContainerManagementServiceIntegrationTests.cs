@@ -9,6 +9,8 @@ using DynamicData.Binding;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using Microsoft.EntityFrameworkCore;
+using PicasaDatabaseReader.Core;
+using PicasaDatabaseReader.Core.Interfaces;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Model;
 using SonOfPicasso.Core.Services;
@@ -30,6 +32,8 @@ namespace SonOfPicasso.Integration.Tests.Services
             containerBuilder.RegisterType<FolderRulesManagementService>().As<IFolderRulesManagementService>();
             containerBuilder.RegisterType<ImageContainerOperationService>().As<IImageContainerOperationService>();
             containerBuilder.RegisterType<ImageContainerWatcherService>().As<IImageContainerWatcherService>();
+            containerBuilder.RegisterInstance(SchedulerProvider).As<PicasaDatabaseReader.Core.Scheduling.ISchedulerProvider>();
+            containerBuilder.RegisterType<DatabaseReader>().As<IDatabaseReader>();
 
             Container = containerBuilder.Build();
         }
@@ -250,6 +254,13 @@ namespace SonOfPicasso.Integration.Tests.Services
                 imageContainers.Should().HaveCount(generateImagesAsync.Count);
                 imageRefs.Should().HaveCount(imageCount);
             }
+        }
+
+        [SkippableFact]
+        public void ShouldScanPicasaDatabase()
+        {
+            var variable = Environment.GetEnvironmentVariable("SonOfPicasso_IntegrationTest_PicasaDatabsePath");
+            Skip.If(string.IsNullOrWhiteSpace(variable), "Skipped if database path not present");
         }
     }
 }
