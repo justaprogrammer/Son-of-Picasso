@@ -49,4 +49,10 @@
     <ProjectReference Include="..\SonOfPicasso.UI\SonOfPicasso.UI.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="PicasaDatabaseReader.Core">
+      <HintPath>..\..\lib\picasa-database-reader\PicasaDatabaseReader.Core.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

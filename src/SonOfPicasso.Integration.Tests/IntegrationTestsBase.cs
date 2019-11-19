@@ -22,6 +22,7 @@ namespace SonOfPicasso.Integration.Tests
     public abstract class IntegrationTestsBase : TestsBase
     {
         protected readonly FileSystem FileSystem = new FileSystem();
+        protected readonly ISchedulerProvider SchedulerProvider = new SchedulerProvider();
         protected string DatabasePath;
         protected DataContext DataContext;
         protected DbContextOptions<DataContext> DbContextOptions;
@@ -71,7 +72,7 @@ namespace SonOfPicasso.Integration.Tests
             containerBuilder.RegisterType<UnitOfWork>()
                 .As<IUnitOfWork>()
                 .AsSelf();
-            containerBuilder.RegisterType<SchedulerProvider>().As<ISchedulerProvider>();
+            containerBuilder.RegisterInstance(SchedulerProvider).As<ISchedulerProvider>();
             containerBuilder.RegisterType<ImageGenerationService>().AsSelf();
             return containerBuilder;
         }
