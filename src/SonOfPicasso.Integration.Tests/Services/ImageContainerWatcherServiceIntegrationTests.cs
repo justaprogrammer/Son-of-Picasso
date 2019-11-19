@@ -329,6 +329,8 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             await imageContainerWatcherService.Start(imageRefCache);
 
+            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(1));
+     
             var file = generatedImages.First().Value.First();
             var movedTo = Path.Combine(generatedImages.First().Key, "a" + FileSystem.Path.GetFileName(file));
             FileSystem.File.Move(file, movedTo);
