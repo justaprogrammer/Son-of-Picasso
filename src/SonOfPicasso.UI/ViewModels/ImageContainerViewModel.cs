@@ -1,24 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using ReactiveUI;
 using SonOfPicasso.Core.Model;
-using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.UI.ViewModels.Abstract;
 
 namespace SonOfPicasso.UI.ViewModels
 {
-    public class ImageContainerViewModel : ViewModelBase, IDisposable
+    public class ImageContainerViewModel : ViewModelBase
     {
-        private readonly ISchedulerProvider _schedulerProvider;
-
         private IImageContainer _imageContainer;
-
-        public ImageContainerViewModel(
-            ViewModelActivator activator, 
-            ISchedulerProvider schedulerProvider) : base(activator)
-        {
-            _schedulerProvider = schedulerProvider;
-        }
 
         public string Name => _imageContainer.Name;
 
@@ -44,10 +33,6 @@ namespace SonOfPicasso.UI.ViewModels
 
             ApplicationViewModel =
                 applicationViewModel ?? throw new ArgumentNullException(nameof(applicationViewModel));
-        }
-
-        public void Dispose()
-        {
         }
     }
 }

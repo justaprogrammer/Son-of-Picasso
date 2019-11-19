@@ -3,7 +3,7 @@ using SonOfPicasso.UI.ViewModels.Abstract;
 
 namespace SonOfPicasso.UI.ViewModels
 {
-    public class TrayImageViewModel : ViewModelBase
+    public class TrayImageViewModel : ActivatableViewModelBase
     {
         private bool _pinned;
 

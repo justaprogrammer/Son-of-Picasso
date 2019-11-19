@@ -17,7 +17,7 @@ using SonOfPicasso.UI.ViewModels.Abstract;
 
 namespace SonOfPicasso.UI.ViewModels
 {
-    public class ApplicationViewModel : ViewModelBase, IDisposable
+    public class ApplicationViewModel : ActivatableViewModelBase, IDisposable
     {
         private readonly IFolderRulesManagementService _folderRulesManagementService;
         private readonly IImageContainerManagementService _imageContainerManagementService;
