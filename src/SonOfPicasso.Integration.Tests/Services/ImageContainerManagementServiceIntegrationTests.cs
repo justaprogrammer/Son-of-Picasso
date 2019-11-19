@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Autofac;
+using Castle.Components.DictionaryAdapter;
 using Dapper;
 using DynamicData;
 using DynamicData.Binding;
@@ -257,10 +260,25 @@ namespace SonOfPicasso.Integration.Tests.Services
         }
 
         [SkippableFact]
-        public void ShouldScanPicasaDatabase()
+        public async Task ShouldScanPicasaDatabase()
         {
             var variable = Environment.GetEnvironmentVariable("SonOfPicasso_IntegrationTest_PicasaDatabsePath");
             Skip.If(string.IsNullOrWhiteSpace(variable), "Skipped if database path not present");
+
+            var databaseReader = Container.Resolve<IDatabaseReader>();
+            databaseReader.Initialize(variable);
+            var tables = await databaseReader.GetTableNames().ToArray();
+
+            var list = new List<DataTable>();
+            foreach (var table in tables)
+            {
+                var dataTable = await databaseReader.GetDataTable(table);
+                list.Add(dataTable);
+            }
+
+            var dataTable1 = list[2];
+            var dataRowCollection = dataTable1.Rows;
+            var count = dataRowCollection.Count;
         }
     }
 }
