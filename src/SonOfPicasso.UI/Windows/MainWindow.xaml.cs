@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO.Abstractions;
 using System.Linq;
@@ -7,20 +6,21 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Forms;
 using DynamicData;
-using DynamicData.Binding;
 using ReactiveUI;
 using Serilog;
 using Serilog.Events;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
+using SonOfPicasso.UI.Extensions;
 using SonOfPicasso.UI.ViewModels;
 using SonOfPicasso.UI.ViewModels.FolderRules;
 using SonOfPicasso.UI.Windows.Dialogs;
-using SerilogMetrics;
+using MenuItem = System.Windows.Controls.MenuItem;
 using MessageBox = System.Windows.MessageBox;
 
 namespace SonOfPicasso.UI.Windows
@@ -31,24 +31,23 @@ namespace SonOfPicasso.UI.Windows
     public partial class MainWindow : ReactiveWindow<ApplicationViewModel>
     {
         private readonly Func<AddAlbumViewModel> _addAlbumViewModelFactory;
-        private readonly Func<FolderManagementWindow> _folderManagementWindowFactory;
-        private readonly Func<ManageFolderRulesViewModel> _folderManagementViewModelFactory;
         private readonly Func<AddAlbumWindow> _addAlbumWindowFactory;
         private readonly IEnvironmentService _environmentService;
         private readonly IFileSystem _fileSystem;
+        private readonly Func<ManageFolderRulesViewModel> _folderManagementViewModelFactory;
+        private readonly Func<FolderManagementWindow> _folderManagementWindowFactory;
         private readonly ILogger _logger;
         private readonly ISchedulerProvider _schedulerProvider;
-        private CollectionViewSource imageCollectionViewSource;
-        private CollectionViewSource imageContainersViewSource;
-        private CollectionViewSource albumImageContainersViewSource;
+        private readonly CollectionViewSource albumImageContainersViewSource;
+        private readonly CollectionViewSource imageCollectionViewSource;
+        private readonly CollectionViewSource imageContainersViewSource;
 
         public MainWindow(ILogger logger, IEnvironmentService environmentService, IFileSystem fileSystem,
-            ISchedulerProvider schedulerProvider, 
+            ISchedulerProvider schedulerProvider,
             Func<AddAlbumWindow> addAlbumWindowFactory,
             Func<AddAlbumViewModel> addAlbumViewModelFactory,
             Func<FolderManagementWindow> folderManagementWindowFactory,
-            Func<ManageFolderRulesViewModel> folderManagementViewModelFactory
-            )
+            Func<ManageFolderRulesViewModel> folderManagementViewModelFactory)
         {
             _logger = logger;
             _environmentService = environmentService;
@@ -69,7 +68,8 @@ namespace SonOfPicasso.UI.Windows
             {
                 imageCollectionViewSource.Source = ViewModel.Images;
 
-                var propertyGroupDescription = new PropertyGroupDescription(nameof(ImageViewModel.ImageContainerViewModel));
+                var propertyGroupDescription =
+                    new PropertyGroupDescription(nameof(ImageViewModel.ImageContainerViewModel));
 
                 imageCollectionViewSource.GroupDescriptions.Add(propertyGroupDescription);
                 imageCollectionViewSource.SortDescriptions.Add(new SortDescription(nameof(ImageViewModel.ContainerType),
@@ -82,11 +82,14 @@ namespace SonOfPicasso.UI.Windows
                 imageCollectionViewSource.IsLiveFilteringRequested = true;
                 imageCollectionViewSource.IsLiveGroupingRequested = true;
                 imageCollectionViewSource.IsLiveSortingRequested = true;
-                
+
                 imageContainersViewSource.Source = ViewModel.ImageContainers;
-                imageContainersViewSource.GroupDescriptions.Add(new PropertyGroupDescription(nameof(ImageContainerViewModel.ContainerType)));
-                imageContainersViewSource.GroupDescriptions.Add(new PropertyGroupDescription(nameof(ImageContainerViewModel.Year)));
-                imageContainersViewSource.SortDescriptions.Add(new SortDescription(nameof(ImageContainerViewModel.ContainerType),
+                imageContainersViewSource.GroupDescriptions.Add(
+                    new PropertyGroupDescription(nameof(ImageContainerViewModel.ContainerType)));
+                imageContainersViewSource.GroupDescriptions.Add(
+                    new PropertyGroupDescription(nameof(ImageContainerViewModel.Year)));
+                imageContainersViewSource.SortDescriptions.Add(
+                    new SortDescription(nameof(ImageContainerViewModel.ContainerType),
                     ListSortDirection.Ascending));
                 imageContainersViewSource.SortDescriptions.Add(
                     new SortDescription(nameof(ImageContainerViewModel.Date), ListSortDirection.Descending));
@@ -104,6 +107,27 @@ namespace SonOfPicasso.UI.Windows
                 albumImageContainersViewSource.IsLiveFilteringRequested = true;
                 albumImageContainersViewSource.IsLiveGroupingRequested = true;
                 albumImageContainersViewSource.IsLiveSortingRequested = true;
+
+                ImagesListScrollViewer = ImagesList.FindVisualChildren<ScrollViewer>().First();
+                ContainersListScrollViewer = ContainersList.FindVisualChildren<ScrollViewer>().First();
+
+                ImagesListScrollViewer.WhenAny<ScrollViewer, (double verticalOffset, double viewportHeight), double, double>(scrollViewer => scrollViewer.VerticalOffset,
+                    viewer => viewer.ViewportHeight, (observedChange1, observedChanged2) => (observedChange1.Value, observedChanged2.Value))
+                    .Subscribe(tuple =>
+                    {
+                        var (verticalOffset, viewportHeight) = tuple;
+                        _logger.Verbose("ImageListScrollView {Offset} {Height}", verticalOffset, viewportHeight);
+                    })
+                    .DisposeWith(d);
+
+                ContainersListScrollViewer.WhenAny<ScrollViewer, (double verticalOffset, double viewportHeight), double, double>(scrollViewer => scrollViewer.VerticalOffset,
+                    viewer => viewer.ViewportHeight, (observedChange1, observedChanged2) => (observedChange1.Value, observedChanged2.Value))
+                    .Subscribe(tuple =>
+                    {
+                        var (verticalOffset, viewportHeight) = tuple;
+                        _logger.Verbose("ContainersListScrollViewer {Offset} {Height}", verticalOffset, viewportHeight);
+                    })
+                    .DisposeWith(d);
 
                 this.BindCommand(ViewModel,
                         model => model.AddFolder,
@@ -161,9 +185,7 @@ namespace SonOfPicasso.UI.Windows
                     .Subscribe(imageViewModels =>
                     {
                         foreach (var imageViewModel in imageViewModels)
-                        {
                             ImagesList.SelectedItems.Remove(imageViewModel);
-                        }
                     })
                     .DisposeWith(d);
 
@@ -181,9 +203,7 @@ namespace SonOfPicasso.UI.Windows
                     .Subscribe(trayImageViewModels =>
                     {
                         foreach (var trayImageViewModel in trayImageViewModels)
-                        {
                             TrayImagesList.SelectedItems.Remove(trayImageViewModel);
-                        }
                     })
                     .DisposeWith(d);
 
@@ -229,9 +249,11 @@ namespace SonOfPicasso.UI.Windows
                 {
                     return Observable.Defer(() =>
                     {
-                        var messageBoxResult = MessageBox.Show("This will clear items in the tray. Are you sure?", "Confirmation", MessageBoxButton.YesNo);
+                        var messageBoxResult = MessageBox.Show(
+                            "This will clear items in the tray. Are you sure?",
+                            "Confirmation", MessageBoxButton.YesNo);
                         context.SetOutput(messageBoxResult == MessageBoxResult.Yes);
-                        
+
                         return Observable.Return(Unit.Default);
                     }).SubscribeOn(_schedulerProvider.MainThreadScheduler);
                 }).DisposeWith(d);
@@ -243,7 +265,8 @@ namespace SonOfPicasso.UI.Windows
                             var folderManagementWindow = _folderManagementWindowFactory();
                             var folderManagementViewModel = _folderManagementViewModelFactory();
 
-                            using (_logger.BeginTimedOperation("Initializing FolderManagementViewModel", level: LogEventLevel.Debug))
+                            using (_logger.BeginTimedOperation("Initializing FolderManagementViewModel",
+                                level: LogEventLevel.Debug))
                             {
                                 await folderManagementViewModel.Initialize();
                             }
@@ -266,7 +289,8 @@ namespace SonOfPicasso.UI.Windows
                         var deletedCount = context.Input.DeletedImagePaths.Length;
                         var imagesString = deletedCount == 0 ? "image" : "images";
 
-                        var messageBoxResult = MessageBox.Show($"This action will remove {deletedCount} {imagesString} from the database. Are you sure?",
+                        var messageBoxResult = MessageBox.Show(
+                            $"This action will remove {deletedCount} {imagesString} from the database. Are you sure?",
                             "Confirmation", MessageBoxButton.YesNo);
 
                         context.SetOutput(messageBoxResult == MessageBoxResult.Yes);
@@ -277,13 +301,20 @@ namespace SonOfPicasso.UI.Windows
             });
         }
 
+        public ScrollViewer ContainersListScrollViewer { get; set; }
+
+        public ScrollViewer  ImagesListScrollViewer { get; set; }
+
         private void AlbumButton_AddImagesToAlbum_OnClick(object sender, RoutedEventArgs e)
         {
-            var menuItem = (System.Windows.Controls.MenuItem)sender;
+            var menuItem = (MenuItem) sender;
             var imageContainerViewModel = (ImageContainerViewModel) menuItem.DataContext;
 
-            var viewModelSelectedTrayImages = ViewModel.SelectedTrayImages.Any() ? ViewModel.SelectedTrayImages : ViewModel.TrayImages;
-            var imageViewModels = viewModelSelectedTrayImages.Select(model => model.Image).ToList();
+            var viewModelSelectedTrayImages =
+                ViewModel.SelectedTrayImages.Any() ? ViewModel.SelectedTrayImages : ViewModel.TrayImages;
+
+            var imageViewModels = 
+                viewModelSelectedTrayImages.Select(model => model.Image).ToList();
 
             ViewModel.AddImagesToAlbum.Execute((imageViewModels.AsEnumerable(), imageContainerViewModel))
                 .Subscribe();
@@ -291,8 +322,11 @@ namespace SonOfPicasso.UI.Windows
 
         private void AlbumButton_AddAlbum_OnClick(object sender, RoutedEventArgs e)
         {
-            var viewModelSelectedTrayImages = ViewModel.SelectedTrayImages.Any() ? ViewModel.SelectedTrayImages : ViewModel.TrayImages;
-            var imageViewModels = viewModelSelectedTrayImages.Select(model => model.Image).ToList();
+            var viewModelSelectedTrayImages =
+                ViewModel.SelectedTrayImages.Any() ? ViewModel.SelectedTrayImages : ViewModel.TrayImages;
+
+            var imageViewModels = 
+                viewModelSelectedTrayImages.Select(model => model.Image).ToList();
 
             ViewModel.NewAlbumWithImages.Execute(imageViewModels)
                 .Subscribe();

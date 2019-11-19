@@ -45,7 +45,7 @@ namespace SonOfPicasso.Core.Services
         {
             return Observable.Defer(() =>
                 {
-                    _logger.Debug("ScanFolder {Path}", path);
+                    _logger.Verbose("ScanFolder {Path}", path);
 
                     using var unitOfWork = _unitOfWorkFactory();
 
@@ -216,7 +216,7 @@ namespace SonOfPicasso.Core.Services
                     var directory = _fileSystem.Path.GetDirectoryName(path);
                     lock (_writeLock)
                     {
-                        _logger.Debug("AddImage {Path}", path);
+                        _logger.Verbose("AddImage {Path}", path);
 
                         using var unitOfWork = _unitOfWorkFactory();
                         using var transaction = unitOfWork.BeginTransaction();
@@ -408,7 +408,7 @@ namespace SonOfPicasso.Core.Services
 
                     lock (_writeLock)
                     {
-                        _logger.Debug("AddOrUpdateImage {Path}", path);
+                        _logger.Verbose("AddOrUpdateImage {Path}", path);
 
                         using var unitOfWork = _unitOfWorkFactory();
                         using var transaction = unitOfWork.BeginTransaction();
@@ -498,7 +498,7 @@ namespace SonOfPicasso.Core.Services
                 {
                     lock (_writeLock)
                     {
-                        _logger.Debug("ApplyRuleChanges");
+                        _logger.Verbose("ApplyRuleChanges");
 
                         using var unitOfWork = _unitOfWorkFactory();
                         using var transaction = unitOfWork.BeginTransaction();
