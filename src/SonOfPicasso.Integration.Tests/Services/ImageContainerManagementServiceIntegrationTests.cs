@@ -206,6 +206,8 @@ namespace SonOfPicasso.Integration.Tests.Services
             await imageContainerManagementService.Start();
             await imageContainerManagementService.ResetRules(new[]
                 {new FolderRule {Path = ImagesPath, Action = FolderRuleActionEnum.Always}});
+            
+            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(1));
 
             var imageCount = 1;
             var generateImagesAsync = await GenerateImagesAsync(imageCount);
