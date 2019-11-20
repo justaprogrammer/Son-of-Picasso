@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using Bogus;
 using ExifLibrary;
+using SonOfPicasso.Core.Model;
 using SonOfPicasso.Data.Model;
 using SonOfPicasso.Testing.Common.Extensions;
 
@@ -11,8 +11,7 @@ namespace SonOfPicasso.Testing.Common
 {
     public static class Fakers
     {
-        public static Faker<ExifData> ExifDataFaker => LazyExifDataFaker.Value;
-        private static readonly Lazy<Faker<ExifData>> LazyExifDataFaker = new Lazy<Faker<ExifData>>(() => 
+        private static readonly Lazy<Faker<ExifData>> LazyExifDataFaker = new Lazy<Faker<ExifData>>(() =>
             new Faker<ExifData>()
                 .RuleFor(data => data.Id, faker => faker.Random.Int(1))
                 .RuleFor(data => data.Make, faker => faker.Random.Words())
@@ -80,8 +79,7 @@ namespace SonOfPicasso.Testing.Common
                 .RuleFor(data => data.InteroperabilityVersion, faker => faker.Random.Short().ToString())
                 .StrictMode(true));
 
-        public static Faker<Folder> FolderFaker => LazyFolderFaker.Value;
-        private static readonly  Lazy<Faker<Folder>> LazyFolderFaker = new Lazy<Faker<Folder>>(() => 
+        private static readonly Lazy<Faker<Folder>> LazyFolderFaker = new Lazy<Faker<Folder>>(() =>
             new Faker<Folder>()
                 .RuleFor(folder => folder.Id, faker => faker.Random.Int(0))
                 .RuleFor(folder => folder.Date, faker => faker.Date.Past().Date)
@@ -106,16 +104,14 @@ namespace SonOfPicasso.Testing.Common
                                 return image;
                             });
                         })
-                    ));
-        
-        public static Faker<Album> AlbumFaker => LazyAlbumFaker.Value;
-        private static readonly  Lazy<Faker<Album>> LazyAlbumFaker = new Lazy<Faker<Album>>(() => 
+                ));
+
+        private static readonly Lazy<Faker<Album>> LazyAlbumFaker = new Lazy<Faker<Album>>(() =>
             new Faker<Album>()
                 .RuleFor(album => album.Name, faker => faker.Random.Words(3))
                 .StrictMode(true));
 
-        public static Faker<Image> ImageFaker => LazyImageFaker.Value;
-        private static readonly Lazy<Faker<Image>> LazyImageFaker = new Lazy<Faker<Image>>(() => 
+        private static readonly Lazy<Faker<Image>> LazyImageFaker = new Lazy<Faker<Image>>(() =>
             new Faker<Image>()
                 .RuleFor(image => image.Id, faker => faker.Random.Int(0))
                 .RuleFor(image => image.ExifData, () => ExifDataFaker)
@@ -123,7 +119,8 @@ namespace SonOfPicasso.Testing.Common
                 .RuleFor(image => image.Folder, () => null)
                 .RuleFor(image => image.FolderId, (faker, image) => 0)
                 .RuleFor(image => image.AlbumImages, () => new List<AlbumImage>())
-                .RuleFor(image => image.Path, (faker, image) => Path.Join(faker.System.DirectoryPathWindows(), faker.System.FileName("jpg")))
+                .RuleFor(image => image.Path,
+                    (faker, image) => Path.Join(faker.System.DirectoryPathWindows(), faker.System.FileName("jpg")))
                 .StrictMode(true)
                 .RuleSet("withFolder", set => set.RuleFor(image => image.Id, faker => faker.Random.Int(0))
                     .RuleFor(image => image.Folder, (faker, image) =>
@@ -133,15 +130,56 @@ namespace SonOfPicasso.Testing.Common
                         return folder;
                     })
                     .RuleFor(image => image.FolderId, (faker, image) => image.Folder.Id)
-                    .RuleFor(image => image.Path, (faker, image) => Path.Join(image.Folder.Path, faker.System.FileName("jpg"))))
-            );
+                    .RuleFor(image => image.Path,
+                        (faker, image) => Path.Join(image.Folder.Path, faker.System.FileName("jpg"))))
+        );
 
-        public static Faker<FolderRule> FolderRuleFaker => LazyFolderRuleFaker.Value;
-        private static readonly Lazy<Faker<FolderRule>> LazyFolderRuleFaker = new Lazy<Faker<FolderRule>>(() => 
+        private static readonly Lazy<Faker<ImageRef>> LazyImageRefFaker = new Lazy<Faker<ImageRef>>(() =>
+            new Faker<ImageRef>()
+                .RuleFor(image => image.Id, faker => faker.Random.Int(0))
+                .RuleFor(image => image.Key, faker => faker.Random.String())
+                .RuleFor(image => image.ImagePath, faker => faker.System.FilePathWindows(ext: "jpg"))
+                .RuleFor(image => image.CreationTime, faker => faker.Date.Recent())
+                .RuleFor(image => image.LastWriteTime, faker => faker.Date.Recent())
+                .RuleFor(image => image.ExifDate, faker => faker.Date.Recent())
+                .RuleFor(image => image.ContainerKey, faker => faker.Random.String())
+                .RuleFor(image => image.ContainerType, faker => faker.PickRandom<ImageContainerTypeEnum>())
+                .RuleFor(image => image.ContainerDate, faker => faker.Date.Recent().Date)
+                .StrictMode(true)
+        );
+
+        private static readonly Lazy<Faker<FolderRule>> LazyFolderRuleFaker = new Lazy<Faker<FolderRule>>(() =>
             new Faker<FolderRule>()
                 .RuleFor(rule => rule.Id, 0)
                 .RuleFor(rule => rule.Path, faker => faker.System.DirectoryPathWindows())
                 .RuleFor(rule => rule.Action, faker => faker.PickRandom<FolderRuleActionEnum>())
                 .StrictMode(true));
+
+        public static Faker<ExifData> ExifDataFaker => LazyExifDataFaker.Value;
+
+        public static Faker<Folder> FolderFaker => LazyFolderFaker.Value;
+
+        public static Faker<Album> AlbumFaker => LazyAlbumFaker.Value;
+
+        public static Faker<Image> ImageFaker => LazyImageFaker.Value;
+
+        public static Faker<ImageRef> ImageRefFaker => LazyImageRefFaker.Value;
+
+        public static Faker<FolderRule> FolderRuleFaker => LazyFolderRuleFaker.Value;
+
+        public static Faker<ImageRef> ImageRefFakerFor(string path)
+        {
+            return new Faker<ImageRef>()
+                .RuleFor(image => image.Id, faker => faker.Random.Int(0))
+                .RuleFor(image => image.Key, faker => faker.Random.String())
+                .RuleFor(image => image.ImagePath, faker => path)
+                .RuleFor(image => image.CreationTime, faker => faker.Date.Recent())
+                .RuleFor(image => image.LastWriteTime, faker => faker.Date.Recent())
+                .RuleFor(image => image.ExifDate, faker => faker.Date.Recent())
+                .RuleFor(image => image.ContainerKey, faker => faker.Random.String())
+                .RuleFor(image => image.ContainerType, faker => faker.PickRandom<ImageContainerTypeEnum>())
+                .RuleFor(image => image.ContainerDate, faker => faker.Date.Recent().Date)
+                .StrictMode(true);
+        }
     }
 }
