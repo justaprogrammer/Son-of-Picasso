@@ -4,6 +4,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Autofac;
 using Dapper;
+using DynamicData;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using SonOfPicasso.Core.Interfaces;
@@ -56,7 +57,7 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             var imageContainerOperationService = Container.Resolve<ImageContainerOperationService>();
             var imageContainers = await imageContainerOperationService
-                .ScanFolder(ImagesPath)
+                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath))
                 .ToArray();
 
             imageContainers.Should().HaveCount(directoryCount);
@@ -125,7 +126,7 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             var imageContainerOperationService = Container.Resolve<ImageContainerOperationService>();
             var imageContainers = await imageContainerOperationService
-                .ScanFolder(ImagesPath)
+                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath))
                 .ToArray();
 
             imageContainers.Should().HaveCount(directoryCount);
@@ -205,7 +206,7 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             var imageContainerOperationService = Container.Resolve<ImageContainerOperationService>();
             var imageContainers = await imageContainerOperationService
-                .ScanFolder(ImagesPath)
+                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath))
                 .ToArray();
 
             imageContainers.Should().HaveCount(directoryCount);
@@ -287,7 +288,7 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             var imageContainerOperationService = Container.Resolve<ImageContainerOperationService>();
             var imageContainers = await imageContainerOperationService
-                .ScanFolder(ImagesPath)
+                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath))
                 .ToArray();
 
             imageContainers.Should().HaveCount(directoryCount);
@@ -383,7 +384,7 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             var imageContainerOperationService = Container.Resolve<ImageContainerOperationService>();
             var imageContainers = await imageContainerOperationService
-                .ScanFolder(ImagesPath)
+                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath))
                 .ToArray();
 
             imageContainers.Should().HaveCount(directoryCount);
@@ -466,7 +467,7 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             var imageContainerOperationService = Container.Resolve<ImageContainerOperationService>();
             var imageContainers = await imageContainerOperationService
-                .ScanFolder(ImagesPath)
+                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath))
                 .ToArray();
 
             imageContainers.Should().HaveCount(directoryCount);
@@ -558,7 +559,7 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             var imageContainerOperationService = Container.Resolve<ImageContainerOperationService>();
             var imageContainers = await imageContainerOperationService
-                .ScanFolder(ImagesPath)
+                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath))
                 .ToArray();
 
             imageContainers.Should().HaveCount(directoryCount);
@@ -642,7 +643,7 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             var imageContainerOperationService = Container.Resolve<ImageContainerOperationService>();
             var imageContainers = await imageContainerOperationService
-                .ScanFolder(ImagesPath)
+                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath))
                 .ToArray();
 
             var imageRefs = Faker
@@ -718,7 +719,7 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             var imageContainerOperationService = Container.Resolve<ImageContainerOperationService>();
             var imageContainers = await imageContainerOperationService
-                .ScanFolder(ImagesPath)
+                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath))
                 .ToArray();
 
             var imageRefs = Faker
@@ -779,7 +780,7 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             var imageContainerOperationService = Container.Resolve<ImageContainerOperationService>();
             var imageContainers = await imageContainerOperationService
-                .ScanFolder(ImagesPath)
+                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath))
                 .ToArray();
 
             imageContainers.Should().HaveCount(directoryCount);
@@ -811,7 +812,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             imageCount += addImages;
 
             await imageContainerOperationService
-                .ScanFolder(ImagesPath)
+                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath))
                 .ToArray();
 
             directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
