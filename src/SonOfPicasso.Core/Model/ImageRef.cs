@@ -26,14 +26,18 @@ namespace SonOfPicasso.Core.Model
             ContainerDate = containerDate;
         }
 
-        public int Id { get; }
-        public string Key { get; }
-        public string ImagePath { get; }
-        public DateTime CreationTime { get; }
-        public DateTime LastWriteTime { get; }
-        public DateTime ExifDate { get; }
-        public string ContainerKey { get; }
-        public ImageContainerTypeEnum ContainerType { get; }
-        public DateTime ContainerDate { get; }
+        public ImageRef()
+        {
+        }
+
+        public int Id { get; set; }
+        public string Key { get; set;}
+        public string ImagePath { get; set;}
+        public DateTime CreationTime { get;set; }
+        public DateTime LastWriteTime { get; set;}
+        public DateTime ExifDate { get; set;}
+        public string ContainerKey { get; set;}
+        public ImageContainerTypeEnum ContainerType { get; set;}
+        public DateTime ContainerDate { get; set;}
     }
 }

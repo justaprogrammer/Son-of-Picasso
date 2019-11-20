@@ -11,6 +11,7 @@ using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Model;
 using SonOfPicasso.Core.Services;
 using SonOfPicasso.Data.Model;
+using SonOfPicasso.Testing.Common;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -773,14 +774,16 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             var imageCount = 5;
             var addImages = 5;
-            await GenerateImagesAsync(imageCount);
+            var generatedImages = await GenerateImagesAsync(imageCount);
 
             var imagesDirectoryInfo = FileSystem.DirectoryInfo.FromDirectoryName(ImagesPath);
             var directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
 
+            var folderImageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
+
             var imageContainerOperationService = Container.Resolve<ImageContainerOperationService>();
             var imageContainers = await imageContainerOperationService
-                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath))
+                .ScanFolder(ImagesPath, folderImageRefCache)
                 .ToArray();
 
             imageContainers.Should().HaveCount(directoryCount);
@@ -808,11 +811,20 @@ namespace SonOfPicasso.Integration.Tests.Services
                 .Should()
                 .Be(directoryCount);
 
+            var imageRefs = generatedImages.SelectMany(pair => pair.Value)
+                .Select(s => Fakers.ImageRefFakerFor(s).Generate())
+                .ToArray();
+
+            foreach (var imageRef in imageRefs)
+            {
+                folderImageRefCache.AddOrUpdate(imageRef);
+            }
+
             await GenerateImagesAsync(addImages);
             imageCount += addImages;
 
             await imageContainerOperationService
-                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath))
+                .ScanFolder(ImagesPath, folderImageRefCache)
                 .ToArray();
 
             directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
