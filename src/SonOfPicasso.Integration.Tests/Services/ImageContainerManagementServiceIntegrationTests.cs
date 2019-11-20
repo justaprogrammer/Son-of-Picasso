@@ -253,5 +253,49 @@ namespace SonOfPicasso.Integration.Tests.Services
                 imageRefs.Should().HaveCount(imageCount);
             }
         }
+
+        [SkippableFact]
+        public async Task ShouldScanFolderWithRealImages()
+        {
+            var environmentVariable = Environment.GetEnvironmentVariable("SonOfPicasso_IntegrationTests_RealImagesFolder");
+            Skip.If(string.IsNullOrWhiteSpace(environmentVariable), "RealImagesFolder environment variable not provided");
+
+            await InitializeDataContextAsync();
+
+            var imageContainerManagementService = Container.Resolve<ImageContainerManagementService>();
+            imageContainerManagementService.ImageContainerCache
+                .Connect()
+                .Subscribe(set =>
+                {
+                    var names = set.Select(change => change.Current.Name)
+                        .ToArray();
+
+                    Logger.Verbose("ImageContainerCache {@Names} Adds:{Adds} Removes:{Removes} Updates:{Updates}",
+                        names, set.Adds, set.Removes, set.Updates);
+                });
+
+            imageContainerManagementService.FolderImageRefCache
+                .Connect()
+                .Subscribe(set =>
+                {
+                    var distinctContainers = set.Select(change => change.Current.ContainerKey)
+                        .Distinct()
+                        .Count();
+
+                    Logger.Verbose("FolderImageRefCache Containers:{ContainerCount} Adds:{Adds} Removes:{Removes} Updates:{Updates}", 
+                        distinctContainers, set.Adds, set.Removes, set.Updates);
+                });
+
+            imageContainerManagementService.ScanFolder(environmentVariable)
+                .Subscribe(container =>
+                {
+                    Logger.Verbose("Scan Folder Container Result {Name}", container.Name);
+                }, () =>
+                {
+                    Set();
+                });
+
+            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(20));
+        }
     }
 }

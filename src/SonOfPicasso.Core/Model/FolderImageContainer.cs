@@ -15,7 +15,7 @@ namespace SonOfPicasso.Core.Model
             Name = fileSystem.DirectoryInfo.FromDirectoryName(folder.Path).Name;
             Date = folder.Date;
             Year = folder.Date.Year;
-            ImageRefs = folder.Images.Select(image => new ImageRef(image, this)).ToArray();
+            ImageRefs = folder.Images.Select(image => ImageRef.CreateImageRef(image, this)).ToArray();
         }
 
         public int Id { get; }

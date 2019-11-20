@@ -5,18 +5,12 @@ namespace SonOfPicasso.Core.Model
 {
     public class ImageRef
     {
-        public ImageRef(Image image, IImageContainer imageContainer)
-            : this(image.Id, $"{imageContainer.Key}:Image:{image.Id}", image.Path, image.CreationTime,
-                image.LastWriteTime, image.ExifData.DateTime, imageContainer.Key, imageContainer.ContainerType,
-                imageContainer.Date)
-        {
-        }
+        private string _key;
 
-        public ImageRef(int id, string key, string imagePath, DateTime creationTime, DateTime lastWriteTime,
+        public ImageRef(int id, string imagePath, DateTime creationTime, DateTime lastWriteTime,
             DateTime exifDate, string containerKey, ImageContainerTypeEnum containerType, DateTime containerDate)
         {
             Id = id;
-            Key = key;
             ImagePath = imagePath;
             CreationTime = creationTime;
             LastWriteTime = lastWriteTime;
@@ -26,14 +20,25 @@ namespace SonOfPicasso.Core.Model
             ContainerDate = containerDate;
         }
 
-        public int Id { get; }
-        public string Key { get; }
-        public string ImagePath { get; }
-        public DateTime CreationTime { get; }
-        public DateTime LastWriteTime { get; }
-        public DateTime ExifDate { get; }
-        public string ContainerKey { get; }
-        public ImageContainerTypeEnum ContainerType { get; }
-        public DateTime ContainerDate { get; }
+        public ImageRef()
+        {
+        }
+
+        public int Id { get; set; }
+        public string Key => _key ??= $"{ContainerKey}:Image:{Id}";
+        public string ImagePath { get; set; }
+        public DateTime CreationTime { get; set; }
+        public DateTime LastWriteTime { get; set; }
+        public DateTime ExifDate { get; set; }
+        public string ContainerKey { get; set; }
+        public ImageContainerTypeEnum ContainerType { get; set; }
+        public DateTime ContainerDate { get; set; }
+
+        public static ImageRef CreateImageRef(Image image, IImageContainer imageContainer)
+        {
+            return new ImageRef(image.Id, image.Path, image.CreationTime,
+                image.LastWriteTime, image.ExifData.DateTime, imageContainer.Key, imageContainer.ContainerType,
+                imageContainer.Date);
+        }
     }
 }
