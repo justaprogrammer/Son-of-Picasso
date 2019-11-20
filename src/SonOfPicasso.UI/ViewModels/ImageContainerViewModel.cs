@@ -11,7 +11,7 @@ namespace SonOfPicasso.UI.ViewModels
 
         public string Name => _imageContainer.Name;
 
-        public string ContainerId => _imageContainer.Key;
+        public string ContainerKey => _imageContainer.Key;
 
         public ImageContainerTypeEnum ContainerType => _imageContainer.ContainerType;
         public int ContainerTypeId => _imageContainer.Id;

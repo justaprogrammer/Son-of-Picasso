@@ -9,12 +9,14 @@
                            xmlns:converters="clr-namespace:SonOfPicasso.UI.Converters"
                            xmlns:windows="clr-namespace:SonOfPicasso.UI.Windows"
                            mc:Ignorable="d"
-                           Title="MainWindow" Height="450" Width="800">
+                           Title="MainWindow" Height="450" Width="800"
+                           Name="Window">
 
     <Window.Resources>
         <CollectionViewSource x:Key="ImageContainersViewSource" />
         <CollectionViewSource x:Key="AlbumImageContainersViewSource" />
         <CollectionViewSource x:Key="ImagesCollectionViewSource" />
+        <converters:MultiValueEqualityConverter x:Key="MultiValueEqualityConverter"/>
     </Window.Resources>
     <DockPanel>
         <Menu DockPanel.Dock="Top" Width="Auto" Height="20">
@@ -57,6 +59,24 @@
                       VirtualizingStackPanel.VirtualizationMode="Recycling"
                       VirtualizingStackPanel.ScrollUnit="Pixel">
 
+                <ListView.Resources>
+                    <Style x:Key="BorderStyle" TargetType="Border">
+                        <Setter Property="BorderThickness" Value="0"></Setter>
+                        <Setter Property="BorderBrush" Value="Blue"></Setter>
+                        <Style.Triggers>
+                            <DataTrigger Value="True">
+                                <DataTrigger.Binding>
+                                    <MultiBinding Converter="{StaticResource MultiValueEqualityConverter}">
+                                        <Binding ElementName="Window" Path="ViewModel.VisibleItemContainerKey" />
+                                        <Binding Path="ContainerKey"></Binding>
+                                    </MultiBinding>
+                                </DataTrigger.Binding>
+                                <Setter Property="BorderThickness" Value="1"></Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListView.Resources>
+
                 <ListView.GroupStyle>
                     <GroupStyle HidesIfEmpty="False">
                         <GroupStyle.ContainerStyle>
@@ -84,10 +104,12 @@
 
                 <ListView.ItemTemplate>
                     <DataTemplate DataType="viewModels:ImageContainerViewModel">
-                        <StackPanel Orientation="Horizontal">
-                            <Label Content="{Binding Name}"></Label>
-                            <Label Content="{Binding Count}" ContentStringFormat="({0})" />
-                        </StackPanel>
+                        <Border Style="{StaticResource  BorderStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="{Binding Name}" />
+                                <Label Content="{Binding Count}" ContentStringFormat="({0})" />
+                            </StackPanel>
+                        </Border>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
@@ -105,7 +127,7 @@
                       ItemsSource="{Binding Source={StaticResource ImagesCollectionViewSource}}"
                       VirtualizingStackPanel.IsVirtualizing="True"
                       VirtualizingStackPanel.IsVirtualizingWhenGrouping="True"
-                      VirtualizingStackPanel.VirtualizationMode="Recycling"
+                      VirtualizingStackPanel.VirtualizationMode="Standard"
                       VirtualizingStackPanel.ScrollUnit="Pixel"
                       SelectionMode="Extended">
 
@@ -128,8 +150,9 @@
 
                         <GroupStyle.HeaderTemplate>
                             <DataTemplate DataType="CollectionViewGroup">
-                                <StackPanel DataContext="{Binding Path=Name}" d:DataContext="{d:DesignInstance viewModels:ImageContainerViewModel}">
-                                    <Label Name="FolderName" Content="{Binding Path=Name}"></Label>
+                                <StackPanel DataContext="{Binding Path=Name}"
+                                            d:DataContext="{d:DesignInstance viewModels:ImageContainerViewModel}">
+                                    <Label Name="FolderName" Content="{Binding Path=Name}" />
                                 </StackPanel>
                             </DataTemplate>
                         </GroupStyle.HeaderTemplate>
@@ -138,7 +161,7 @@
 
                 <ListView.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <WrapPanel/>
+                        <WrapPanel />
                     </ItemsPanelTemplate>
                 </ListView.ItemsPanel>
 
@@ -146,7 +169,7 @@
                     <DataTemplate DataType="viewModels:ImageViewModel">
                         <StackPanel>
                             <Label Name="ImageLabel" Content="{Binding Path}" />
-                            <Image Name="ImageBitmap" Height="250" Width="250" Stretch="Fill" Source="{Binding Image}"/>
+                            <Image Name="ImageBitmap" Height="250" Width="250" Stretch="Fill" Source="{Binding Image}" />
                         </StackPanel>
                     </DataTemplate>
                 </ListView.ItemTemplate>
@@ -188,38 +211,37 @@
                                 <d:Style.DataContext>
                                     <x:Type Type="viewModels:ImageContainerViewModel" />
                                 </d:Style.DataContext>
-                                <EventSetter Event="Click" Handler="AlbumButton_AddImagesToAlbum_OnClick"></EventSetter>
+                                <EventSetter Event="Click" Handler="AlbumButton_AddImagesToAlbum_OnClick" />
                             </Style>
-                            
-                            <Style x:Key="OtherMenuItemStyle" TargetType="MenuItem">
-                            </Style>
+
+                            <Style x:Key="OtherMenuItemStyle" TargetType="MenuItem" />
 
                             <Style x:Key="SeparatorMenuItemStyle" TargetType="Separator" />
 
-                            <converters:AlbumContextMenuStyleSelector 
-                                        x:Key="MenuItemStyleConverter" 
-                                        AlbumModelStyle="{StaticResource AlbumMenuItemStyle}"
-                                        OtherMenuItemStyle="{StaticResource OtherMenuItemStyle}"
-                                        SeparatorMenuItemStyle="{StaticResource SeparatorMenuItemStyle}"
-                                        />
+                            <converters:AlbumContextMenuStyleSelector
+                                x:Key="MenuItemStyleConverter"
+                                AlbumModelStyle="{StaticResource AlbumMenuItemStyle}"
+                                OtherMenuItemStyle="{StaticResource OtherMenuItemStyle}"
+                                SeparatorMenuItemStyle="{StaticResource SeparatorMenuItemStyle}" />
                         </Button.Resources>
                         <Button.ContextMenu>
                             <ContextMenu ItemContainerStyleSelector="{StaticResource MenuItemStyleConverter}">
                                 <ContextMenu.ItemsSource>
                                     <CompositeCollection>
-                                        <MenuItem Header="Add Album"  Click="AlbumButton_AddAlbum_OnClick"/>
+                                        <MenuItem Header="Add Album" Click="AlbumButton_AddAlbum_OnClick" />
                                         <Separator />
-                                        <CollectionContainer Collection="{Binding Source={StaticResource AlbumImageContainersViewSource}}" />
+                                        <CollectionContainer
+                                            Collection="{Binding Source={StaticResource AlbumImageContainersViewSource}}" />
                                     </CompositeCollection>
                                 </ContextMenu.ItemsSource>
                                 <ContextMenu.ItemTemplate>
                                     <DataTemplate DataType="viewModels:ImageContainerViewModel">
-                                        <TextBlock Text="{Binding Name}"/>
+                                        <TextBlock Text="{Binding Name}" />
                                     </DataTemplate>
                                 </ContextMenu.ItemTemplate>
                             </ContextMenu>
                         </Button.ContextMenu>
-                        
+
                     </Button>
                 </DockPanel>
             </Grid>

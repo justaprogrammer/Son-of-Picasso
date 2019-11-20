@@ -40,6 +40,8 @@ namespace SonOfPicasso.UI.ViewModels
         private readonly Subject<IEnumerable<TrayImageViewModel>> _unselectTrayImageSubject =
             new Subject<IEnumerable<TrayImageViewModel>>();
 
+        private string _visibleItemContainerKey;
+
         public ApplicationViewModel(ISchedulerProvider schedulerProvider,
             IImageContainerManagementService imageContainerManagementService,
             IFolderRulesManagementService folderRulesManagementService,
@@ -220,6 +222,12 @@ namespace SonOfPicasso.UI.ViewModels
         public ReactiveCommand<Unit, Unit> AddTrayItemsToAlbum { get; }
 
         public ReactiveCommand<Unit, Unit> FolderManager { get; }
+
+        public string VisibleItemContainerKey
+        {
+            get => _visibleItemContainerKey;
+            set => this.RaiseAndSetIfChanged(ref _visibleItemContainerKey, value);
+        }
 
         public void Dispose()
         {
