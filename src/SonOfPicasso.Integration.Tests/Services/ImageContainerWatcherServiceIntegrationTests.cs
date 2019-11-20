@@ -47,9 +47,13 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
             var imageContainerWatcherService = Container.Resolve<ImageContainerWatcherService>();
-            imageContainerWatcherService.Start(imageRefCache).Subscribe(unit => { }, () => { AutoResetEvent.Set(); });
+            imageContainerWatcherService.Start(imageRefCache)
+                .Subscribe(unit => { }, () =>
+                {
+                    AutoResetEvent.Set();
+                });
 
-            WaitOne();
+            WaitOne(TimeSpan.FromSeconds(2));
         }
 
         [Fact]
@@ -78,6 +82,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             });
 
             await imageContainerWatcherService.Start(imageRefCache);
+            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(3));
 
             await GenerateImagesAsync(1);
 
@@ -114,6 +119,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             });
 
             await imageContainerWatcherService.Start(imageRefCache);
+            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(3));
 
             var generatedImages = await GenerateImagesAsync(1);
             var path = generatedImages.First().Value.First();
@@ -164,6 +170,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             });
 
             await imageContainerWatcherService.Start(imageRefCache);
+            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(3));
 
             var generatedImages2 = await GenerateImagesAsync(1);
 
@@ -203,7 +210,6 @@ namespace SonOfPicasso.Integration.Tests.Services
             });
 
             await imageContainerWatcherService.Start(imageRefCache);
-
             AutoResetEvent.WaitOne(TimeSpan.FromSeconds(3));
 
             Logger.Verbose("Delete Path {Path}", path);
@@ -245,8 +251,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             });
 
             await imageContainerWatcherService.Start(imageRefCache);
-
-            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(3));
+            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(1));
 
             Logger.Verbose("Delete Path {Path}", path);
             FileSystem.File.Delete(path);
@@ -286,7 +291,6 @@ namespace SonOfPicasso.Integration.Tests.Services
             });
 
             await imageContainerWatcherService.Start(imageRefCache);
-
             AutoResetEvent.WaitOne(TimeSpan.FromSeconds(1));
 
             var movedTo = Path.Combine(generatedImages.First().Key, "a" + FileSystem.Path.GetFileName(imagePath));
@@ -328,7 +332,6 @@ namespace SonOfPicasso.Integration.Tests.Services
             });
 
             await imageContainerWatcherService.Start(imageRefCache);
-
             AutoResetEvent.WaitOne(TimeSpan.FromSeconds(1));
      
             var file = generatedImages.First().Value.First();
@@ -357,8 +360,10 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
             var imageContainerWatcherService = Container.Resolve<ImageContainerWatcherService>();
+           
             await imageContainerWatcherService.Start(imageRefCache);
-
+            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(1));
+         
             var directoryInfo = ImagesDirectoryInfo.CreateSubdirectory("Test");
 
             AutoResetEvent.WaitOne(TimeSpan.FromSeconds(3));
@@ -383,8 +388,10 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
             var imageContainerWatcherService = Container.Resolve<ImageContainerWatcherService>();
+        
             await imageContainerWatcherService.Start(imageRefCache);
-
+            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(1));
+       
             subdirectory.Delete();
 
             AutoResetEvent.WaitOne(TimeSpan.FromSeconds(3));
@@ -409,8 +416,10 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
             var imageContainerWatcherService = Container.Resolve<ImageContainerWatcherService>();
+        
             await imageContainerWatcherService.Start(imageRefCache);
-
+            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(1));
+         
             subdirectory.MoveTo(FileSystem.Path.Combine(ImagesPath, "Test2"));
 
             AutoResetEvent.WaitOne(TimeSpan.FromSeconds(3));
