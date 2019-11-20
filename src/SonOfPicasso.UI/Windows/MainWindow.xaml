@@ -128,7 +128,9 @@
 
                         <GroupStyle.HeaderTemplate>
                             <DataTemplate DataType="CollectionViewGroup">
-                                <reactiveUi:ViewModelViewHost ViewModel="{Binding Name}" />
+                                <StackPanel DataContext="{Binding Path=Name}" d:DataContext="{d:DesignInstance viewModels:ImageContainerViewModel}">
+                                    <Label Name="FolderName" Content="{Binding Path=Name}"></Label>
+                                </StackPanel>
                             </DataTemplate>
                         </GroupStyle.HeaderTemplate>
                     </GroupStyle>
@@ -136,13 +138,16 @@
 
                 <ListView.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <WrapPanel />
+                        <WrapPanel/>
                     </ItemsPanelTemplate>
                 </ListView.ItemsPanel>
 
                 <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <reactiveUi:ViewModelViewHost ViewModel="{Binding}" />
+                    <DataTemplate DataType="viewModels:ImageViewModel">
+                        <StackPanel>
+                            <Label Name="ImageLabel" Content="{Binding Path}" />
+                            <Image Name="ImageBitmap" Height="250" Width="250" Stretch="Fill" Source="{Binding Image}"/>
+                        </StackPanel>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>

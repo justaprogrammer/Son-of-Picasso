@@ -14,11 +14,10 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             : base(testOutputHelper)
         {
             Func<ImageViewModel> imageViewModelFactory = () =>
-                new ImageViewModel(AutoSubstitute.Resolve<IImageLoadingService>(), TestSchedulerProvider,
-                    new ViewModelActivator());
+                new ImageViewModel(AutoSubstitute.Resolve<IImageLoadingService>(), TestSchedulerProvider);
 
             Func<ImageContainerViewModel> imageContainerViewModelFactory = () =>
-                new ImageContainerViewModel(new ViewModelActivator(), TestSchedulerProvider);
+                new ImageContainerViewModel();
 
             Func<TrayImageViewModel> trayImageViewModelFactory = () =>
                 new TrayImageViewModel(new ViewModelActivator());

@@ -25,7 +25,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             var folderImageContainer = new FolderImageContainer(folder, MockFileSystem);
 
             imageContainerViewModel.Initialize(folderImageContainer, applicationViewModel);
-            imageContainerViewModel.Activator.Activate();
+//            imageContainerViewModel.Activator.Activate();
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(1);
         }
     }

@@ -17,16 +17,13 @@ namespace SonOfPicasso.UI.Views
 
             this.WhenActivated(d =>
             {
-                ViewModel.Image.GetImage()
-                    .Subscribe(bitmap =>
-                    {
-                        var imageBitmapSource = bitmap.ToNative();
-                        ImageBitmap.Source = imageBitmapSource;
-                    }).DisposeWith(d);
-
                 this.OneWayBind(ViewModel,
                     model => model.Pinned,
                     view => view.ImageOverlay.Visibility);
+                
+                this.OneWayBind(ViewModel,
+                    model => model.Image,
+                    view => view.ImageBitmap.Source);
             });
         }
     }

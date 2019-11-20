@@ -76,7 +76,7 @@ namespace SonOfPicasso.UI.Windows
                     ListSortDirection.Ascending));
                 imageCollectionViewSource.SortDescriptions.Add(new SortDescription(nameof(ImageViewModel.ContainerDate),
                     ListSortDirection.Descending));
-                imageCollectionViewSource.SortDescriptions.Add(new SortDescription(nameof(ImageViewModel.Date),
+                imageCollectionViewSource.SortDescriptions.Add(new SortDescription(nameof(ImageViewModel.ExifDate),
                     ListSortDirection.Ascending));
 
                 imageCollectionViewSource.IsLiveFilteringRequested = true;

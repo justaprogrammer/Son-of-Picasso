@@ -55,8 +55,8 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(2);
 
             applicationViewModel.ImageContainers.Should().HaveCount(2);
-            foreach (var imageContainerViewModel in applicationViewModel.ImageContainers)
-                imageContainerViewModel.Activator.Activate();
+//            foreach (var imageContainerViewModel in applicationViewModel.ImageContainers)
+//                imageContainerViewModel.Activator.Activate();
 
             applicationViewModel.AlbumImageContainers.Should().HaveCount(0);
             applicationViewModel.Images.Should().HaveCount(8);
@@ -91,8 +91,8 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             TestSchedulerProvider.TaskPool.AdvanceBy(1);
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(2);
 
-            foreach (var imageContainerViewModel in applicationViewModel.ImageContainers)
-                imageContainerViewModel.Activator.Activate();
+//            foreach (var imageContainerViewModel in applicationViewModel.ImageContainers)
+//                imageContainerViewModel.Activator.Activate();
 
             var randomImages = Faker.PickRandom(applicationViewModel.Images, 2)
                 .ToArray();
@@ -149,8 +149,8 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             TestSchedulerProvider.TaskPool.AdvanceBy(1);
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(2);
 
-            foreach (var imageContainerViewModel in applicationViewModel.ImageContainers.ToArray())
-                imageContainerViewModel.Activator.Activate();
+//            foreach (var imageContainerViewModel in applicationViewModel.ImageContainers.ToArray())
+//                imageContainerViewModel.Activator.Activate();
 
             var randomImages = Faker.PickRandom(applicationViewModel.Images, 4)
                 .Batch(2)
@@ -208,8 +208,8 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             TestSchedulerProvider.TaskPool.AdvanceBy(1);
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(2);
 
-            foreach (var imageContainerViewModel in applicationViewModel.ImageContainers.ToArray())
-                imageContainerViewModel.Activator.Activate();
+//            foreach (var imageContainerViewModel in applicationViewModel.ImageContainers.ToArray())
+//                imageContainerViewModel.Activator.Activate();
 
             var randomImages = Faker.PickRandom(applicationViewModel.Images, 4)
                 .ToArray();
@@ -281,8 +281,8 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             TestSchedulerProvider.TaskPool.AdvanceBy(1);
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(2);
 
-            foreach (var imageContainerViewModel in applicationViewModel.ImageContainers.ToArray())
-                imageContainerViewModel.Activator.Activate();
+//            foreach (var imageContainerViewModel in applicationViewModel.ImageContainers.ToArray())
+//                imageContainerViewModel.Activator.Activate();
 
             var randomImages = Faker.PickRandom(applicationViewModel.Images, 4)
                 .ToArray();
@@ -356,8 +356,8 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(2);
 
             applicationViewModel.ImageContainers.Should().HaveCount(2);
-            foreach (var imageContainerViewModel in applicationViewModel.ImageContainers)
-                imageContainerViewModel.Activator.Activate();
+//            foreach (var imageContainerViewModel in applicationViewModel.ImageContainers)
+//                imageContainerViewModel.Activator.Activate();
 
             applicationViewModel.FolderManagerInteraction.RegisterHandler(context =>
             {

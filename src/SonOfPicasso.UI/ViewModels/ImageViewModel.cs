@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reactive.Linq;
+using System.Windows.Media.Imaging;
 using ReactiveUI;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Model;
@@ -9,13 +10,13 @@ using Splat;
 
 namespace SonOfPicasso.UI.ViewModels
 {
-    public class ImageViewModel : ActivatableViewModelBase
+    public class ImageViewModel : ViewModelBase
     {
         private readonly IImageLoadingService _imageLoadingService;
         private readonly ISchedulerProvider _schedulerProvider;
+        private ObservableAsPropertyHelper<BitmapSource> _imageOaph;
 
-        public ImageViewModel(IImageLoadingService imageLoadingService, ISchedulerProvider schedulerProvider,
-            ViewModelActivator activator) : base(activator)
+        public ImageViewModel(IImageLoadingService imageLoadingService, ISchedulerProvider schedulerProvider)
         {
             _imageLoadingService = imageLoadingService;
             _schedulerProvider = schedulerProvider;
@@ -24,7 +25,7 @@ namespace SonOfPicasso.UI.ViewModels
         public ImageRef ImageRef { get; private set; }
         public ImageContainerViewModel ImageContainerViewModel { get; set; }
         public string ImageRefId => ImageRef.Key;
-        public DateTime Date => ImageRef.ExifDate;
+        public DateTime ExifDate => ImageRef.ExifDate;
         public int ImageId => ImageRef.Id;
         public string Path => ImageRef.ImagePath;
         public string ContainerId => ImageContainerViewModel.ContainerId;
@@ -35,13 +36,15 @@ namespace SonOfPicasso.UI.ViewModels
         public void Initialize(ImageRef imageRef, ImageContainerViewModel imageContainerViewModel)
         {
             ImageRef = imageRef ?? throw new ArgumentNullException(nameof(imageRef));
-            ImageContainerViewModel = imageContainerViewModel;
+            ImageContainerViewModel = imageContainerViewModel ?? throw new ArgumentNullException(nameof(imageContainerViewModel));
+            
+            _imageOaph = _imageLoadingService
+                .LoadImageFromPath(Path)
+                .Select(bitmap => bitmap.ToNative())
+                .ObserveOn(_schedulerProvider.MainThreadScheduler)
+                .ToProperty(this, model => model.Image, deferSubscription: true);
         }
 
-        public IObservable<IBitmap> GetImage()
-        {
-            return _imageLoadingService.LoadImageFromPath(Path)
-                .ObserveOn(_schedulerProvider.MainThreadScheduler);
-        }
+        public BitmapSource Image => _imageOaph.Value;
     }
 }
