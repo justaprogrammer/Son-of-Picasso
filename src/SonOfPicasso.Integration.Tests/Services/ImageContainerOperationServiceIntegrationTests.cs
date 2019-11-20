@@ -812,7 +812,12 @@ namespace SonOfPicasso.Integration.Tests.Services
                 .Be(directoryCount);
 
             var imageRefs = generatedImages.SelectMany(pair => pair.Value)
-                .Select(s => Fakers.ImageRefFakerFor(s).Generate())
+                .Select(s =>
+                {
+                    var imageRef = Fakers.ImageRefFaker.Generate();
+                    imageRef.ImagePath = s;
+                    return imageRef;
+                })
                 .ToArray();
 
             foreach (var imageRef in imageRefs)

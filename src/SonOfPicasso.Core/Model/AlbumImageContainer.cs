@@ -14,7 +14,7 @@ namespace SonOfPicasso.Core.Model
             Name = album.Name;
             Date = album.Date;
             Year = album.Date.Year;
-            ImageRefs = album.AlbumImages.Select(albumImage => new ImageRef(albumImage.Image, this)).ToArray();
+            ImageRefs = album.AlbumImages.Select(albumImage => ImageRef.CreateImageRef(albumImage.Image, this)).ToArray();
         }
 
         public int Id { get; }
