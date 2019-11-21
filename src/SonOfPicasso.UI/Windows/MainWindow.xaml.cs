@@ -2,10 +2,10 @@
 using System.ComponentModel;
 using System.IO.Abstractions;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -113,8 +113,65 @@ namespace SonOfPicasso.UI.Windows
 
                 ImagesListScrollViewer = ImagesList.FindVisualChildren<ScrollViewer>().First();
 
-                GetTopmostVisibleImageContainer()
+                Observable.Create<string>(observer =>
+                    {
+                        var disposable1 = imageCollectionViewSource
+                            .View
+                            .ObserveCollectionChanges()
+                            .Select(pattern => (ICollectionView) pattern.Sender)
+                            .Select(view => (CollectionViewGroup) view.Groups.FirstOrDefault())
+                            .Select(group => (ImageViewModel) group?.Items.FirstOrDefault())
+                            .DistinctUntilChanged(model => model?.ContainerKey)
+                            .Subscribe(imageViewModel =>
+                            {
+                                observer.OnNext(imageViewModel?.ContainerKey);
+                            });
+
+                        var disposable2 = ImagesListScrollViewer
+                            .WhenAny(
+                                scrollViewer => scrollViewer.VerticalOffset,
+                                observedChange1 => observedChange1.Value)
+                            .Skip(1)
+                            .DistinctUntilChanged(verticalOffset => (int) (verticalOffset / 50))
+                            .Select(verticalOffset =>
+                            {
+                                var listViewItem = GetFirstVisibleListViewItem(ImagesListScrollViewer);
+                                var imageViewModel1 = (ImageViewModel) listViewItem?.DataContext;
+                                return imageViewModel1?.ImageContainerViewModel;
+                            })
+                            .DistinctUntilChanged()
+                            .Subscribe(model =>
+                            {
+                                if (disposable1 != null)
+                                {
+                                    disposable1.Dispose();
+                                    disposable1 = null;
+                                }
+
+                                observer.OnNext(model?.ContainerKey);
+                            });
+
+                        return new CompositeDisposable(disposable1, disposable2);
+                    })
                     .BindTo(ViewModel, model => model.VisibleItemContainerKey);
+
+                ImagesListScrollViewer
+                    .WhenAny(
+                        scrollViewer => scrollViewer.ViewportWidth,
+                        observedChange1 => observedChange1.Value)
+                    .Select(viewportWidth => (int) (viewportWidth / 300))
+                    .DistinctUntilChanged()
+                    .Subscribe(columns =>
+                    {
+                        _logger.Verbose("Max image columns {Columns}", columns);
+                    })
+                    .DisposeWith(d);
+
+                ImagesListScrollViewer
+                    .WhenAny(
+                        scrollViewer => scrollViewer.ViewportWidth,
+                        observedChange1 => observedChange1.Value)
+                    .BindTo(ViewModel, model => model.ImagesViewportWidth);
 
                 this.BindCommand(ViewModel,
                         model => model.AddFolder,
@@ -288,56 +345,14 @@ namespace SonOfPicasso.UI.Windows
             });
         }
 
-        private IObservable<string> GetTopmostVisibleImageContainer()
-        {
-            return Observable.Create<string>(observer =>
-            {
-                var disposable1 = imageCollectionViewSource
-                    .View
-                    .ObserveCollectionChanges()
-                    .Select(pattern => (ICollectionView) pattern.Sender)
-                    .Select(view => (CollectionViewGroup) view.Groups.FirstOrDefault())
-                    .Select(group => (ImageViewModel) group?.Items.FirstOrDefault())
-                    .DistinctUntilChanged(model => model?.ContainerKey)
-                    .Subscribe(imageViewModel =>
-                    {
-                        observer.OnNext(imageViewModel?.ContainerKey);
-                    });
-
-                var disposable2 = ImagesListScrollViewer
-                    .WhenAny(
-                        scrollViewer => scrollViewer.VerticalOffset,
-                        (observedChange1) => observedChange1.Value)
-                    .Skip(1)
-                    .DistinctUntilChanged(verticalOffset => ((int) (verticalOffset / 50)))
-                    .Select(verticalOffset =>
-                    {
-                        var listViewItem = GetFirstVisibleListViewItem(ImagesListScrollViewer);
-                        var imageViewModel = (ImageViewModel) listViewItem?.DataContext;
-                        return imageViewModel?.ImageContainerViewModel;
-                    })
-                    .DistinctUntilChanged()
-                    .Subscribe(model =>
-                    {
-                        if (disposable1 != null)
-                        {
-                            disposable1.Dispose();
-                            disposable1 = null;
-                        }
-
-                        observer.OnNext(model?.ContainerKey);
-                    });
-
-                return new CompositeDisposable(disposable1, disposable2);
-            });
-        }
+        public ScrollViewer ImagesListScrollViewer { get; set; }
 
         private ListViewItem GetFirstVisibleListViewItem(ScrollViewer imagesListScrollViewer)
         {
             var listViewItems = ImagesListScrollViewer
                 .FindVisualChildren<ListViewItem>()
                 .ToArray();
-            
+
             ListViewItem lastListViewItem = null;
             Point lastViewViewItemPoint;
 
@@ -356,18 +371,13 @@ namespace SonOfPicasso.UI.Windows
                     continue;
                 }
 
-                if (lastListViewItem == null)
-                {
-                    lastListViewItem = listViewItem;
-                }
+                if (lastListViewItem == null) lastListViewItem = listViewItem;
 
                 break;
             }
 
             return lastListViewItem;
         }
-
-        public ScrollViewer ImagesListScrollViewer { get; set; }
 
         private void AlbumButton_AddImagesToAlbum_OnClick(object sender, RoutedEventArgs e)
         {

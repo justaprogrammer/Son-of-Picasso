@@ -52,7 +52,7 @@ namespace SonOfPicasso.Tools.Tests.Services
 
             var imageGenerationService = AutoSubstitute.Resolve<ImageGenerationService>();
 
-            imageGenerationService.GenerateImage(imageFile, 400, 300, exifData)
+            imageGenerationService.GenerateImage(imageFile, exifData)
                 .Subscribe(s => { AutoResetEvent.Set(); });
 
             TestSchedulerProvider.TaskPool.AdvanceBy(1);

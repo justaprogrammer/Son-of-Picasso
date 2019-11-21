@@ -16,13 +16,36 @@ using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Data.Model;
 using SonOfPicasso.Testing.Common;
 using SonOfPicasso.Tools.Extensions;
-using Image = System.Drawing.Image;
 
 namespace SonOfPicasso.Tools.Services
 {
     public class ImageGenerationService
     {
         protected internal static Faker Faker = new Faker();
+
+        private static readonly (int, int)[] Sizes =
+        {
+            (900, 1500),
+            (900, 1500),
+            (1200, 1800),
+            (1500, 2100),
+            (2400, 2400),
+            (2400, 3000),
+            (2550, 3300),
+            (2700, 4800),
+            (3300, 4200),
+            (3300, 4800),
+            (1500, 900),
+            (1500, 900),
+            (1800, 1200),
+            (2100, 1500),
+            (3000, 2400),
+            (3300, 2550),
+            (4800, 2700),
+            (4200, 3300),
+            (4800, 3300),
+        };
+
         private readonly IFileSystem _fileSystem;
 
         private readonly ILogger _logger;
@@ -35,41 +58,44 @@ namespace SonOfPicasso.Tools.Services
             _schedulerProvider = schedulerProvider;
         }
 
-        public IObservable<IGroupedObservable<string, string>> GenerateImages(int count, string fileRoot, bool inDateNamedDirectory = true)
+        public IObservable<IGroupedObservable<string, string>> GenerateImages(int count, string fileRoot,
+            bool inDateNamedDirectory = true)
         {
             return Observable.Generate(
-                initialState: 0,
-                condition: value => value < count,
-                iterate: value => value + 1,
-                resultSelector: value =>
-                {
-                    if(value == 0)
-                        _logger.Verbose("GenerateImages {Count} {FileRoot}", count, fileRoot);
+                    0,
+                    value => value < count,
+                    value => value + 1,
+                    value =>
+                    {
+                        if (value == 0)
+                            _logger.Verbose("GenerateImages {Count} {FileRoot}", count, fileRoot);
 
-                    var time = Faker.Date.Between(DateTime.Now, DateTime.Now.AddDays(-30));
-                    var directoryPath = inDateNamedDirectory ? _fileSystem.Path.Combine(fileRoot, time.ToString("yyyy-MM-dd")) : fileRoot;
-                    _fileSystem.Directory.CreateDirectory(directoryPath);
+                        var time = Faker.Date.Between(DateTime.Now, DateTime.Now.AddDays(-30));
+                        var directoryPath = inDateNamedDirectory
+                            ? _fileSystem.Path.Combine(fileRoot, time.ToString("yyyy-MM-dd"))
+                            : fileRoot;
+                        _fileSystem.Directory.CreateDirectory(directoryPath);
 
-                    var fileName = $"{time.ToString("s").Replace("-", "_").Replace(":", "_")}.jpg";
-                    var filePath = _fileSystem.Path.Combine(directoryPath, fileName);
+                        var fileName = $"{time.ToString("s").Replace("-", "_").Replace(":", "_")}.jpg";
+                        var filePath = _fileSystem.Path.Combine(directoryPath, fileName);
 
-                    var exifData = (ExifData)Fakers.ExifDataFaker;
-                    exifData.DateTime = time;
-                    exifData.DateTimeDigitized = time;
-                    exifData.DateTimeOriginal = time;
+                        var exifData = (ExifData) Fakers.ExifDataFaker;
+                        exifData.DateTime = time;
+                        exifData.DateTimeDigitized = time;
+                        exifData.DateTimeOriginal = time;
 
-                    return GenerateImage(filePath, 1024, 768, exifData)
-                        .Select(imagePath => (directoryPath, imagePath));
-
-                }, _schedulerProvider.TaskPool)
+                        return GenerateImage(filePath, exifData)
+                            .Select(imagePath => (directoryPath, imagePath));
+                    }, _schedulerProvider.TaskPool)
                 .SelectMany(observable => observable)
                 .GroupBy(tuple => tuple.directoryPath, tuple => tuple.imagePath);
         }
 
-        public IObservable<string> GenerateImage(string path, int width, int height, ExifData exifData)
+        public IObservable<string> GenerateImage(string path, ExifData exifData)
         {
             return Observable.Defer(() =>
             {
+                var (height, width) = Faker.PickRandom(Sizes);
                 var cellHeight = height / 3;
                 var cellWidth = width / 3;
 
@@ -88,15 +114,15 @@ namespace SonOfPicasso.Tools.Services
                         using (var graphics = Graphics.FromImage(bitmap))
                         {
                             for (var x = 0; x < 3; x++)
-                                for (var y = 0; y < 3; y++)
-                                {
-                                    var xPos = x * cellWidth;
-                                    var yPos = y * cellHeight;
+                            for (var y = 0; y < 3; y++)
+                            {
+                                var xPos = x * cellWidth;
+                                var yPos = y * cellHeight;
 
-                                    using var brush = new SolidBrush(GetColor(colors, x, y));
-                                    var rectangle = new Rectangle(xPos, yPos, cellWidth, cellHeight);
-                                    graphics.FillRectangle(brush, rectangle);
-                                }
+                                using var brush = new SolidBrush(GetColor(colors, x, y));
+                                var rectangle = new Rectangle(xPos, yPos, cellWidth, cellHeight);
+                                graphics.FillRectangle(brush, rectangle);
+                            }
                         }
 
                         bitmap.Save(imageStream, ImageFormat.Jpeg);
@@ -128,85 +154,85 @@ namespace SonOfPicasso.Tools.Services
             foreach (var propertyInfo in properties)
                 try
                 {
-                    var exifTag = (ExifTag)Enum.Parse(typeof(ExifTag), propertyInfo.Name, true);
+                    var exifTag = (ExifTag) Enum.Parse(typeof(ExifTag), propertyInfo.Name, true);
 
                     var exifTagType = GetExifTagType(exifTag);
                     if (exifTagType == typeof(ExifAscii))
                     {
-                        var value = (string)propertyInfo.GetValue(exifData);
+                        var value = (string) propertyInfo.GetValue(exifData);
                         var exifProperty = new ExifAscii(exifTag, value, Encoding.Default);
                         imageFile.Properties.Set(exifProperty);
                     }
                     else if (exifTagType == typeof(ExifEncodedString))
                     {
-                        var value = (string)propertyInfo.GetValue(exifData);
+                        var value = (string) propertyInfo.GetValue(exifData);
                         var exifProperty = new ExifEncodedString(exifTag, value, Encoding.Default);
                         imageFile.Properties.Set(exifProperty);
                     }
                     else if (exifTagType == typeof(ExifUShort))
                     {
-                        var value = (ushort)propertyInfo.GetValue(exifData);
+                        var value = (ushort) propertyInfo.GetValue(exifData);
                         var exifProperty = new ExifUShort(exifTag, value);
                         imageFile.Properties.Set(exifProperty);
                     }
                     else if (exifTagType == typeof(ExifUInt))
                     {
-                        var value = (uint)propertyInfo.GetValue(exifData);
+                        var value = (uint) propertyInfo.GetValue(exifData);
                         var exifProperty = new ExifUInt(exifTag, value);
                         imageFile.Properties.Set(exifProperty);
                     }
                     else if (exifTagType == typeof(ExifDateTime))
                     {
-                        var value = (DateTime)propertyInfo.GetValue(exifData);
+                        var value = (DateTime) propertyInfo.GetValue(exifData);
                         var exifProperty = new ExifDateTime(exifTag, value);
                         imageFile.Properties.Set(exifProperty);
                     }
                     else if (exifTagType == typeof(ExifVersion))
                     {
-                        var value = (string)propertyInfo.GetValue(exifData);
+                        var value = (string) propertyInfo.GetValue(exifData);
                         var exifProperty = new ExifVersion(exifTag, value);
                         imageFile.Properties.Set(exifProperty);
                     }
                     else if (exifTagType == typeof(ExifURational))
                     {
-                        var value = (string)propertyInfo.GetValue(exifData);
+                        var value = (string) propertyInfo.GetValue(exifData);
                         var uFraction = MathEx.UFraction32.Parse(value);
                         var exifProperty = new ExifURational(exifTag, uFraction);
                         imageFile.Properties.Set(exifProperty);
                     }
                     else if (exifTagType == typeof(ExifSRational))
                     {
-                        var value = (string)propertyInfo.GetValue(exifData);
+                        var value = (string) propertyInfo.GetValue(exifData);
                         var fraction = MathEx.Fraction32.Parse(value);
                         var exifProperty = new ExifSRational(exifTag, fraction);
                         imageFile.Properties.Set(exifProperty);
                     }
                     else if (exifTagType == typeof(LensSpecification))
                     {
-                        var value = (string)propertyInfo.GetValue(exifData);
+                        var value = (string) propertyInfo.GetValue(exifData);
                         var regex = new Regex("^(.*?) F(.*?), (.*?) F(.*?)$");
                         var match = regex.Match(value);
                         var fractions = match.Groups.Values.Skip(1)
                             .Select(group => MathEx.UFraction32.Parse(group.Value))
                             .ToArray();
                         var exifProperty = new LensSpecification(exifTag,
-                            new[] { fractions[0], fractions[2], fractions[1], fractions[3] });
+                            new[] {fractions[0], fractions[2], fractions[1], fractions[3]});
                         imageFile.Properties.Set(exifProperty);
                     }
                     else if (exifTagType.IsGenericType &&
                              exifTagType.GetGenericTypeDefinition() == typeof(ExifEnumProperty<>))
                     {
                         var enumType = exifTagType.GenericTypeArguments.First();
-                        var value = (string)propertyInfo.GetValue(exifData);
+                        var value = (string) propertyInfo.GetValue(exifData);
                         var enumValue = Enum.Parse(enumType, value, true);
                         var constructorInfo = typeof(ExifEnumProperty<>).MakeGenericType(enumType)
-                            .GetConstructor(new[] { typeof(ExifTag), enumType });
+                            .GetConstructor(new[] {typeof(ExifTag), enumType});
 
                         if (constructorInfo == null)
                             throw new InvalidOperationException(
                                 $"Constructor not found for enum type: '{enumType.Name}'");
 
-                        var exitProperty = (ExifProperty)constructorInfo.Invoke(new[] { exifTag, enumValue });
+                        var exitProperty = (ExifProperty) constructorInfo.Invoke(new[] {exifTag, enumValue});
                         imageFile.Properties.Add(exitProperty);
                     }
                     else
@@ -400,8 +426,9 @@ namespace SonOfPicasso.Tools.Services
 
             return new[]
             {
-                HslColorExtensions.ToColor(color0), HslColorExtensions.ToColor(color1),
-                HslColorExtensions.ToColor(color2)
+                color0.ToColor(),
+                color1.ToColor(),
+                color2.ToColor()
             };
         }
     }

@@ -16,7 +16,7 @@
         <CollectionViewSource x:Key="ImageContainersViewSource" />
         <CollectionViewSource x:Key="AlbumImageContainersViewSource" />
         <CollectionViewSource x:Key="ImagesCollectionViewSource" />
-        <converters:MultiValueEqualityConverter x:Key="MultiValueEqualityConverter"/>
+        <converters:MultiValueEqualityConverter x:Key="MultiValueEqualityConverter" />
     </Window.Resources>
     <DockPanel>
         <Menu DockPanel.Dock="Top" Width="Auto" Height="20">
@@ -61,17 +61,17 @@
 
                 <ListView.Resources>
                     <Style x:Key="BorderStyle" TargetType="Border">
-                        <Setter Property="BorderThickness" Value="0"></Setter>
-                        <Setter Property="BorderBrush" Value="Blue"></Setter>
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="BorderBrush" Value="Blue" />
                         <Style.Triggers>
                             <DataTrigger Value="True">
                                 <DataTrigger.Binding>
                                     <MultiBinding Converter="{StaticResource MultiValueEqualityConverter}">
                                         <Binding ElementName="Window" Path="ViewModel.VisibleItemContainerKey" />
-                                        <Binding Path="ContainerKey"></Binding>
+                                        <Binding Path="ContainerKey" />
                                     </MultiBinding>
                                 </DataTrigger.Binding>
-                                <Setter Property="BorderThickness" Value="1"></Setter>
+                                <Setter Property="BorderThickness" Value="1" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
@@ -138,7 +138,7 @@
                                 <Setter Property="Template">
                                     <Setter.Value>
                                         <ControlTemplate TargetType="{x:Type GroupItem}">
-                                            <StackPanel Width="{Binding ElementName=ImagesList, Path=ActualWidth}">
+                                            <StackPanel Width="{Binding ElementName=Window, Path=ViewModel.ImagesViewportWidth}">
                                                 <ContentPresenter x:Name="PART_Header" />
                                                 <ItemsPresenter x:Name="ItemsPresenter" Margin="5,0,0,0" />
                                             </StackPanel>
@@ -167,10 +167,13 @@
 
                 <ListView.ItemTemplate>
                     <DataTemplate DataType="viewModels:ImageViewModel">
-                        <StackPanel>
-                            <Label Name="ImageLabel" Content="{Binding Path}" />
-                            <Image Name="ImageBitmap" Height="250" Width="250" Stretch="Fill" Source="{Binding Image}" />
-                        </StackPanel>
+                        <DockPanel Height="300" Width="300">
+                            <Image Height="250" Width="250"
+                                   Name="ImageBitmap"
+                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                   Stretch="Fill"
+                                   Source="{Binding Image}" />
+                        </DockPanel>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>

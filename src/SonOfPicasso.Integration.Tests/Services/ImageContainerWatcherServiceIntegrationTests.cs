@@ -129,7 +129,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             list.Should().HaveCount(1);
             list.First().Should().Be(path);
 
-            await ImageGenerationService.GenerateImage(path, Faker.Random.Int(200, 400), Faker.Random.Int(200, 400),
+            await ImageGenerationService.GenerateImage(path,
                 Fakers.ExifDataFaker);
 
             WaitOne(5);

@@ -12,26 +12,27 @@ namespace SonOfPicasso.UI.ViewModels
 {
     public class ImageViewModel : ViewModelBase
     {
-        private readonly ApplicationViewModel _applicationViewModel;
-        private readonly ObservableAsPropertyHelper<BitmapSource> _imageOaph;
+        private readonly ObservableAsPropertyHelper<BitmapSource> _image;
 
         public ImageViewModel(IImageLoadingService imageLoadingService, ISchedulerProvider schedulerProvider,
-            ImageRef imageRef, ImageContainerViewModel imageContainerViewModel,
-            ApplicationViewModel applicationViewModel)
+            ImageRef imageRef, ImageContainerViewModel imageContainerViewModel)
         {
-            _applicationViewModel = applicationViewModel;
-            var imageLoadingService1 =
-                imageLoadingService ?? throw new ArgumentNullException(nameof(imageLoadingService));
-            var schedulerProvider1 = schedulerProvider ?? throw new ArgumentNullException(nameof(schedulerProvider));
-            ImageRef = imageRef ?? throw new ArgumentNullException(nameof(imageRef));
-            ImageContainerViewModel = imageContainerViewModel ??
-                                      throw new ArgumentNullException(nameof(imageContainerViewModel));
+            if (imageLoadingService == null) throw new ArgumentNullException(nameof(imageLoadingService));
+            if (schedulerProvider == null) throw new ArgumentNullException(nameof(schedulerProvider));
 
-            _imageOaph = imageLoadingService1
+            ImageRef = 
+                imageRef ?? 
+                throw new ArgumentNullException(nameof(imageRef));
+
+            ImageContainerViewModel =
+                imageContainerViewModel ??
+                throw new ArgumentNullException(nameof(imageContainerViewModel));
+
+            imageLoadingService
                 .LoadImageFromPath(Path)
                 .Select(bitmap => bitmap.ToNative())
-                .ObserveOn(schedulerProvider1.MainThreadScheduler)
-                .ToProperty(this, model => model.Image, deferSubscription: true);
+                .ObserveOn(schedulerProvider.MainThreadScheduler)
+                .ToProperty(this, nameof(Image), out _image, deferSubscription: true);
         }
 
         public ImageRef ImageRef { get; }
@@ -44,6 +45,6 @@ namespace SonOfPicasso.UI.ViewModels
         public ImageContainerTypeEnum ContainerType => ImageContainerViewModel.ContainerType;
         public int ContainerYear => ImageContainerViewModel.Year;
         public DateTime ContainerDate => ImageContainerViewModel.Date;
-        public BitmapSource Image => _imageOaph.Value;
+        public BitmapSource Image => _image.Value;
     }
 }
