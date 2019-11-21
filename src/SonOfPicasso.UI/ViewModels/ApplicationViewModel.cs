@@ -31,7 +31,6 @@ namespace SonOfPicasso.UI.ViewModels
         private readonly IObservableCache<TrayImageViewModel, int> _trayImageCache;
 
         private readonly SourceCache<ImageViewModel, int> _trayImageSourceCache;
-        private readonly Func<TrayImageViewModel> _trayImageViewModelFactory;
 
         private readonly Subject<IEnumerable<ImageViewModel>> _unselectImageSubject =
             new Subject<IEnumerable<ImageViewModel>>();
@@ -45,14 +44,12 @@ namespace SonOfPicasso.UI.ViewModels
             IImageContainerManagementService imageContainerManagementService,
             IImageLoadingService imageLoadingService,
             Func<ImageContainerViewModel> imageContainerViewModelFactory,
-            Func<TrayImageViewModel> trayImageViewModelFactory,
             ViewModelActivator activator) : base(activator)
         {
             _schedulerProvider = schedulerProvider;
             _imageContainerManagementService = imageContainerManagementService;
             _imageLoadingService = imageLoadingService;
             _imageContainerViewModelFactory = imageContainerViewModelFactory;
-            _trayImageViewModelFactory = trayImageViewModelFactory;
 
             _selectedImagesSourceCache = new SourceCache<ImageViewModel, int>(model => model.ImageId);
 
@@ -89,9 +86,9 @@ namespace SonOfPicasso.UI.ViewModels
 
             _imageViewModelCache = _imageContainerViewModelCache
                 .Connect()
-                .TransformMany(model =>
-                        model.ImageRefs.Select(imageRef =>
-                            new ImageViewModel(_imageLoadingService, _schedulerProvider, imageRef, model)),
+                .TransformMany(imageContainerViewModel =>
+                        imageContainerViewModel.ImageRefs.Select(imageRef =>
+                            new ImageViewModel(_imageLoadingService, _schedulerProvider, imageRef, imageContainerViewModel, this)),
                     imageViewModel => imageViewModel.ImageRefId)
                 .DisposeMany()
                 .AsObservableCache();
@@ -100,7 +97,7 @@ namespace SonOfPicasso.UI.ViewModels
 
             _trayImageCache = _trayImageSourceCache
                 .Connect()
-                .Transform(CreateTrayImageViewModel)
+                .Transform(model => new TrayImageViewModel(model))
                 .DisposeMany()
                 .AsObservableCache();
 
@@ -234,13 +231,6 @@ namespace SonOfPicasso.UI.ViewModels
             _imageContainerManagementService?.Dispose();
         }
 
-        private TrayImageViewModel CreateTrayImageViewModel(ImageViewModel model)
-        {
-            var trayImageViewModel = _trayImageViewModelFactory();
-            trayImageViewModel.Initialize(model);
-            return trayImageViewModel;
-        }
-
         private IObservable<ImageContainerViewModel> ExecuteNewAlbum(Unit _)
         {
             return NewAlbumInteraction.Handle(Unit.Default)
@@ -328,9 +318,9 @@ namespace SonOfPicasso.UI.ViewModels
                     if (shouldContinue)
                     {
                         var trayImageViewModelsArray = trayImageViewModels.ToArray();
-                        var imageIds = trayImageViewModelsArray.Select(model => model.Image.ImageId);
+                        var imageIds = trayImageViewModelsArray.Select(model => model.ImageViewModel.ImageId);
                         _trayImageSourceCache.RemoveKeys(imageIds);
-                        _unselectImageSubject.OnNext(trayImageViewModelsArray.Select(model => model.Image));
+                        _unselectImageSubject.OnNext(trayImageViewModelsArray.Select(model => model.ImageViewModel));
                         _unselectTrayImageSubject.OnNext(trayImageViewModelsArray);
                     }
 

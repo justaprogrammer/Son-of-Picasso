@@ -57,9 +57,10 @@ namespace SonOfPicasso.UI
             Log.Logger = loggerConfiguration.CreateLogger();
 
             BlobCache.ApplicationName = ApplicationName;
+            BlobCache.EnsureInitialized();
 
             var containerBuilder = new ContainerBuilder();
-
+            
             containerBuilder.RegisterType<FileSystem>()
                 .As<IFileSystem>()
                 .InstancePerLifetimeScope();
@@ -131,6 +132,13 @@ namespace SonOfPicasso.UI
 
             mainWindow.ViewModel = container.Resolve<ApplicationViewModel>();
             mainWindow.Show();
+        }
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            BlobCache.Shutdown().Wait();
+         
+            base.OnExit(e);
         }
 
         internal static DbContextOptions<DataContext> BuildDbContextOptions(IEnvironmentService environmentService,

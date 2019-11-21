@@ -378,7 +378,7 @@ namespace SonOfPicasso.UI.Windows
                 ViewModel.SelectedTrayImages.Any() ? ViewModel.SelectedTrayImages : ViewModel.TrayImages;
 
             var imageViewModels =
-                viewModelSelectedTrayImages.Select(model => model.Image).ToList();
+                viewModelSelectedTrayImages.Select(model => model.ImageViewModel).ToList();
 
             ViewModel.AddImagesToAlbum.Execute((imageViewModels.AsEnumerable(), imageContainerViewModel))
                 .Subscribe();
@@ -390,7 +390,7 @@ namespace SonOfPicasso.UI.Windows
                 ViewModel.SelectedTrayImages.Any() ? ViewModel.SelectedTrayImages : ViewModel.TrayImages;
 
             var imageViewModels =
-                viewModelSelectedTrayImages.Select(model => model.Image).ToList();
+                viewModelSelectedTrayImages.Select(model => model.ImageViewModel).ToList();
 
             ViewModel.NewAlbumWithImages.Execute(imageViewModels)
                 .Subscribe();

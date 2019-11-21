@@ -12,11 +12,14 @@ namespace SonOfPicasso.UI.ViewModels
 {
     public class ImageViewModel : ViewModelBase
     {
+        private readonly ApplicationViewModel _applicationViewModel;
         private readonly ObservableAsPropertyHelper<BitmapSource> _imageOaph;
 
         public ImageViewModel(IImageLoadingService imageLoadingService, ISchedulerProvider schedulerProvider,
-            ImageRef imageRef, ImageContainerViewModel imageContainerViewModel)
+            ImageRef imageRef, ImageContainerViewModel imageContainerViewModel,
+            ApplicationViewModel applicationViewModel)
         {
+            _applicationViewModel = applicationViewModel;
             var imageLoadingService1 =
                 imageLoadingService ?? throw new ArgumentNullException(nameof(imageLoadingService));
             var schedulerProvider1 = schedulerProvider ?? throw new ArgumentNullException(nameof(schedulerProvider));

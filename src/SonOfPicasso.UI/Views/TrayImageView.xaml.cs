@@ -22,7 +22,7 @@ namespace SonOfPicasso.UI.Views
                     view => view.ImageOverlay.Visibility);
                 
                 this.OneWayBind(ViewModel,
-                    model => model.Image,
+                    model => model.ImageViewModel.Image,
                     view => view.ImageBitmap.Source);
             });
         }

@@ -1,7 +1,4 @@
-﻿using System;
-using ReactiveUI;
-using SonOfPicasso.Testing.Common;
-using SonOfPicasso.UI.ViewModels;
+﻿using SonOfPicasso.Testing.Common;
 using Xunit.Abstractions;
 
 namespace SonOfPicasso.UI.Tests.ViewModels
@@ -11,10 +8,6 @@ namespace SonOfPicasso.UI.Tests.ViewModels
         public ViewModelTestsBase(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {
-            Func<TrayImageViewModel> trayImageViewModelFactory = () =>
-                new TrayImageViewModel(new ViewModelActivator());
-
-            AutoSubstitute.Provide(trayImageViewModelFactory);
         }
     }
 }
