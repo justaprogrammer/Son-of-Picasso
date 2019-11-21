@@ -36,10 +36,10 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="morelinq" Version="3.2.0" />
-    <PackageReference Include="ReactiveUI.Events" Version="10.5.30" />
-    <PackageReference Include="ReactiveUI.Events.WPF" Version="10.5.30" />
+    <PackageReference Include="ReactiveUI.Events" Version="10.5.31" />
+    <PackageReference Include="ReactiveUI.Events.WPF" Version="10.5.31" />
     <PackageReference Include="ReactiveUI.Validation" Version="1.4.1" />
-    <PackageReference Include="ReactiveUI.WPF" Version="10.5.30" />
+    <PackageReference Include="ReactiveUI.WPF" Version="10.5.31" />
     <PackageReference Include="Roslyn.System.IO.Abstractions.Analyzers" Version="6.0.32">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -51,9 +51,9 @@
     <PackageReference Include="Serilog.Sinks.Trace" Version="2.1.0" />
     <PackageReference Include="SerilogAnalyzer" Version="0.15.0" />
     <PackageReference Include="SerilogMetrics" Version="2.1.0" />
-    <PackageReference Include="Splat.Autofac" Version="9.1.1" />
-    <PackageReference Include="Splat.Drawing" Version="9.1.1" />
-    <PackageReference Include="Splat.Serilog" Version="9.1.1" />
+    <PackageReference Include="Splat.Autofac" Version="9.2.7" />
+    <PackageReference Include="Splat.Drawing" Version="9.2.7" />
+    <PackageReference Include="Splat.Serilog" Version="9.2.7" />
     <PackageReference Include="System.IO.Abstractions" Version="7.0.7" />
     <PackageReference Include="System.Reactive" Version="4.2.0" />
   </ItemGroup>
