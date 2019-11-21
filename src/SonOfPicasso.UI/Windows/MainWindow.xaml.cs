@@ -43,12 +43,14 @@ namespace SonOfPicasso.UI.Windows
         private readonly Func<FolderManagementWindow> _folderManagementWindowFactory;
         private readonly ILogger _logger;
         private readonly ISchedulerProvider _schedulerProvider;
-        private readonly CollectionViewSource albumImageContainersViewSource;
-        private readonly CollectionViewSource imageCollectionViewSource;
-        private readonly CollectionViewSource imageContainersViewSource;
+        private readonly IImageLoadingService _imageLoadingService;
+        private readonly CollectionViewSource _albumImageContainersViewSource;
+        private readonly CollectionViewSource _imageCollectionViewSource;
+        private readonly CollectionViewSource _imageContainersViewSource;
 
         public MainWindow(ILogger logger, IEnvironmentService environmentService, IFileSystem fileSystem,
             ISchedulerProvider schedulerProvider,
+            IImageLoadingService imageLoadingService,
             Func<AddAlbumWindow> addAlbumWindowFactory,
             Func<AddAlbumViewModel> addAlbumViewModelFactory,
             Func<FolderManagementWindow> folderManagementWindowFactory,
@@ -58,6 +60,7 @@ namespace SonOfPicasso.UI.Windows
             _environmentService = environmentService;
             _fileSystem = fileSystem;
             _schedulerProvider = schedulerProvider;
+            _imageLoadingService = imageLoadingService;
             _addAlbumWindowFactory = addAlbumWindowFactory;
             _addAlbumViewModelFactory = addAlbumViewModelFactory;
             _folderManagementWindowFactory = folderManagementWindowFactory;
@@ -65,53 +68,53 @@ namespace SonOfPicasso.UI.Windows
 
             InitializeComponent();
 
-            imageCollectionViewSource = (CollectionViewSource) FindResource("ImagesCollectionViewSource");
-            imageContainersViewSource = (CollectionViewSource) FindResource("ImageContainersViewSource");
-            albumImageContainersViewSource = (CollectionViewSource) FindResource("AlbumImageContainersViewSource");
-
+            _imageCollectionViewSource = (CollectionViewSource) FindResource("ImagesCollectionViewSource");
+            _imageContainersViewSource = (CollectionViewSource) FindResource("ImageContainersViewSource");
+            _albumImageContainersViewSource = (CollectionViewSource) FindResource("AlbumImageContainersViewSource");
+            
             this.WhenActivated(d =>
             {
-                imageCollectionViewSource.Source = ViewModel.Images;
+                _imageCollectionViewSource.Source = ViewModel.Images;
 
                 var propertyGroupDescription =
                     new PropertyGroupDescription(nameof(ImageViewModel.ImageContainerViewModel));
 
-                imageCollectionViewSource.GroupDescriptions.Add(propertyGroupDescription);
-                imageCollectionViewSource.SortDescriptions.Add(new SortDescription(nameof(ImageViewModel.ContainerType),
+                _imageCollectionViewSource.GroupDescriptions.Add(propertyGroupDescription);
+                _imageCollectionViewSource.SortDescriptions.Add(new SortDescription(nameof(ImageViewModel.ContainerType),
                     ListSortDirection.Ascending));
-                imageCollectionViewSource.SortDescriptions.Add(new SortDescription(nameof(ImageViewModel.ContainerDate),
+                _imageCollectionViewSource.SortDescriptions.Add(new SortDescription(nameof(ImageViewModel.ContainerDate),
                     ListSortDirection.Descending));
-                imageCollectionViewSource.SortDescriptions.Add(new SortDescription(nameof(ImageViewModel.ExifDate),
+                _imageCollectionViewSource.SortDescriptions.Add(new SortDescription(nameof(ImageViewModel.ExifDate),
                     ListSortDirection.Ascending));
 
-                imageCollectionViewSource.IsLiveFilteringRequested = true;
-                imageCollectionViewSource.IsLiveGroupingRequested = true;
-                imageCollectionViewSource.IsLiveSortingRequested = true;
+                _imageCollectionViewSource.IsLiveFilteringRequested = true;
+                _imageCollectionViewSource.IsLiveGroupingRequested = true;
+                _imageCollectionViewSource.IsLiveSortingRequested = true;
 
-                imageContainersViewSource.Source = ViewModel.ImageContainers;
-                imageContainersViewSource.GroupDescriptions.Add(
+                _imageContainersViewSource.Source = ViewModel.ImageContainers;
+                _imageContainersViewSource.GroupDescriptions.Add(
                     new PropertyGroupDescription(nameof(ImageContainerViewModel.ContainerType)));
-                imageContainersViewSource.GroupDescriptions.Add(
+                _imageContainersViewSource.GroupDescriptions.Add(
                     new PropertyGroupDescription(nameof(ImageContainerViewModel.Year)));
-                imageContainersViewSource.SortDescriptions.Add(
+                _imageContainersViewSource.SortDescriptions.Add(
                     new SortDescription(nameof(ImageContainerViewModel.ContainerType),
                         ListSortDirection.Ascending));
-                imageContainersViewSource.SortDescriptions.Add(
+                _imageContainersViewSource.SortDescriptions.Add(
                     new SortDescription(nameof(ImageContainerViewModel.Date), ListSortDirection.Descending));
 
-                imageContainersViewSource.IsLiveFilteringRequested = true;
-                imageContainersViewSource.IsLiveGroupingRequested = true;
-                imageContainersViewSource.IsLiveSortingRequested = true;
+                _imageContainersViewSource.IsLiveFilteringRequested = true;
+                _imageContainersViewSource.IsLiveGroupingRequested = true;
+                _imageContainersViewSource.IsLiveSortingRequested = true;
 
-                albumImageContainersViewSource.Source = ViewModel.AlbumImageContainers;
-                albumImageContainersViewSource.SortDescriptions.Add(
+                _albumImageContainersViewSource.Source = ViewModel.AlbumImageContainers;
+                _albumImageContainersViewSource.SortDescriptions.Add(
                     new SortDescription(nameof(ImageContainerViewModel.Year), ListSortDirection.Descending));
-                albumImageContainersViewSource.SortDescriptions.Add(
+                _albumImageContainersViewSource.SortDescriptions.Add(
                     new SortDescription(nameof(ImageContainerViewModel.Date), ListSortDirection.Descending));
 
-                albumImageContainersViewSource.IsLiveFilteringRequested = true;
-                albumImageContainersViewSource.IsLiveGroupingRequested = true;
-                albumImageContainersViewSource.IsLiveSortingRequested = true;
+                _albumImageContainersViewSource.IsLiveFilteringRequested = true;
+                _albumImageContainersViewSource.IsLiveGroupingRequested = true;
+                _albumImageContainersViewSource.IsLiveSortingRequested = true;
 
                 ImagesListScrollViewer = ImagesList.FindVisualChildren<ScrollViewer>().First();
 
@@ -128,7 +131,7 @@ namespace SonOfPicasso.UI.Windows
                             return;
                         }
 
-                        var (groupIndex, rowIndex) = imageCollectionViewSource
+                        var (groupIndex, rowIndex) = _imageCollectionViewSource
                             .View
                             .Groups
                             .Cast<CollectionViewGroup>()
@@ -147,7 +150,7 @@ namespace SonOfPicasso.UI.Windows
 
                 Observable.Create<string>(observer =>
                     {
-                        var disposable1 = imageCollectionViewSource
+                        var disposable1 = _imageCollectionViewSource
                             .View
                             .ObserveCollectionChanges()
                             .Select(pattern => (ICollectionView) pattern.Sender)
@@ -167,7 +170,7 @@ namespace SonOfPicasso.UI.Windows
                             .DistinctUntilChanged(verticalOffset => (int) (verticalOffset / 50))
                             .Select(verticalOffset =>
                             {
-                                var listViewItem = GetFirstVisibleListViewItem(ImagesListScrollViewer);
+                                var listViewItem = GetFirstVisibleListViewItem<ImageViewModel>(ImagesListScrollViewer);
                                 var imageViewModel1 = (ImageViewModel) listViewItem?.DataContext;
                                 return imageViewModel1?.ImageContainerViewModel;
                             })
@@ -367,7 +370,7 @@ namespace SonOfPicasso.UI.Windows
 
         public ScrollViewer ImagesListScrollViewer { get; set; }
 
-        private ListViewItem GetFirstVisibleListViewItem(ScrollViewer imagesListScrollViewer)
+        private ListViewItem GetFirstVisibleListViewItem<TDataContextType>(ScrollViewer imagesListScrollViewer)
         {
             var listViewItems = ImagesListScrollViewer
                 .FindVisualChildren<ListViewItem>()
@@ -378,6 +381,9 @@ namespace SonOfPicasso.UI.Windows
 
             foreach (var listViewItem in listViewItems)
             {
+                if(!listViewItem.DataContext.GetType().Equals(typeof(TDataContextType)))
+                    continue;
+
                 var translatePoint = listViewItem.TranslatePoint(new Point(), imagesListScrollViewer);
 
                 if (translatePoint.Y <= 0)
@@ -424,6 +430,15 @@ namespace SonOfPicasso.UI.Windows
 
             ViewModel.NewAlbumWithImages.Execute(imageViewModels)
                 .Subscribe();
+        }
+
+        private void ImageBitmap_OnInitialized(object sender, EventArgs e)
+        {
+            var image = (Image) sender;
+            var imageViewModel = (ImageViewModel) image.DataContext;
+            _imageLoadingService.LoadImageFromPath(imageViewModel.Path)
+                .ObserveOn(_schedulerProvider.MainThreadScheduler)
+                .Subscribe(source => image.Source = source);
         }
     }
 }

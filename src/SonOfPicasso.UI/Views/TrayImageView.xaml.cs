@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using ReactiveUI;
+using SonOfPicasso.Core.Interfaces;
+using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.UI.ViewModels;
 using Splat;
 
@@ -11,7 +14,7 @@ namespace SonOfPicasso.UI.Views
     /// </summary>
     public partial class TrayImageView : ReactiveUserControl<TrayImageViewModel>
     {
-        public TrayImageView()
+        public TrayImageView(IImageLoadingService imageLoadingService, ISchedulerProvider schedulerProvider)
         {
             InitializeComponent();
 
@@ -20,10 +23,11 @@ namespace SonOfPicasso.UI.Views
                 this.OneWayBind(ViewModel,
                     model => model.Pinned,
                     view => view.ImageOverlay.Visibility);
-                
-                this.OneWayBind(ViewModel,
-                    model => model.ImageViewModel.Image,
-                    view => view.ImageBitmap.Source);
+
+                imageLoadingService.LoadImageFromPath(ViewModel.ImageViewModel.Path)
+                    .ObserveOn(schedulerProvider.MainThreadScheduler)
+                    .Subscribe(source => ImageBitmap.Source = source)
+                    .DisposeWith(d);
             });
         }
     }
