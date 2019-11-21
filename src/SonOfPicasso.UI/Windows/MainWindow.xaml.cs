@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO.Abstractions;
 using System.Linq;
@@ -13,6 +14,7 @@ using System.Windows.Data;
 using System.Windows.Forms;
 using DynamicData;
 using DynamicData.Binding;
+using MoreLinq;
 using ReactiveUI;
 using Serilog;
 using Serilog.Events;
@@ -113,6 +115,36 @@ namespace SonOfPicasso.UI.Windows
 
                 ImagesListScrollViewer = ImagesList.FindVisualChildren<ScrollViewer>().First();
 
+                ContainersList.Events()
+                    .SelectionChanged
+                    .Subscribe(args =>
+                    {
+                        var imageContainerViewModel = args.AddedItems
+                            .Cast<ImageContainerViewModel>()
+                            .FirstOrDefault();
+
+                        if (imageContainerViewModel == null)
+                        {
+                            return;
+                        }
+
+                        var (groupIndex, rowIndex) = imageCollectionViewSource
+                            .View
+                            .Groups
+                            .Cast<CollectionViewGroup>()
+                            .SelectMany((group, g) => group.Items
+                                .Cast<ImageViewModel>()
+                                .Batch(ViewModel.ImagesViewportColumns)
+                                .Select(models => (models, g)))
+                            .Select((tuple, r) => (tuple.models, tuple.g, r))
+                            .Where(tuple => tuple.models.Any(model => model.ContainerKey == imageContainerViewModel.ContainerKey))
+                            .Select(tuple => (tuple.g, tuple.r))
+                            .FirstOrDefault();
+
+                        var scrollToPosition = rowIndex * 300 + groupIndex * 28;
+                        ImagesListScrollViewer.ScrollToVerticalOffset(scrollToPosition);
+                    });
+
                 Observable.Create<string>(observer =>
                     {
                         var disposable1 = imageCollectionViewSource
@@ -154,18 +186,6 @@ namespace SonOfPicasso.UI.Windows
                         return new CompositeDisposable(disposable1, disposable2);
                     })
                     .BindTo(ViewModel, model => model.VisibleItemContainerKey);
-
-                ImagesListScrollViewer
-                    .WhenAny(
-                        scrollViewer => scrollViewer.ViewportWidth,
-                        observedChange1 => observedChange1.Value)
-                    .Select(viewportWidth => (int) (viewportWidth / 300))
-                    .DistinctUntilChanged()
-                    .Subscribe(columns =>
-                    {
-                        _logger.Verbose("Max image columns {Columns}", columns);
-                    })
-                    .DisposeWith(d);
 
                 ImagesListScrollViewer
                     .WhenAny(

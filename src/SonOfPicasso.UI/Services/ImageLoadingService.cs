@@ -25,10 +25,16 @@ namespace SonOfPicasso.UI.Services
 
         public IObservable<IBitmap> LoadImageFromPath(string path)
         {
-            return Observable.Using(
-                    () => _fileSystem.File.OpenRead(path),
-                    stream => Observable.FromAsync(() => BitmapLoader.Current.Load(stream, null, null)))
-                .SubscribeOn(_schedulerProvider.TaskPool);
+            return Observable.Defer(() =>
+            {
+                _logger.Verbose("Loading image {Path}", path);
+
+                return Observable.Using(
+                        () => _fileSystem.File.OpenRead(path),
+                        stream => Observable.FromAsync(() => BitmapLoader.Current.Load(stream, null, null)))
+                    .Do(bitmap => _logger.Verbose("Loaded image {Path}", path));
+            })
+            .SubscribeOn(_schedulerProvider.TaskPool);
         }
     }
 }

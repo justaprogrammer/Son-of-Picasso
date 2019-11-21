@@ -167,13 +167,13 @@
 
                 <ListView.ItemTemplate>
                     <DataTemplate DataType="viewModels:ImageViewModel">
-                        <DockPanel Height="300" Width="300">
+                        <Canvas Height="300" Width="300">
                             <Image Height="250" Width="250"
                                    Name="ImageBitmap"
                                    RenderOptions.BitmapScalingMode="HighQuality"
                                    Stretch="Fill"
                                    Source="{Binding Image}" />
-                        </DockPanel>
+                        </Canvas>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>

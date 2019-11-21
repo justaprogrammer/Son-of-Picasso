@@ -8,6 +8,7 @@ using System.Reactive.Subjects;
 using DynamicData;
 using DynamicData.Binding;
 using ReactiveUI;
+using Serilog;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Model;
 using SonOfPicasso.Core.Scheduling;
@@ -20,6 +21,7 @@ namespace SonOfPicasso.UI.ViewModels
     public class ApplicationViewModel : ActivatableViewModelBase, IDisposable
     {
         private readonly IImageContainerManagementService _imageContainerManagementService;
+        private readonly ILogger _logger;
         private readonly IObservableCache<ImageContainerViewModel, string> _imageContainerViewModelCache;
 
         private readonly IObservableCache<ImageViewModel, string> _imageViewModelCache;
@@ -45,10 +47,12 @@ namespace SonOfPicasso.UI.ViewModels
         public ApplicationViewModel(ISchedulerProvider schedulerProvider,
             IImageContainerManagementService imageContainerManagementService,
             IImageLoadingService imageLoadingService,
-            ViewModelActivator activator) : base(activator)
+            ViewModelActivator activator,
+            ILogger logger) : base(activator)
         {
             _schedulerProvider = schedulerProvider;
             _imageContainerManagementService = imageContainerManagementService;
+            _logger = logger;
 
             _selectedImagesSourceCache = new SourceCache<ImageViewModel, int>(model => model.ImageId);
 
@@ -97,7 +101,7 @@ namespace SonOfPicasso.UI.ViewModels
                 .TransformMany(imageContainerViewModel =>
                         imageContainerViewModel.ImageRefs.Select(imageRef =>
                             new ImageViewModel(imageLoadingService, _schedulerProvider, imageRef,
-                                imageContainerViewModel)),
+                                imageContainerViewModel, logger.ForContext<ImageViewModel>())),
                     imageViewModel => imageViewModel.ImageRefId)
                 .DisposeMany()
                 .AsObservableCache();
@@ -178,7 +182,7 @@ namespace SonOfPicasso.UI.ViewModels
                     .Subscribe()
                     .DisposeWith(d);
 
-                this.WhenAny(model => model.ImagesViewportWidth, change => (int) (change.Value / 300))
+                this.WhenAny(model => model.ImagesViewportWidth, change => Math.Max(1, (int) (change.Value / 300)))
                     .ToProperty(this, nameof(ImagesViewportColumns), out _imagesViewportColumns);
             });
         }

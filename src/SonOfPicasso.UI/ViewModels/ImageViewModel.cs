@@ -7,18 +7,21 @@ using SonOfPicasso.Core.Model;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.UI.ViewModels.Abstract;
 using Splat;
+using ILogger = Serilog.ILogger;
 
 namespace SonOfPicasso.UI.ViewModels
 {
     public class ImageViewModel : ViewModelBase
     {
+        private readonly ILogger _logger;
         private readonly ObservableAsPropertyHelper<BitmapSource> _image;
 
         public ImageViewModel(IImageLoadingService imageLoadingService, ISchedulerProvider schedulerProvider,
-            ImageRef imageRef, ImageContainerViewModel imageContainerViewModel)
+            ImageRef imageRef, ImageContainerViewModel imageContainerViewModel, ILogger logger)
         {
             if (imageLoadingService == null) throw new ArgumentNullException(nameof(imageLoadingService));
             if (schedulerProvider == null) throw new ArgumentNullException(nameof(schedulerProvider));
+            _logger = logger;
 
             ImageRef = 
                 imageRef ?? 
@@ -32,6 +35,10 @@ namespace SonOfPicasso.UI.ViewModels
                 .LoadImageFromPath(Path)
                 .Select(bitmap => bitmap.ToNative())
                 .ObserveOn(schedulerProvider.MainThreadScheduler)
+                .Do(source =>
+                {
+                    _logger.Verbose("Image Loaded {Path}", Path);
+                })
                 .ToProperty(this, nameof(Image), out _image, deferSubscription: true);
         }
 
