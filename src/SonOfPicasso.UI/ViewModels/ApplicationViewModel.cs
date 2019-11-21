@@ -19,13 +19,12 @@ namespace SonOfPicasso.UI.ViewModels
 {
     public class ApplicationViewModel : ActivatableViewModelBase, IDisposable
     {
-        private readonly IFolderRulesManagementService _folderRulesManagementService;
         private readonly IImageContainerManagementService _imageContainerManagementService;
         private readonly IObservableCache<ImageContainerViewModel, string> _imageContainerViewModelCache;
 
         private readonly Func<ImageContainerViewModel> _imageContainerViewModelFactory;
+        private readonly IImageLoadingService _imageLoadingService;
         private readonly IObservableCache<ImageViewModel, string> _imageViewModelCache;
-        private readonly Func<ImageViewModel> _imageViewModelFactory;
         private readonly ISchedulerProvider _schedulerProvider;
 
         private readonly SourceCache<ImageViewModel, int> _selectedImagesSourceCache;
@@ -44,17 +43,15 @@ namespace SonOfPicasso.UI.ViewModels
 
         public ApplicationViewModel(ISchedulerProvider schedulerProvider,
             IImageContainerManagementService imageContainerManagementService,
-            IFolderRulesManagementService folderRulesManagementService,
+            IImageLoadingService imageLoadingService,
             Func<ImageContainerViewModel> imageContainerViewModelFactory,
-            Func<ImageViewModel> imageViewModelFactory,
             Func<TrayImageViewModel> trayImageViewModelFactory,
             ViewModelActivator activator) : base(activator)
         {
             _schedulerProvider = schedulerProvider;
             _imageContainerManagementService = imageContainerManagementService;
-            _folderRulesManagementService = folderRulesManagementService;
+            _imageLoadingService = imageLoadingService;
             _imageContainerViewModelFactory = imageContainerViewModelFactory;
-            _imageViewModelFactory = imageViewModelFactory;
             _trayImageViewModelFactory = trayImageViewModelFactory;
 
             _selectedImagesSourceCache = new SourceCache<ImageViewModel, int>(model => model.ImageId);
@@ -86,13 +83,16 @@ namespace SonOfPicasso.UI.ViewModels
             _imageContainerViewModelCache = _imageContainerManagementService
                 .ImageContainerCache
                 .Connect()
-                .Transform(CreateImageContainerViewModel)
+                .Transform(imageContainer => new ImageContainerViewModel(imageContainer))
                 .DisposeMany()
                 .AsObservableCache();
 
             _imageViewModelCache = _imageContainerViewModelCache
                 .Connect()
-                .TransformMany(CreateImageViewModels, imageViewModel => imageViewModel.ImageRefId)
+                .TransformMany(model =>
+                        model.ImageRefs.Select(imageRef =>
+                            new ImageViewModel(_imageLoadingService, _schedulerProvider, imageRef, model)),
+                    imageViewModel => imageViewModel.ImageRefId)
                 .DisposeMany()
                 .AsObservableCache();
 
@@ -234,31 +234,11 @@ namespace SonOfPicasso.UI.ViewModels
             _imageContainerManagementService?.Dispose();
         }
 
-        private IEnumerable<ImageViewModel> CreateImageViewModels(ImageContainerViewModel containerViewModel)
-        {
-            return containerViewModel.ImageRefs.Select(imageRef =>
-                CreateImageViewModel(imageRef, containerViewModel));
-        }
-
         private TrayImageViewModel CreateTrayImageViewModel(ImageViewModel model)
         {
             var trayImageViewModel = _trayImageViewModelFactory();
             trayImageViewModel.Initialize(model);
             return trayImageViewModel;
-        }
-
-        private ImageViewModel CreateImageViewModel(ImageRef imageRef, ImageContainerViewModel imageContainerViewModel)
-        {
-            var imageViewModel = _imageViewModelFactory();
-            imageViewModel.Initialize(imageRef, imageContainerViewModel);
-            return imageViewModel;
-        }
-
-        private ImageContainerViewModel CreateImageContainerViewModel(IImageContainer imageContainer)
-        {
-            var imageContainerViewModel = _imageContainerViewModelFactory();
-            imageContainerViewModel.Initialize(imageContainer, this);
-            return imageContainerViewModel;
         }
 
         private IObservable<ImageContainerViewModel> ExecuteNewAlbum(Unit _)

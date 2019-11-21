@@ -7,7 +7,13 @@ namespace SonOfPicasso.UI.ViewModels
 {
     public class ImageContainerViewModel : ViewModelBase
     {
-        private IImageContainer _imageContainer;
+        private readonly IImageContainer _imageContainer;
+
+        public ImageContainerViewModel(IImageContainer imageContainer)
+        {
+            _imageContainer =
+                imageContainer ?? throw new ArgumentNullException(nameof(imageContainer));
+        }
 
         public string Name => _imageContainer.Name;
 
@@ -23,16 +29,5 @@ namespace SonOfPicasso.UI.ViewModels
         public int Year => _imageContainer.Year;
 
         public DateTime Date => _imageContainer.Date;
-
-        public ApplicationViewModel ApplicationViewModel { get; private set; }
-
-        public void Initialize(IImageContainer imageContainer, ApplicationViewModel applicationViewModel)
-        {
-            _imageContainer = 
-                imageContainer ?? throw new ArgumentNullException(nameof(imageContainer));
-
-            ApplicationViewModel =
-                applicationViewModel ?? throw new ArgumentNullException(nameof(applicationViewModel));
-        }
     }
 }
