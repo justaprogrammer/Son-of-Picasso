@@ -436,8 +436,8 @@ namespace SonOfPicasso.UI.Windows
         {
             var image = (Image) sender;
             var imageViewModel = (ImageViewModel) image.DataContext;
-            _imageLoadingService.LoadImageFromPath(imageViewModel.Path)
-                .ObserveOn(_schedulerProvider.MainThreadScheduler)
+            _imageLoadingService.LoadThumbnailFromPath(imageViewModel.Path)
+                .ObserveOnDispatcher()
                 .Subscribe(source => image.Source = source);
         }
     }
