@@ -20,7 +20,7 @@ using SonOfPicasso.UI.ViewModels.Abstract;
 
 namespace SonOfPicasso.UI.ViewModels.FolderRules
 {
-    public class ManageFolderRulesViewModel : ViewModelBase, IManageFolderRulesViewModel, IDisposable
+    public class ManageFolderRulesViewModel : ActivatableViewModelBase, IManageFolderRulesViewModel, IDisposable
     {
         private readonly IObservable<IDictionary<string, FolderRuleActionEnum>> _currentFolderManagementRules;
         private readonly IDirectoryInfoPermissionsService _directoryInfoPermissionsService;

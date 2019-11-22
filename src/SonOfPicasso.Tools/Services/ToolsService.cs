@@ -13,18 +13,11 @@ namespace SonOfPicasso.Tools.Services
 
         private readonly ILogger _logger;
         private readonly IFileSystem _fileSystem;
-        private readonly IDataCache _dataCache;
 
-        public ToolsService(ILogger logger, IFileSystem fileSystem, IDataCache dataCache)
+        public ToolsService(ILogger logger, IFileSystem fileSystem)
         {
             _logger = logger;
             _fileSystem = fileSystem;
-            _dataCache = dataCache;
-        }
-
-        public IObservable<Unit> ClearCache()
-        {
-            return _dataCache.Clear();
         }
     }
 }

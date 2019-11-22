@@ -23,7 +23,8 @@ namespace SonOfPicasso.UI.ViewModels
         private string _albumName = string.Empty;
 
         public AddAlbumViewModel(ViewModelActivator activator, ILogger logger,
-            IImageContainerOperationService imageContainerOperationService, ISchedulerProvider schedulerProvider) : base(
+            IImageContainerOperationService imageContainerOperationService,
+            ISchedulerProvider schedulerProvider) : base(
             activator, schedulerProvider.TaskPool)
         {
             _logger = logger;
@@ -35,9 +36,8 @@ namespace SonOfPicasso.UI.ViewModels
                     s => !string.IsNullOrWhiteSpace(s),
                     "Album name must be set");
 
-            _displayAlbumNameError =
-                OnValidationHelperChange(model => model.AlbumName, model => model.AlbumNameRule.IsValid)
-                    .ToProperty(this, model => model.DisplayAlbumNameError);
+            OnValidationHelperChange(model => model.AlbumName, model => model.AlbumNameRule.IsValid)
+                .ToProperty(this, nameof(DisplayAlbumNameError), out _displayAlbumNameError);
 
             Continue = ReactiveCommand.CreateFromObservable(ExecuteContinue, this.IsValid());
             ContinueInteraction = new Interaction<Unit, Unit>();

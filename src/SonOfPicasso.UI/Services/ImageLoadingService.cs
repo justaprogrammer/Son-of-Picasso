@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO.Abstractions;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
 using Splat;
@@ -24,17 +24,20 @@ namespace SonOfPicasso.UI.Services
             _schedulerProvider = schedulerProvider ?? throw new ArgumentNullException(nameof(schedulerProvider));
         }
 
-        public IObservable<IBitmap> LoadImageFromPath(string path)
+        public IObservable<BitmapSource> LoadImageFromPath(string path)
         {
-            return Observable.Using(
-                () => _fileSystem.File.OpenRead(path),
-                stream => Observable.FromAsync(
-                    () =>
-                    {
-                        _logger.Verbose("LoadImageFromPath {Path}", path);
-                        return BitmapLoader.Current.Load(stream, null, null);
-                    }))
-                .SubscribeOn(_schedulerProvider.TaskPool);
+            return Observable.DeferAsync(async (token) =>
+            {
+                _logger.Verbose("Loading image {Path}", path);
+
+                await using var stream = _fileSystem.File.OpenRead(path);
+                var load = await BitmapLoader.Current.Load(stream, null, null);
+                var result = load.ToNative();
+                result.Freeze();
+
+                return Observable.Return(result);
+            })
+            .SubscribeOn(_schedulerProvider.TaskPool);
         }
     }
 }

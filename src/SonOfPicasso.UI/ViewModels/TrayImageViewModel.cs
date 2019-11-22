@@ -7,16 +7,12 @@ namespace SonOfPicasso.UI.ViewModels
     {
         private bool _pinned;
 
-        public TrayImageViewModel(ViewModelActivator activator) : base(activator)
+        public TrayImageViewModel(ImageViewModel imageViewModel)
         {
+            ImageViewModel = imageViewModel;
         }
 
-        public ImageViewModel Image { get; private set; }
-
-        public void Initialize(ImageViewModel imageViewModel)
-        {
-            Image = imageViewModel;
-        }
+        public ImageViewModel ImageViewModel { get; }
 
         public bool Pinned
         {

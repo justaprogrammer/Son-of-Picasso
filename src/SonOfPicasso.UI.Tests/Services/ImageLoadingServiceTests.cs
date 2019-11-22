@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Windows.Media.Imaging;
 using FluentAssertions;
 using SonOfPicasso.Testing.Common;
 using SonOfPicasso.Testing.Common.Extensions;
@@ -32,7 +33,7 @@ namespace SonOfPicasso.UI.Tests.Services
             MockFileSystem.AddFileFromEmbeddedResource(filePath, resourceAssembly,
                 "SonOfPicasso.Testing.Common.Resources.DSC04085.JPG");
 
-            IBitmap bitmap = null;
+            BitmapSource bitmap = null;
 
             var imageLoadingService = AutoSubstitute.Resolve<ImageLoadingService>();
 
