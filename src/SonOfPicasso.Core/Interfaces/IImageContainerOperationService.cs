@@ -10,7 +10,7 @@ namespace SonOfPicasso.Core.Interfaces
 {
     public interface IImageContainerOperationService
     {
-        IObservable<IImageContainer> ScanFolder(string path, IObservableCache<ImageRef, string> folderImageRefCache);
+        IObservable<int> ScanFolder(string path, IObservableCache<ImageRef, string> folderImageRefCache);
         IObservable<IImageContainer> CreateAlbum(ICreateAlbum createAlbum);
         IObservable<IImageContainer> GetAllImageContainers();
         IObservable<IImageContainer> AddImagesToAlbum(int albumId, IEnumerable<int> imageIds);
@@ -19,7 +19,7 @@ namespace SonOfPicasso.Core.Interfaces
         IObservable<IImageContainer> UpdateImage(string path);
         IObservable<IImageContainer> RenameImage(string oldPath, string newPath);
         IObservable<Unit> DeleteAlbum(int albumId);
-        IObservable<IImageContainer> AddOrUpdateImage(string path);
+        IObservable<int> AddOrUpdateImage(string path);
         IObservable<ResetChanges> PreviewRuleChangesEffect(IEnumerable<FolderRule> folderRules);
         IObservable<ResetChanges> ApplyRuleChanges(IEnumerable<FolderRule> folderRules);
         IObservable<IImageContainer>  GetFolderImageContainer(int folderId);

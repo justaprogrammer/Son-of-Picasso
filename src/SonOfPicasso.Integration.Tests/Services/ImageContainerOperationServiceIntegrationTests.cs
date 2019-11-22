@@ -645,6 +645,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             var imageContainerOperationService = Container.Resolve<ImageContainerOperationService>();
             var imageContainers = await imageContainerOperationService
                 .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath))
+                .SelectMany(i => imageContainerOperationService.GetAlbumImageContainer(i))
                 .ToArray();
 
             var imageRefs = Faker
@@ -721,6 +722,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             var imageContainerOperationService = Container.Resolve<ImageContainerOperationService>();
             var imageContainers = await imageContainerOperationService
                 .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath))
+                .SelectMany(i => imageContainerOperationService.GetAlbumImageContainer(i))
                 .ToArray();
 
             var imageRefs = Faker

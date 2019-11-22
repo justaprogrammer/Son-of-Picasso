@@ -6,6 +6,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using DynamicData;
 using Serilog;
+using Serilog.Events;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Model;
 using SonOfPicasso.Core.Scheduling;
@@ -42,82 +43,13 @@ namespace SonOfPicasso.Core.Services
             _exifDataService = exifDataService;
         }
 
-        public IObservable<IImageContainer> ScanFolder(string path,
+        public IObservable<int> ScanFolder(string path,
             IObservableCache<ImageRef, string> folderImageRefCache)
         {
             return _imageLocationService
                 .GetImages(path)
                 .Where(fileInfo => !folderImageRefCache.Lookup(fileInfo.FullName).HasValue)
-                .SelectMany(fileInfo => _exifDataService.GetExifData(fileInfo.FullName, true)
-                    .Select(exifData => (fileInfo, exifData)))
-                .GroupByUntil(tuple => tuple.fileInfo.DirectoryName,
-                    tuple => Observable.Timer(TimeSpan.FromSeconds(0.5)))
-                .SelectMany(groupedObservable =>
-                {
-                    var folderPath = groupedObservable.Key;
-
-                    var imagesObservable = groupedObservable
-                        .Select(tuple => new Image
-                        {
-                            Path = tuple.fileInfo.FullName,
-                            CreationTime = tuple.fileInfo.CreationTimeUtc,
-                            LastWriteTime = tuple.fileInfo.LastWriteTimeUtc,
-                            ExifData = tuple.exifData
-                        })
-                        .ToArray();
-
-                    var minDateObservable = groupedObservable.Select(tuple => tuple.exifData.DateTime).Min();
-
-                    return imagesObservable.Zip(minDateObservable, (i, d) => (i, d, folderPath));
-                })
-                .SelectMany(tuple =>
-                {
-                    return Observable.Defer(() =>
-                    {
-                        var (images, minDate, folderPath) = tuple;
-
-                        _logger.Verbose("Saving Folder {Path}", folderPath);
-
-                        lock (_writeLock)
-                        {
-                            using var unitOfWork = _unitOfWorkFactory();
-                            using var transaction = unitOfWork.BeginTransaction();
-
-                            var folder = unitOfWork.FolderRepository
-                                .Get(d => d.Path == folderPath, includeProperties: FolderDefaultProperties)
-                                .FirstOrDefault();
-
-                            var isNew = false;
-
-                            if (folder != null)
-                            {
-                                folder.Images.AddRange(images);
-                            }
-                            else
-                            {
-                                isNew = true;
-
-                                folder = new Folder
-                                {
-                                    Path = folderPath,
-                                    Images = images.ToList(),
-                                    Date = minDate.Date
-                                };
-
-                                unitOfWork.FolderRepository.Insert(folder);
-                            }
-
-                            unitOfWork.Save();
-                            transaction.Commit();
-
-                            _logger.Verbose("Saved Folder IsNew:{IsNew} ImageCount:{ImageCount} {Path}", isNew,
-                                images.Length, folderPath);
-
-                            return Observable.Return(folder.Id);
-                        }
-                    });
-                })
-                .SelectMany(GetFolderImageContainer)
+                .SelectMany(fileInfo => Observable.Defer(() => AddOrUpdateImage(fileInfo.FullName)))
                 .SubscribeOn(_schedulerProvider.TaskPool);
         }
 
@@ -405,70 +337,70 @@ namespace SonOfPicasso.Core.Services
                 .SubscribeOn(_schedulerProvider.TaskPool);
         }
 
-        public IObservable<IImageContainer> AddOrUpdateImage(string path)
+        public IObservable<int> AddOrUpdateImage(string path)
         {
-            return Observable.DeferAsync(async token =>
+            return _exifDataService.GetExifData(path)
+                .Select(exifData =>
                 {
-                    var exifData = await _exifDataService.GetExifData(path);
-                    var fileInfo = _fileSystem.FileInfo.FromFileName(path);
-                    var directory = _fileSystem.Path.GetDirectoryName(path);
-
-                    lock (_writeLock)
+                    using (_logger.BeginTimedOperation("AddOrUpdateImage", path, LogEventLevel.Verbose))
                     {
-                        _logger.Verbose("AddOrUpdateImage {Path}", path);
-
-                        using var unitOfWork = _unitOfWorkFactory();
-                        using var transaction = unitOfWork.BeginTransaction();
-
-                        var image = unitOfWork.ImageRepository
-                            .Get(i => i.Path.Equals(path))
-                            .FirstOrDefault();
-
-                        if (image == null)
+                        lock (_writeLock)
                         {
-                            image = new Image
+                            var fileInfo = _fileSystem.FileInfo.FromFileName(path);
+                            var directory = _fileSystem.Path.GetDirectoryName(path);
+
+                            using var unitOfWork = _unitOfWorkFactory();
+                            using var transaction = unitOfWork.BeginTransaction();
+
+                            var image = unitOfWork.ImageRepository
+                                .Get(i => i.Path.Equals(path))
+                                .FirstOrDefault();
+
+                            if (image == null)
                             {
-                                Path = path,
-                                ExifData = exifData,
-                                CreationTime = fileInfo.CreationTimeUtc,
-                                LastWriteTime = fileInfo.LastWriteTimeUtc
-                            };
+                                image = new Image
+                                {
+                                    Path = path,
+                                    ExifData = exifData,
+                                    CreationTime = fileInfo.CreationTimeUtc,
+                                    LastWriteTime = fileInfo.LastWriteTimeUtc
+                                };
 
-                            unitOfWork.ImageRepository.Insert(image);
-                        }
-                        else
-                        {
-                            exifData.Id = image.ExifDataId;
-                            unitOfWork.ExifDataRepository.Update(exifData);
-                        }
-
-                        var folder = unitOfWork.FolderRepository
-                            .Get(f => f.Path.Equals(directory))
-                            .FirstOrDefault();
-
-                        if (folder != null)
-                        {
-                            folder.Images ??= new List<Image>();
-                            folder.Images.Add(image);
-                        }
-                        else
-                        {
-                            folder = new Folder
+                                unitOfWork.ImageRepository.Insert(image);
+                            }
+                            else
                             {
-                                Path = directory,
-                                Date = exifData.DateTime.Date,
-                                Images = new List<Image> {image}
-                            };
+                                exifData.Id = image.ExifDataId;
+                                unitOfWork.ExifDataRepository.Update(exifData);
+                            }
 
-                            unitOfWork.FolderRepository.Insert(folder);
+                            var folder = unitOfWork.FolderRepository
+                                .Get(f => f.Path.Equals(directory))
+                                .FirstOrDefault();
+
+                            if (folder != null)
+                            {
+                                folder.Images ??= new List<Image>();
+                                folder.Images.Add(image);
+                            }
+                            else
+                            {
+                                folder = new Folder
+                                {
+                                    Path = directory,
+                                    Date = exifData.DateTime.Date,
+                                    Images = new List<Image> {image}
+                                };
+
+                                unitOfWork.FolderRepository.Insert(folder);
+                            }
+
+                            unitOfWork.Save();
+                            transaction.Commit();
+                            return image.FolderId;
                         }
-
-                        unitOfWork.Save();
-                        transaction.Commit();
-                        return Observable.Return(image.FolderId);
                     }
                 })
-                .SelectMany(GetFolderImageContainer)
                 .SubscribeOn(_schedulerProvider.TaskPool);
         }
 

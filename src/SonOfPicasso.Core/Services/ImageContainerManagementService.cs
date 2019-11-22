@@ -48,6 +48,7 @@ namespace SonOfPicasso.Core.Services
 
             _imageContainerWatcherService.FileDiscovered
                 .SelectMany(path => _imageContainerOperationService.AddOrUpdateImage(path))
+                .SelectMany(i => _imageContainerOperationService.GetFolderImageContainer(i))
                 .Subscribe(container => _imageContainerCache.AddOrUpdate(container))
                 .DisposeWith(_disposables);
 
@@ -126,6 +127,8 @@ namespace SonOfPicasso.Core.Services
                         Action = FolderRuleActionEnum.Once
                     })
                 .SelectMany(unit =>_imageContainerOperationService.ScanFolder(path, _folderImageRefCache))
+                .GroupByUntil(i => i, i => Observable.Timer(TimeSpan.FromSeconds(3)))
+                .SelectMany(i => _imageContainerOperationService.GetFolderImageContainer(i.Key))
                 .Do(container => _imageContainerCache.AddOrUpdate(container));
         }
 
