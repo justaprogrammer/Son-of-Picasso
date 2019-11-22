@@ -12,7 +12,7 @@ using Xunit;
 using Xunit.Abstractions;
 
 namespace SonOfPicasso.Core.Tests.Services
-{
+{    
     public class ImageLocationServiceTests : UnitTestsBase
     {
         public ImageLocationServiceTests(ITestOutputHelper testOutputHelper)
