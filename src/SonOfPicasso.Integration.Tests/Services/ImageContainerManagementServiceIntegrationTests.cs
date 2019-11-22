@@ -260,6 +260,8 @@ namespace SonOfPicasso.Integration.Tests.Services
             var environmentVariable = Environment.GetEnvironmentVariable("SonOfPicasso_IntegrationTests_RealImagesFolder");
             Skip.If(string.IsNullOrWhiteSpace(environmentVariable), "RealImagesFolder environment variable not provided");
 
+            Logger.Information("ShouldScanFolderWithRealImages");
+
             await InitializeDataContextAsync();
 
             var imageContainerManagementService = Container.Resolve<ImageContainerManagementService>();
@@ -278,7 +280,8 @@ namespace SonOfPicasso.Integration.Tests.Services
                 .Connect()
                 .Subscribe(set =>
                 {
-                    var distinctContainers = set.Select(change => change.Current.ContainerKey)
+                    var distinctContainers = set
+                        .Select(change => change.Current.ContainerKey)
                         .Distinct()
                         .Count();
 
@@ -286,13 +289,14 @@ namespace SonOfPicasso.Integration.Tests.Services
                         distinctContainers, set.Adds, set.Removes, set.Updates);
                 });
 
-            imageContainerManagementService.ScanFolder(environmentVariable)
-                .Subscribe(container =>
+            imageContainerManagementService
+                .ScanFolder(environmentVariable)
+                .SubscribeOn(SchedulerProvider.TaskPool)
+                .Subscribe(unit =>
                 {
-                    Logger.Verbose("Scan Folder Container Result {Name}", container.Name);
+                    
                 }, () =>
                 {
-                    Set();
                 });
 
             AutoResetEvent.WaitOne(TimeSpan.FromSeconds(20));

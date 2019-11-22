@@ -643,10 +643,10 @@ namespace SonOfPicasso.Integration.Tests.Services
             await GenerateImagesAsync(imageCount);
 
             var imageContainerOperationService = Container.Resolve<ImageContainerOperationService>();
-            var imageContainers = await imageContainerOperationService
-                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath))
-                .SelectMany(i => imageContainerOperationService.GetAlbumImageContainer(i))
-                .ToArray();
+            IImageContainer[] imageContainers = null;
+
+            await imageContainerOperationService
+                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath));
 
             var imageRefs = Faker
                 .PickRandom(imageContainers.SelectMany(container => container.ImageRefs.Select(imageRef => imageRef)),
@@ -720,10 +720,10 @@ namespace SonOfPicasso.Integration.Tests.Services
             await GenerateImagesAsync(imageCount);
 
             var imageContainerOperationService = Container.Resolve<ImageContainerOperationService>();
-            var imageContainers = await imageContainerOperationService
-                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath))
-                .SelectMany(i => imageContainerOperationService.GetAlbumImageContainer(i))
-                .ToArray();
+            IImageContainer[] imageContainers = null;
+
+            await imageContainerOperationService
+                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath));
 
             var imageRefs = Faker
                 .PickRandom(imageContainers.SelectMany(container => container.ImageRefs.Select(imageRef => imageRef)),

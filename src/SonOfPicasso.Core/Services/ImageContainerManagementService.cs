@@ -117,7 +117,7 @@ namespace SonOfPicasso.Core.Services
             _imageContainerWatcherService.Stop();
         }
 
-        public IObservable<IImageContainer> ScanFolder(string path)
+        public IObservable<Unit> ScanFolder(string path)
         {
             return _folderRulesManagementService
                 .AddFolderManagementRule(
@@ -127,9 +127,7 @@ namespace SonOfPicasso.Core.Services
                         Action = FolderRuleActionEnum.Once
                     })
                 .SelectMany(unit =>_imageContainerOperationService.ScanFolder(path, _folderImageRefCache))
-                .GroupByUntil(i => i, i => Observable.Timer(TimeSpan.FromSeconds(3)))
-                .SelectMany(i => _imageContainerOperationService.GetFolderImageContainer(i.Key))
-                .Do(container => _imageContainerCache.AddOrUpdate(container));
+                .LastOrDefaultAsync();
         }
 
         public IObservable<IImageContainer> CreateAlbum(ICreateAlbum createAlbum)

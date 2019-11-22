@@ -4,6 +4,9 @@ using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
+using System.Threading.Channels;
+using System.Threading.Tasks;
 using DynamicData;
 using Serilog;
 using Serilog.Events;
@@ -24,12 +27,16 @@ namespace SonOfPicasso.Core.Services
         private readonly IFileSystem _fileSystem;
         private readonly IImageLocationService _imageLocationService;
         private readonly ILogger _logger;
+        private readonly IImageLoadingService _imageLoadingService;
         private readonly ISchedulerProvider _schedulerProvider;
         private readonly Func<IUnitOfWork> _unitOfWorkFactory;
         private readonly object _writeLock = new object();
+        private readonly Channel<string> _scanImageChannel;
+        private readonly Task<Task> _scanImageTask;
 
         public ImageContainerOperationService(IFileSystem fileSystem,
             ILogger logger,
+            IImageLoadingService imageLoadingService,
             IImageLocationService imageLocationService,
             Func<IUnitOfWork> unitOfWorkFactory,
             ISchedulerProvider schedulerProvider,
@@ -37,20 +44,40 @@ namespace SonOfPicasso.Core.Services
         {
             _fileSystem = fileSystem;
             _logger = logger;
+            _imageLoadingService = imageLoadingService;
             _imageLocationService = imageLocationService;
             _unitOfWorkFactory = unitOfWorkFactory;
             _schedulerProvider = schedulerProvider;
             _exifDataService = exifDataService;
+            
+            _scanImageChannel = Channel.CreateUnbounded<string>();
+            _scanImageTask = Task.Factory.StartNew(async () =>
+            {
+                while (await _scanImageChannel.Reader.WaitToReadAsync())
+                {
+                    var path = await _scanImageChannel.Reader.ReadAsync();
+                    
+                    _logger.Verbose("Starting job {Path}", path);
+                    
+                    await AddOrUpdateImage(path)
+                        .SubscribeOn(_schedulerProvider.TaskPool);
+                }
+            }, TaskCreationOptions.LongRunning);
         }
 
-        public IObservable<int> ScanFolder(string path,
-            IObservableCache<ImageRef, string> folderImageRefCache)
+        public IObservable<Unit> ScanFolder(string path, IObservableCache<ImageRef, string> folderImageRefCache)
         {
             return _imageLocationService
                 .GetImages(path)
                 .Where(fileInfo => !folderImageRefCache.Lookup(fileInfo.FullName).HasValue)
-                .SelectMany(fileInfo => Observable.Defer(() => AddOrUpdateImage(fileInfo.FullName)))
-                .SubscribeOn(_schedulerProvider.TaskPool);
+                .Do(info =>
+                {
+                    _scanImageChannel.Writer.WriteAsync(info.FullName)
+                        .AsTask().ToObservable()
+                        .SubscribeOn(_schedulerProvider.TaskPool);
+                })
+                .LastAsync()
+                .Select(info => Unit.Default);
         }
 
         public IObservable<IImageContainer> CreateAlbum(ICreateAlbum createAlbum)
@@ -400,8 +427,7 @@ namespace SonOfPicasso.Core.Services
                             return image.FolderId;
                         }
                     }
-                })
-                .SubscribeOn(_schedulerProvider.TaskPool);
+                });
         }
 
         public IObservable<ResetChanges> PreviewRuleChangesEffect(IEnumerable<FolderRule> folderRules)
