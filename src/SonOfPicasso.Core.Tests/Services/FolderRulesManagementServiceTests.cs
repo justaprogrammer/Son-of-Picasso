@@ -45,7 +45,7 @@ namespace SonOfPicasso.Core.Tests.Services
                         list => { },
                         () =>
                         {
-                            AutoResetEvent.Set();
+                            Set();
                         });
 
                 TestSchedulerProvider.TaskPool.AdvanceBy(3);
