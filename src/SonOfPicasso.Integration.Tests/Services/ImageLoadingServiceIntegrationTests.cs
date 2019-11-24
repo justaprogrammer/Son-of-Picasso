@@ -32,7 +32,7 @@ namespace SonOfPicasso.Integration.Tests.Services
         protected override IContainer Container { get; }
 
         [Fact]
-        public async Task Blah()
+        public async Task ShouldLoadAndCacheThumbnail()
         {
             var generateImages = await GenerateImagesAsync(1, ImagesPath);
             var imagePath = generateImages.First().Value.First();
@@ -42,7 +42,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             var list = new List<Image>();
 
             var imageLoadingService = Container.Resolve<ImageLoadingService>();
-            imageLoadingService.LoadThumbnailFromPathInternal(imagePath, cacheDirectoryInfo.FullName)
+            imageLoadingService.LoadThumbnailFromPathInternal(imagePath, cacheDirectoryInfo.FullName, observeOnlyThumbnail: false)
                 .Subscribe(source =>
                 {
                     list.Add(source);
@@ -62,7 +62,7 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             list.Clear();
 
-            imageLoadingService.LoadThumbnailFromPathInternal(imagePath, cacheDirectoryInfo.FullName)
+            imageLoadingService.LoadThumbnailFromPathInternal(imagePath, cacheDirectoryInfo.FullName, observeOnlyThumbnail: false)
                 .Subscribe(source =>
                 {
                     list.Add(source);
@@ -81,7 +81,7 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             list.Clear();
         
-            imageLoadingService.LoadThumbnailFromPathInternal(imagePath, cacheDirectoryInfo.FullName)
+            imageLoadingService.LoadThumbnailFromPathInternal(imagePath, cacheDirectoryInfo.FullName, observeOnlyThumbnail: false)
                 .Subscribe(source =>
                 {
                     list.Add(source);
