@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Reactive.Linq;
 using Bogus;
 using FluentAssertions;
 using FluentAssertions.Execution;
@@ -44,14 +45,12 @@ namespace SonOfPicasso.Core.Tests.Services
                         list => { },
                         () =>
                         {
-                            AutoResetEvent.Set();
+                            Set();
                         });
 
-                TestSchedulerProvider.TaskPool.AdvanceBy(1);
-                TestSchedulerProvider.TaskPool.AdvanceBy(1);
-                TestSchedulerProvider.TaskPool.AdvanceBy(1);
+                TestSchedulerProvider.TaskPool.AdvanceBy(3);
 
-                AutoResetEvent.WaitOne();
+                WaitOne(2);
 
                 unitOfWork1.DidNotReceive().Save();
 
@@ -73,7 +72,7 @@ namespace SonOfPicasso.Core.Tests.Services
                 return insertedFolderRules;
             }
 
-            [Fact(Skip = "Broken")]
+            [Fact]
             public void ShouldNotAddChildWithSameAction()
             {
                 var existingRules = new[]
@@ -106,7 +105,40 @@ namespace SonOfPicasso.Core.Tests.Services
                 newFolderRules.Should().BeEquivalentTo(existingRules);
             }
 
-            [Fact(Skip = "Broken")]
+            [Fact]
+            public void ShouldNotErrorAppendingExistingRule()
+            {
+                var existingRules = new[]
+                {
+                    new FolderRule
+                    {
+                        Path = "c:\\Stanley\\Pictures",
+                        Action = FolderRuleActionEnum.Always
+                    },
+                    new FolderRule
+                    {
+                        Path = "c:\\Stanley\\Screenshots",
+                        Action = FolderRuleActionEnum.Once
+                    },
+                    new FolderRule
+                    {
+                        Path = "D:\\Other\\Path",
+                        Action = FolderRuleActionEnum.Once
+                    }
+                };
+
+                var addRule = new FolderRule
+                {
+                    Path = "c:\\Stanley\\Pictures",
+                    Action = FolderRuleActionEnum.Always
+                };
+
+                var newFolderRules = ShouldModifyFolderRules(existingRules, addRule);
+
+                newFolderRules.Should().BeEquivalentTo(existingRules);
+            }
+
+            [Fact]
             public void ShouldAddChildWithDifferentAction()
             {
                 var existingRules = new[]
@@ -163,7 +195,7 @@ namespace SonOfPicasso.Core.Tests.Services
                 newFolderRules.Should().BeEquivalentTo(expected);
             }
 
-            [Fact(Skip = "Broken")]
+            [Fact]
             public void ShouldAddNewAction()
             {
                 var existingRules = new[]
