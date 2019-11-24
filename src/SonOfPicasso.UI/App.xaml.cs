@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO.Abstractions;
+using System.Linq;
 using System.Windows;
 using Akavache;
 using Autofac;
@@ -7,6 +8,8 @@ using AutofacSerilogIntegration;
 using Microsoft.EntityFrameworkCore;
 using ReactiveUI;
 using Serilog;
+using Serilog.Events;
+using Serilog.Filters;
 using SonOfPicasso.Core;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Logging;
@@ -14,7 +17,6 @@ using SonOfPicasso.Core.Services;
 using SonOfPicasso.Data.Repository;
 using SonOfPicasso.Data.Services;
 using SonOfPicasso.UI.ViewModels;
-using SonOfPicasso.UI.Views;
 using SonOfPicasso.UI.Windows;
 using Splat;
 using Splat.Serilog;
@@ -48,11 +50,18 @@ namespace SonOfPicasso.UI
                 loggerConfiguration = loggerConfiguration
                     .WriteTo.Trace(outputTemplate: outputTemplate);
 
-            loggerConfiguration = loggerConfiguration
-                .WriteTo
-                .File("SonOfPicasso.log", outputTemplate: outputTemplate);
-
             if (Common.IsVerboseLoggingEnabled) loggerConfiguration = loggerConfiguration.MinimumLevel.Verbose();
+
+            var matches = new[] {Matching.FromSource<ImageLoadingService>()};
+
+            loggerConfiguration = loggerConfiguration.WriteTo.Logger(configuration =>
+            {
+                configuration
+                    .Filter.ByExcluding(logEvent =>
+                        matches.Select(func => func(logEvent)).Any() && logEvent.Level <= LogEventLevel.Verbose)
+                    .WriteTo
+                    .File("SonOfPicasso.log", outputTemplate: outputTemplate);
+            });
 
             Log.Logger = loggerConfiguration.CreateLogger();
 
@@ -60,7 +69,7 @@ namespace SonOfPicasso.UI
             BlobCache.EnsureInitialized();
 
             var containerBuilder = new ContainerBuilder();
-            
+
             containerBuilder.RegisterType<FileSystem>()
                 .As<IFileSystem>()
                 .InstancePerLifetimeScope();
@@ -137,7 +146,7 @@ namespace SonOfPicasso.UI
         protected override void OnExit(ExitEventArgs e)
         {
             BlobCache.Shutdown().Wait();
-         
+
             base.OnExit(e);
         }
 
