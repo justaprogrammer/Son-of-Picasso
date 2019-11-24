@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Reactive.Linq;
 using Bogus;
 using FluentAssertions;
 using FluentAssertions.Execution;
@@ -47,11 +48,9 @@ namespace SonOfPicasso.Core.Tests.Services
                             AutoResetEvent.Set();
                         });
 
-                TestSchedulerProvider.TaskPool.AdvanceBy(1);
-                TestSchedulerProvider.TaskPool.AdvanceBy(1);
-                TestSchedulerProvider.TaskPool.AdvanceBy(1);
+                TestSchedulerProvider.TaskPool.AdvanceBy(3);
 
-                AutoResetEvent.WaitOne();
+                WaitOne(2);
 
                 unitOfWork1.DidNotReceive().Save();
 
