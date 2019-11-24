@@ -78,11 +78,12 @@ namespace SonOfPicasso.Core.Services
 
                     return GetFolderManagementRules();
                 })
-                .Select(list => list.Append(folderRule).ToArray())
+                .SelectMany(list => list.Append(folderRule))
+                .Distinct(rule => rule.Path)
+                .ToArray()
                 .Select(CreateInputs)
                 .SelectMany(ResetFolderManagementRules)
-                .Select(list => Unit.Default)
-                .SubscribeOn(_schedulerProvider.TaskPool);
+                .Select(list => Unit.Default);
         }
 
         private FolderRuleInput[] CreateInputs(IList<FolderRule> folderManagementRules)

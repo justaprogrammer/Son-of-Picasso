@@ -53,7 +53,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                     AutoResetEvent.Set();
                 });
 
-            WaitOne(TimeSpan.FromSeconds(2));
+            WaitOne(5);
         }
 
         [Fact]
