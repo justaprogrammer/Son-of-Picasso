@@ -942,7 +942,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             var imageContainer = await imageContainerOperationService.CreateAlbum(createAlbum);
             var imageContainer2 = await imageContainerOperationService.AddImagesToAlbum(imageContainer.Id, imageIds);
 
-            imageContainer.Id.Should().BeGreaterThan(imageContainer2.Id);
+            imageContainer.Id.Should().Be(imageContainer2.Id);
 
             var albums = (await connection.QueryAsync<Album>("SELECT * FROM Albums"))
                 .ToArray();
