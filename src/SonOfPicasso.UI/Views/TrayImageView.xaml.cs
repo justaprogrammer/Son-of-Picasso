@@ -24,7 +24,7 @@ namespace SonOfPicasso.UI.Views
                     model => model.Pinned,
                     view => view.ImageOverlay.Visibility);
 
-                imageLoadingService.LoadImageFromPath(ViewModel.ImageViewModel.Path)
+                imageLoadingService.LoadThumbnailFromPath(ViewModel.ImageViewModel.Path)
                     .ObserveOn(schedulerProvider.MainThreadScheduler)
                     .Subscribe(source => ImageBitmap.Source = source)
                     .DisposeWith(d);
