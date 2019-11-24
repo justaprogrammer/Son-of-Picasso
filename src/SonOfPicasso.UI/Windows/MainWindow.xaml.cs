@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO.Abstractions;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -37,16 +35,16 @@ namespace SonOfPicasso.UI.Windows
     {
         private readonly Func<AddAlbumViewModel> _addAlbumViewModelFactory;
         private readonly Func<AddAlbumWindow> _addAlbumWindowFactory;
+        private readonly CollectionViewSource _albumImageContainersViewSource;
         private readonly IEnvironmentService _environmentService;
         private readonly IFileSystem _fileSystem;
         private readonly Func<ManageFolderRulesViewModel> _folderManagementViewModelFactory;
         private readonly Func<FolderManagementWindow> _folderManagementWindowFactory;
-        private readonly ILogger _logger;
-        private readonly ISchedulerProvider _schedulerProvider;
-        private readonly IImageLoadingService _imageLoadingService;
-        private readonly CollectionViewSource _albumImageContainersViewSource;
         private readonly CollectionViewSource _imageCollectionViewSource;
         private readonly CollectionViewSource _imageContainersViewSource;
+        private readonly IImageLoadingService _imageLoadingService;
+        private readonly ILogger _logger;
+        private readonly ISchedulerProvider _schedulerProvider;
 
         public MainWindow(ILogger logger, IEnvironmentService environmentService, IFileSystem fileSystem,
             ISchedulerProvider schedulerProvider,
@@ -71,7 +69,7 @@ namespace SonOfPicasso.UI.Windows
             _imageCollectionViewSource = (CollectionViewSource) FindResource("ImagesCollectionViewSource");
             _imageContainersViewSource = (CollectionViewSource) FindResource("ImageContainersViewSource");
             _albumImageContainersViewSource = (CollectionViewSource) FindResource("AlbumImageContainersViewSource");
-            
+
             this.WhenActivated(d =>
             {
                 _imageCollectionViewSource.Source = ViewModel.Images;
@@ -80,9 +78,11 @@ namespace SonOfPicasso.UI.Windows
                     new PropertyGroupDescription(nameof(ImageViewModel.ImageContainerViewModel));
 
                 _imageCollectionViewSource.GroupDescriptions.Add(propertyGroupDescription);
-                _imageCollectionViewSource.SortDescriptions.Add(new SortDescription(nameof(ImageViewModel.ContainerType),
+                _imageCollectionViewSource.SortDescriptions.Add(new SortDescription(
+                    nameof(ImageViewModel.ContainerType),
                     ListSortDirection.Ascending));
-                _imageCollectionViewSource.SortDescriptions.Add(new SortDescription(nameof(ImageViewModel.ContainerDate),
+                _imageCollectionViewSource.SortDescriptions.Add(new SortDescription(
+                    nameof(ImageViewModel.ContainerDate),
                     ListSortDirection.Descending));
                 _imageCollectionViewSource.SortDescriptions.Add(new SortDescription(nameof(ImageViewModel.ExifDate),
                     ListSortDirection.Ascending));
@@ -126,10 +126,7 @@ namespace SonOfPicasso.UI.Windows
                             .Cast<ImageContainerViewModel>()
                             .FirstOrDefault();
 
-                        if (imageContainerViewModel == null)
-                        {
-                            return;
-                        }
+                        if (imageContainerViewModel == null) return;
 
                         var (groupIndex, rowIndex) = _imageCollectionViewSource
                             .View
@@ -140,7 +137,8 @@ namespace SonOfPicasso.UI.Windows
                                 .Batch(ViewModel.ImagesViewportColumns)
                                 .Select(models => (models, g)))
                             .Select((tuple, r) => (tuple.models, tuple.g, r))
-                            .Where(tuple => tuple.models.Any(model => model.ContainerKey == imageContainerViewModel.ContainerKey))
+                            .Where(tuple =>
+                                tuple.models.Any(model => model.ContainerKey == imageContainerViewModel.ContainerKey))
                             .Select(tuple => (tuple.g, tuple.r))
                             .FirstOrDefault();
 
@@ -157,10 +155,7 @@ namespace SonOfPicasso.UI.Windows
                             .Select(view => (CollectionViewGroup) view.Groups.FirstOrDefault())
                             .Select(group => (ImageViewModel) group?.Items.FirstOrDefault())
                             .DistinctUntilChanged(model => model?.ContainerKey)
-                            .Subscribe(imageViewModel =>
-                            {
-                                observer.OnNext(imageViewModel?.ContainerKey);
-                            });
+                            .Subscribe(imageViewModel => { observer.OnNext(imageViewModel?.ContainerKey); });
 
                         var disposable2 = ImagesListScrollViewer
                             .WhenAny(
@@ -193,8 +188,9 @@ namespace SonOfPicasso.UI.Windows
                 ImagesListScrollViewer
                     .WhenAny(
                         scrollViewer => scrollViewer.ViewportWidth,
-                        observedChange1 => observedChange1.Value)
-                    .BindTo(ViewModel, model => model.ImagesViewportWidth);
+                        change => change.Value)
+                    .Subscribe(value => ViewModel.ImagesViewportWidth = value)
+                    .DisposeWith(d);
 
                 this.BindCommand(ViewModel,
                         model => model.AddFolder,
@@ -381,7 +377,7 @@ namespace SonOfPicasso.UI.Windows
 
             foreach (var listViewItem in listViewItems)
             {
-                if(!listViewItem.DataContext.GetType().Equals(typeof(TDataContextType)))
+                if (!listViewItem.DataContext.GetType().Equals(typeof(TDataContextType)))
                     continue;
 
                 var translatePoint = listViewItem.TranslatePoint(new Point(), imagesListScrollViewer);
