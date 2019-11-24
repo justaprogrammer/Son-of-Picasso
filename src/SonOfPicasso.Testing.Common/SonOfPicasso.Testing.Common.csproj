@@ -9,11 +9,6 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="Services\**" />
-    <EmbeddedResource Remove="Services\**" />
-    <None Remove="Services\**" />
-  </ItemGroup>
-  <ItemGroup>
     <None Remove="Resources\DSC04085.JPG" />
   </ItemGroup>
 
