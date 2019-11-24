@@ -106,6 +106,39 @@ namespace SonOfPicasso.Core.Tests.Services
             }
 
             [Fact]
+            public void ShouldNotErrorAppendingExistingRule()
+            {
+                var existingRules = new[]
+                {
+                    new FolderRule
+                    {
+                        Path = "c:\\Stanley\\Pictures",
+                        Action = FolderRuleActionEnum.Always
+                    },
+                    new FolderRule
+                    {
+                        Path = "c:\\Stanley\\Screenshots",
+                        Action = FolderRuleActionEnum.Once
+                    },
+                    new FolderRule
+                    {
+                        Path = "D:\\Other\\Path",
+                        Action = FolderRuleActionEnum.Once
+                    }
+                };
+
+                var addRule = new FolderRule
+                {
+                    Path = "c:\\Stanley\\Pictures",
+                    Action = FolderRuleActionEnum.Always
+                };
+
+                var newFolderRules = ShouldModifyFolderRules(existingRules, addRule);
+
+                newFolderRules.Should().BeEquivalentTo(existingRules);
+            }
+
+            [Fact]
             public void ShouldAddChildWithDifferentAction()
             {
                 var existingRules = new[]
