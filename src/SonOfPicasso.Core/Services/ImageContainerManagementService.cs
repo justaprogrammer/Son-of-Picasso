@@ -116,12 +116,10 @@ namespace SonOfPicasso.Core.Services
 
         public IObservable<Unit> Start()
         {
-            var selectMany = _imageContainerOperationService.GetAllImageContainers()
+            return _imageContainerOperationService.GetAllImageContainers()
                 .Do(container => _imageContainerCache.AddOrUpdate(container))
                 .LastOrDefaultAsync()
                 .SelectMany(_ => _imageContainerWatcherService.Start(_folderImageRefCache));
-
-            return selectMany;
         }
 
         public void Stop()
@@ -138,8 +136,7 @@ namespace SonOfPicasso.Core.Services
                         Path = path,
                         Action = FolderRuleActionEnum.Once
                     })
-                .SelectMany(unit =>_imageContainerOperationService.ScanFolder(path, _folderImageRefCache))
-                .LastOrDefaultAsync();
+                .SelectMany(unit =>_imageContainerOperationService.ScanFolder(path, _folderImageRefCache));
         }
 
         public IObservable<IImageContainer> CreateAlbum(ICreateAlbum createAlbum)

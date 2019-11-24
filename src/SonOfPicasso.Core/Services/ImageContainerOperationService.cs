@@ -61,8 +61,6 @@ namespace SonOfPicasso.Core.Services
                 {
                     return Task.Factory.StartNew(async () =>
                     {
-                        var jobCount = 1;
-
                         while (await _scanImageChannel.Reader.WaitToReadAsync())
                         {
                             var path = await _scanImageChannel.Reader.ReadAsync();
