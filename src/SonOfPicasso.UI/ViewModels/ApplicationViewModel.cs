@@ -182,7 +182,7 @@ namespace SonOfPicasso.UI.ViewModels
                     .Subscribe()
                     .DisposeWith(d);
 
-                this.WhenAny(model => model.ImagesViewportWidth, change => Math.Max(1, (int) (change.Value / 300)))
+                this.WhenAny(model => model.ImagesViewportWidth, change => Math.Max(1, (int) (change.Value / 304)))
                     .ToProperty(this, nameof(ImagesViewportColumns), out _imagesViewportColumns);
             });
         }
