@@ -10,7 +10,7 @@ namespace SonOfPicasso.Core.Model
     {
         public FolderImageContainer(Folder folder, IFileSystem fileSystem)
         {
-            Key = GetContainerId(folder);
+            Key = GetContainerKey(folder);
             Id = folder.Id;
             Name = fileSystem.DirectoryInfo.FromDirectoryName(folder.Path).Name;
             Date = folder.Date;
@@ -26,13 +26,13 @@ namespace SonOfPicasso.Core.Model
         public ImageContainerTypeEnum ContainerType => ImageContainerTypeEnum.Folder;
         public IList<ImageRef> ImageRefs { get; }
 
-        public static string GetContainerId(Folder folder)
+        public static string GetContainerKey(Folder folder)
         {
             var folderId = folder.Id;
-            return GetContainerId(folderId);
+            return GetContainerKey(folderId);
         }
 
-        public static string GetContainerId(int folderId)
+        public static string GetContainerKey(int folderId)
         {
             return $"Folder:{folderId}";
         }

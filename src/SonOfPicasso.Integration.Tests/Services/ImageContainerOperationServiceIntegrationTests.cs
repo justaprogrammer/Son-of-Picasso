@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -7,11 +9,15 @@ using Dapper;
 using DynamicData;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using ReactiveUI;
+using Serilog;
+using Serilog.Filters;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Model;
 using SonOfPicasso.Core.Services;
 using SonOfPicasso.Data.Model;
 using SonOfPicasso.Testing.Common;
+using SonOfPicasso.Testing.Common.Scheduling;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -20,14 +26,19 @@ namespace SonOfPicasso.Integration.Tests.Services
     public class ImageContainerOperationServiceIntegrationTests : IntegrationTestsBase
     {
         public ImageContainerOperationServiceIntegrationTests(ITestOutputHelper testOutputHelper)
-            : base(testOutputHelper)
+            : base(GetCustomConfiguration(testOutputHelper))
         {
             var containerBuilder = GetContainerBuilder();
             containerBuilder.RegisterType<ImageContainerOperationService>();
             containerBuilder.RegisterType<ExifDataService>().As<IExifDataService>();
+            containerBuilder.RegisterType<TestBlobCacheProvider>().As<IBlobCacheProvider>();
+            containerBuilder.RegisterType<ImageLoadingService>().As<IImageLoadingService>();
             containerBuilder.RegisterType<ImageLocationService>().As<IImageLocationService>();
             Container = containerBuilder.Build();
         }
+
+        private static LoggerConfiguration GetCustomConfiguration(ITestOutputHelper testOutputHelper) =>
+            GetLoggerConfiguration(testOutputHelper, configuration => configuration.Filter.ByExcluding(Matching.FromSource<ExifDataService>()));
 
         protected override IContainer Container { get; }
 
@@ -57,11 +68,30 @@ namespace SonOfPicasso.Integration.Tests.Services
             var directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
 
             var imageContainerOperationService = Container.Resolve<ImageContainerOperationService>();
-            var imageContainers = await imageContainerOperationService
-                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath))
-                .ToArray();
+            var scannedImageRefs = new ObservableCollection<ImageRef>();
 
-            imageContainers.Should().HaveCount(directoryCount);
+            imageContainerOperationService.ScanImageObservable
+                .Subscribe(imageRef =>
+                {
+                    scannedImageRefs.Add(imageRef);
+                });
+
+            await imageContainerOperationService
+                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath));
+
+            scannedImageRefs
+                .WhenAny(refs => refs.Count, change => change.Value)
+                .Subscribe(i =>
+                {
+                    if (i == imagesCount)
+                    {
+                        Set();
+                    }
+                });
+
+            WaitOne(15);
+
+            scannedImageRefs.Should().HaveCount(imagesCount);
 
             var images = (await connection.QueryAsync<Image>("SELECT * FROM Images"))
                 .ToArray();
@@ -126,11 +156,30 @@ namespace SonOfPicasso.Integration.Tests.Services
             var directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
 
             var imageContainerOperationService = Container.Resolve<ImageContainerOperationService>();
-            var imageContainers = await imageContainerOperationService
-                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath))
-                .ToArray();
+            var scannedImageRefs = new ObservableCollection<ImageRef>();
 
-            imageContainers.Should().HaveCount(directoryCount);
+            imageContainerOperationService.ScanImageObservable
+                .Subscribe(imageRef =>
+                {
+                    scannedImageRefs.Add(imageRef);
+                });
+
+            await imageContainerOperationService
+                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath));
+
+            scannedImageRefs
+                .WhenAny(refs => refs.Count, change => change.Value)
+                .Subscribe(i =>
+                {
+                    if (i == imagesCount)
+                    {
+                        Set();
+                    }
+                });
+
+            WaitOne(15);
+
+            scannedImageRefs.Should().HaveCount(imagesCount);
 
             var images = (await connection.QueryAsync<Image>("SELECT * FROM Images"))
                 .ToArray();
@@ -206,11 +255,30 @@ namespace SonOfPicasso.Integration.Tests.Services
             var directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
 
             var imageContainerOperationService = Container.Resolve<ImageContainerOperationService>();
-            var imageContainers = await imageContainerOperationService
-                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath))
-                .ToArray();
+            var scannedImageRefs = new ObservableCollection<ImageRef>();
 
-            imageContainers.Should().HaveCount(directoryCount);
+            imageContainerOperationService.ScanImageObservable
+                .Subscribe(imageRef =>
+                {
+                    scannedImageRefs.Add(imageRef);
+                });
+
+            await imageContainerOperationService
+                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath));
+
+            scannedImageRefs
+                .WhenAny(refs => refs.Count, change => change.Value)
+                .Subscribe(i =>
+                {
+                    if (i == imagesCount)
+                    {
+                        Set();
+                    }
+                });
+
+            WaitOne(15);
+
+            scannedImageRefs.Should().HaveCount(imagesCount);
 
             var images = (await connection.QueryAsync<Image>("SELECT * FROM Images"))
                 .ToArray();
@@ -288,11 +356,30 @@ namespace SonOfPicasso.Integration.Tests.Services
             var directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
 
             var imageContainerOperationService = Container.Resolve<ImageContainerOperationService>();
-            var imageContainers = await imageContainerOperationService
-                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath))
-                .ToArray();
+            var scannedImageRefs = new ObservableCollection<ImageRef>();
 
-            imageContainers.Should().HaveCount(directoryCount);
+            imageContainerOperationService.ScanImageObservable
+                .Subscribe(imageRef =>
+                {
+                    scannedImageRefs.Add(imageRef);
+                });
+
+            await imageContainerOperationService
+                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath));
+
+            scannedImageRefs
+                .WhenAny(refs => refs.Count, change => change.Value)
+                .Subscribe(i =>
+                {
+                    if (i == imagesCount)
+                    {
+                        Set();
+                    }
+                });
+
+            WaitOne(15);
+
+            scannedImageRefs.Should().HaveCount(imagesCount);
 
             var images = (await connection.QueryAsync<Image>("SELECT * FROM Images"))
                 .ToArray();
@@ -384,11 +471,30 @@ namespace SonOfPicasso.Integration.Tests.Services
             var directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
 
             var imageContainerOperationService = Container.Resolve<ImageContainerOperationService>();
-            var imageContainers = await imageContainerOperationService
-                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath))
-                .ToArray();
+            var scannedImageRefs = new ObservableCollection<ImageRef>();
 
-            imageContainers.Should().HaveCount(directoryCount);
+            imageContainerOperationService.ScanImageObservable
+                .Subscribe(imageRef =>
+                {
+                    scannedImageRefs.Add(imageRef);
+                });
+
+            await imageContainerOperationService
+                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath));
+
+            scannedImageRefs
+                .WhenAny(refs => refs.Count, change => change.Value)
+                .Subscribe(i =>
+                {
+                    if (i == imagesCount)
+                    {
+                        Set();
+                    }
+                });
+
+            WaitOne(15);
+
+            scannedImageRefs.Should().HaveCount(imagesCount);
 
             var images = (await connection.QueryAsync<Image>("SELECT * FROM Images"))
                 .ToArray();
@@ -460,18 +566,37 @@ namespace SonOfPicasso.Integration.Tests.Services
             await InitializeDataContextAsync();
             await using var connection = DataContext.Database.GetDbConnection();
 
-            var imagesCount = 50;
+            var imagesCount = 25;
             await GenerateImagesAsync(imagesCount);
 
             var imagesDirectoryInfo = FileSystem.DirectoryInfo.FromDirectoryName(ImagesPath);
             var directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
 
             var imageContainerOperationService = Container.Resolve<ImageContainerOperationService>();
-            var imageContainers = await imageContainerOperationService
-                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath))
-                .ToArray();
+            var scannedImageRefs = new ObservableCollection<ImageRef>();
 
-            imageContainers.Should().HaveCount(directoryCount);
+            imageContainerOperationService.ScanImageObservable
+                .Subscribe(imageRef =>
+                {
+                    scannedImageRefs.Add(imageRef);
+                });
+
+            scannedImageRefs
+                .WhenAny(refs => refs.Count, change => change.Value)
+                .Subscribe(i =>
+                {
+                    if (i == imagesCount)
+                    {
+                        Set();
+                    }
+                });
+
+            await imageContainerOperationService
+                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath));
+
+            WaitOne(25);
+
+            scannedImageRefs.Should().HaveCount(imagesCount);
 
             var images = (await connection.QueryAsync<Image>("SELECT * FROM Images"))
                 .ToArray();
@@ -559,11 +684,30 @@ namespace SonOfPicasso.Integration.Tests.Services
             var directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
 
             var imageContainerOperationService = Container.Resolve<ImageContainerOperationService>();
-            var imageContainers = await imageContainerOperationService
-                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath))
-                .ToArray();
+            var scannedImageRefs = new ObservableCollection<ImageRef>();
 
-            imageContainers.Should().HaveCount(directoryCount);
+            imageContainerOperationService.ScanImageObservable
+                .Subscribe(imageRef =>
+                {
+                    scannedImageRefs.Add(imageRef);
+                });
+
+            await imageContainerOperationService
+                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath));
+
+            scannedImageRefs
+                .WhenAny(refs => refs.Count, change => change.Value)
+                .Subscribe(i =>
+                {
+                    if (i == imagesCount)
+                    {
+                        Set();
+                    }
+                });
+
+            WaitOne(15);
+
+            scannedImageRefs.Should().HaveCount(imagesCount);
 
             var images = (await connection.QueryAsync<Image>("SELECT * FROM Images"))
                 .ToArray();
@@ -637,28 +781,56 @@ namespace SonOfPicasso.Integration.Tests.Services
             await InitializeDataContextAsync();
             await using var connection = DataContext.Database.GetDbConnection();
 
-            var imageCount = 10;
+            var imagesCount = 10;
             var albumImageCount = 5;
 
-            await GenerateImagesAsync(imageCount);
+            await GenerateImagesAsync(imagesCount);
 
             var imageContainerOperationService = Container.Resolve<ImageContainerOperationService>();
-            var imageContainers = await imageContainerOperationService
-                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath))
+
+            var scannedImageRefs = new ObservableCollection<ImageRef>();
+
+            imageContainerOperationService.ScanImageObservable
+                .Subscribe(imageRef =>
+                {
+                    scannedImageRefs.Add(imageRef);
+                });
+
+            await imageContainerOperationService
+                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath));
+
+            scannedImageRefs
+                .WhenAny(refs => refs.Count, change => change.Value)
+                .Subscribe(i =>
+                {
+                    if (i == imagesCount)
+                    {
+                        Set();
+                    }
+                });
+
+            WaitOne(15);
+
+            scannedImageRefs.Should().HaveCount(imagesCount);
+
+            var imageContainers = await scannedImageRefs
+                .Select(i => imageContainerOperationService.GetFolderImageContainer(i.ContainerId))
+                .Concat()
                 .ToArray();
 
-            var imageRefs = Faker
-                .PickRandom(imageContainers.SelectMany(container => container.ImageRefs.Select(imageRef => imageRef)),
+            var selection = Faker
+                .PickRandom(
+                    imageContainers.SelectMany(container => container.ImageRefs.Select(imageRef => imageRef)),
                     albumImageCount)
                 .ToArray();
 
-            var imageIds = imageRefs.Select(imageRef => imageRef.Id)
+            var selectionIds = selection.Select(imageRef => imageRef.Id)
                 .ToArray();
 
             ICreateAlbum createAlbum = new TestCreateAlbum
             {
                 AlbumName = Faker.Random.Word(),
-                AlbumDate = imageRefs
+                AlbumDate = selection
                     .Select(imageRef => imageRef.ContainerDate)
                     .Min()
                     .Date
@@ -671,7 +843,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             imageContainer.ImageRefs.Should().BeEmpty();
             imageContainer.Year.Should().Be(createAlbum.AlbumDate.Year);
 
-            imageContainer = await imageContainerOperationService.AddImagesToAlbum(imageContainer.Id, imageIds);
+            imageContainer = await imageContainerOperationService.AddImagesToAlbum(imageContainer.Id, selectionIds);
             imageContainer.Name.Should().Be(createAlbum.AlbumName);
             imageContainer.Date.Should().Be(createAlbum.AlbumDate);
             imageContainer.ContainerType.Should().Be(ImageContainerTypeEnum.Album);
@@ -713,19 +885,46 @@ namespace SonOfPicasso.Integration.Tests.Services
             await InitializeDataContextAsync();
             await using var connection = DataContext.Database.GetDbConnection();
 
-            var imageCount = 10;
+            var imagesCount = 10;
             var albumImageCount = 5;
 
-            await GenerateImagesAsync(imageCount);
+            var generateImages = await GenerateImagesAsync(imagesCount);
 
             var imageContainerOperationService = Container.Resolve<ImageContainerOperationService>();
-            var imageContainers = await imageContainerOperationService
-                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath))
+
+            var scannedImageRefs = new ObservableCollection<ImageRef>();
+
+            imageContainerOperationService.ScanImageObservable
+                .Subscribe(imageRef =>
+                {
+                    scannedImageRefs.Add(imageRef);
+                });
+
+            await imageContainerOperationService
+                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath));
+
+            scannedImageRefs
+                .WhenAny(refs => refs.Count, change => change.Value)
+                .Subscribe(i =>
+                {
+                    if (i == imagesCount)
+                    {
+                        Set();
+                    }
+                });
+
+            WaitOne(15);
+
+            scannedImageRefs.Should().HaveCount(imagesCount);
+            var imageContainerIds = scannedImageRefs
+                .Select(imageRef => imageRef.ContainerId)
+                .Distinct()
                 .ToArray();
 
+            imageContainerIds.Should().HaveCount(generateImages.Count);
+
             var imageRefs = Faker
-                .PickRandom(imageContainers.SelectMany(container => container.ImageRefs.Select(imageRef => imageRef)),
-                    albumImageCount)
+                .PickRandom(scannedImageRefs, albumImageCount)
                 .ToArray();
 
             var imageIds = imageRefs.Select(imageRef => imageRef.Id)
@@ -741,7 +940,9 @@ namespace SonOfPicasso.Integration.Tests.Services
             };
 
             var imageContainer = await imageContainerOperationService.CreateAlbum(createAlbum);
-            imageContainer = await imageContainerOperationService.AddImagesToAlbum(imageContainer.Id, imageIds);
+            var imageContainer2 = await imageContainerOperationService.AddImagesToAlbum(imageContainer.Id, imageIds);
+
+            imageContainer.Id.Should().Be(imageContainer2.Id);
 
             var albums = (await connection.QueryAsync<Album>("SELECT * FROM Albums"))
                 .ToArray();
@@ -758,7 +959,7 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             imageContainersAfter
                 .Should()
-                .HaveCount(imageContainers.Length + 1);
+                .HaveCount(imageContainerIds.Length + 1);
 
             var albumImageContainer =
                 imageContainersAfter.First(container => container.ContainerType == ImageContainerTypeEnum.Album);
@@ -772,9 +973,9 @@ namespace SonOfPicasso.Integration.Tests.Services
             await InitializeDataContextAsync();
             await using var connection = DataContext.Database.GetDbConnection();
 
-            var imageCount = 5;
+            var imagesCount = 5;
             var addImages = 5;
-            var generatedImages = await GenerateImagesAsync(imageCount);
+            var generatedImages = await GenerateImagesAsync(imagesCount);
 
             var imagesDirectoryInfo = FileSystem.DirectoryInfo.FromDirectoryName(ImagesPath);
             var directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
@@ -782,21 +983,41 @@ namespace SonOfPicasso.Integration.Tests.Services
             var folderImageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
 
             var imageContainerOperationService = Container.Resolve<ImageContainerOperationService>();
-            var imageContainers = await imageContainerOperationService
-                .ScanFolder(ImagesPath, folderImageRefCache)
-                .ToArray();
+            var scannedImageRefs = new ObservableCollection<ImageRef>();
 
-            imageContainers.Should().HaveCount(directoryCount);
+            imageContainerOperationService.ScanImageObservable
+                .Subscribe(imageRef =>
+                {
+                    scannedImageRefs.Add(imageRef);
+                });
+
+            await imageContainerOperationService
+                .ScanFolder(ImagesPath, new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath));
+
+            var disposable = scannedImageRefs
+                .WhenAny(refs => refs.Count, change => change.Value)
+                .Subscribe(i =>
+                {
+                    if (i == imagesCount)
+                    {
+                        Set();
+                    }
+                });
+
+            WaitOne(15);
+            disposable.Dispose();
+
+            scannedImageRefs.Should().HaveCount(imagesCount);
 
             var images = (await connection.QueryAsync<Image>("SELECT * FROM Images"))
                 .ToArray();
 
-            images.Should().HaveCount(imageCount);
+            images.Should().HaveCount(imagesCount);
 
             var exifDatas = (await connection.QueryAsync("SELECT * FROM ExifData"))
                 .ToArray();
 
-            exifDatas.Should().HaveCount(imageCount);
+            exifDatas.Should().HaveCount(imagesCount);
 
             var folders = (await connection.QueryAsync<Folder>("SELECT * FROM Folders"))
                 .ToArray();
@@ -826,23 +1047,36 @@ namespace SonOfPicasso.Integration.Tests.Services
             }
 
             await GenerateImagesAsync(addImages);
-            imageCount += addImages;
+            imagesCount += addImages;
+
+            disposable = scannedImageRefs
+                .WhenAny(refs => refs.Count, change => change.Value)
+                .Subscribe(i =>
+                {
+                    if (i == imagesCount)
+                    {
+                        Set();
+                    }
+                });
 
             await imageContainerOperationService
                 .ScanFolder(ImagesPath, folderImageRefCache)
                 .ToArray();
+
+            WaitOne(15);
+            disposable.Dispose();
 
             directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
 
             images = (await connection.QueryAsync<Image>("SELECT * FROM Images"))
                 .ToArray();
 
-            images.Should().HaveCount(imageCount);
+            images.Should().HaveCount(imagesCount);
 
             exifDatas = (await connection.QueryAsync("SELECT * FROM ExifData"))
                 .ToArray();
 
-            exifDatas.Should().HaveCount(imageCount);
+            exifDatas.Should().HaveCount(imagesCount);
 
             folders = (await connection.QueryAsync<Folder>("SELECT * FROM Folders"))
                 .ToArray();

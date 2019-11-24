@@ -178,7 +178,7 @@ namespace SonOfPicasso.Core.Services
                     _logger.Warning("Unhandled Properties {Path} {@Properties}", path, unhandledProperties);
 
                 return Observable.Return(exifData);
-            }).SubscribeOn(_schedulerProvider.TaskPool);
+            });
         }
 
         private string ReadLensSpecification(ExifProperty imageFileProperty)

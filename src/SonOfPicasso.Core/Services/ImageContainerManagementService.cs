@@ -48,6 +48,7 @@ namespace SonOfPicasso.Core.Services
 
             _imageContainerWatcherService.FileDiscovered
                 .SelectMany(path => _imageContainerOperationService.AddOrUpdateImage(path))
+                .SelectMany(imageRef => _imageContainerOperationService.GetFolderImageContainer(imageRef.ContainerId))
                 .Subscribe(container => _imageContainerCache.AddOrUpdate(container))
                 .DisposeWith(_disposables);
 
@@ -60,11 +61,21 @@ namespace SonOfPicasso.Core.Services
                 .SelectMany(tuple => imageContainerOperationService.RenameImage(tuple.oldFullPath, tuple.fullPath))
                 .Subscribe(container => _imageContainerCache.AddOrUpdate(container))
                 .DisposeWith(_disposables);
+            
+            imageContainerOperationService.ScanImageObservable
+                .Select((imageRef) => imageRef.ContainerId)
+                .Buffer(TimeSpan.FromSeconds(2))
+                .SelectMany(observable => observable.Distinct())
+                .SelectMany(i => _imageContainerOperationService.GetFolderImageContainer(i))
+                .Subscribe(container => _imageContainerCache.AddOrUpdate(container))
+                .DisposeWith(_disposables);
         }
 
         public IConnectableCache<IImageContainer, string> ImageContainerCache => _imageContainerCache;
 
         public IConnectableCache<ImageRef, string> FolderImageRefCache => _folderImageRefCache;
+
+        public IObservable<ImageRef> ScanImageObservable => _imageContainerOperationService.ScanImageObservable;
 
         public void Dispose()
         {
@@ -82,7 +93,7 @@ namespace SonOfPicasso.Core.Services
             var applyImageChanges = _imageContainerOperationService.ApplyRuleChanges(folderRulesArray)
                 .Select(changes =>
                 {
-                    _imageContainerCache.Remove(changes.DeletedFolderIds.Select(FolderImageContainer.GetContainerId));
+                    _imageContainerCache.Remove(changes.DeletedFolderIds.Select(FolderImageContainer.GetContainerKey));
 
                     return Unit.Default;
                 });
@@ -116,7 +127,7 @@ namespace SonOfPicasso.Core.Services
             _imageContainerWatcherService.Stop();
         }
 
-        public IObservable<IImageContainer> ScanFolder(string path)
+        public IObservable<Unit> ScanFolder(string path)
         {
             return _folderRulesManagementService
                 .AddFolderManagementRule(
@@ -125,8 +136,7 @@ namespace SonOfPicasso.Core.Services
                         Path = path,
                         Action = FolderRuleActionEnum.Once
                     })
-                .SelectMany(unit =>_imageContainerOperationService.ScanFolder(path, _folderImageRefCache))
-                .Do(container => _imageContainerCache.AddOrUpdate(container));
+                .SelectMany(unit =>_imageContainerOperationService.ScanFolder(path, _folderImageRefCache));
         }
 
         public IObservable<IImageContainer> CreateAlbum(ICreateAlbum createAlbum)

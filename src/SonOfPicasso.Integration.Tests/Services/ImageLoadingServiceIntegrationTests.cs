@@ -51,7 +51,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                     Set();
                 });
 
-            WaitOne(5);
+            WaitOne(15);
 
             list.Should().HaveCount(2);
             list[1].Width.Should().BeLessOrEqualTo(300);
@@ -71,7 +71,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                     Set();
                 });
 
-            WaitOne(5);
+            WaitOne(15);
 
             list.Should().HaveCount(1);
             list[0].Width.Should().BeLessOrEqualTo(300);
@@ -90,7 +90,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                     Set();
                 });
 
-            WaitOne(5);
+            WaitOne(15);
 
             list.Should().HaveCount(2);
             list[1].Width.Should().BeLessOrEqualTo(300);

@@ -35,7 +35,7 @@ namespace SonOfPicasso.Core.Services
                         .EnumerateFiles("*.*", SearchOption.AllDirectories)
                         .Where(file => Constants.ImageExtensions.Contains(file.Extension.ToLowerInvariant()))
                         .ToObservable();
-            }).SubscribeOn(_schedulerProvider.TaskPool);
+            });
         }
     }
 }

@@ -37,7 +37,7 @@ namespace SonOfPicasso.Integration.Tests.Services
 
         private ImageRef CreateImageRef(string imagePath)
         {
-            return new ImageRef(Faker.Random.Int(), imagePath, Faker.Date.Recent(), Faker.Date.Recent(), Faker.Date.Recent(), Faker.Random.String(), Faker.PickRandom<ImageContainerTypeEnum>(), Faker.Date.Recent());
+            return new ImageRef(Faker.Random.Int(), imagePath, Faker.Date.Recent(), Faker.Date.Recent(), Faker.Date.Recent(), Faker.Random.Int(), Faker.Random.String(), Faker.PickRandom<ImageContainerTypeEnum>(), Faker.Date.Recent());
         }
 
         [Fact]
