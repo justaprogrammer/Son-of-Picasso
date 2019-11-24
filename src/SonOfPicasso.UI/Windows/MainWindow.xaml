@@ -170,8 +170,7 @@
                         <DockPanel Height="300" Width="300">
                             <Image Height="250" Width="250"
                                    Name="ImageBitmap"
-                                   RenderOptions.BitmapScalingMode="HighQuality"
-                                   Stretch="Fill" DataContext="{Binding}"
+                                   Stretch="None" DataContext="{Binding}"
                                    Initialized="ImageBitmap_OnInitialized" />
                         </DockPanel>
                     </DataTemplate>

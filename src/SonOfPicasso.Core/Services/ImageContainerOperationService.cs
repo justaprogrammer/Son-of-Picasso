@@ -29,7 +29,7 @@ namespace SonOfPicasso.Core.Services
         private readonly ILogger _logger;
         private readonly Channel<string> _scanImageChannel;
         private readonly Subject<ImageRef> _scanImageSubject;
-        private readonly Task<Task>[] _scanImageTask;
+        private readonly Task<Task> _scanImageTask;
         private readonly ISchedulerProvider _schedulerProvider;
         private readonly Func<IUnitOfWork> _unitOfWorkFactory;
         private readonly object _writeLock = new object();
@@ -52,23 +52,19 @@ namespace SonOfPicasso.Core.Services
             _scanImageSubject = new Subject<ImageRef>();
             ScanImageObservable = _scanImageSubject.ObserveOn(schedulerProvider.TaskPool);
             _scanImageChannel = Channel.CreateUnbounded<string>();
-            _scanImageTask = Enumerable.Range(1, 3)
-                .Select(taskIndex =>
+            _scanImageTask = Task.Factory.StartNew(async () =>
+            {
+                while (await _scanImageChannel.Reader.WaitToReadAsync())
                 {
-                    return Task.Factory.StartNew(async () =>
-                    {
-                        while (await _scanImageChannel.Reader.WaitToReadAsync())
-                        {
-                            var path = await _scanImageChannel.Reader.ReadAsync();
+                    var path = await _scanImageChannel.Reader.ReadAsync();
 
-                            await AddOrUpdateImage(path)
-                                .SelectMany(containerId =>
-                                    imageLoadingService.CreateThumbnailFromPath(path).Select(unit => containerId))
-                                .Do(_scanImageSubject.OnNext)
-                                .SubscribeOn(_schedulerProvider.TaskPool);
-                        }
-                    }, TaskCreationOptions.LongRunning);
-                }).ToArray();
+                    await AddOrUpdateImage(path)
+                        .SelectMany(containerId =>
+                            imageLoadingService.CreateThumbnailFromPath(path).Select(unit => containerId))
+                        .Do(_scanImageSubject.OnNext)
+                        .SubscribeOn(_schedulerProvider.TaskPool);
+                }
+            }, TaskCreationOptions.LongRunning);
         }
 
         public IObservable<Unit> ScanFolder(string path, IObservableCache<ImageRef, string> folderImageRefCache)

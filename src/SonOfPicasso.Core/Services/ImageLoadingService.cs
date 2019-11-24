@@ -93,7 +93,7 @@ namespace SonOfPicasso.Core.Services
                 }
 
                 var size = image.Size();
-                var (width, height) = AspectRatioFactory.Calculate(size.Width, size.Height, 300, 300, false);
+                var (width, height) = AspectRatioFactory.Calculate(size.Width, size.Height, 250, 250, false);
 
                 image.Mutate(context => context.Resize(width, height));
                 observer.OnNext(image);
