@@ -26,5 +26,6 @@ namespace SonOfPicasso.Core.Interfaces
         IObservable<IImageContainer>  GetFolderImageContainer(int folderId);
         IObservable<IImageContainer> GetAlbumImageContainer(int albumId);
         IObservable<ImageRef> ScanImageObservable { get; }
+        IObservable<Unit> ScanImage(string path);
     }
 }
