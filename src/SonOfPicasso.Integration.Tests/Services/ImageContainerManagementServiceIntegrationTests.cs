@@ -9,10 +9,13 @@ using DynamicData.Binding;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
+using Serilog.Filters;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Model;
 using SonOfPicasso.Core.Services;
 using SonOfPicasso.Data.Model;
+using SonOfPicasso.Testing.Common.Scheduling;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -21,10 +24,12 @@ namespace SonOfPicasso.Integration.Tests.Services
     public class ImageContainerManagementServiceIntegrationTests : IntegrationTestsBase
     {
         public ImageContainerManagementServiceIntegrationTests(ITestOutputHelper testOutputHelper)
-            : base(testOutputHelper)
+            : base(GetCustomConfiguration(testOutputHelper))
         {
             var containerBuilder = GetContainerBuilder();
             containerBuilder.RegisterType<ExifDataService>().As<IExifDataService>();
+            containerBuilder.RegisterType<TestBlobCacheProvider>().As<IBlobCacheProvider>();
+            containerBuilder.RegisterType<ImageLoadingService>().As<IImageLoadingService>();
             containerBuilder.RegisterType<ImageLocationService>().As<IImageLocationService>();
             containerBuilder.RegisterType<ImageContainerManagementService>();
             containerBuilder.RegisterType<FolderRulesManagementService>().As<IFolderRulesManagementService>();
@@ -34,6 +39,11 @@ namespace SonOfPicasso.Integration.Tests.Services
             Container = containerBuilder.Build();
         }
 
+        private static LoggerConfiguration GetCustomConfiguration(ITestOutputHelper testOutputHelper) =>
+            GetLoggerConfiguration(testOutputHelper, configuration => configuration
+                .Filter.ByExcluding(Matching.FromSource<ExifDataService>())
+                .Filter.ByExcluding(Matching.FromSource<ImageLoadingService>()));
+
         protected override IContainer Container { get; }
 
         [Fact]
@@ -42,11 +52,14 @@ namespace SonOfPicasso.Integration.Tests.Services
             await InitializeDataContextAsync();
             await using var connection = DataContext.Database.GetDbConnection();
 
-            var imageCount = 50;
-            var generateImagesAsync = await GenerateImagesAsync(imageCount);
+            var subdirectory = ImagesDirectoryInfo.CreateSubdirectory("Subdirectory");
 
-            var imagesDirectoryInfo = FileSystem.DirectoryInfo.FromDirectoryName(ImagesPath);
-            var directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
+            var desiredImageCount = 20;
+            var generateImagesAsync = await GenerateImagesAsync(desiredImageCount, subdirectory.FullName);
+            var imageCount = generateImagesAsync.SelectMany(pair => pair.Value).Count();
+            var folderCount = generateImagesAsync.Count;
+
+            imageCount.Should().Be(desiredImageCount);
 
             var imageContainerManagementService = Container.Resolve<ImageContainerManagementService>();
 
@@ -65,36 +78,42 @@ namespace SonOfPicasso.Integration.Tests.Services
                 .Subscribe();
 
             await imageContainerManagementService.Start();
+
             await imageContainerManagementService.ScanFolder(ImagesPath);
 
             imageContainers.WhenPropertyChanged(items => items.Count)
-                .CombineLatest(imageRefs.WhenPropertyChanged(items => items.Count),(pV1, pV2) => (pV1.Value, pV2.Value))
+                .CombineLatest(imageRefs.WhenPropertyChanged(items => items.Count), (pV1, pV2) => (pV1.Value, pV2.Value))
+//                .Buffer(TimeSpan.FromSeconds(1))
+//                .Select(list => list.Last())
                 .Subscribe(tuple =>
                 {
-                    if (tuple.Item1 == generateImagesAsync.Count && tuple.Item2 == imageCount)
+                    Logger.Debug("Folders {FolderCount}/{FolderTotal} Images {ImageCount}/{ImageTotal}", 
+                        tuple.Item1, folderCount, tuple.Item2, imageCount);
+
+                    if (tuple.Item1 == folderCount && tuple.Item2 == imageCount)
                     {
                         AutoResetEvent.Set();
                     }
                 });
 
-            WaitOne(TimeSpan.FromSeconds(10));
-
-            var images = (await connection.QueryAsync<Image>("SELECT * FROM Images"))
-                .ToArray();
-
-            var folders = (await connection.QueryAsync<Folder>("SELECT * FROM Folders"))
-                .ToArray();
-
-            var exifDatas = (await connection.QueryAsync("SELECT * FROM ExifData"))
-                .ToArray();
-
-            var folderRules = (await connection.QueryAsync<FolderRule>("SELECT * FROM FolderRules"))
-                .ToArray();
-
             using (new AssertionScope())
             {
+                WaitOne(TimeSpan.FromSeconds(45));
+
+                var images = (await connection.QueryAsync<Image>("SELECT * FROM Images"))
+                    .ToArray();
+
+                var folders = (await connection.QueryAsync<Folder>("SELECT * FROM Folders"))
+                    .ToArray();
+
+                var exifDatas = (await connection.QueryAsync("SELECT * FROM ExifData"))
+                    .ToArray();
+
+                var folderRules = (await connection.QueryAsync<FolderRule>("SELECT * FROM FolderRules"))
+                    .ToArray();
+
                 images.Should().HaveCount(imageCount);
-                folders.Should().HaveCount(generateImagesAsync.Count);
+                folders.Should().HaveCount(folderCount);
                 exifDatas.Should().HaveCount(imageCount);
                 folderRules.Should().HaveCount(1);
 
@@ -102,7 +121,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                 folderRule.Path.Should().Be(ImagesPath);
                 folderRule.Action.Should().Be(FolderRuleActionEnum.Once);
 
-                imageContainers.Should().HaveCount(generateImagesAsync.Count);
+                imageContainers.Should().HaveCount(folderCount);
                 imageRefs.Should().HaveCount(imageCount);
             }
         }

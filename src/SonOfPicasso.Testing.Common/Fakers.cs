@@ -142,6 +142,7 @@ namespace SonOfPicasso.Testing.Common
                 .RuleFor(image => image.CreationTime, faker => faker.Date.Recent())
                 .RuleFor(image => image.LastWriteTime, faker => faker.Date.Recent())
                 .RuleFor(image => image.ExifDate, faker => faker.Date.Recent())
+                .RuleFor(image => image.ContainerId, faker => faker.Random.Int(0))
                 .RuleFor(image => image.ContainerKey, faker => faker.Random.String())
                 .RuleFor(image => image.ContainerType, faker => faker.PickRandom<ImageContainerTypeEnum>())
                 .RuleFor(image => image.ContainerDate, faker => faker.Date.Recent().Date)

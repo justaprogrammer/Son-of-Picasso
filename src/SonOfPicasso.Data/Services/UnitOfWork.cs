@@ -52,18 +52,7 @@ namespace SonOfPicasso.Data.Services
 
         public void Dispose()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!Disposed)
-                if (disposing)
-                {
-                    _dataContext.Dispose();
-                }
-            Disposed = true;
+            _dataContext?.Dispose();
         }
     }
 }

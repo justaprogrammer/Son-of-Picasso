@@ -41,8 +41,7 @@ namespace SonOfPicasso.Core.Services
         public IObservable<BitmapSource> LoadThumbnailFromPath(string path)
         {
             return LoadThumbnailFromPathInternal(path)
-                .Select(image => image.CreateBitmapSource())
-                .SubscribeOn(_schedulerProvider.TaskPool);
+                .Select(image => image.CreateBitmapSource());
         }
 
         public IObservable<Unit> CreateThumbnailFromPath(string path)
@@ -105,7 +104,9 @@ namespace SonOfPicasso.Core.Services
                     _fileSystem.Directory.CreateDirectory(tempPath);
                 }
 
-                var thumbnailPath = _fileSystem.Path.Combine(tempPath, "thumbnail_" + Guid.NewGuid() + fileInfo.Extension);
+                var thumbnailPath = _fileSystem.Path.Combine(tempPath, $"thumbnail_{Guid.NewGuid()}.jpg");
+              
+                _logger.Verbose("Caching {Path} to path {Thumbnail}", path, thumbnailPath);
 
                 var directoryName = _fileSystem.Path.GetDirectoryName(thumbnailPath);
                 _fileSystem.Directory.CreateDirectory(directoryName);

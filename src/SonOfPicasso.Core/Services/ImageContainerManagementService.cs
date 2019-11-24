@@ -48,7 +48,7 @@ namespace SonOfPicasso.Core.Services
 
             _imageContainerWatcherService.FileDiscovered
                 .SelectMany(path => _imageContainerOperationService.AddOrUpdateImage(path))
-                .SelectMany(i => _imageContainerOperationService.GetFolderImageContainer(i))
+                .SelectMany(imageRef => _imageContainerOperationService.GetFolderImageContainer(imageRef.ContainerId))
                 .Subscribe(container => _imageContainerCache.AddOrUpdate(container))
                 .DisposeWith(_disposables);
 
@@ -61,11 +61,30 @@ namespace SonOfPicasso.Core.Services
                 .SelectMany(tuple => imageContainerOperationService.RenameImage(tuple.oldFullPath, tuple.fullPath))
                 .Subscribe(container => _imageContainerCache.AddOrUpdate(container))
                 .DisposeWith(_disposables);
+            
+            imageContainerOperationService.ScanImageObservable
+                .ObserveOn(_schedulerProvider.TaskPool)
+                .Select((imageRef, i) =>
+                {
+                    _logger.Verbose("Image {Count} Discovered", i + 1);
+                    return imageRef.ContainerId;
+                })
+                .GroupByUntil(i => i, i => Observable.Timer(TimeSpan.FromSeconds(5)))
+                .Select(observable => observable.Key)
+                .SelectMany(i =>
+                {
+                    _logger.Verbose("Loading Container {Id} Discovered", i);
+                    return _imageContainerOperationService.GetFolderImageContainer(i);
+                })
+                .Subscribe(container => _imageContainerCache.AddOrUpdate(container))
+                .DisposeWith(_disposables);
         }
 
         public IConnectableCache<IImageContainer, string> ImageContainerCache => _imageContainerCache;
 
         public IConnectableCache<ImageRef, string> FolderImageRefCache => _folderImageRefCache;
+
+        public IObservable<ImageRef> ScanImageObservable => _imageContainerOperationService.ScanImageObservable;
 
         public void Dispose()
         {
@@ -83,7 +102,7 @@ namespace SonOfPicasso.Core.Services
             var applyImageChanges = _imageContainerOperationService.ApplyRuleChanges(folderRulesArray)
                 .Select(changes =>
                 {
-                    _imageContainerCache.Remove(changes.DeletedFolderIds.Select(FolderImageContainer.GetContainerId));
+                    _imageContainerCache.Remove(changes.DeletedFolderIds.Select(FolderImageContainer.GetContainerKey));
 
                     return Unit.Default;
                 });
@@ -106,10 +125,12 @@ namespace SonOfPicasso.Core.Services
 
         public IObservable<Unit> Start()
         {
-            return _imageContainerOperationService.GetAllImageContainers()
+            var selectMany = _imageContainerOperationService.GetAllImageContainers()
                 .Do(container => _imageContainerCache.AddOrUpdate(container))
                 .LastOrDefaultAsync()
                 .SelectMany(_ => _imageContainerWatcherService.Start(_folderImageRefCache));
+
+            return selectMany;
         }
 
         public void Stop()

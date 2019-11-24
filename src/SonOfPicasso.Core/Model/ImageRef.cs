@@ -7,14 +7,15 @@ namespace SonOfPicasso.Core.Model
     {
         private string _key;
 
-        public ImageRef(int id, string imagePath, DateTime creationTime, DateTime lastWriteTime,
-            DateTime exifDate, string containerKey, ImageContainerTypeEnum containerType, DateTime containerDate)
+        public ImageRef(int id, string imagePath, DateTime creationTime, DateTime lastWriteTime, DateTime exifDate,
+            int containerId, string containerKey, ImageContainerTypeEnum containerType, DateTime containerDate)
         {
             Id = id;
             ImagePath = imagePath;
             CreationTime = creationTime;
             LastWriteTime = lastWriteTime;
             ExifDate = exifDate;
+            ContainerId = containerId;
             ContainerKey = containerKey;
             ContainerType = containerType;
             ContainerDate = containerDate;
@@ -30,15 +31,15 @@ namespace SonOfPicasso.Core.Model
         public DateTime CreationTime { get; set; }
         public DateTime LastWriteTime { get; set; }
         public DateTime ExifDate { get; set; }
+        public int ContainerId { get; set; }
         public string ContainerKey { get; set; }
         public ImageContainerTypeEnum ContainerType { get; set; }
         public DateTime ContainerDate { get; set; }
 
         public static ImageRef CreateImageRef(Image image, IImageContainer imageContainer)
         {
-            return new ImageRef(image.Id, image.Path, image.CreationTime,
-                image.LastWriteTime, image.ExifData.DateTime, imageContainer.Key, imageContainer.ContainerType,
-                imageContainer.Date);
+            return new ImageRef(image.Id, image.Path, image.CreationTime, image.LastWriteTime, image.ExifData.DateTime,
+                imageContainer.Id, imageContainer.Key, imageContainer.ContainerType, imageContainer.Date);
         }
     }
 }

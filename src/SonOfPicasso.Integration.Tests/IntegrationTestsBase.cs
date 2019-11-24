@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Autofac;
 using AutofacSerilogIntegration;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Data.Interfaces;
 using SonOfPicasso.Data.Repository;
@@ -20,18 +21,32 @@ namespace SonOfPicasso.Integration.Tests
 {
     public abstract class IntegrationTestsBase : TestsBase
     {
-        protected readonly string DatabasePath;
-        protected readonly DbContextOptions<DataContext> DbContextOptions;
-        protected readonly FileSystem FileSystem;
-        protected readonly string ImagesPath;
-        protected readonly string TestPath;
+        protected readonly FileSystem FileSystem = new FileSystem();
+        protected string DatabasePath;
         protected DataContext DataContext;
+        protected DbContextOptions<DataContext> DbContextOptions;
+        protected string ImagesPath;
+        protected string TestPath;
+
+        protected IntegrationTestsBase(LoggerConfiguration loggerConfiguration)
+            : base(loggerConfiguration)
+        {
+            Initialize();
+        }
 
         protected IntegrationTestsBase(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {
-            FileSystem = new FileSystem();
+            Initialize();
+        }
 
+        protected abstract IContainer Container { get; }
+        protected ImageGenerationService ImageGenerationService => Container.Resolve<ImageGenerationService>();
+        protected IDirectoryInfo ImagesDirectoryInfo => FileSystem.DirectoryInfo.FromDirectoryName(ImagesPath);
+        protected ISchedulerProvider SchedulerProvider => Container.Resolve<ISchedulerProvider>();
+
+        private void Initialize()
+        {
             TestPath = FileSystem.Path.Combine(FileSystem.Path.GetTempPath(), "SonOfPicasso.IntegrationTests",
                 Guid.NewGuid().ToString());
             FileSystem.Directory.CreateDirectory(TestPath);
@@ -46,11 +61,6 @@ namespace SonOfPicasso.Integration.Tests
                     .UseSqlite($"Data Source={DatabasePath}")
                     .Options;
         }
-
-        protected abstract IContainer Container { get; }
-        protected ImageGenerationService ImageGenerationService => Container.Resolve<ImageGenerationService>();
-        protected IDirectoryInfo ImagesDirectoryInfo => FileSystem.DirectoryInfo.FromDirectoryName(ImagesPath);
-        protected ISchedulerProvider SchedulerProvider => Container.Resolve<ISchedulerProvider>();
 
         protected ContainerBuilder GetContainerBuilder()
         {

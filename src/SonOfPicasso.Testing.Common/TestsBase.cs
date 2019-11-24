@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using Bogus;
 using FluentAssertions;
@@ -15,14 +16,29 @@ namespace SonOfPicasso.Testing.Common
         protected readonly Faker Faker;
         protected readonly AutoResetEvent AutoResetEvent;
 
-        public TestsBase(ITestOutputHelper testOutputHelper)
+        protected TestsBase(LoggerConfiguration loggerConfiguration)
         {
+            if (loggerConfiguration == null) throw new ArgumentNullException(nameof(loggerConfiguration));
+
             Faker = new Faker();
 
+            Log.Logger = loggerConfiguration
+                .CreateLogger();
+
+            Logger = Log.Logger.ForContext(GetType());
+            AutoResetEvent = new AutoResetEvent(false);
+        }
+
+        protected TestsBase(ITestOutputHelper testOutputHelper):this(GetLoggerConfiguration(testOutputHelper))
+        {
+
+        }
+
+        public static LoggerConfiguration GetLoggerConfiguration(ITestOutputHelper testOutputHelper, Func<LoggerConfiguration, LoggerConfiguration> customLogConfiguration = null)
+        {
             var loggerConfiguration = new LoggerConfiguration()
                 .Enrich.WithThreadId()
-                .Enrich.With<CustomEnrichers>() 
-                .WriteTo.TestOutput(testOutputHelper, outputTemplate: "{Timestamp:HH:mm:ss} [{Level:u4}] ({PaddedThreadId}) {ShortSourceContext} {Message}{NewLineIfException}{Exception}");
+                .Enrich.With<CustomEnrichers>();
 
             if (Core.Common.IsVerboseLoggingEnabled)
             {
@@ -33,11 +49,20 @@ namespace SonOfPicasso.Testing.Common
                 loggerConfiguration = loggerConfiguration.MinimumLevel.Debug();
             }
 
-            Log.Logger = loggerConfiguration
-                .CreateLogger();
+            loggerConfiguration = loggerConfiguration
+                .WriteTo.Logger(configuration =>
+                {
+                    if(customLogConfiguration != null)
+                    {
+                        configuration = customLogConfiguration.Invoke(configuration);
+                    }
+                  
+                    configuration.WriteTo.TestOutput(testOutputHelper,
+                        outputTemplate:
+                        "{Timestamp:HH:mm:ss} [{Level:u4}] ({PaddedThreadId}) {ShortSourceContext} {Message}{NewLineIfException}{Exception}");
+                });
 
-            Logger = Log.Logger.ForContext(GetType());
-            AutoResetEvent = new AutoResetEvent(false);
+            return loggerConfiguration;
         }
 
         protected bool Set()
@@ -52,8 +77,24 @@ namespace SonOfPicasso.Testing.Common
 
         protected void WaitOne(TimeSpan? timespan = null)
         {
-            timespan ??= TimeSpan.FromSeconds(0.5);
-            AutoResetEvent.WaitOne(timespan.Value).Should().BeTrue($"Set() was called in {timespan.Value.TotalSeconds:0.00}s");
+            if (Debugger.IsAttached)
+            {
+                timespan = TimeSpan.FromMinutes(3);
+            }
+            else
+            {
+                timespan ??= TimeSpan.FromSeconds(0.5);
+            }
+
+            try
+            {
+                AutoResetEvent.WaitOne(timespan.Value).Should().BeTrue($"Set() was called in {timespan.Value.TotalSeconds:0.00}s");
+            }
+            catch
+            {
+                Logger.Error("WaitOne Timeout");
+                throw;
+            }
         }
 
         public virtual void Dispose()
