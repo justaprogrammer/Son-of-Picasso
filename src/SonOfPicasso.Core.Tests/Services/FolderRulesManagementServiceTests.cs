@@ -73,7 +73,7 @@ namespace SonOfPicasso.Core.Tests.Services
                 return insertedFolderRules;
             }
 
-            [Fact(Skip = "Broken")]
+            [Fact]
             public void ShouldNotAddChildWithSameAction()
             {
                 var existingRules = new[]
@@ -106,7 +106,7 @@ namespace SonOfPicasso.Core.Tests.Services
                 newFolderRules.Should().BeEquivalentTo(existingRules);
             }
 
-            [Fact(Skip = "Broken")]
+            [Fact]
             public void ShouldAddChildWithDifferentAction()
             {
                 var existingRules = new[]
@@ -163,7 +163,7 @@ namespace SonOfPicasso.Core.Tests.Services
                 newFolderRules.Should().BeEquivalentTo(expected);
             }
 
-            [Fact(Skip = "Broken")]
+            [Fact]
             public void ShouldAddNewAction()
             {
                 var existingRules = new[]
