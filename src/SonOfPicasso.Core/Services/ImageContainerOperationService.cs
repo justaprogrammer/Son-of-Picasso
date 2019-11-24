@@ -35,6 +35,7 @@ namespace SonOfPicasso.Core.Services
         private readonly Func<IUnitOfWork> _unitOfWorkFactory;
         private readonly object _writeLock = new object();
         private readonly Subject<ImageRef> _scanImageSubject;
+        private readonly IObservable<ImageRef> _scanImageObservable;
 
         public ImageContainerOperationService(IFileSystem fileSystem,
             ILogger logger,
@@ -53,8 +54,9 @@ namespace SonOfPicasso.Core.Services
             _exifDataService = exifDataService;
 
             _scanImageSubject = new Subject<ImageRef>();
+            _scanImageObservable = _scanImageSubject.ObserveOn(schedulerProvider.TaskPool);
             _scanImageChannel = Channel.CreateUnbounded<string>();
-            _scanImageTask = Enumerable.Range(1, 1)
+            _scanImageTask = Enumerable.Range(1, 3)
                 .Select(taskIndex =>
                 {
                     return Task.Factory.StartNew(async () =>
@@ -64,8 +66,6 @@ namespace SonOfPicasso.Core.Services
                         while (await _scanImageChannel.Reader.WaitToReadAsync())
                         {
                             var path = await _scanImageChannel.Reader.ReadAsync();
-
-                            _logger.Verbose("Worker {Worker} starting job {Number} {Path}", taskIndex, jobCount++, path);
 
                             await AddOrUpdateImage(path)
                                 .SelectMany(containerId => _imageLoadingService.CreateThumbnailFromPath(path).Select(unit => containerId))
@@ -91,7 +91,7 @@ namespace SonOfPicasso.Core.Services
                 });
         }
 
-        public IObservable<ImageRef> ScanImageObservable => _scanImageSubject;
+        public IObservable<ImageRef> ScanImageObservable => _scanImageObservable;
 
         public IObservable<IImageContainer> CreateAlbum(ICreateAlbum createAlbum)
         {

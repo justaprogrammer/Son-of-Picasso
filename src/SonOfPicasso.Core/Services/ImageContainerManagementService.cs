@@ -63,19 +63,10 @@ namespace SonOfPicasso.Core.Services
                 .DisposeWith(_disposables);
             
             imageContainerOperationService.ScanImageObservable
-                .ObserveOn(_schedulerProvider.TaskPool)
-                .Select((imageRef, i) =>
-                {
-                    _logger.Verbose("Image {Count} Discovered", i + 1);
-                    return imageRef.ContainerId;
-                })
-                .GroupByUntil(i => i, i => Observable.Timer(TimeSpan.FromSeconds(5)))
-                .Select(observable => observable.Key)
-                .SelectMany(i =>
-                {
-                    _logger.Verbose("Loading Container {Id} Discovered", i);
-                    return _imageContainerOperationService.GetFolderImageContainer(i);
-                })
+                .Select((imageRef) => imageRef.ContainerId)
+                .Buffer(TimeSpan.FromSeconds(2))
+                .SelectMany(observable => observable.Distinct())
+                .SelectMany(i => _imageContainerOperationService.GetFolderImageContainer(i))
                 .Subscribe(container => _imageContainerCache.AddOrUpdate(container))
                 .DisposeWith(_disposables);
         }

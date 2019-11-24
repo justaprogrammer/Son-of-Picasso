@@ -39,12 +39,60 @@ namespace SonOfPicasso.Integration.Tests.Services
             Container = containerBuilder.Build();
         }
 
-        private static LoggerConfiguration GetCustomConfiguration(ITestOutputHelper testOutputHelper) =>
-            GetLoggerConfiguration(testOutputHelper, configuration => configuration
+        private static LoggerConfiguration GetCustomConfiguration(ITestOutputHelper testOutputHelper)
+        {
+            return GetLoggerConfiguration(testOutputHelper, configuration => configuration
                 .Filter.ByExcluding(Matching.FromSource<ExifDataService>())
                 .Filter.ByExcluding(Matching.FromSource<ImageLoadingService>()));
+        }
 
         protected override IContainer Container { get; }
+
+        [SkippableFact]
+        public async Task ShouldScanFolderWithRealImages()
+        {
+            var environmentVariable =
+                Environment.GetEnvironmentVariable("SonOfPicasso_IntegrationTests_RealImagesFolder");
+            Skip.If(string.IsNullOrWhiteSpace(environmentVariable),
+                "RealImagesFolder environment variable not provided");
+
+            Logger.Information("ShouldScanFolderWithRealImages");
+
+            await InitializeDataContextAsync();
+
+            var imageContainerManagementService = Container.Resolve<ImageContainerManagementService>();
+            imageContainerManagementService.ImageContainerCache
+                .Connect()
+                .Subscribe(set =>
+                {
+                    var names = set.Select(change => change.Current.Name)
+                        .ToArray();
+
+                    Logger.Verbose("ImageContainerCache {@Names} Adds:{Adds} Removes:{Removes} Updates:{Updates}",
+                        names, set.Adds, set.Removes, set.Updates);
+                });
+
+            imageContainerManagementService.FolderImageRefCache
+                .Connect()
+                .Subscribe(set =>
+                {
+                    var distinctContainers = set
+                        .Select(change => change.Current.ContainerKey)
+                        .Distinct()
+                        .Count();
+
+                    Logger.Verbose(
+                        "FolderImageRefCache Containers:{ContainerCount} Adds:{Adds} Removes:{Removes} Updates:{Updates}",
+                        distinctContainers, set.Adds, set.Removes, set.Updates);
+                });
+
+            imageContainerManagementService
+                .ScanFolder(environmentVariable)
+                .SubscribeOn(SchedulerProvider.TaskPool)
+                .Subscribe(unit => { }, () => { });
+
+            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(20));
+        }
 
         [Fact]
         public async Task ShouldScanExistingFolder()
@@ -52,10 +100,8 @@ namespace SonOfPicasso.Integration.Tests.Services
             await InitializeDataContextAsync();
             await using var connection = DataContext.Database.GetDbConnection();
 
-            var subdirectory = ImagesDirectoryInfo.CreateSubdirectory("Subdirectory");
-
-            var desiredImageCount = 20;
-            var generateImagesAsync = await GenerateImagesAsync(desiredImageCount, subdirectory.FullName);
+            var desiredImageCount = 50;
+            var generateImagesAsync = await GenerateImagesAsync(desiredImageCount);
             var imageCount = generateImagesAsync.SelectMany(pair => pair.Value).Count();
             var folderCount = generateImagesAsync.Count;
 
@@ -79,26 +125,26 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             await imageContainerManagementService.Start();
 
+            var beginTimedOperation = Logger.BeginTimedOperation("Started Scanning");
+
             await imageContainerManagementService.ScanFolder(ImagesPath);
 
             imageContainers.WhenPropertyChanged(items => items.Count)
-                .CombineLatest(imageRefs.WhenPropertyChanged(items => items.Count), (pV1, pV2) => (pV1.Value, pV2.Value))
-//                .Buffer(TimeSpan.FromSeconds(1))
-//                .Select(list => list.Last())
+                .CombineLatest(imageRefs.WhenPropertyChanged(items => items.Count),
+                    (pV1, pV2) => (pV1.Value, pV2.Value))
                 .Subscribe(tuple =>
                 {
-                    Logger.Debug("Folders {FolderCount}/{FolderTotal} Images {ImageCount}/{ImageTotal}", 
+                    Logger.Debug("Folders {FolderCount}/{FolderTotal} Images {ImageCount}/{ImageTotal}",
                         tuple.Item1, folderCount, tuple.Item2, imageCount);
 
-                    if (tuple.Item1 == folderCount && tuple.Item2 == imageCount)
-                    {
-                        AutoResetEvent.Set();
-                    }
+                    if (tuple.Item1 == folderCount && tuple.Item2 == imageCount) AutoResetEvent.Set();
                 });
 
             using (new AssertionScope())
             {
-                WaitOne(TimeSpan.FromSeconds(45));
+                WaitOne(TimeSpan.FromSeconds(15));
+
+                beginTimedOperation.Dispose();
 
                 var images = (await connection.QueryAsync<Image>("SELECT * FROM Images"))
                     .ToArray();
@@ -160,13 +206,11 @@ namespace SonOfPicasso.Integration.Tests.Services
             var generateImagesAsync = await GenerateImagesAsync(imageCount);
 
             imageContainers.WhenPropertyChanged(items => items.Count)
-                .CombineLatest(imageRefs.WhenPropertyChanged(items => items.Count),(pV1, pV2) => (pV1.Value, pV2.Value))
+                .CombineLatest(imageRefs.WhenPropertyChanged(items => items.Count),
+                    (pV1, pV2) => (pV1.Value, pV2.Value))
                 .Subscribe(tuple =>
                 {
-                    if (tuple.Item1 == generateImagesAsync.Count && tuple.Item2 == imageCount)
-                    {
-                        AutoResetEvent.Set();
-                    }
+                    if (tuple.Item1 == generateImagesAsync.Count && tuple.Item2 == imageCount) AutoResetEvent.Set();
                 });
 
             WaitOne(TimeSpan.FromSeconds(60));
@@ -225,20 +269,18 @@ namespace SonOfPicasso.Integration.Tests.Services
             await imageContainerManagementService.Start();
             await imageContainerManagementService.ResetRules(new[]
                 {new FolderRule {Path = ImagesPath, Action = FolderRuleActionEnum.Always}});
-            
+
             AutoResetEvent.WaitOne(TimeSpan.FromSeconds(1));
 
             var imageCount = 1;
             var generateImagesAsync = await GenerateImagesAsync(imageCount);
 
             imageContainers.WhenPropertyChanged(items => items.Count)
-                .CombineLatest(imageRefs.WhenPropertyChanged(items => items.Count),(pV1, pV2) => (pV1.Value, pV2.Value))
+                .CombineLatest(imageRefs.WhenPropertyChanged(items => items.Count),
+                    (pV1, pV2) => (pV1.Value, pV2.Value))
                 .Subscribe(tuple =>
                 {
-                    if (tuple.Item1 == generateImagesAsync.Count && tuple.Item2 == imageCount)
-                    {
-                        AutoResetEvent.Set();
-                    }
+                    if (tuple.Item1 == generateImagesAsync.Count && tuple.Item2 == imageCount) AutoResetEvent.Set();
                 });
 
             WaitOne(TimeSpan.FromSeconds(5));
@@ -271,54 +313,6 @@ namespace SonOfPicasso.Integration.Tests.Services
                 imageContainers.Should().HaveCount(generateImagesAsync.Count);
                 imageRefs.Should().HaveCount(imageCount);
             }
-        }
-
-        [SkippableFact]
-        public async Task ShouldScanFolderWithRealImages()
-        {
-            var environmentVariable = Environment.GetEnvironmentVariable("SonOfPicasso_IntegrationTests_RealImagesFolder");
-            Skip.If(string.IsNullOrWhiteSpace(environmentVariable), "RealImagesFolder environment variable not provided");
-
-            Logger.Information("ShouldScanFolderWithRealImages");
-
-            await InitializeDataContextAsync();
-
-            var imageContainerManagementService = Container.Resolve<ImageContainerManagementService>();
-            imageContainerManagementService.ImageContainerCache
-                .Connect()
-                .Subscribe(set =>
-                {
-                    var names = set.Select(change => change.Current.Name)
-                        .ToArray();
-
-                    Logger.Verbose("ImageContainerCache {@Names} Adds:{Adds} Removes:{Removes} Updates:{Updates}",
-                        names, set.Adds, set.Removes, set.Updates);
-                });
-
-            imageContainerManagementService.FolderImageRefCache
-                .Connect()
-                .Subscribe(set =>
-                {
-                    var distinctContainers = set
-                        .Select(change => change.Current.ContainerKey)
-                        .Distinct()
-                        .Count();
-
-                    Logger.Verbose("FolderImageRefCache Containers:{ContainerCount} Adds:{Adds} Removes:{Removes} Updates:{Updates}", 
-                        distinctContainers, set.Adds, set.Removes, set.Updates);
-                });
-
-            imageContainerManagementService
-                .ScanFolder(environmentVariable)
-                .SubscribeOn(SchedulerProvider.TaskPool)
-                .Subscribe(unit =>
-                {
-                    
-                }, () =>
-                {
-                });
-
-            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(20));
         }
     }
 }
