@@ -142,8 +142,7 @@ namespace SonOfPicasso.UI.Windows
                             .Select(tuple => (tuple.g, tuple.r))
                             .FirstOrDefault();
 
-                        var scrollToPosition = rowIndex * 300 + groupIndex * 28;
-                        ImagesListScrollViewer.ScrollToVerticalOffset(scrollToPosition);
+                        ImagesListScrollViewer.ScrollToVerticalOffset(rowIndex * 304 + groupIndex * 25.96);
                     });
 
                 Observable.Create<string>(observer =>
