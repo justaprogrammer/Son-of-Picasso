@@ -16,6 +16,7 @@ using SonOfPicasso.Core.Logging;
 using SonOfPicasso.Core.Services;
 using SonOfPicasso.Data.Repository;
 using SonOfPicasso.Data.Services;
+using SonOfPicasso.UI.Services;
 using SonOfPicasso.UI.ViewModels;
 using SonOfPicasso.UI.Windows;
 using Splat;
@@ -52,7 +53,10 @@ namespace SonOfPicasso.UI
 
             if (Common.IsVerboseLoggingEnabled) loggerConfiguration = loggerConfiguration.MinimumLevel.Verbose();
 
-            var matches = new[] {Matching.FromSource<ImageLoadingService>()};
+            Func<LogEvent, bool>[] matches =
+            {
+                Matching.FromSource<ImageLoadingService>()
+            };
 
             loggerConfiguration = loggerConfiguration.WriteTo.Logger(configuration =>
             {
@@ -95,6 +99,23 @@ namespace SonOfPicasso.UI
                 .Where(type => type.Namespace.StartsWith("SonOfPicasso.Core.Services"))
                 .InstancePerLifetimeScope()
                 .AsImplementedInterfaces();
+
+            containerBuilder.Register<IBlobCacheProvider>(context =>
+                {
+                    var environmentService = context.Resolve<IEnvironmentService>();
+                    var cachePath = environmentService.GetEnvironmentVariable("SonOfPicasso_CachePath");
+                    
+                    if (!string.IsNullOrWhiteSpace(cachePath))
+                    {
+                        var fileSystem = context.Resolve<IFileSystem>();
+                        var blobCacheProvider = new CustomBlobCacheProvider(fileSystem, cachePath);
+                        return blobCacheProvider;
+                    }
+                    
+                    return new BlobCacheProvider();
+                }).As<IBlobCacheProvider>()
+                .InstancePerLifetimeScope();
+
 
             containerBuilder.RegisterAssemblyTypes(typeof(UnitOfWork).Assembly)
                 .Where(type => type.Namespace.StartsWith("SonOfPicasso.Data.Services"))

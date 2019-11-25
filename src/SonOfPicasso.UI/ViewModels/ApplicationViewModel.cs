@@ -100,8 +100,10 @@ namespace SonOfPicasso.UI.ViewModels
                 .Connect()
                 .TransformMany(imageContainerViewModel =>
                         imageContainerViewModel.ImageRefs.Select(imageRef =>
-                            new ImageViewModel(imageRef,
-                                imageContainerViewModel)),
+                        {
+                            var imageViewModel = new ImageViewModel(imageRef, imageContainerViewModel);
+                            return imageViewModel;
+                        }),
                     imageViewModel => imageViewModel.ImageRefId)
                 .DisposeMany()
                 .AsObservableCache();

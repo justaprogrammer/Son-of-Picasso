@@ -3,12 +3,14 @@
     "SonOfPicasso.UI": {
       "commandName": "Project",
       "environmentVariables": {
+        "SonOfPicasso_CachePath": "$(SolutionDir)cache\\",
         "SonOfPicasso_DatabasePath": "$(SolutionDir)db\\development.db"
       }
     },
     "SonOfPicasso.UI Verbose Logs": {
       "commandName": "Project",
       "environmentVariables": {
+        "SonOfPicasso_CachePath": "$(SolutionDir)cache\\",
         "SonOfPicasso_DatabasePath": "$(SolutionDir)db\\development.db",
         "SonOfPicasso_Verbose": "true"
       }

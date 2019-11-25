@@ -127,7 +127,7 @@
                       ItemsSource="{Binding Source={StaticResource ImagesCollectionViewSource}}"
                       VirtualizingStackPanel.IsVirtualizing="True"
                       VirtualizingStackPanel.IsVirtualizingWhenGrouping="True"
-                      VirtualizingStackPanel.VirtualizationMode="Standard"
+                      VirtualizingStackPanel.VirtualizationMode="Recycling"
                       VirtualizingStackPanel.ScrollUnit="Pixel"
                       SelectionMode="Extended">
 
