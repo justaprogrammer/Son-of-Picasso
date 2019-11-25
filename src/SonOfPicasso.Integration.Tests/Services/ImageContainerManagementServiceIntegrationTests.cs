@@ -298,7 +298,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                     if (tuple.Item1 == generateImagesAsync.Count && tuple.Item2 == imageCount) AutoResetEvent.Set();
                 });
 
-            WaitOne(TimeSpan.FromSeconds(5));
+            WaitOne(TimeSpan.FromSeconds(15));
 
             await using var connection = DataContext.Database.GetDbConnection();
 
