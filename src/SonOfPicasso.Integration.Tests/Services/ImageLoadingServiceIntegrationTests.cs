@@ -55,7 +55,7 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             var imageLoadingService = Container.Resolve<ImageLoadingService>();
             imageLoadingService
-                .LoadThumbnailFromPathInternal(imagePath, cacheDirectoryInfo.FullName, observeOnlyThumbnail: false)
+                .LoadThumbnailFromPathInternal(imagePath, observeOnlyThumbnail: false)
                 .Subscribe(source => { list.Add(source); }, () => { Set(); });
 
             WaitOne(15);
@@ -70,7 +70,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             list.Clear();
 
             imageLoadingService
-                .LoadThumbnailFromPathInternal(imagePath, cacheDirectoryInfo.FullName, observeOnlyThumbnail: false)
+                .LoadThumbnailFromPathInternal(imagePath, observeOnlyThumbnail: false)
                 .Subscribe(source => { list.Add(source); }, () => { Set(); });
 
             WaitOne(15);
@@ -84,7 +84,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             list.Clear();
 
             imageLoadingService
-                .LoadThumbnailFromPathInternal(imagePath, cacheDirectoryInfo.FullName, observeOnlyThumbnail: false)
+                .LoadThumbnailFromPathInternal(imagePath, observeOnlyThumbnail: false)
                 .Subscribe(source => { list.Add(source); }, () => { Set(); });
 
             WaitOne(15);
