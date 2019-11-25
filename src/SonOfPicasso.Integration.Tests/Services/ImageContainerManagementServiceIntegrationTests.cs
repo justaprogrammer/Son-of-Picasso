@@ -43,7 +43,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                 return new ImageLoadingService(context.Resolve<IFileSystem>(), logger,
                     context.Resolve<ISchedulerProvider>(), context.Resolve<IBlobCacheProvider>(),
                     ThumbnailsDirectoryInfo.FullName);
-            }).As<ImageLoadingService>();
+            }).As<IImageLoadingService>();
 
             containerBuilder.RegisterType<ImageLocationService>().As<IImageLocationService>();
             containerBuilder.RegisterType<ImageContainerManagementService>();

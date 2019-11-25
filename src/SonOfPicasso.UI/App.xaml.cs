@@ -13,6 +13,7 @@ using Serilog.Filters;
 using SonOfPicasso.Core;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Logging;
+using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Core.Services;
 using SonOfPicasso.Data.Repository;
 using SonOfPicasso.Data.Services;
@@ -22,6 +23,7 @@ using SonOfPicasso.UI.Windows;
 using Splat;
 using Splat.Serilog;
 using SQLitePCL;
+using ILogger = Serilog.ILogger;
 
 namespace SonOfPicasso.UI
 {
@@ -100,6 +102,30 @@ namespace SonOfPicasso.UI
                 .InstancePerLifetimeScope()
                 .AsImplementedInterfaces();
 
+            containerBuilder.Register<IImageLoadingService>(context =>
+                {
+                    var fileSystem = context.Resolve<IFileSystem>();
+                    var environmentService = context.Resolve<IEnvironmentService>();
+                    string cacheFolderOverride = null;
+
+                    var cachePath = environmentService.GetEnvironmentVariable("SonOfPicasso_CachePath");
+                    if (!string.IsNullOrWhiteSpace(cachePath))
+                    {
+                        var directoryInfo = fileSystem.DirectoryInfo.FromDirectoryName(cachePath);
+                        directoryInfo.Create();
+
+                        cacheFolderOverride = directoryInfo.CreateSubdirectory("Thumbnails").FullName;
+                    }
+
+                    return new ImageLoadingService(fileSystem, 
+                        context.Resolve<ILogger>().ForContext<ImageLoadingService>(),
+                        context.Resolve<ISchedulerProvider>(), 
+                        context.Resolve<IBlobCacheProvider>(), 
+                        cacheFolderOverride);
+
+                }).As<IImageLoadingService>()
+                .InstancePerLifetimeScope();
+
             containerBuilder.Register<IBlobCacheProvider>(context =>
                 {
                     var environmentService = context.Resolve<IEnvironmentService>();
@@ -108,14 +134,18 @@ namespace SonOfPicasso.UI
                     if (!string.IsNullOrWhiteSpace(cachePath))
                     {
                         var fileSystem = context.Resolve<IFileSystem>();
+
+                        var directoryInfo = fileSystem.DirectoryInfo.FromDirectoryName(cachePath);
+                        directoryInfo.Create();
+
                         var blobCacheProvider = new CustomBlobCacheProvider(fileSystem, cachePath);
                         return blobCacheProvider;
                     }
                     
                     return new BlobCacheProvider();
+
                 }).As<IBlobCacheProvider>()
                 .InstancePerLifetimeScope();
-
 
             containerBuilder.RegisterAssemblyTypes(typeof(UnitOfWork).Assembly)
                 .Where(type => type.Namespace.StartsWith("SonOfPicasso.Data.Services"))

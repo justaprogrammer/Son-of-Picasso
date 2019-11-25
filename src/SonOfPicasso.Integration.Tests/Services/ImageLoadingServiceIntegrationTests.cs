@@ -64,7 +64,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             list[1].Width.Should().BeLessOrEqualTo(300);
             list[1].Height.Should().BeLessOrEqualTo(300);
 
-            var cachedFiles = cacheDirectoryInfo.GetFiles();
+            var cachedFiles = ThumbnailsDirectoryInfo.GetFiles();
             cachedFiles.Should().HaveCount(1);
 
             list.Clear();
