@@ -11,6 +11,10 @@
     <PackageReference Include="Autofac.Extras.NSubstitute" Version="1.1.0" />
     <PackageReference Include="AutofacSerilogIntegration" Version="2.1.0" />
     <PackageReference Include="Bogus" Version="28.4.1" />
+    <PackageReference Include="coverlet.collector" Version="1.1.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="FluentAssertions" Version="5.9.0" />
     <PackageReference Include="FluentAssertions.Analyzers" Version="0.11.4" />
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8">

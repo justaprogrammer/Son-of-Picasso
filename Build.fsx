@@ -63,48 +63,50 @@ Target.create "Build" (fun _ ->
         if isAppveyor then
           AppVeyor.updateBuild (fun t -> {t with Version = (sprintf "%s" version)})
 
-  let configuration: (DotNet.BuildOptions -> DotNet.BuildOptions)
+  let buildConfiguration: (DotNet.BuildOptions -> DotNet.BuildOptions)
+        = (fun t -> {t with
+                      Configuration = DotNet.BuildConfiguration.Release})
+
+  let publicConfiguration: (DotNet.PublishOptions -> DotNet.PublishOptions)
         = (fun t -> {t with
                         Configuration = DotNet.BuildConfiguration.Release})
   
-  DotNet.build configuration "SonOfPicasso.sln"
+  DotNet.build buildConfiguration "SonOfPicasso.sln"
+  
+  DotNet.publish publicConfiguration "SonOfPicasso.sln"
 )
 
 let test proj framework flag =
-    let projectPath = sprintf "src\\%s\\%s.csproj" proj proj
-    let reportFile = sprintf "%s-%s.results.trx" proj framework
+    let options: (DotNet.Options -> DotNet.Options)
+        = (fun t -> t)
 
-    let configuration: (DotNet.TestOptions -> DotNet.TestOptions)
-        = (fun t -> {t with
-                        Configuration = DotNet.BuildConfiguration.Release
-                        NoBuild = true
-                        Framework = Some framework
-                        Logger = Some (sprintf "trx;LogFileName=%s" reportFile)
-                        ResultsDirectory = Some "../../reports"
-                        })
-
-    DotNet.test configuration projectPath
-
-    let dllPath = sprintf "src\\%s\\bin\\Release\\%s\\%s.dll" proj framework proj
-    let projectPath = sprintf "src\\%s\\%s.csproj" proj proj
-    let reportPath = sprintf "reports/%s-%s.coverage.xml" proj framework
-
+    let dllPath = sprintf "src\\%s\\bin\\Release\\%s\\publish\\%s.dll" proj framework proj
+    let testReportPath = sprintf "%s-%s.trx" proj framework
+    let coverageReportPath = sprintf "reports\%s.opencover.xml" proj
+    
     Directory.ensure "reports"
-          
-    sprintf "%s --target \"dotnet\" --targetargs \"test -c Release -f %s %s --no-build\" --include \"[SonOfPicasso.*]*\" --exclude \"[SonOfPicasso.*.Tests]*\" --exclude \"[SonOfPicasso.Testing.Common]*\" --format opencover --output \"./%s\""
-        dllPath framework projectPath reportPath
-    |> CreateProcess.fromRawCommandLine "coverlet"
+
+    let formatString = sprintf ("%s --logger:\"trx;LogFileName=%s\" --ResultsDirectory:reports --collect:\"XPlat code coverage\" --settings:\"src\coverletArgs.runsettings\"")
+
+    let vstestOutput = DotNet.exec options "vstest" (formatString dllPath testReportPath)
+    
+    let opencoverOutputFile = vstestOutput.Messages
+                                |> List.filter (fun s -> s.Contains("opencover.xml"))
+                                |> List.map (fun s -> s.Trim())
+                                |> List.head
+
+    Shell.moveFile opencoverOutputFile coverageReportPath
+
+    Trace.publish ImportData.BuildArtifact testReportPath
+
+(*
+if isAppveyor then
+    CreateProcess.fromRawCommandLine "codecov" (sprintf "-f \"%s\" --flag %s" reportPath flag)
     |> Proc.run
     |> ignore
-
-    Trace.publish ImportData.BuildArtifact reportPath
-
-    if isAppveyor then
-        CreateProcess.fromRawCommandLine "codecov" (sprintf "-f \"%s\" --flag %s" reportPath flag)
-        |> Proc.run
-        |> ignore
-        
-    Trace.publish ImportData.BuildArtifact (sprintf "reports/%s" reportFile)
+    
+Trace.publish ImportData.BuildArtifact (sprintf "reports/%s" reportFile)
+*)
 
 Target.create "Test" (fun _ -> 
     ()
