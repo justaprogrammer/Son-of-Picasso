@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Media;
 
-namespace SonOfPicasso.UI.WPF.Extensions
+namespace SonOfPicasso.UI.Extensions
 {
     public static class DependencyObjectExtensions
     {

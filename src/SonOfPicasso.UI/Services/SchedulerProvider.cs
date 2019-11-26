@@ -2,7 +2,7 @@
 using ReactiveUI;
 using SonOfPicasso.Core.Scheduling;
 
-namespace SonOfPicasso.UI.WPF.Services
+namespace SonOfPicasso.UI.Services
 {
     public sealed class SchedulerProvider : ISchedulerProvider
     {

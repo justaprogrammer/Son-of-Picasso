@@ -3,7 +3,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Windows.Media.Imaging;
 
-namespace SonOfPicasso.UI.WPF.Extensions
+namespace SonOfPicasso.UI.Extensions
 {
     public static class BitmapExtensions
     {

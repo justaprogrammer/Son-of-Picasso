@@ -13,10 +13,10 @@ using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Model;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Core.Services;
-using SonOfPicasso.UI.WPF.Interfaces;
-using SonOfPicasso.UI.WPF.ViewModels.Abstract;
+using SonOfPicasso.UI.Interfaces;
+using SonOfPicasso.UI.ViewModels.Abstract;
 
-namespace SonOfPicasso.UI.WPF.ViewModels
+namespace SonOfPicasso.UI.ViewModels
 {
     public class ApplicationViewModel : ActivatableViewModelBase, IDisposable
     {

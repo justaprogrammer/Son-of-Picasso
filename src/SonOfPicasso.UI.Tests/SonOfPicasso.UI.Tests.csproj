@@ -10,6 +10,12 @@
   <PropertyGroup>
     <MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);NETSDK1107</MSBuildWarningsAsMessages>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <Compile Remove="Services\**" />
+    <EmbeddedResource Remove="Services\**" />
+    <None Remove="Services\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Autofac" Version="4.9.4" />
@@ -50,10 +56,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SonOfPicasso.Testing.Common\SonOfPicasso.Testing.Common.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Services\" />
+    <ProjectReference Include="..\SonOfPicasso.UI\SonOfPicasso.UI.csproj" />
   </ItemGroup>
 
 </Project>

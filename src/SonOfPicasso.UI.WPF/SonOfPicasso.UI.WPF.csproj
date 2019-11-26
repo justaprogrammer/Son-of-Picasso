@@ -65,6 +65,7 @@
   <ItemGroup>
     <ProjectReference Include="..\SonOfPicasso.Core\SonOfPicasso.Core.csproj" />
     <ProjectReference Include="..\SonOfPicasso.Data\SonOfPicasso.Data.csproj" />
+    <ProjectReference Include="..\SonOfPicasso.UI\SonOfPicasso.UI.csproj" />
   </ItemGroup>
 
 </Project>

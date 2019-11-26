@@ -17,7 +17,7 @@ using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Core.Services;
 using SonOfPicasso.Data.Repository;
 using SonOfPicasso.Data.Services;
-using SonOfPicasso.UI.WPF.ViewModels;
+using SonOfPicasso.UI.ViewModels;
 using SonOfPicasso.UI.WPF.Windows;
 using Splat;
 using Splat.Serilog;

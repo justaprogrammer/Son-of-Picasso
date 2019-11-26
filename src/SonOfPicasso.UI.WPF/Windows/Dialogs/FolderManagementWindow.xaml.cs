@@ -10,8 +10,8 @@ using ReactiveUI;
 using Serilog;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Data.Model;
-using SonOfPicasso.UI.WPF.Interfaces;
-using SonOfPicasso.UI.WPF.ViewModels.FolderRules;
+using SonOfPicasso.UI.Interfaces;
+using SonOfPicasso.UI.ViewModels.FolderRules;
 
 namespace SonOfPicasso.UI.WPF.Windows.Dialogs
 {

@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Windows.Data;
 
-namespace SonOfPicasso.UI.WPF.Converters
+namespace SonOfPicasso.UI.Converters
 {
     public class DataTypeConverter : IValueConverter
     {
