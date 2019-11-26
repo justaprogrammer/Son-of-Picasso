@@ -14,7 +14,7 @@ using SonOfPicasso.Data.Repository;
 using SonOfPicasso.Data.Services;
 using SonOfPicasso.Testing.Common;
 using SonOfPicasso.Tools.Services;
-using SonOfPicasso.UI.Services;
+using SonOfPicasso.UI.WPF.Services;
 using Xunit.Abstractions;
 
 namespace SonOfPicasso.Integration.Tests
