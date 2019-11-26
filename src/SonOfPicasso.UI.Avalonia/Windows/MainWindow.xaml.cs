@@ -1,10 +1,11 @@
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using Avalonia.ReactiveUI;
+using SonOfPicasso.UI.ViewModels;
 
-namespace SonOfPicasso.UI.Avalonia
+namespace SonOfPicasso.UI.Avalonia.Windows
 {
-    public class MainWindow : Window
+    public class MainWindow : ReactiveWindow<ApplicationViewModel>
     {
         public MainWindow()
         {

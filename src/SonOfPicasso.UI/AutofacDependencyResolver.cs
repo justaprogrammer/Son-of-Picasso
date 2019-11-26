@@ -1,6 +1,6 @@
 ﻿using Autofac;
 
-namespace SonOfPicasso.UI.WPF
+namespace SonOfPicasso.UI
 {
     public class AutofacDependencyResolver : Splat.Autofac.AutofacDependencyResolver
     {

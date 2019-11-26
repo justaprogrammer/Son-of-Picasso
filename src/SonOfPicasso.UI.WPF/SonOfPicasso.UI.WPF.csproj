@@ -17,14 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="..\..\lib\flat-color-icons-8eccbb\svg\folder.svg" Link="Resources\FlatColorIcons\folder.svg" />
-    <EmbeddedResource Include="..\..\lib\flat-color-icons-8eccbb\svg\opened_folder.svg" Link="Resources\FlatColorIcons\opened_folder.svg" />
-    <EmbeddedResource Include="..\..\lib\flat-color-icons-8eccbb\svg\checkmark.svg" Link="Resources\FlatColorIcons\checkmark.svg" />
-    <EmbeddedResource Include="..\..\lib\flat-color-icons-8eccbb\svg\cancel.svg" Link="Resources\FlatColorIcons\cancel.svg" />
-    <EmbeddedResource Include="..\..\lib\flat-color-icons-8eccbb\svg\synchronize.svg" Link="Resources\FlatColorIcons\synchronize.svg" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="akavache" Version="6.9.10" />
     <PackageReference Include="Ardalis.GuardClauses" Version="1.3.1" />
     <PackageReference Include="Autofac" Version="4.9.4" />
