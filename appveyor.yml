@@ -19,6 +19,6 @@ build_script:
     codecov -f reports\SonOfPicasso.Data.Tests.opencover.xml --flag datatest
     codecov -f reports\SonOfPicasso.UI.Tests.opencover.xml --flag uitest
     codecov -f reports\SonOfPicasso.Integration.Tests.opencover.xml --flag integration
-    codecov -f reports\SonOfPicasso.Integration.Tools.opencover.xml --flag tools
+    codecov -f reports\SonOfPicasso.Tools.Tests.opencover.xml --flag tools 
 test: off
 deploy_script: semantic-release
