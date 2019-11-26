@@ -8,7 +8,6 @@ install:
   - npm install -g semantic-release @semantic-release/changelog @semantic-release/git
 cache:
   - '%LOCALAPPDATA%\Temp\Chocolatey -> appveyor.yml'
-  - 'packages\cache -> paket.*'
 before_build:
   - ps: gitversion /output buildserver 
 build_script:
