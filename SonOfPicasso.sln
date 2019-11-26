@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29215.179
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SonOfPicasso.UI", "src\SonOfPicasso.UI\SonOfPicasso.UI.csproj", "{282F684E-B70E-4C4B-920A-06D3E96F3109}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{12E2CEF6-EB9D-412F-98E3-ECBBBD00A29A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SonOfPicasso.Testing.Common", "src\SonOfPicasso.Testing.Common\SonOfPicasso.Testing.Common.csproj", "{0D73C26E-D1F1-4DE7-8354-9C9549FD2F93}"
@@ -40,16 +38,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SonOfPicasso.Integration.Te
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SonOfPicasso.UI.Avalonia", "src\SonOfPicasso.UI.Avalonia\SonOfPicasso.UI.Avalonia.csproj", "{AB7C1153-7474-4591-8708-EE1A4EA34E1E}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SonOfPicasso.UI.WPF", "src\SonOfPicasso.UI.WPF\SonOfPicasso.UI.WPF.csproj", "{AFAD5D51-9063-46BE-B489-9222C9C1BE2B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{282F684E-B70E-4C4B-920A-06D3E96F3109}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{282F684E-B70E-4C4B-920A-06D3E96F3109}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{282F684E-B70E-4C4B-920A-06D3E96F3109}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{282F684E-B70E-4C4B-920A-06D3E96F3109}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0D73C26E-D1F1-4DE7-8354-9C9549FD2F93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0D73C26E-D1F1-4DE7-8354-9C9549FD2F93}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0D73C26E-D1F1-4DE7-8354-9C9549FD2F93}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -90,6 +86,10 @@ Global
 		{AB7C1153-7474-4591-8708-EE1A4EA34E1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AB7C1153-7474-4591-8708-EE1A4EA34E1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AB7C1153-7474-4591-8708-EE1A4EA34E1E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFAD5D51-9063-46BE-B489-9222C9C1BE2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFAD5D51-9063-46BE-B489-9222C9C1BE2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFAD5D51-9063-46BE-B489-9222C9C1BE2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFAD5D51-9063-46BE-B489-9222C9C1BE2B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
