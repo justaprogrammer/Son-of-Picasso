@@ -2,7 +2,7 @@
 using ReactiveUI;
 using ReactiveUI.Validation.Helpers;
 
-namespace SonOfPicasso.UI.WPF.ViewModels.Abstract
+namespace SonOfPicasso.UI.ViewModels.Abstract
 {
     public abstract class ValidatedViewModelBase<T> : ReactiveValidationObject<T>, IActivatableViewModel
     {

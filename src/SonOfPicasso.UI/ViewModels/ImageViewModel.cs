@@ -1,8 +1,8 @@
 ﻿using System;
 using SonOfPicasso.Core.Model;
-using SonOfPicasso.UI.WPF.ViewModels.Abstract;
+using SonOfPicasso.UI.ViewModels.Abstract;
 
-namespace SonOfPicasso.UI.WPF.ViewModels
+namespace SonOfPicasso.UI.ViewModels
 {
     public class ImageViewModel : ViewModelBase
     {

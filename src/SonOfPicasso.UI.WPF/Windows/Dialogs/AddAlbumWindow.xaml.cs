@@ -3,7 +3,7 @@ using System.Reactive.Linq;
 using ReactiveUI;
 using ReactiveUI.Validation.Extensions;
 using SonOfPicasso.Core.Scheduling;
-using SonOfPicasso.UI.WPF.ViewModels;
+using SonOfPicasso.UI.ViewModels;
 
 namespace SonOfPicasso.UI.WPF.Windows.Dialogs
 {

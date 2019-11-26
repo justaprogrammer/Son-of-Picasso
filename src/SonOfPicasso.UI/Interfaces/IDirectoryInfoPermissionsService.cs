@@ -1,6 +1,6 @@
 ﻿using System.IO.Abstractions;
 
-namespace SonOfPicasso.UI.WPF.Interfaces
+namespace SonOfPicasso.UI.Interfaces
 {
 
     public interface IDirectoryInfoPermissionsService

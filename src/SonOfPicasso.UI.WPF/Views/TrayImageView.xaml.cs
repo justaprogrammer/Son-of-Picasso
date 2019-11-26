@@ -4,7 +4,7 @@ using System.Reactive.Linq;
 using ReactiveUI;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
-using SonOfPicasso.UI.WPF.ViewModels;
+using SonOfPicasso.UI.ViewModels;
 
 namespace SonOfPicasso.UI.WPF.Views
 {

@@ -8,9 +8,9 @@ using ReactiveUI.Validation.Helpers;
 using Serilog;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
-using SonOfPicasso.UI.WPF.ViewModels.Abstract;
+using SonOfPicasso.UI.ViewModels.Abstract;
 
-namespace SonOfPicasso.UI.WPF.ViewModels
+namespace SonOfPicasso.UI.ViewModels
 {
     public class AddAlbumViewModel : ValidatedViewModelBase<AddAlbumViewModel>, ICreateAlbum, IDisposable
     {

@@ -5,7 +5,7 @@
                                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                                 xmlns:reactiveUi="http://reactiveui.net"
-                                xmlns:viewModels="clr-namespace:SonOfPicasso.UI.WPF.ViewModels"
+                                xmlns:viewModels="clr-namespace:SonOfPicasso.UI.ViewModels;assembly=SonOfPicasso.UI"
                                 mc:Ignorable="d"
                                 d:DesignHeight="15" d:DesignWidth="15">
     <Canvas Height="15" Width="15">

@@ -6,7 +6,7 @@
                            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                            xmlns:reactiveUi="http://reactiveui.net"
                            xmlns:model="clr-namespace:SonOfPicasso.Data.Model;assembly=SonOfPicasso.Data"
-                           xmlns:folderRules="clr-namespace:SonOfPicasso.UI.WPF.ViewModels.FolderRules"
+                           xmlns:folderRules="clr-namespace:SonOfPicasso.UI.ViewModels.FolderRules;assembly=SonOfPicasso.UI"
                            mc:Ignorable="d"
                            Title="Manage Folders"
                            Name="Window"
