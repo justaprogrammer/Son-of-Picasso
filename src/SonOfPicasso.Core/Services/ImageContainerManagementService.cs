@@ -115,10 +115,35 @@ namespace SonOfPicasso.Core.Services
 
         public IObservable<Unit> Start()
         {
-            return _imageContainerOperationService.GetAllImageContainers()
-                .Do(container => _imageContainerCache.AddOrUpdate(container))
-                .LastOrDefaultAsync()
-                .SelectMany(_ => _imageContainerWatcherService.Start(_folderImageRefCache));
+            return Observable.DeferAsync(async token =>
+            {
+                var imageContainers = await _imageContainerOperationService
+                    .GetAllImageContainers()
+                    .ToArray();
+
+                foreach (var imageContainer in imageContainers)
+                {
+                    _imageContainerCache.AddOrUpdate(imageContainer);
+                }
+
+                await _imageContainerWatcherService.Start(_folderImageRefCache);
+
+                var folderRules = await _folderRulesManagementService.GetFolderManagementRules();
+
+                var folderRuleDictionary = folderRules.ToDictionary(rule => rule.Path, rule => rule.Action);
+
+                var topLevelItemDictionary = folderRules.GetTopLevelItemDictionary();
+                foreach (var (key, _) in topLevelItemDictionary)
+                {
+                    if (folderRuleDictionary[key] == FolderRuleActionEnum.Always)
+                    {
+                        ScanFolder(key)
+                            .Subscribe();
+                    }
+                }
+
+                return Observable.Return(Unit.Default);
+            });
         }
 
         public void Stop()
