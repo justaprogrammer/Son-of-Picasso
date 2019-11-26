@@ -22,6 +22,10 @@
     <PackageReference Include="Autofac" Version="4.9.4" />
     <PackageReference Include="AutofacSerilogIntegration" Version="2.1.0" />
     <PackageReference Include="DynamicData" Version="6.13.21" />
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.0.1">
       <PrivateAssets>all</PrivateAssets>
