@@ -14,7 +14,7 @@ before_build:
   - ps: gitversion /output buildserver 
 build_script:
 - ps: >-
-    build.ps1
+    .\build.ps1
     codecov -f reports\SonOfPicasso.Core.Tests.opencover.xml --flag coretest
     codecov -f reports\SonOfPicasso.Data.Tests.opencover.xml --flag datatest
     codecov -f reports\SonOfPicasso.UI.Tests.opencover.xml --flag uitest
