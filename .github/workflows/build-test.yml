@@ -2,7 +2,7 @@ name: Build and Test
 on: [push]
 
 jobs:
-  build:
+  build-windows:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v1
@@ -28,7 +28,7 @@ jobs:
         echo $output
         $ENV:lastCoverageReport = ($output -match "opencover").Trim()
     - name: Upload SonOfPicasso.Core.Tests to CodeCov
-      uses: codecov/codecov-action@v1.0.3
+      uses: codecov/codecov-action@v1.0.4
       with:
         token: ${{secrets.CODECOV_TOKEN}}
         file: $ENV:lastCoverageReport
@@ -43,7 +43,7 @@ jobs:
         echo $output
         $ENV:lastCoverageReport = ($output -match "opencover").Trim()
     - name: Upload SonOfPicasso.Data.Tests to CodeCov
-      uses: codecov/codecov-action@v1.0.3
+      uses: codecov/codecov-action@v1.0.4
       with:
         token: ${{secrets.CODECOV_TOKEN}}
         file: $ENV:lastCoverageReport
@@ -58,7 +58,7 @@ jobs:
         echo $output
         $ENV:lastCoverageReport = ($output -match "opencover").Trim()
     - name: Upload SonOfPicasso.UI.Tests to CodeCov
-      uses: codecov/codecov-action@v1.0.3
+      uses: codecov/codecov-action@v1.0.4
       with:
         token: ${{secrets.CODECOV_TOKEN}}
         file: $ENV:lastCoverageReport
@@ -73,7 +73,7 @@ jobs:
         echo $output
         $ENV:lastCoverageReport = ($output -match "opencover").Trim()
     - name: Upload SonOfPicasso.Tools.Tests to CodeCov
-      uses: codecov/codecov-action@v1.0.3
+      uses: codecov/codecov-action@v1.0.4
       with:
         token: ${{secrets.CODECOV_TOKEN}}
         file: $ENV:lastCoverageReport
@@ -88,7 +88,7 @@ jobs:
         echo $output
         $ENV:lastCoverageReport = ($output -match "opencover").Trim()
     - name: Upload SonOfPicasso.Integration.Tests to CodeCov
-      uses: codecov/codecov-action@v1.0.3
+      uses: codecov/codecov-action@v1.0.4
       with:
         token: ${{secrets.CODECOV_TOKEN}}
         file: $ENV:lastCoverageReport
@@ -97,5 +97,4 @@ jobs:
       run: |-
         Get-ChildItem -Recurse
     - name: Semantic Release
-      run: semantic-release
-      
+      run: semantic-release    
