@@ -8,14 +8,14 @@ using ReactiveUI.Validation.Helpers;
 using Serilog;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
-using SonOfPicasso.UI.ViewModels.Abstract;
+using SonOfPicasso.UI.WPF.ViewModels.Abstract;
 
-namespace SonOfPicasso.UI.ViewModels
+namespace SonOfPicasso.UI.WPF.ViewModels
 {
     public class AddAlbumViewModel : ValidatedViewModelBase<AddAlbumViewModel>, ICreateAlbum, IDisposable
     {
         private readonly ObservableAsPropertyHelper<bool> _displayAlbumNameError;
-        private readonly IImageManagementService _imageManagementService;
+        private readonly IImageContainerOperationService _imageContainerOperationService;
         private readonly ILogger _logger;
         private readonly ISchedulerProvider _schedulerProvider;
 
@@ -23,11 +23,12 @@ namespace SonOfPicasso.UI.ViewModels
         private string _albumName = string.Empty;
 
         public AddAlbumViewModel(ViewModelActivator activator, ILogger logger,
-            IImageManagementService imageManagementService, ISchedulerProvider schedulerProvider) : base(
+            IImageContainerOperationService imageContainerOperationService,
+            ISchedulerProvider schedulerProvider) : base(
             activator, schedulerProvider.TaskPool)
         {
             _logger = logger;
-            _imageManagementService = imageManagementService;
+            _imageContainerOperationService = imageContainerOperationService;
             _schedulerProvider = schedulerProvider;
 
             AlbumNameRule =
@@ -35,9 +36,8 @@ namespace SonOfPicasso.UI.ViewModels
                     s => !string.IsNullOrWhiteSpace(s),
                     "Album name must be set");
 
-            _displayAlbumNameError =
-                OnValidationHelperChange(model => model.AlbumName, model => model.AlbumNameRule.IsValid)
-                    .ToProperty(this, model => model.DisplayAlbumNameError);
+            OnValidationHelperChange(model => model.AlbumName, model => model.AlbumNameRule.IsValid)
+                .ToProperty(this, nameof(DisplayAlbumNameError), out _displayAlbumNameError);
 
             Continue = ReactiveCommand.CreateFromObservable(ExecuteContinue, this.IsValid());
             ContinueInteraction = new Interaction<Unit, Unit>();

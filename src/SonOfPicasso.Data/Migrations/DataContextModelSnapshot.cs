@@ -262,17 +262,40 @@ namespace SonOfPicasso.Data.Migrations
                     b.ToTable("Folders");
                 });
 
+            modelBuilder.Entity("SonOfPicasso.Data.Model.FolderRule", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Action")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Path")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FolderRules");
+                });
+
             modelBuilder.Entity("SonOfPicasso.Data.Model.Image", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("ExifDataId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("FolderId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("LastWriteTime")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Path")
                         .HasColumnType("TEXT");

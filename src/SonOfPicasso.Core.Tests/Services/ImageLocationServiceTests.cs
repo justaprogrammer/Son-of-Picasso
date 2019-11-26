@@ -4,19 +4,15 @@ using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Threading;
-using Autofac.Extras.NSubstitute;
 using FluentAssertions;
-using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Core.Services;
 using SonOfPicasso.Testing.Common;
 using SonOfPicasso.Testing.Common.Extensions;
-using SonOfPicasso.Testing.Common.Scheduling;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace SonOfPicasso.Core.Tests.Services
-{
+{    
     public class ImageLocationServiceTests : UnitTestsBase
     {
         public ImageLocationServiceTests(ITestOutputHelper testOutputHelper)
@@ -40,12 +36,9 @@ namespace SonOfPicasso.Core.Tests.Services
                 .Select(ext => Path.Combine(subDirectory, Faker.System.FileName(ext)))
                 .ToArray();
 
-            foreach (var file in files.Concat(otherFiles))
-            {
-                MockFileSystem.AddFile(file, new MockFileData(new byte[0]));
-            }
+            foreach (var file in files.Concat(otherFiles)) MockFileSystem.AddFile(file, new MockFileData(new byte[0]));
 
-            string[] imagePaths = null;
+            IFileInfo[] imagePaths = null;
 
             var imageLocationService = AutoSubstitute.Resolve<ImageLocationService>();
             imageLocationService.GetImages(directory)
@@ -60,7 +53,7 @@ namespace SonOfPicasso.Core.Tests.Services
             AutoResetEvent.WaitOne();
 
             imagePaths.Should().NotBeNull();
-            imagePaths.Select(fileInfo => fileInfo)
+            imagePaths.Select(fileInfo => fileInfo.FullName)
                 .Should().BeEquivalentTo(files);
         }
     }

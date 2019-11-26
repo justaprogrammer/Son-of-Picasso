@@ -35,3 +35,4 @@ using System.Runtime.InteropServices;
 [assembly:InternalsVisibleTo("SonOfPicasso.Testing.Common")]
 [assembly:InternalsVisibleTo("SonOfPicasso.Core.Tests")]
 [assembly:InternalsVisibleTo("SonOfPicasso.UI.Tests")]
+[assembly:InternalsVisibleTo("SonOfPicasso.Integration.Tests")]

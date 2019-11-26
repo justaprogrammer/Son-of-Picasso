@@ -43,20 +43,6 @@ namespace SonOfPicasso.Tools
                 });
             });
 
-            app.Command("cache", configCmd =>
-            {
-                configCmd.HandleSpecifySubCommandError();
-
-                configCmd.Command("clear", setCmd =>
-                {
-                    setCmd.Description = "Clear Cache";
-
-                    setCmd.HandleValidationError();
-
-                    setCmd.OnExecute(() => ToolsService.ClearCache().Wait());
-                });
-            });
-
             app.HandleSpecifySubCommandError();
 
             return app.Execute(args);
@@ -97,16 +83,13 @@ namespace SonOfPicasso.Tools
                         .As<ISchedulerProvider>()
                         .InstancePerLifetimeScope();
 
-                    containerBuilder.RegisterType<ImageManagementService>()
-                        .As<IImageManagementService>()
+                    containerBuilder.RegisterType<ImageContainerOperationService>()
+                        .As<IImageContainerOperationService>()
                         .InstancePerLifetimeScope();
 
                     containerBuilder.RegisterType<ImageLocationService>()
                         .As<IImageLocationService>()
                         .InstancePerLifetimeScope();
-
-                    containerBuilder.RegisterType<DataCache>()
-                        .As<IDataCache>();
 
                     containerBuilder.RegisterType<ImageGenerationService>();
 

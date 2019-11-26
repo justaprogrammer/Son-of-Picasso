@@ -18,12 +18,12 @@
     <PackageReference Include="Bogus" Version="28.4.1" />
     <PackageReference Include="ExifLibNet" Version="2.1.1" />
     <PackageReference Include="FluentColorConsole" Version="2.0.1" />
-    <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="2.4.2" />
+    <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="2.4.4" />
     <PackageReference Include="Serilog" Version="2.9.0" />
     <PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0" />
     <PackageReference Include="Serilog.Sinks.Debug" Version="1.0.1" />
     <PackageReference Include="Skybrud.Colors" Version="1.0.2" />
-    <PackageReference Include="System.Drawing.Common" Version="4.6.0" />
+    <PackageReference Include="System.Drawing.Common" Version="4.6.1" />
     <PackageReference Include="System.Reactive" Version="4.2.0" />
   </ItemGroup>
 

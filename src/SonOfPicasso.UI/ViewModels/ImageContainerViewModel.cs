@@ -1,45 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
-using ReactiveUI;
 using SonOfPicasso.Core.Model;
-using SonOfPicasso.Core.Scheduling;
-using SonOfPicasso.UI.ViewModels.Abstract;
+using SonOfPicasso.UI.WPF.ViewModels.Abstract;
 
-namespace SonOfPicasso.UI.ViewModels
+namespace SonOfPicasso.UI.WPF.ViewModels
 {
     public class ImageContainerViewModel : ViewModelBase
     {
-        private readonly ISchedulerProvider _schedulerProvider;
+        private readonly IImageContainer _imageContainer;
 
-        private ImageContainer _imageContainer;
-
-        public ImageContainerViewModel(
-            ViewModelActivator activator, 
-            ISchedulerProvider schedulerProvider) : base(activator)
+        public ImageContainerViewModel(IImageContainer imageContainer)
         {
-            _schedulerProvider = schedulerProvider;
+            _imageContainer =
+                imageContainer ?? throw new ArgumentNullException(nameof(imageContainer));
         }
 
         public string Name => _imageContainer.Name;
 
-        public string ContainerId => _imageContainer.Id;
+        public string ContainerKey => _imageContainer.Key;
 
         public ImageContainerTypeEnum ContainerType => _imageContainer.ContainerType;
-        public int ContainerTypeId => _imageContainer.ContainerTypeId;
+        public int ContainerTypeId => _imageContainer.Id;
 
         public IList<ImageRef> ImageRefs => _imageContainer.ImageRefs;
+
+        public int Count => ImageRefs.Count;
 
         public int Year => _imageContainer.Year;
 
         public DateTime Date => _imageContainer.Date;
-
-        public ApplicationViewModel ApplicationViewModel { get; private set; }
-
-        public void Initialize(ImageContainer imageContainer, ApplicationViewModel applicationViewModel)
-        {
-            _imageContainer = imageContainer ?? throw new ArgumentNullException(nameof(imageContainer));
-            ApplicationViewModel =
-                applicationViewModel ?? throw new ArgumentNullException(nameof(applicationViewModel));
-        }
     }
 }

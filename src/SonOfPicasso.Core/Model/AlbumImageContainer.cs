@@ -5,29 +5,34 @@ using SonOfPicasso.Data.Model;
 
 namespace SonOfPicasso.Core.Model
 {
-    public class AlbumImageContainer : ImageContainer
+    public class AlbumImageContainer : IImageContainer
     {
         public AlbumImageContainer(Album album)
         {
-            Id = GetContainerId(album);
-            ContainerTypeId = album.Id;
+            Key = GetContainerKey(album);
+            Id = album.Id;
             Name = album.Name;
             Date = album.Date;
             Year = album.Date.Year;
-            ImageRefs = album.AlbumImages.Select(albumImage => new ImageRef(albumImage.Image, this)).ToArray();
+            ImageRefs = album.AlbumImages.Select(albumImage => ImageRef.CreateImageRef(albumImage.Image, this)).ToArray();
         }
 
-        public override string Id { get; }
-        public override string Name { get; }
-        public override int Year { get; }
-        public override DateTime Date { get; }
-        public override ImageContainerTypeEnum ContainerType => ImageContainerTypeEnum.Album;
-        public override int ContainerTypeId { get; }
-        public override IList<ImageRef> ImageRefs { get; }
+        public int Id { get; }
+        public string Key { get; }
+        public string Name { get; }
+        public int Year { get; }
+        public DateTime Date { get; }
+        public ImageContainerTypeEnum ContainerType => ImageContainerTypeEnum.Album;
+        public IList<ImageRef> ImageRefs { get; }
 
-        public static string GetContainerId(Album album)
+        public static string GetContainerKey(Album album)
         {
-            return $"Album:{album.Id}";
+            return GetContainerKey(album.Id);
+        }
+        
+        public static string GetContainerKey(int albumId)
+        {
+            return $"Album:{albumId}";
         }
     }
 }

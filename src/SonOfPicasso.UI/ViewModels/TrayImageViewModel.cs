@@ -1,22 +1,18 @@
 ﻿using ReactiveUI;
-using SonOfPicasso.UI.ViewModels.Abstract;
+using SonOfPicasso.UI.WPF.ViewModels.Abstract;
 
-namespace SonOfPicasso.UI.ViewModels
+namespace SonOfPicasso.UI.WPF.ViewModels
 {
     public class TrayImageViewModel : ViewModelBase
     {
         private bool _pinned;
 
-        public TrayImageViewModel(ViewModelActivator activator) : base(activator)
+        public TrayImageViewModel(ImageViewModel imageViewModel)
         {
+            ImageViewModel = imageViewModel;
         }
 
-        public ImageViewModel Image { get; private set; }
-
-        public void Initialize(ImageViewModel imageViewModel)
-        {
-            Image = imageViewModel;
-        }
+        public ImageViewModel ImageViewModel { get; }
 
         public bool Pinned
         {

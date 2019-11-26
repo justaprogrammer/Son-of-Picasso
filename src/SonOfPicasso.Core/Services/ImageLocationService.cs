@@ -12,8 +12,6 @@ namespace SonOfPicasso.Core.Services
 {
     public class ImageLocationService: IImageLocationService
     {
-        private static readonly string[] ImageExtensions = { ".jpg", ".jpeg", ".png", ".tif", ".tiff", ".bmp" };
-
         private readonly IFileSystem _fileSystem;
         private readonly ISchedulerProvider _schedulerProvider;
         private readonly ILogger _logger;
@@ -27,29 +25,17 @@ namespace SonOfPicasso.Core.Services
             _schedulerProvider = schedulerProvider;
         }
 
-        public IObservable<string> GetImages(string path)
+        public IObservable<IFileInfo> GetImages(string path)
         {
             return Observable.Defer(() =>
             {
-                _logger.Debug("GetImages {Path}", path);
+                _logger.Verbose("GetImages {Path}", path);
 
-                var fileInfoBases = Array.Empty<string>();
-                try
-                {
-                    fileInfoBases = _fileSystem.DirectoryInfo.FromDirectoryName(path)
+                return _fileSystem.DirectoryInfo.FromDirectoryName(path)
                         .EnumerateFiles("*.*", SearchOption.AllDirectories)
-                        .Where(file => ImageExtensions.Contains(file.Extension.ToLowerInvariant()))
-                        .Select(file => file.FullName)
-                        .ToArray();
-                }
-                catch (Exception ex)
-                {
-                    _logger.Error(ex, "Error GetImages {Path}", path);
-                }
-
-                return Observable.Return(fileInfoBases);
-            }).SelectMany(strings => strings)
-                .SubscribeOn(_schedulerProvider.TaskPool);
+                        .Where(file => Constants.ImageExtensions.Contains(file.Extension.ToLowerInvariant()))
+                        .ToObservable();
+            });
         }
     }
 }

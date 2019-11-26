@@ -248,3 +248,5 @@ nuget/*
 
 *.db
 /db
+/cache
+.vscode

@@ -1,67 +1,26 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using Bogus;
 using FluentAssertions;
 using Serilog;
 using Xunit.Abstractions;
+using SonOfPicasso.Core;
 using SonOfPicasso.Core.Logging;
 
 namespace SonOfPicasso.Testing.Common
 {
     public abstract class TestsBase: IDisposable
     {
-
-        protected static bool IsDebug
-        {
-            get
-            {
-#if DEBUG
-                return true;
-#else
-                return false;
-#endif
-            }
-        }
-
-        protected static bool IsTracingEnabled
-        {
-            get
-            {
-                var environmentVariable = Environment.GetEnvironmentVariable("SonOfPicasso_Testing_Tracing");
-                if (string.IsNullOrWhiteSpace(environmentVariable))
-                    return false;
-
-                environmentVariable = environmentVariable.ToLower();
-                if (environmentVariable == "false" || environmentVariable == "1")
-                {
-                    return false;
-                }
-
-                return true;
-            }
-        }
-
         protected readonly ILogger Logger;
         protected readonly Faker Faker;
         protected readonly AutoResetEvent AutoResetEvent;
 
-        public TestsBase(ITestOutputHelper testOutputHelper)
+        protected TestsBase(LoggerConfiguration loggerConfiguration)
         {
+            if (loggerConfiguration == null) throw new ArgumentNullException(nameof(loggerConfiguration));
+
             Faker = new Faker();
-
-            var loggerConfiguration = new LoggerConfiguration()
-                .Enrich.WithThreadId()
-                .Enrich.With<CustomEnrichers>() 
-                .WriteTo.TestOutput(testOutputHelper, outputTemplate: "{Timestamp:HH:mm:ss} [{Level:u4}] ({PaddedThreadId}) {ShortSourceContext} {Message}{NewLineIfException}{Exception}");
-
-            if (IsTracingEnabled)
-            {
-                loggerConfiguration = loggerConfiguration.MinimumLevel.Verbose();
-            }
-            else if (IsDebug)
-            {
-                loggerConfiguration = loggerConfiguration.MinimumLevel.Debug();
-            }
 
             Log.Logger = loggerConfiguration
                 .CreateLogger();
@@ -70,9 +29,72 @@ namespace SonOfPicasso.Testing.Common
             AutoResetEvent = new AutoResetEvent(false);
         }
 
-        protected void WaitOne(int timeout = 500)
+        protected TestsBase(ITestOutputHelper testOutputHelper):this(GetLoggerConfiguration(testOutputHelper))
         {
-            AutoResetEvent.WaitOne(timeout).Should().BeTrue();
+
+        }
+
+        public static LoggerConfiguration GetLoggerConfiguration(ITestOutputHelper testOutputHelper, Func<LoggerConfiguration, LoggerConfiguration> customLogConfiguration = null)
+        {
+            var loggerConfiguration = new LoggerConfiguration()
+                .Enrich.WithThreadId()
+                .Enrich.With<CustomEnrichers>();
+
+            if (Core.Common.IsVerboseLoggingEnabled)
+            {
+                loggerConfiguration = loggerConfiguration.MinimumLevel.Verbose();
+            }
+            else if (Core.Common.IsDebug)
+            {
+                loggerConfiguration = loggerConfiguration.MinimumLevel.Debug();
+            }
+
+            loggerConfiguration = loggerConfiguration
+                .WriteTo.Logger(configuration =>
+                {
+                    if(customLogConfiguration != null)
+                    {
+                        configuration = customLogConfiguration.Invoke(configuration);
+                    }
+                  
+                    configuration.WriteTo.TestOutput(testOutputHelper,
+                        outputTemplate:
+                        "{Timestamp:HH:mm:ss} [{Level:u4}] ({PaddedThreadId}) {ShortSourceContext} {Message}{NewLineIfException}{Exception}");
+                });
+
+            return loggerConfiguration;
+        }
+
+        protected bool Set()
+        {
+            return AutoResetEvent.Set();
+        }
+
+        protected void WaitOne(int timespanSeconds)
+        {
+            WaitOne(TimeSpan.FromSeconds(timespanSeconds));
+        }
+
+        protected void WaitOne(TimeSpan? timespan = null)
+        {
+            if (Debugger.IsAttached)
+            {
+                timespan = TimeSpan.FromMinutes(3);
+            }
+            else
+            {
+                timespan ??= TimeSpan.FromSeconds(0.5);
+            }
+
+            try
+            {
+                AutoResetEvent.WaitOne(timespan.Value).Should().BeTrue($"Set() was called in {timespan.Value.TotalSeconds:0.00}s");
+            }
+            catch
+            {
+                Logger.Error("WaitOne Timeout");
+                throw;
+            }
         }
 
         public virtual void Dispose()

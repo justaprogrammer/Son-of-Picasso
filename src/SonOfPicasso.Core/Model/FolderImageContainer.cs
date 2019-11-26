@@ -2,34 +2,39 @@
 using System.Collections.Generic;
 using System.IO.Abstractions;
 using System.Linq;
-using Microsoft.VisualBasic;
 using SonOfPicasso.Data.Model;
 
 namespace SonOfPicasso.Core.Model
 {
-    public class FolderImageContainer : ImageContainer
+    public class FolderImageContainer : IImageContainer
     {
         public FolderImageContainer(Folder folder, IFileSystem fileSystem)
         {
-            Id = GetContainerId(folder);
-            ContainerTypeId = folder.Id;
+            Key = GetContainerKey(folder);
+            Id = folder.Id;
             Name = fileSystem.DirectoryInfo.FromDirectoryName(folder.Path).Name;
             Date = folder.Date;
             Year = folder.Date.Year;
-            ImageRefs = folder.Images.Select(image => new ImageRef(image, this)).ToArray();
+            ImageRefs = folder.Images.Select(image => ImageRef.CreateImageRef(image, this)).ToArray();
         }
 
-        public override int ContainerTypeId { get; }
-        public override string Id { get; }
-        public override string Name { get; }
-        public override int Year { get; }
-        public override DateTime Date { get; }
-        public override ImageContainerTypeEnum ContainerType => ImageContainerTypeEnum.Folder;
-        public override IList<ImageRef> ImageRefs { get; }
+        public int Id { get; }
+        public string Key { get; }
+        public string Name { get; }
+        public int Year { get; }
+        public DateTime Date { get; }
+        public ImageContainerTypeEnum ContainerType => ImageContainerTypeEnum.Folder;
+        public IList<ImageRef> ImageRefs { get; }
 
-        public static string GetContainerId(Folder folder)
+        public static string GetContainerKey(Folder folder)
         {
-            return $"Folder:{folder.Id}";
+            var folderId = folder.Id;
+            return GetContainerKey(folderId);
+        }
+
+        public static string GetContainerKey(int folderId)
+        {
+            return $"Folder:{folderId}";
         }
     }
 }
