@@ -29,6 +29,8 @@ function test {
         --settings:"src\coverletArgs.runsettings" | Tee-Object -Variable cmdOutput 
   
     $match = Select-String -Pattern "Attachments:\s+(.*?opencover.xml)" -InputObject $cmdOutput
+    Write-Host "Last Exit Code: $LastExitCode"
+
     $coverageFile = Resolve-Path -Relative $match.Matches[0].Groups[1].Value
     Move-Item  $coverageFile ".\reports\$project.opencover.xml"
 }
