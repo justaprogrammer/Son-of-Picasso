@@ -16,6 +16,10 @@
     <PackageReference Include="Autofac" Version="4.9.4" />
     <PackageReference Include="DynamicData" Version="6.13.21" />
     <PackageReference Include="ExifLibNet" Version="2.1.1" />
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.7">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="morelinq" Version="3.2.0" />
     <PackageReference Include="Roslyn.System.IO.Abstractions.Analyzers" Version="6.0.32">
       <PrivateAssets>all</PrivateAssets>
