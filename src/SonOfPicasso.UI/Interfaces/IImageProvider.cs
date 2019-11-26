@@ -1,6 +1,6 @@
 ﻿using System.Windows.Media.Imaging;
 
-namespace SonOfPicasso.UI.WPF.Interfaces
+namespace SonOfPicasso.UI.Interfaces
 {
     public interface IImageProvider
     {

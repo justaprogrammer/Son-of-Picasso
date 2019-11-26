@@ -1,6 +1,6 @@
 ﻿using ReactiveUI;
 
-namespace SonOfPicasso.UI.WPF.ViewModels.Abstract
+namespace SonOfPicasso.UI.ViewModels.Abstract
 {
     public abstract class ViewModelBase : ReactiveObject
     {

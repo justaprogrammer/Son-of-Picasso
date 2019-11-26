@@ -15,10 +15,10 @@ using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Core.Services;
 using SonOfPicasso.Data.Model;
-using SonOfPicasso.UI.WPF.Interfaces;
-using SonOfPicasso.UI.WPF.ViewModels.Abstract;
+using SonOfPicasso.UI.Interfaces;
+using SonOfPicasso.UI.ViewModels.Abstract;
 
-namespace SonOfPicasso.UI.WPF.ViewModels.FolderRules
+namespace SonOfPicasso.UI.ViewModels.FolderRules
 {
     public class ManageFolderRulesViewModel : ActivatableViewModelBase, IManageFolderRulesViewModel, IDisposable
     {

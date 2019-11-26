@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using SonOfPicasso.UI.WPF.ViewModels;
+using SonOfPicasso.UI.ViewModels;
 
 namespace SonOfPicasso.UI.WPF.Converters
 {

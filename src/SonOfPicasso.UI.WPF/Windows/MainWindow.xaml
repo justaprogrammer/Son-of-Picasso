@@ -5,8 +5,9 @@
                            xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                            xmlns:reactiveUi="http://reactiveui.net"
-                           xmlns:viewModels="clr-namespace:SonOfPicasso.UI.WPF.ViewModels"
                            xmlns:converters="clr-namespace:SonOfPicasso.UI.WPF.Converters"
+                           xmlns:viewModels="clr-namespace:SonOfPicasso.UI.ViewModels;assembly=SonOfPicasso.UI"
+                           xmlns:uiconverters="clr-namespace:SonOfPicasso.UI.WPF.Converters;assembly=SonOfPicasso.UI"
                            mc:Ignorable="d"
                            Title="MainWindow" Height="450" Width="800"
                            Name="Window">
@@ -15,7 +16,7 @@
         <CollectionViewSource x:Key="ImageContainersViewSource" />
         <CollectionViewSource x:Key="AlbumImageContainersViewSource" />
         <CollectionViewSource x:Key="ImagesCollectionViewSource" />
-        <converters:MultiValueEqualityConverter x:Key="MultiValueEqualityConverter" />
+        <uiconverters:MultiValueEqualityConverter x:Key="MultiValueEqualityConverter" />
     </Window.Resources>
     <DockPanel>
         <Menu DockPanel.Dock="Top" Width="Auto" Height="20">

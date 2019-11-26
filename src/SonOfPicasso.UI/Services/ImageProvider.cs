@@ -1,10 +1,10 @@
 ﻿using System.Collections.Concurrent;
 using System.Windows.Media.Imaging;
 using SonOfPicasso.Core.Interfaces;
-using SonOfPicasso.UI.WPF.Extensions;
-using SonOfPicasso.UI.WPF.Interfaces;
+using SonOfPicasso.UI.Extensions;
+using SonOfPicasso.UI.Interfaces;
 
-namespace SonOfPicasso.UI.WPF.Services
+namespace SonOfPicasso.UI.Services
 {
     public class ImageProvider: IImageProvider
     {

@@ -11,9 +11,9 @@ using ReactiveUI;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Data.Model;
-using SonOfPicasso.UI.WPF.Interfaces;
+using SonOfPicasso.UI.Interfaces;
 
-namespace SonOfPicasso.UI.WPF.ViewModels.FolderRules
+namespace SonOfPicasso.UI.ViewModels.FolderRules
 {
     public class FolderRuleViewModel : ReactiveObject, IFolderRuleInput, IDisposable
     {

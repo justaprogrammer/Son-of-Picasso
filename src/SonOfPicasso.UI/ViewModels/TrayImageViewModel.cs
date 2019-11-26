@@ -1,7 +1,7 @@
 ﻿using ReactiveUI;
-using SonOfPicasso.UI.WPF.ViewModels.Abstract;
+using SonOfPicasso.UI.ViewModels.Abstract;
 
-namespace SonOfPicasso.UI.WPF.ViewModels
+namespace SonOfPicasso.UI.ViewModels
 {
     public class TrayImageViewModel : ViewModelBase
     {

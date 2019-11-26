@@ -3,9 +3,9 @@ using System.Diagnostics;
 using System.IO.Abstractions;
 using System.Security.AccessControl;
 using System.Security.Principal;
-using SonOfPicasso.UI.WPF.Interfaces;
+using SonOfPicasso.UI.Interfaces;
 
-namespace SonOfPicasso.UI.WPF.Services
+namespace SonOfPicasso.UI.Services
 {
     public class DirectoryInfoPermissionsService : IDirectoryInfoPermissionsService
     {

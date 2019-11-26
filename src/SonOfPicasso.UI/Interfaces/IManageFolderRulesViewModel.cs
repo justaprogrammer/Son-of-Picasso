@@ -4,7 +4,7 @@ using System.Reactive;
 using ReactiveUI;
 using SonOfPicasso.Core.Interfaces;
 
-namespace SonOfPicasso.UI.WPF.Interfaces
+namespace SonOfPicasso.UI.Interfaces
 {
     public interface IManageFolderRulesViewModel : IReactiveObject
     {
