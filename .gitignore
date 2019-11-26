@@ -242,7 +242,6 @@ paket-files
 .fake/
 
 reports/
-SharedAssemblyInfo.cs
 nuget/*
 /images
 

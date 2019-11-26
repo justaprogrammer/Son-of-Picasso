@@ -13,10 +13,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\common\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" Condition="Exists('..\common\SharedAssemblyInfo.cs')" />
-  </ItemGroup>
-
-  <ItemGroup>
     <EmbeddedResource Include="..\..\lib\flat-color-icons-8eccbb\svg\folder.svg" Link="Resources\FlatColorIcons\folder.svg" />
     <EmbeddedResource Include="..\..\lib\flat-color-icons-8eccbb\svg\opened_folder.svg" Link="Resources\FlatColorIcons\opened_folder.svg" />
     <EmbeddedResource Include="..\..\lib\flat-color-icons-8eccbb\svg\checkmark.svg" Link="Resources\FlatColorIcons\checkmark.svg" />
@@ -30,6 +26,10 @@
     <PackageReference Include="Autofac" Version="4.9.4" />
     <PackageReference Include="AutofacSerilogIntegration" Version="2.1.0" />
     <PackageReference Include="DynamicData" Version="6.13.21" />
+    <PackageReference Include="GitVersionTask" Version="5.1.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

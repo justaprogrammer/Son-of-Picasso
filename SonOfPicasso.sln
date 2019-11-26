@@ -14,12 +14,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{30DC3442-C225-4FC5-9439-77BD1B3EE895}"
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
-		Build.fsx = Build.fsx
 		codecov.yml = codecov.yml
 		.chglog\config.yml = .chglog\config.yml
+		src\coverletArgs.runsettings = src\coverletArgs.runsettings
 		nuget.config = nuget.config
-		paket.dependencies = paket.dependencies
-		paket.lock = paket.lock
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{DE25AC0A-8FB7-4D88-8B3A-CDC3EF9AE88F}"
