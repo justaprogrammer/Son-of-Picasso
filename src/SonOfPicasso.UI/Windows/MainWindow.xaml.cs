@@ -3,8 +3,10 @@ using System.ComponentModel;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -12,6 +14,7 @@ using System.Windows.Data;
 using System.Windows.Forms;
 using DynamicData;
 using DynamicData.Binding;
+using Microsoft.Extensions.Caching.Memory;
 using MoreLinq;
 using ReactiveUI;
 using Serilog;
@@ -45,6 +48,7 @@ namespace SonOfPicasso.UI.Windows
         private readonly IImageLoadingService _imageLoadingService;
         private readonly ILogger _logger;
         private readonly ISchedulerProvider _schedulerProvider;
+        private MemoryCache memoryCache;
 
         public MainWindow(ILogger logger, IEnvironmentService environmentService, IFileSystem fileSystem,
             ISchedulerProvider schedulerProvider,
@@ -65,6 +69,7 @@ namespace SonOfPicasso.UI.Windows
             _folderManagementViewModelFactory = folderManagementViewModelFactory;
 
             InitializeComponent();
+            memoryCache = new MemoryCache(new MemoryCacheOptions());
 
             _imageCollectionViewSource = (CollectionViewSource) FindResource("ImagesCollectionViewSource");
             _imageContainersViewSource = (CollectionViewSource) FindResource("ImageContainersViewSource");
@@ -431,9 +436,20 @@ namespace SonOfPicasso.UI.Windows
         {
             var image = (Image) sender;
             var imageViewModel = (ImageViewModel) image.DataContext;
-            _imageLoadingService.LoadThumbnailFromPath(imageViewModel.Path)
-                .ObserveOnDispatcher()
-                .Subscribe(source => image.Source = source);
+
+            _schedulerProvider.TaskPool.Schedule(() =>
+            {
+                memoryCache.GetOrCreateAsync(imageViewModel.Path, async entry =>
+                    {
+                        var bitmapSource = await _imageLoadingService.LoadThumbnailFromPath((string) entry.Key)
+                            .ObserveOn(_schedulerProvider.TaskPool);
+
+                        entry.SetSlidingExpiration(TimeSpan.FromMinutes(10));
+                        return bitmapSource;
+                    }).ToObservable()
+                    .ObserveOn(_schedulerProvider.MainThreadScheduler)
+                    .Subscribe(source => image.Source = source);
+            });
         }
     }
 }

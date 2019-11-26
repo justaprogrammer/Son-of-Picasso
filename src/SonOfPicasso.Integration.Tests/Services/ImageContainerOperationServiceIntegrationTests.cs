@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -14,6 +15,7 @@ using Serilog;
 using Serilog.Filters;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Model;
+using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Core.Services;
 using SonOfPicasso.Data.Model;
 using SonOfPicasso.Testing.Common;
@@ -32,7 +34,17 @@ namespace SonOfPicasso.Integration.Tests.Services
             containerBuilder.RegisterType<ImageContainerOperationService>();
             containerBuilder.RegisterType<ExifDataService>().As<IExifDataService>();
             containerBuilder.RegisterType<TestBlobCacheProvider>().As<IBlobCacheProvider>();
-            containerBuilder.RegisterType<ImageLoadingService>().As<IImageLoadingService>();
+
+            containerBuilder.Register(context =>
+            {
+                var resolve = context.Resolve<ILogger>();
+                var directoryInfo = ImagesDirectoryInfo.Parent.CreateSubdirectory("Thumbnails");
+
+                return new ImageLoadingService(context.Resolve<IFileSystem>(), resolve,
+                    context.Resolve<ISchedulerProvider>(), context.Resolve<IBlobCacheProvider>(),
+                    directoryInfo.FullName);
+            }).As<IImageLoadingService>();
+
             containerBuilder.RegisterType<ImageLocationService>().As<IImageLocationService>();
             Container = containerBuilder.Build();
         }
