@@ -17,6 +17,8 @@ dotnet publish -c Release .\SonOfPicasso.sln -v m
 
 printHeader "Test"
 
+$testSuccess = $true
+
 function test {
     param (
         $project
@@ -27,9 +29,10 @@ function test {
         --ResultsDirectory:reports `
         --collect:"XPlat code coverage" `
         --settings:"src\coverletArgs.runsettings" | Tee-Object -Variable cmdOutput 
+    
+    $script:testSuccess = $script:testSuccess -and ($LastExitCode -eq 0)
   
     $match = Select-String -Pattern "Attachments:\s+(.*?opencover.xml)" -InputObject $cmdOutput
-    Write-Host "Last Exit Code: $LastExitCode"
 
     $coverageFile = Resolve-Path -Relative $match.Matches[0].Groups[1].Value
     Move-Item  $coverageFile ".\reports\$project.opencover.xml"
@@ -40,3 +43,8 @@ test "SonOfPicasso.Data.Tests"
 test "SonOfPicasso.Integration.Tests"
 test "SonOfPicasso.Tools.Tests"
 test "SonOfPicasso.UI.Tests"
+
+if(!$testSuccess) {
+    Write-Host "Test Failed"
+    exit 1
+}

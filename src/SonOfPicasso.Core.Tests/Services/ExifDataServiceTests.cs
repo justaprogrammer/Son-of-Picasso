@@ -33,6 +33,12 @@ namespace SonOfPicasso.Core.Tests.Services
         }
 
         [Fact]
+        public void Other()
+        {
+            throw new InvalidOperationException();
+        }
+
+        [Fact]
         public void CanReadExifData()
         {
             Logger.Debug("CanReadExifData");

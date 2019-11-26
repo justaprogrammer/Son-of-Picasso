@@ -15,10 +15,15 @@ build_script:
 - ps: |
     [System.Environment]::SetEnvironmentVariable("SonOfPicasso_Verbose", "true")
     .\build.ps1
+    $success = $LastExitCode -eq 0
     codecov -f reports\SonOfPicasso.Core.Tests.opencover.xml --flag coretest
     codecov -f reports\SonOfPicasso.Data.Tests.opencover.xml --flag datatest
     codecov -f reports\SonOfPicasso.UI.Tests.opencover.xml --flag uitest
     codecov -f reports\SonOfPicasso.Integration.Tests.opencover.xml --flag integration
     codecov -f reports\SonOfPicasso.Tools.Tests.opencover.xml --flag tools 
+    
+    if($success -eq $False) {
+      exit 1
+    }
 test: off
 deploy_script: semantic-release
