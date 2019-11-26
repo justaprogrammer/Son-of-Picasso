@@ -41,6 +41,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SonOfPicasso.UI.Avalonia", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SonOfPicasso.UI.WPF", "src\SonOfPicasso.UI.WPF\SonOfPicasso.UI.WPF.csproj", "{AFAD5D51-9063-46BE-B489-9222C9C1BE2B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SonOfPicasso.UI", "src\SonOfPicasso.UI\SonOfPicasso.UI.csproj", "{7599C0FD-62B6-458F-983E-6930BFCBCF71}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -91,6 +93,10 @@ Global
 		{AFAD5D51-9063-46BE-B489-9222C9C1BE2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AFAD5D51-9063-46BE-B489-9222C9C1BE2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AFAD5D51-9063-46BE-B489-9222C9C1BE2B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7599C0FD-62B6-458F-983E-6930BFCBCF71}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7599C0FD-62B6-458F-983E-6930BFCBCF71}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7599C0FD-62B6-458F-983E-6930BFCBCF71}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7599C0FD-62B6-458F-983E-6930BFCBCF71}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
