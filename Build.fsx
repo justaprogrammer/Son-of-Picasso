@@ -63,17 +63,11 @@ Target.create "Build" (fun _ ->
         if isAppveyor then
           AppVeyor.updateBuild (fun t -> {t with Version = (sprintf "%s" version)})
 
-  let buildConfiguration: (DotNet.BuildOptions -> DotNet.BuildOptions)
+  let publishConfiguration: (DotNet.PublishOptions -> DotNet.PublishOptions)
         = (fun t -> {t with
-                      Configuration = DotNet.BuildConfiguration.Release})
-
-  let publicConfiguration: (DotNet.PublishOptions -> DotNet.PublishOptions)
-        = (fun t -> {t with
-                        Configuration = DotNet.BuildConfiguration.Release})
-  
-  DotNet.build buildConfiguration "SonOfPicasso.sln"
-  
-  DotNet.publish publicConfiguration "SonOfPicasso.sln"
+                        Configuration = DotNet.BuildConfiguration.Release})  
+ 
+  DotNet.publish publishConfiguration "SonOfPicasso.sln"
 )
 
 let test proj framework flag =
@@ -89,10 +83,16 @@ let test proj framework flag =
     let formatString = sprintf ("%s --logger:\"trx;LogFileName=%s\" --ResultsDirectory:reports --collect:\"XPlat code coverage\" --settings:\"src\coverletArgs.runsettings\"")
 
     let vstestOutput = DotNet.exec options "vstest" (formatString dllPath testReportPath)
+
+    Trace.log (sprintf "Output: %s" (vstestOutput.ToString()))
+
+    vstestOutput.Messages
+    |> List.map (fun s -> sprintf "Message: %s" s)
+    |> List.iter(fun s -> Trace.log s)
     
-    let opencoverOutputFile = vstestOutput.Messages
-                                |> List.filter (fun s -> s.Contains("opencover.xml"))
-                                |> List.map (fun s -> s.Trim())
+    let opencoverOutputFile = vstestOutput.Results
+                                |> List.filter (fun s -> s.Message.Contains("opencover.xml"))
+                                |> List.map (fun s -> s.Message.Trim())
                                 |> List.head
 
     Shell.moveFile opencoverOutputFile coverageReportPath
