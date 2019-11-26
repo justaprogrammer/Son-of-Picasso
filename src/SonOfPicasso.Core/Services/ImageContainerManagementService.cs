@@ -47,9 +47,8 @@ namespace SonOfPicasso.Core.Services
                 .AsObservableCache();
 
             _imageContainerWatcherService.FileDiscovered
-                .SelectMany(path => _imageContainerOperationService.AddOrUpdateImage(path))
-                .SelectMany(imageRef => _imageContainerOperationService.GetFolderImageContainer(imageRef.ContainerId))
-                .Subscribe(container => _imageContainerCache.AddOrUpdate(container))
+                .SelectMany(path => _imageContainerOperationService.ScanImage(path))
+                .Subscribe()
                 .DisposeWith(_disposables);
 
             _imageContainerWatcherService.FileDeleted

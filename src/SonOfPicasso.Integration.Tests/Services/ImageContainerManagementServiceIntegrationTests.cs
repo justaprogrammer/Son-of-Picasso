@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -13,6 +14,7 @@ using Serilog;
 using Serilog.Filters;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Model;
+using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Core.Services;
 using SonOfPicasso.Data.Model;
 using SonOfPicasso.Testing.Common.Scheduling;
@@ -23,13 +25,26 @@ namespace SonOfPicasso.Integration.Tests.Services
 {
     public class ImageContainerManagementServiceIntegrationTests : IntegrationTestsBase
     {
+        public IDirectoryInfo ThumbnailsDirectoryInfo { get; }
+
         public ImageContainerManagementServiceIntegrationTests(ITestOutputHelper testOutputHelper)
             : base(GetCustomConfiguration(testOutputHelper))
         {
+            ThumbnailsDirectoryInfo = ImagesDirectoryInfo.Parent.CreateSubdirectory("Thumbnails");
+            
             var containerBuilder = GetContainerBuilder();
             containerBuilder.RegisterType<ExifDataService>().As<IExifDataService>();
             containerBuilder.RegisterType<TestBlobCacheProvider>().As<IBlobCacheProvider>();
-            containerBuilder.RegisterType<ImageLoadingService>().As<IImageLoadingService>();
+
+            containerBuilder.Register(context =>
+            {
+                var logger = context.Resolve<ILogger>().ForContext<ImageLoadingService>();
+
+                return new ImageLoadingService(context.Resolve<IFileSystem>(), logger,
+                    context.Resolve<ISchedulerProvider>(), context.Resolve<IBlobCacheProvider>(),
+                    ThumbnailsDirectoryInfo.FullName);
+            }).As<IImageLoadingService>();
+
             containerBuilder.RegisterType<ImageLocationService>().As<IImageLocationService>();
             containerBuilder.RegisterType<ImageContainerManagementService>();
             containerBuilder.RegisterType<FolderRulesManagementService>().As<IFolderRulesManagementService>();
@@ -283,7 +298,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                     if (tuple.Item1 == generateImagesAsync.Count && tuple.Item2 == imageCount) AutoResetEvent.Set();
                 });
 
-            WaitOne(TimeSpan.FromSeconds(5));
+            WaitOne(TimeSpan.FromSeconds(15));
 
             await using var connection = DataContext.Database.GetDbConnection();
 

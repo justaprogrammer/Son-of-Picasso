@@ -81,13 +81,8 @@ namespace SonOfPicasso.Core.Services
 
                     return _fileSystem.FileInfo.FromFileName(args.FullPath).DirectoryName;
                 })
-                .GroupByUntil(
-                    args => args,
-                    args => Observable.Timer(TimeSpan.FromSeconds(DebounceDirectoryChangeSeconds),
-                        _schedulerProvider.TaskPool))
-                .SelectMany(groupedObservable =>
-                    groupedObservable.Select((path, count) => (path, count + 1))
-                        .LastAsync())
+                .Buffer(TimeSpan.FromSeconds(DebounceDirectoryChangeSeconds))
+                .SelectMany(list => list.GroupBy(s => s).Select(grouping => (grouping.Key, grouping.Count() + 1)))
                 .Subscribe(tuple =>
                 {
                     var (path, count) = tuple;

@@ -1,19 +1,16 @@
 ﻿using System;
-using System.IO;
 using System.IO.Abstractions;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows.Media.Imaging;
 using Akavache;
+using Serilog;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
-using SixLabors.Primitives;
 using SonOfPicasso.Core.Extensions;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
-using Splat;
-using ILogger = Serilog.ILogger;
 
 namespace SonOfPicasso.Core.Services
 {
@@ -23,17 +20,28 @@ namespace SonOfPicasso.Core.Services
         private readonly IFileSystem _fileSystem;
         private readonly ILogger _logger;
         private readonly ISchedulerProvider _schedulerProvider;
+        private readonly string _cacheFolderOverride;
         private IBlobCache _userAccount;
 
         public ImageLoadingService(IFileSystem fileSystem,
             ILogger logger,
             ISchedulerProvider schedulerProvider,
-            IBlobCacheProvider blobCacheProvider)
+            IBlobCacheProvider blobCacheProvider) 
+            : this(fileSystem, logger, schedulerProvider, blobCacheProvider, null)
+        {
+        }
+
+        public ImageLoadingService(IFileSystem fileSystem,
+            ILogger logger,
+            ISchedulerProvider schedulerProvider,
+            IBlobCacheProvider blobCacheProvider,
+            string cacheFolderOverride)
         {
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _schedulerProvider = schedulerProvider ?? throw new ArgumentNullException(nameof(schedulerProvider));
             _blobCacheProvider = blobCacheProvider;
+            _cacheFolderOverride = cacheFolderOverride;
         }
 
         public IBlobCache UserAccount => _userAccount ??= _blobCacheProvider.UserAccount;
@@ -48,7 +56,7 @@ namespace SonOfPicasso.Core.Services
         {
             return Observable.Create<Unit>(observer =>
             {
-                return LoadThumbnailFromPathInternal(path, skipCache: true)
+                return LoadThumbnailFromPathInternal(path, true)
                     .Subscribe(image => { },
                         observer.OnError,
                         () =>
@@ -59,12 +67,13 @@ namespace SonOfPicasso.Core.Services
             });
         }
 
-        internal IObservable<Image> LoadThumbnailFromPathInternal(string path, string tempPath = null, bool skipCache = false, bool observeOnlyThumbnail = true)
+        internal IObservable<Image> LoadThumbnailFromPathInternal(string path, bool skipCache = false,
+            bool observeOnlyThumbnail = true)
         {
             return Observable.Create<Image>(async (observer, token) =>
             {
                 _logger.Verbose("LoadThumbnailFromPathInternal {Path}", path);
-                
+
                 var cacheKey = GetThumbnailKey(path);
                 if (!skipCache)
                 {
@@ -87,25 +96,20 @@ namespace SonOfPicasso.Core.Services
                 var fileInfo = _fileSystem.FileInfo.FromFileName(path);
 
                 var image = await LoadImageFromPath(path);
-                if (!observeOnlyThumbnail)
-                {
-                    observer.OnNext(image);
-                }
+                if (!observeOnlyThumbnail) observer.OnNext(image);
 
                 var size = image.Size();
-                var (width, height) = AspectRatioFactory.Calculate(size.Width, size.Height, 300, 300, false);
+                var (width, height) = AspectRatioFactory.Calculate(size.Width, size.Height, 250, 250, false);
 
                 image.Mutate(context => context.Resize(width, height));
                 observer.OnNext(image);
 
-                if (tempPath == null)
-                {
-                    tempPath = _fileSystem.Path.Combine(_fileSystem.Path.GetTempPath(),"SonOfPicasso","ImageCache");
-                    _fileSystem.Directory.CreateDirectory(tempPath);
-                }
+                var cacheFolder = _cacheFolderOverride ??
+                                _fileSystem.Path.Combine(_fileSystem.Path.GetTempPath(), "SonOfPicasso", "ImageCache");
+                _fileSystem.Directory.CreateDirectory(cacheFolder);
 
-                var thumbnailPath = _fileSystem.Path.Combine(tempPath, $"thumbnail_{Guid.NewGuid()}.jpg");
-              
+                var thumbnailPath = _fileSystem.Path.Combine(cacheFolder, $"thumbnail_{Guid.NewGuid()}.jpg");
+
                 _logger.Verbose("Caching {Path} to path {Thumbnail}", path, thumbnailPath);
 
                 var directoryName = _fileSystem.Path.GetDirectoryName(thumbnailPath);
@@ -121,12 +125,7 @@ namespace SonOfPicasso.Core.Services
 
         internal IObservable<Image> LoadImageFromPath(string path)
         {
-            return Observable.DeferAsync(async token =>
-            {
-                _logger.Verbose("Loading image {Path}", path);
-
-                return Observable.Return(Image.Load(path));
-            });
+            return Observable.Defer(() => Observable.Return(Image.Load(path)));
         }
 
         public static string GetThumbnailKey(string path)
