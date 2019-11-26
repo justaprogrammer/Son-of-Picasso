@@ -50,7 +50,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SonOfPicasso.Testing.Common\SonOfPicasso.Testing.Common.csproj" />
-    <ProjectReference Include="..\SonOfPicasso.UI\SonOfPicasso.UI.csproj" />
   </ItemGroup>
 
   <ItemGroup>

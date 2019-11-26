@@ -46,7 +46,6 @@
   <ItemGroup>
     <ProjectReference Include="..\SonOfPicasso.Data.Tests\SonOfPicasso.Data.Tests.csproj" />
     <ProjectReference Include="..\SonOfPicasso.Tools\SonOfPicasso.Tools.csproj" />
-    <ProjectReference Include="..\SonOfPicasso.UI\SonOfPicasso.UI.csproj" />
   </ItemGroup>
 
 </Project>
