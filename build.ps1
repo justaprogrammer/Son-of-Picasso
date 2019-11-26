@@ -9,7 +9,7 @@ function printHeader {
 printHeader "Clean"
 
 dotnet clean .\SonOfPicasso.sln -v m
-Remove-Item -Recurse .\reports
+Remove-Item -Recurse .\reports -ErrorAction Ignore
 
 printHeader "Publish"
 
