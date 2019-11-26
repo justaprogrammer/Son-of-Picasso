@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO.Abstractions;
 using System.Linq;
-using System.Reflection;
 using Akavache;
 using Autofac;
 using AutofacSerilogIntegration;
@@ -18,23 +17,21 @@ using SonOfPicasso.Core.Services;
 using SonOfPicasso.Data.Repository;
 using SonOfPicasso.Data.Services;
 using Splat;
-using Splat.Autofac;
 using Splat.Serilog;
 using SQLitePCL;
 using ILogger = Serilog.ILogger;
 
-namespace SonOfPicasso.UI.WPF
+namespace SonOfPicasso.UI
 {
     public class AppConfiguration
     {
-        public static IContainer Configure(Assembly executingAssembly, string applicationName)
+        public static ContainerBuilder Configure(string applicationName)
         {
             ConfigureLogging();
             ConfigureAkavache(applicationName);
             ConfigureSqlite();
 
-            var container = ConfigureContainer(executingAssembly, applicationName);
-            return container;
+            return ConfigureContainerBuilder(applicationName);
         }
 
         private static void ConfigureSqlite()
@@ -42,7 +39,28 @@ namespace SonOfPicasso.UI.WPF
             Batteries_V2.Init();
         }
 
-        private static IContainer ConfigureContainer(Assembly executingAssembly, string applicationName)
+        public static void ConfigureContainer(IContainer container)
+        {
+            var resolver = new AutofacDependencyResolver(container);
+
+            Locator.SetLocator(resolver);
+            Locator.CurrentMutable.InitializeReactiveUI();
+
+            var updatedBuilder = new ContainerBuilder();
+
+            updatedBuilder.RegisterType<ViewModelActivator>()
+                .AsSelf();
+
+            updatedBuilder.RegisterType<CommandBinderImplementation>()
+                .AsImplementedInterfaces();
+
+            resolver.UpdateComponentContext(updatedBuilder);
+
+            Locator.CurrentMutable.RegisterPlatformBitmapLoader();
+            Locator.CurrentMutable.UseSerilogFullLogger();
+        }
+
+        private static ContainerBuilder ConfigureContainerBuilder(string applicationName)
         {
             var containerBuilder = new ContainerBuilder();
 
@@ -54,7 +72,7 @@ namespace SonOfPicasso.UI.WPF
                 .As<IDriveInfoFactory>()
                 .InstancePerLifetimeScope();
 
-            containerBuilder.Register<DbContextOptions<DataContext>>(context =>
+            containerBuilder.Register(context =>
                 {
                     var environmentService = context.Resolve<IEnvironmentService>();
                     var fileSystem = context.Resolve<IFileSystem>();
@@ -119,38 +137,18 @@ namespace SonOfPicasso.UI.WPF
                 .Where(type => type.Namespace.StartsWith("SonOfPicasso.Data.Services"))
                 .AsImplementedInterfaces();
 
-            containerBuilder.RegisterAssemblyTypes(executingAssembly)
+            containerBuilder.RegisterAssemblyTypes(typeof(AppConfiguration).Assembly)
                 .Where(type => type.Namespace.StartsWith("SonOfPicasso.UI.Services"))
                 .InstancePerLifetimeScope()
                 .AsImplementedInterfaces();
 
-            containerBuilder.RegisterAssemblyTypes(executingAssembly)
-                .Where(type => type.Namespace.StartsWith("SonOfPicasso.UI.Windows")
-                               || type.Namespace.StartsWith("SonOfPicasso.UI.Views")
-                               || type.Namespace.StartsWith("SonOfPicasso.UI.ViewModels"))
+            containerBuilder.RegisterAssemblyTypes(typeof(AppConfiguration).Assembly)
+                .Where(type => type.Namespace.StartsWith("SonOfPicasso.UI.ViewModels"))
                 .AsImplementedInterfaces()
                 .AsSelf();
 
             containerBuilder.RegisterLogger();
-            var container = containerBuilder.Build();
-            var resolver = new AutofacDependencyResolver(container);
-
-            Locator.SetLocator(resolver);
-            Locator.CurrentMutable.InitializeReactiveUI();
-
-            var updatedBuilder = new ContainerBuilder();
-
-            updatedBuilder.RegisterType<ViewModelActivator>()
-                .AsSelf();
-
-            updatedBuilder.RegisterType<CommandBinderImplementation>()
-                .AsImplementedInterfaces();
-
-            resolver.UpdateComponentContext(updatedBuilder);
-
-            Locator.CurrentMutable.RegisterPlatformBitmapLoader();
-            Locator.CurrentMutable.UseSerilogFullLogger();
-            return container;
+            return containerBuilder;
         }
 
         private static void ConfigureAkavache(string applicationName)

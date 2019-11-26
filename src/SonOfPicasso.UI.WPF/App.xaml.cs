@@ -19,7 +19,17 @@ namespace SonOfPicasso.UI.WPF
         {
             base.OnStartup(e);
 
-            var container = AppConfiguration.Configure(GetType().Assembly, App.ApplicationName);
+            var containerBuilder = AppConfiguration.Configure(App.ApplicationName);
+
+            containerBuilder.RegisterAssemblyTypes(GetType().Assembly)
+                .Where(type => type.Namespace.StartsWith("SonOfPicasso.UI.WPF.Windows")
+                               || type.Namespace.StartsWith("SonOfPicasso.UI.WPF.Views"))
+                .AsImplementedInterfaces()
+                .AsSelf();
+
+            var container = containerBuilder.Build();
+            
+            AppConfiguration.ConfigureContainer(container);
 
             var dataContext = container.Resolve<DataContext>();
             dataContext.Database.Migrate();
