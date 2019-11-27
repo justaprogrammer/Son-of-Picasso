@@ -18,31 +18,31 @@ jobs:
       uses: codecov/codecov-action@v1.0.4
       with:
         token: ${{secrets.CODECOV_TOKEN}}
-        file: .\reports\SonOfPicasso.Core.Tests.opencover.xml
+        file: reports\SonOfPicasso.Core.Tests.opencover.xml
         flags: coretests
     - name: Upload SonOfPicasso.Data.Tests to CodeCov
       uses: codecov/codecov-action@v1.0.4
       with:
         token: ${{secrets.CODECOV_TOKEN}}
-        file: .\reports\SonOfPicasso.Data.Tests.opencover.xml
+        file: reports\SonOfPicasso.Data.Tests.opencover.xml
         flags: datatests
     - name: Upload SonOfPicasso.UI.Tests to CodeCov
       uses: codecov/codecov-action@v1.0.4
       with:
         token: ${{secrets.CODECOV_TOKEN}}
-        file: .\reports\SonOfPicasso.UI.Tests.opencover.xml
+        file: reports\SonOfPicasso.UI.Tests.opencover.xml
         flags: uitests
     - name: Upload SonOfPicasso.Integration.Tests to CodeCov
       uses: codecov/codecov-action@v1.0.4
       with:
         token: ${{secrets.CODECOV_TOKEN}}
-        file: .\reports\SonOfPicasso.Integration.Tests.opencover.xml
+        file: reports\SonOfPicasso.Integration.Tests.opencover.xml
         flags: integration
     - name: Upload SonOfPicasso.Tools.Tests to CodeCov
       uses: codecov/codecov-action@v1.0.4
       with:
         token: ${{secrets.CODECOV_TOKEN}}
-        file: .\reports\SonOfPicasso.Tools.Tests.opencover.xml
+        file: reports\SonOfPicasso.Tools.Tests.opencover.xml
         flags: tools
     - name: Semantic Release
       run: semantic-release    
