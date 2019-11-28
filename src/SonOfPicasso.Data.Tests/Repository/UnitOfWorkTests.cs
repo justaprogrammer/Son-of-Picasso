@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using FluentAssertions;
 using SonOfPicasso.Data.Model;
 using SonOfPicasso.Testing.Common.Extensions;
