@@ -25,6 +25,8 @@ test "SonOfPicasso.Integration.Tests"
 test "SonOfPicasso.Tools.Tests"
 test "SonOfPicasso.UI.Tests"
 
+gci -Path .\reports\ -Directory | rm -Recurse
+
 if(!$testSuccess) {
     Write-Host "Test Failed"
     exit 1
