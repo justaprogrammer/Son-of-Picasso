@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using FluentAssertions;
 using SonOfPicasso.Data.Model;
 using SonOfPicasso.Testing.Common.Extensions;
@@ -12,6 +13,12 @@ namespace SonOfPicasso.Data.Tests.Repository
         public UnitOfWorkTests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {
+        }
+
+        [Fact]
+        public void Blah()
+        {
+            throw new Exception();
         }
 
         [Fact]
