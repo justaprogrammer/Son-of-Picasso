@@ -127,8 +127,9 @@
                       ItemsSource="{Binding Source={StaticResource ImagesCollectionViewSource}}"
                       VirtualizingStackPanel.IsVirtualizing="True"
                       VirtualizingStackPanel.IsVirtualizingWhenGrouping="True"
-                      VirtualizingStackPanel.VirtualizationMode="Recycling"
+                      VirtualizingStackPanel.VirtualizationMode="Standard"
                       VirtualizingStackPanel.ScrollUnit="Pixel"
+                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                       SelectionMode="Extended">
 
                 <ListView.GroupStyle>
@@ -138,7 +139,7 @@
                                 <Setter Property="Template">
                                     <Setter.Value>
                                         <ControlTemplate TargetType="{x:Type GroupItem}">
-                                            <StackPanel Width="{Binding ElementName=Window, Path=ViewModel.ImagesViewportWidth}">
+                                            <StackPanel Width="{Binding RelativeSource={RelativeSource AncestorType=VirtualizingStackPanel},Path=ActualWidth}">
                                                 <ContentPresenter x:Name="PART_Header" />
                                                 <ItemsPresenter x:Name="ItemsPresenter" Margin="5,0,0,0" />
                                             </StackPanel>

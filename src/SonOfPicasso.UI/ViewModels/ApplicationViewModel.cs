@@ -33,8 +33,6 @@ namespace SonOfPicasso.UI.ViewModels
         private readonly Subject<IEnumerable<TrayImageViewModel>> _unselectTrayImageSubject =
             new Subject<IEnumerable<TrayImageViewModel>>();
 
-        private ObservableAsPropertyHelper<int> _imagesViewportColumns;
-        private double _imagesViewportWidth;
         private string _visibleItemContainerKey;
 
         public ApplicationViewModel(ISchedulerProvider schedulerProvider,
@@ -173,9 +171,6 @@ namespace SonOfPicasso.UI.ViewModels
                     .Bind(TrayImages)
                     .Subscribe()
                     .DisposeWith(d);
-
-                this.WhenAny(model => model.ImagesViewportWidth, change => Math.Max(1, (int) (change.Value / 304)))
-                    .ToProperty(this, nameof(ImagesViewportColumns), out _imagesViewportColumns);
             });
         }
 
@@ -234,14 +229,6 @@ namespace SonOfPicasso.UI.ViewModels
             set => this.RaiseAndSetIfChanged(ref _visibleItemContainerKey, value);
         }
 
-        public double ImagesViewportWidth
-        {
-            get => _imagesViewportWidth;
-            set => this.RaiseAndSetIfChanged(ref _imagesViewportWidth, value);
-        }
-
-        public int ImagesViewportColumns => _imagesViewportColumns.Value;
-
         public void Dispose()
         {
             _imageContainerViewModelCache?.Dispose();
@@ -251,7 +238,6 @@ namespace SonOfPicasso.UI.ViewModels
             _trayImageSourceCache?.Dispose();
             _unselectImageSubject?.Dispose();
             _unselectTrayImageSubject?.Dispose();
-            _imagesViewportColumns?.Dispose();
         }
 
         private IObservable<ImageContainerViewModel> ExecuteNewAlbum(Unit _)
