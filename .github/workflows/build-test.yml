@@ -21,13 +21,14 @@ jobs:
         catch {
         }
         finally{
+          7z a reports.zip reports\*
           echo "::set-env name=test_exit_code::$ErrorLevel"
         }
-    - name: Upload test artifacts
+    - name: Upload Reports
       uses: actions/upload-artifact@v1.0.0
       with:
-        name: Test Reports
-        path: reports/*
+        name: Reports
+        path: reports.zip
     - name: Upload SonOfPicasso.Core.Tests to CodeCov
       uses: codecov/codecov-action@v1.0.4
       with:
