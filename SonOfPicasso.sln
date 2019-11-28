@@ -15,10 +15,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{30DC3442
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
 		build.ps1 = build.ps1
+		clean.ps1 = clean.ps1
 		codecov.yml = codecov.yml
 		.chglog\config.yml = .chglog\config.yml
 		src\coverletArgs.runsettings = src\coverletArgs.runsettings
 		nuget.config = nuget.config
+		test.ps1 = test.ps1
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{DE25AC0A-8FB7-4D88-8B3A-CDC3EF9AE88F}"
