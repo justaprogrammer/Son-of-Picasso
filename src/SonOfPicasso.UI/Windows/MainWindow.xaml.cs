@@ -123,6 +123,15 @@ namespace SonOfPicasso.UI.Windows
 
                 ImagesListScrollViewer = ImagesList.FindVisualChildren<ScrollViewer>().First();
 
+                var currentViewportWidth = 0;
+                ImagesListScrollViewer
+                    .WhenAny(
+                        scrollViewer => scrollViewer.ViewportWidth,
+                        change => change.Value)
+                    .Select(value => Math.Max(1, (int)(value / 310)))
+                    .Subscribe(i => currentViewportWidth = i)
+                    .DisposeWith(d);
+
                 ContainersList.Events()
                     .SelectionChanged
                     .Subscribe(args =>
@@ -139,7 +148,7 @@ namespace SonOfPicasso.UI.Windows
                             .Cast<CollectionViewGroup>()
                             .SelectMany((group, g) => group.Items
                                 .Cast<ImageViewModel>()
-                                .Batch(ViewModel.ImagesViewportColumns)
+                                .Batch(currentViewportWidth)
                                 .Select(models => (models, g)))
                             .Select((tuple, r) => (tuple.models, tuple.g, r))
                             .Where(tuple =>
@@ -166,7 +175,7 @@ namespace SonOfPicasso.UI.Windows
                                 scrollViewer => scrollViewer.VerticalOffset,
                                 observedChange1 => observedChange1.Value)
                             .Skip(1)
-                            .DistinctUntilChanged(verticalOffset => (int) (verticalOffset / 50))
+                            .DistinctUntilChanged(verticalOffset => (int) (verticalOffset / 30))
                             .Select(verticalOffset =>
                             {
                                 var listViewItem = GetFirstVisibleListViewItem<ImageViewModel>(ImagesListScrollViewer);
@@ -188,13 +197,6 @@ namespace SonOfPicasso.UI.Windows
                         return new CompositeDisposable(disposable1, disposable2);
                     })
                     .BindTo(ViewModel, model => model.VisibleItemContainerKey);
-
-                ImagesListScrollViewer
-                    .WhenAny(
-                        scrollViewer => scrollViewer.ViewportWidth,
-                        change => change.Value)
-                    .Subscribe(value => ViewModel.ImagesViewportWidth = value)
-                    .DisposeWith(d);
 
                 this.BindCommand(ViewModel,
                         model => model.AddFolder,
