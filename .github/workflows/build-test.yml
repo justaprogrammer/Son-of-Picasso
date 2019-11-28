@@ -2,7 +2,7 @@ name: Build and Test
 on: [push]
 
 jobs:
-  build-windows:
+  build:
     runs-on: windows-latest
     env:
       SonOfPicasso_Verbose: True
