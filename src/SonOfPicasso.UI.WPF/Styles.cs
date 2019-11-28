@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Windows;
 
-namespace SonOfPicasso.UI
+namespace SonOfPicasso.UI.WPF
 {
     public static class Styles
     {

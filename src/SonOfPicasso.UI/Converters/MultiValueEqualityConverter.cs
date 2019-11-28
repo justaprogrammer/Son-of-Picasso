@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Linq;
 using System.Windows.Data;
 
-namespace SonOfPicasso.UI.Converters
+namespace SonOfPicasso.UI.WPF.Converters
 {
     public class MultiValueEqualityConverter : IMultiValueConverter
     {

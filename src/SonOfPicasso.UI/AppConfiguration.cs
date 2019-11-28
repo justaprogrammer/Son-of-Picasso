@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO.Abstractions;
 using System.Linq;
-using System.Windows;
 using Akavache;
 using Autofac;
 using AutofacSerilogIntegration;
@@ -17,9 +16,6 @@ using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Core.Services;
 using SonOfPicasso.Data.Repository;
 using SonOfPicasso.Data.Services;
-using SonOfPicasso.UI.Services;
-using SonOfPicasso.UI.ViewModels;
-using SonOfPicasso.UI.Windows;
 using Splat;
 using Splat.Serilog;
 using SQLitePCL;
@@ -27,17 +23,142 @@ using ILogger = Serilog.ILogger;
 
 namespace SonOfPicasso.UI
 {
-    /// <summary>
-    ///     Interaction logic for App.xaml
-    /// </summary>
-    public partial class App : Application
+    public class AppConfiguration
     {
-        private const string ApplicationName = "SonOfPicasso";
-
-        protected override void OnStartup(StartupEventArgs e)
+        public static ContainerBuilder Configure(string applicationName)
         {
-            base.OnStartup(e);
+            ConfigureLogging();
+            ConfigureAkavache(applicationName);
+            ConfigureSqlite();
 
+            return ConfigureContainerBuilder(applicationName);
+        }
+
+        private static void ConfigureSqlite()
+        {
+            Batteries_V2.Init();
+        }
+
+        public static void ConfigureContainer(IContainer container)
+        {
+            var resolver = new AutofacDependencyResolver(container);
+
+            Locator.SetLocator(resolver);
+            Locator.CurrentMutable.InitializeReactiveUI();
+
+            var updatedBuilder = new ContainerBuilder();
+
+            updatedBuilder.RegisterType<ViewModelActivator>()
+                .AsSelf();
+
+            updatedBuilder.RegisterType<CommandBinderImplementation>()
+                .AsImplementedInterfaces();
+
+            resolver.UpdateComponentContext(updatedBuilder);
+
+            Locator.CurrentMutable.RegisterPlatformBitmapLoader();
+            Locator.CurrentMutable.UseSerilogFullLogger();
+        }
+
+        private static ContainerBuilder ConfigureContainerBuilder(string applicationName)
+        {
+            var containerBuilder = new ContainerBuilder();
+
+            containerBuilder.RegisterType<FileSystem>()
+                .As<IFileSystem>()
+                .InstancePerLifetimeScope();
+
+            containerBuilder.Register(context => context.Resolve<IFileSystem>().DriveInfo)
+                .As<IDriveInfoFactory>()
+                .InstancePerLifetimeScope();
+
+            containerBuilder.Register(context =>
+                {
+                    var environmentService = context.Resolve<IEnvironmentService>();
+                    var fileSystem = context.Resolve<IFileSystem>();
+
+                    return BuildDbContextOptions(environmentService, fileSystem, applicationName);
+                }).As<DbContextOptions<DataContext>>()
+                .InstancePerLifetimeScope();
+
+            containerBuilder.RegisterType<DataContext>()
+                .As<DataContext>()
+                .As<IDataContext>();
+
+            containerBuilder.RegisterAssemblyTypes(typeof(EnvironmentService).Assembly)
+                .Where(type => type.Namespace.StartsWith("SonOfPicasso.Core.Services"))
+                .InstancePerLifetimeScope()
+                .AsImplementedInterfaces();
+
+            containerBuilder.Register<IImageLoadingService>(context =>
+                {
+                    var fileSystem = context.Resolve<IFileSystem>();
+                    var environmentService = context.Resolve<IEnvironmentService>();
+                    string cacheFolderOverride = null;
+
+                    var cachePath = environmentService.GetEnvironmentVariable("SonOfPicasso_CachePath");
+                    if (!string.IsNullOrWhiteSpace(cachePath))
+                    {
+                        var directoryInfo = fileSystem.DirectoryInfo.FromDirectoryName(cachePath);
+                        directoryInfo.Create();
+
+                        cacheFolderOverride = directoryInfo.CreateSubdirectory("Thumbnails").FullName;
+                    }
+
+                    return new ImageLoadingService(fileSystem,
+                        context.Resolve<ILogger>().ForContext<ImageLoadingService>(),
+                        context.Resolve<ISchedulerProvider>(),
+                        context.Resolve<IBlobCacheProvider>(),
+                        cacheFolderOverride);
+                }).As<IImageLoadingService>()
+                .InstancePerLifetimeScope();
+
+            containerBuilder.Register<IBlobCacheProvider>(context =>
+                {
+                    var environmentService = context.Resolve<IEnvironmentService>();
+                    var cachePath = environmentService.GetEnvironmentVariable("SonOfPicasso_CachePath");
+
+                    if (!string.IsNullOrWhiteSpace(cachePath))
+                    {
+                        var fileSystem = context.Resolve<IFileSystem>();
+
+                        var directoryInfo = fileSystem.DirectoryInfo.FromDirectoryName(cachePath);
+                        directoryInfo.Create();
+
+                        var blobCacheProvider = new CustomBlobCacheProvider(fileSystem, cachePath);
+                        return blobCacheProvider;
+                    }
+
+                    return new BlobCacheProvider();
+                }).As<IBlobCacheProvider>()
+                .InstancePerLifetimeScope();
+
+            containerBuilder.RegisterAssemblyTypes(typeof(UnitOfWork).Assembly)
+                .Where(type => type.Namespace.StartsWith("SonOfPicasso.Data.Services"))
+                .AsImplementedInterfaces();
+
+            containerBuilder.RegisterAssemblyTypes(typeof(AppConfiguration).Assembly)
+                .Where(type => type.Namespace.StartsWith("SonOfPicasso.UI.Services"))
+                .InstancePerLifetimeScope()
+                .AsImplementedInterfaces();
+
+            containerBuilder.RegisterAssemblyTypes(typeof(AppConfiguration).Assembly)
+                .Where(type => type.Namespace.StartsWith("SonOfPicasso.UI.ViewModels"))
+                .AsImplementedInterfaces()
+                .AsSelf();
+
+            containerBuilder.RegisterLogger();
+            return containerBuilder;
+        }
+
+        private static void ConfigureAkavache(string applicationName)
+        {
+            BlobCache.ApplicationName = applicationName;
+            BlobCache.EnsureInitialized();
+        }
+
+        private static void ConfigureLogging()
+        {
             var loggerConfiguration = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .Enrich.WithThreadId()
@@ -70,139 +191,10 @@ namespace SonOfPicasso.UI
             });
 
             Log.Logger = loggerConfiguration.CreateLogger();
-
-            BlobCache.ApplicationName = ApplicationName;
-            BlobCache.EnsureInitialized();
-
-            var containerBuilder = new ContainerBuilder();
-
-            containerBuilder.RegisterType<FileSystem>()
-                .As<IFileSystem>()
-                .InstancePerLifetimeScope();
-
-            containerBuilder.Register(context => context.Resolve<IFileSystem>().DriveInfo)
-                .As<IDriveInfoFactory>()
-                .InstancePerLifetimeScope();
-
-            containerBuilder.Register(context =>
-                {
-                    var environmentService = context.Resolve<IEnvironmentService>();
-                    var fileSystem = context.Resolve<IFileSystem>();
-
-                    return BuildDbContextOptions(environmentService, fileSystem);
-                }).As<DbContextOptions<DataContext>>()
-                .InstancePerLifetimeScope();
-
-            containerBuilder.RegisterType<DataContext>()
-                .As<DataContext>()
-                .As<IDataContext>();
-
-            containerBuilder.RegisterAssemblyTypes(typeof(EnvironmentService).Assembly)
-                .Where(type => type.Namespace.StartsWith("SonOfPicasso.Core.Services"))
-                .InstancePerLifetimeScope()
-                .AsImplementedInterfaces();
-
-            containerBuilder.Register<IImageLoadingService>(context =>
-                {
-                    var fileSystem = context.Resolve<IFileSystem>();
-                    var environmentService = context.Resolve<IEnvironmentService>();
-                    string cacheFolderOverride = null;
-
-                    var cachePath = environmentService.GetEnvironmentVariable("SonOfPicasso_CachePath");
-                    if (!string.IsNullOrWhiteSpace(cachePath))
-                    {
-                        var directoryInfo = fileSystem.DirectoryInfo.FromDirectoryName(cachePath);
-                        directoryInfo.Create();
-
-                        cacheFolderOverride = directoryInfo.CreateSubdirectory("Thumbnails").FullName;
-                    }
-
-                    return new ImageLoadingService(fileSystem, 
-                        context.Resolve<ILogger>().ForContext<ImageLoadingService>(),
-                        context.Resolve<ISchedulerProvider>(), 
-                        context.Resolve<IBlobCacheProvider>(), 
-                        cacheFolderOverride);
-
-                }).As<IImageLoadingService>()
-                .InstancePerLifetimeScope();
-
-            containerBuilder.Register<IBlobCacheProvider>(context =>
-                {
-                    var environmentService = context.Resolve<IEnvironmentService>();
-                    var cachePath = environmentService.GetEnvironmentVariable("SonOfPicasso_CachePath");
-                    
-                    if (!string.IsNullOrWhiteSpace(cachePath))
-                    {
-                        var fileSystem = context.Resolve<IFileSystem>();
-
-                        var directoryInfo = fileSystem.DirectoryInfo.FromDirectoryName(cachePath);
-                        directoryInfo.Create();
-
-                        var blobCacheProvider = new CustomBlobCacheProvider(fileSystem, cachePath);
-                        return blobCacheProvider;
-                    }
-                    
-                    return new BlobCacheProvider();
-
-                }).As<IBlobCacheProvider>()
-                .InstancePerLifetimeScope();
-
-            containerBuilder.RegisterAssemblyTypes(typeof(UnitOfWork).Assembly)
-                .Where(type => type.Namespace.StartsWith("SonOfPicasso.Data.Services"))
-                .AsImplementedInterfaces();
-
-            containerBuilder.RegisterAssemblyTypes(GetType().Assembly)
-                .Where(type => type.Namespace.StartsWith("SonOfPicasso.UI.Services"))
-                .InstancePerLifetimeScope()
-                .AsImplementedInterfaces();
-
-            containerBuilder.RegisterAssemblyTypes(GetType().Assembly)
-                .Where(type => type.Namespace.StartsWith("SonOfPicasso.UI.Windows")
-                               || type.Namespace.StartsWith("SonOfPicasso.UI.Views")
-                               || type.Namespace.StartsWith("SonOfPicasso.UI.ViewModels"))
-                .AsImplementedInterfaces()
-                .AsSelf();
-
-            containerBuilder.RegisterLogger();
-            var container = containerBuilder.Build();
-            var resolver = new AutofacDependencyResolver(container);
-
-            Locator.SetLocator(resolver);
-            Locator.CurrentMutable.InitializeReactiveUI();
-
-            var updatedBuilder = new ContainerBuilder();
-
-            updatedBuilder.RegisterType<ViewModelActivator>()
-                .AsSelf();
-
-            updatedBuilder.RegisterType<CommandBinderImplementation>()
-                .AsImplementedInterfaces();
-
-            resolver.UpdateComponentContext(updatedBuilder);
-
-            Locator.CurrentMutable.RegisterPlatformBitmapLoader();
-            Locator.CurrentMutable.UseSerilogFullLogger();
-
-            Batteries_V2.Init();
-
-            var dataContext = container.Resolve<DataContext>();
-            dataContext.Database.Migrate();
-
-            var mainWindow = container.Resolve<MainWindow>();
-
-            mainWindow.ViewModel = container.Resolve<ApplicationViewModel>();
-            mainWindow.Show();
-        }
-
-        protected override void OnExit(ExitEventArgs e)
-        {
-            BlobCache.Shutdown().Wait();
-
-            base.OnExit(e);
         }
 
         internal static DbContextOptions<DataContext> BuildDbContextOptions(IEnvironmentService environmentService,
-            IFileSystem fileSystem)
+            IFileSystem fileSystem, string applicationName)
         {
             var databasePath = environmentService.GetEnvironmentVariable("SonOfPicasso_DatabasePath");
             if (!string.IsNullOrWhiteSpace(databasePath))
@@ -213,7 +205,7 @@ namespace SonOfPicasso.UI
             else
             {
                 var appDataPath = environmentService.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-                databasePath = fileSystem.Path.Combine(appDataPath, ApplicationName, $"{ApplicationName}.db");
+                databasePath = fileSystem.Path.Combine(appDataPath, applicationName, $"{applicationName}.db");
             }
 
             var dbContextOptionsBuilder = new DbContextOptionsBuilder<DataContext>();

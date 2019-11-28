@@ -2,7 +2,7 @@
 using System.Windows.Controls;
 using SonOfPicasso.UI.ViewModels;
 
-namespace SonOfPicasso.UI.Converters
+namespace SonOfPicasso.UI.WPF.Converters
 {
     class AlbumContextMenuStyleSelector : StyleSelector
     {

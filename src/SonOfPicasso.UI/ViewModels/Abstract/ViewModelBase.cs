@@ -1,5 +1,4 @@
-﻿using System;
-using ReactiveUI;
+﻿using ReactiveUI;
 
 namespace SonOfPicasso.UI.ViewModels.Abstract
 {

@@ -1,13 +1,11 @@
-﻿using System;
-using System.Reactive;
+﻿using System.Reactive;
 using System.Reactive.Linq;
-using System.Windows;
 using ReactiveUI;
 using ReactiveUI.Validation.Extensions;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.UI.ViewModels;
 
-namespace SonOfPicasso.UI.Windows.Dialogs
+namespace SonOfPicasso.UI.WPF.Windows.Dialogs
 {
     /// <summary>
     ///     Interaction logic for AddAlbumWindow.xaml

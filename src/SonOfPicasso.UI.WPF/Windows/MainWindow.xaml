@@ -1,22 +1,22 @@
 ﻿<reactiveUi:ReactiveWindow x:TypeArguments="viewModels:ApplicationViewModel"
-                           x:Class="SonOfPicasso.UI.Windows.MainWindow"
+                           x:Class="SonOfPicasso.UI.WPF.Windows.MainWindow"
                            xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                            xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                            xmlns:reactiveUi="http://reactiveui.net"
-                           xmlns:viewModels="clr-namespace:SonOfPicasso.UI.ViewModels"
-                           xmlns:converters="clr-namespace:SonOfPicasso.UI.Converters"
-                           xmlns:windows="clr-namespace:SonOfPicasso.UI.Windows"
+                           xmlns:converters="clr-namespace:SonOfPicasso.UI.WPF.Converters"
+                           xmlns:viewModels="clr-namespace:SonOfPicasso.UI.ViewModels;assembly=SonOfPicasso.UI"
+                           xmlns:uiconverters="clr-namespace:SonOfPicasso.UI.WPF.Converters;assembly=SonOfPicasso.UI"
                            mc:Ignorable="d"
                            Title="MainWindow" Height="450" Width="800"
                            Name="Window">
 
     <Window.Resources>
         <CollectionViewSource x:Key="ImageContainersViewSource" />
+        <CollectionViewSource x:Key="GroupedImageContainersViewSource" />
         <CollectionViewSource x:Key="AlbumImageContainersViewSource" />
-        <CollectionViewSource x:Key="ImagesCollectionViewSource" />
-        <converters:MultiValueEqualityConverter x:Key="MultiValueEqualityConverter" />
+        <uiconverters:MultiValueEqualityConverter x:Key="MultiValueEqualityConverter" />
     </Window.Resources>
     <DockPanel>
         <Menu DockPanel.Dock="Top" Width="Auto" Height="20">
@@ -51,7 +51,7 @@
             <ListView Name="ContainersList"
                       Grid.Column="0"
                       Grid.Row="0"
-                      ItemsSource="{Binding Source={StaticResource ImageContainersViewSource}}"
+                      ItemsSource="{Binding Source={StaticResource GroupedImageContainersViewSource}}"
                       DockPanel.Dock="Left"
                       MinWidth="300"
                       VirtualizingStackPanel.IsVirtualizing="True"
@@ -124,58 +124,8 @@
             <ListView Name="ImagesList"
                       Grid.Column="2"
                       Grid.Row="0"
-                      ItemsSource="{Binding Source={StaticResource ImagesCollectionViewSource}}"
-                      VirtualizingStackPanel.IsVirtualizing="True"
-                      VirtualizingStackPanel.IsVirtualizingWhenGrouping="True"
-                      VirtualizingStackPanel.VirtualizationMode="Standard"
-                      VirtualizingStackPanel.ScrollUnit="Pixel"
-                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                      SelectionMode="Extended">
+                      ItemsSource="{Binding Source={StaticResource ImageContainersViewSource}}">
 
-                <ListView.GroupStyle>
-                    <GroupStyle HidesIfEmpty="False">
-                        <GroupStyle.ContainerStyle>
-                            <Style TargetType="{x:Type GroupItem}">
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="{x:Type GroupItem}">
-                                            <StackPanel Width="{Binding RelativeSource={RelativeSource AncestorType=VirtualizingStackPanel},Path=ActualWidth}">
-                                                <ContentPresenter x:Name="PART_Header" />
-                                                <ItemsPresenter x:Name="ItemsPresenter" Margin="5,0,0,0" />
-                                            </StackPanel>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </GroupStyle.ContainerStyle>
-
-                        <GroupStyle.HeaderTemplate>
-                            <DataTemplate DataType="CollectionViewGroup">
-                                <StackPanel DataContext="{Binding Path=Name}"
-                                            d:DataContext="{d:DesignInstance viewModels:ImageContainerViewModel}">
-                                    <Label Name="FolderName" Content="{Binding Path=Name}" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </GroupStyle.HeaderTemplate>
-                    </GroupStyle>
-                </ListView.GroupStyle>
-
-                <ListView.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <WrapPanel />
-                    </ItemsPanelTemplate>
-                </ListView.ItemsPanel>
-
-                <ListView.ItemTemplate>
-                    <DataTemplate DataType="viewModels:ImageViewModel">
-                        <DockPanel Height="300" Width="300">
-                            <Image Height="250" Width="250"
-                                   Name="ImageBitmap"
-                                   Stretch="None" DataContext="{Binding}"
-                                   Initialized="ImageBitmap_OnInitialized" />
-                        </DockPanel>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
             </ListView>
 
             <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3">

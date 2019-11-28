@@ -12,13 +12,12 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{30DC3442-C225-4FC5-9439-77BD1B3EE895}"
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
-		build.ps1 = build.ps1
-		clean.ps1 = clean.ps1
+		Build.fsx = Build.fsx
 		codecov.yml = codecov.yml
 		.chglog\config.yml = .chglog\config.yml
-		src\coverletArgs.runsettings = src\coverletArgs.runsettings
 		nuget.config = nuget.config
-		test.ps1 = test.ps1
+		paket.dependencies = paket.dependencies
+		paket.lock = paket.lock
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{DE25AC0A-8FB7-4D88-8B3A-CDC3EF9AE88F}"
@@ -39,9 +38,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SonOfPicasso.Integration.Te
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SonOfPicasso.UI.Avalonia", "src\SonOfPicasso.UI.Avalonia\SonOfPicasso.UI.Avalonia.csproj", "{AB7C1153-7474-4591-8708-EE1A4EA34E1E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SonOfPicasso.UI.WPF", "src\SonOfPicasso.UI.WPF\SonOfPicasso.UI.WPF.csproj", "{AFAD5D51-9063-46BE-B489-9222C9C1BE2B}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SonOfPicasso.UI", "src\SonOfPicasso.UI\SonOfPicasso.UI.csproj", "{7599C0FD-62B6-458F-983E-6930BFCBCF71}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SonOfPicasso.UI", "src\SonOfPicasso.UI\SonOfPicasso.UI.csproj", "{7599C0FD-62B6-458F-983E-6930BFCBCF71}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -89,10 +86,6 @@ Global
 		{AB7C1153-7474-4591-8708-EE1A4EA34E1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AB7C1153-7474-4591-8708-EE1A4EA34E1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AB7C1153-7474-4591-8708-EE1A4EA34E1E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AFAD5D51-9063-46BE-B489-9222C9C1BE2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AFAD5D51-9063-46BE-B489-9222C9C1BE2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AFAD5D51-9063-46BE-B489-9222C9C1BE2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AFAD5D51-9063-46BE-B489-9222C9C1BE2B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7599C0FD-62B6-458F-983E-6930BFCBCF71}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7599C0FD-62B6-458F-983E-6930BFCBCF71}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7599C0FD-62B6-458F-983E-6930BFCBCF71}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -5,9 +5,8 @@ using ReactiveUI;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.UI.ViewModels;
-using Splat;
 
-namespace SonOfPicasso.UI.Views
+namespace SonOfPicasso.UI.WPF.Views
 {
     /// <summary>
     /// Interaction logic for TrayImageView.xaml

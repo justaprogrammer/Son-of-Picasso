@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Windows.Media.Imaging;
 using SonOfPicasso.Core.Model;
 using SonOfPicasso.UI.ViewModels.Abstract;
 

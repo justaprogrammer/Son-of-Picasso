@@ -13,7 +13,7 @@ using SonOfPicasso.Data.Model;
 using SonOfPicasso.UI.Interfaces;
 using SonOfPicasso.UI.ViewModels.FolderRules;
 
-namespace SonOfPicasso.UI.Windows.Dialogs
+namespace SonOfPicasso.UI.WPF.Windows.Dialogs
 {
     /// <summary>
     ///     Interaction logic for AddAlbumWindow.xaml
