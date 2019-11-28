@@ -13,7 +13,7 @@ jobs:
       with:
         dotnet-version: 3.0.100
     - name: Build and Test
-      run: -|
+      run: |
         .\build.ps1
         powershell.exe -noprofile .\test.ps1
         echo "::set-env name=test_exit_code::$LastExitCode"
