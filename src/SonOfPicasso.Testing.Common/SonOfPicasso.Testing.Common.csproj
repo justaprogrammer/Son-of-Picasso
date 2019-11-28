@@ -37,6 +37,8 @@
     <PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0" />
     <PackageReference Include="Serilog.Sinks.XUnit" Version="1.0.21" />
     <PackageReference Include="System.IO.Abstractions.TestingHelpers" Version="7.0.7" />
+    <PackageReference Include="xunit.extensibility.core" Version="2.4.1" />
+    <PackageReference Include="xunit.extensibility.execution" Version="2.4.1" />
   </ItemGroup>
   
   <ItemGroup>

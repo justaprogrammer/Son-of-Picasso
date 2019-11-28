@@ -5,6 +5,7 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using DynamicData;
+using PicasaDatabaseReader.Core.Interfaces;
 using Serilog;
 using SonOfPicasso.Core.Extensions;
 using SonOfPicasso.Core.Interfaces;
@@ -19,6 +20,7 @@ namespace SonOfPicasso.Core.Services
         private readonly CompositeDisposable _disposables;
         private readonly IObservableCache<ImageRef, string> _folderImageRefCache;
         private readonly IFolderRulesManagementService _folderRulesManagementService;
+        private readonly IDatabaseReader _picasaDatabaseReader;
         private readonly SourceCache<IImageContainer, string> _imageContainerCache;
         private readonly IImageContainerOperationService _imageContainerOperationService;
         private readonly IImageContainerWatcherService _imageContainerWatcherService;
@@ -29,6 +31,7 @@ namespace SonOfPicasso.Core.Services
             IImageContainerOperationService imageContainerOperationService,
             IImageContainerWatcherService imageContainerWatcherService,
             IFolderRulesManagementService folderRulesManagementService,
+            IDatabaseReader picasaDatabaseReader,
             ISchedulerProvider schedulerProvider,
             ILogger logger)
         {
@@ -36,6 +39,7 @@ namespace SonOfPicasso.Core.Services
             _imageContainerOperationService = imageContainerOperationService;
             _imageContainerWatcherService = imageContainerWatcherService;
             _folderRulesManagementService = folderRulesManagementService;
+            _picasaDatabaseReader = picasaDatabaseReader;
             _schedulerProvider = schedulerProvider;
             _logger = logger;
             _imageContainerCache = new SourceCache<IImageContainer, string>(imageContainer => imageContainer.Key);

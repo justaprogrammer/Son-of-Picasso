@@ -1,9 +1,12 @@
 ﻿using System;
 using System.IO.Abstractions;
+using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Autofac;
+using Castle.Components.DictionaryAdapter;
 using Dapper;
 using DynamicData;
 using DynamicData.Binding;
@@ -12,6 +15,8 @@ using FluentAssertions.Execution;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Filters;
+using PicasaDatabaseReader.Core;
+using PicasaDatabaseReader.Core.Interfaces;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Model;
 using SonOfPicasso.Core.Scheduling;
@@ -50,6 +55,8 @@ namespace SonOfPicasso.Integration.Tests.Services
             containerBuilder.RegisterType<FolderRulesManagementService>().As<IFolderRulesManagementService>();
             containerBuilder.RegisterType<ImageContainerOperationService>().As<IImageContainerOperationService>();
             containerBuilder.RegisterType<ImageContainerWatcherService>().As<IImageContainerWatcherService>();
+            containerBuilder.RegisterInstance(SchedulerProvider).As<PicasaDatabaseReader.Core.Scheduling.ISchedulerProvider>();
+            containerBuilder.RegisterType<DatabaseReader>().As<IDatabaseReader>();
 
             Container = containerBuilder.Build();
         }
@@ -328,6 +335,28 @@ namespace SonOfPicasso.Integration.Tests.Services
                 imageContainers.Should().HaveCount(generateImagesAsync.Count);
                 imageRefs.Should().HaveCount(imageCount);
             }
+        }
+
+        [SkippableFact]
+        public async Task ShouldScanPicasaDatabase()
+        {
+            var variable = Environment.GetEnvironmentVariable("SonOfPicasso_IntegrationTest_PicasaDatabsePath");
+            Skip.If(string.IsNullOrWhiteSpace(variable), "Skipped if database path not present");
+
+            var databaseReader = Container.Resolve<IDatabaseReader>();
+            databaseReader.Initialize(variable);
+            var tables = await databaseReader.GetTableNames().ToArray();
+
+            var list = new List<DataTable>();
+            foreach (var table in tables)
+            {
+                var dataTable = await databaseReader.GetDataTable(table);
+                list.Add(dataTable);
+            }
+
+            var dataTable1 = list[2];
+            var dataRowCollection = dataTable1.Rows;
+            var count = dataRowCollection.Count;
         }
     }
 }
