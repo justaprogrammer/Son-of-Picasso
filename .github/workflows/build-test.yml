@@ -15,12 +15,8 @@ jobs:
     - name: Build and Test
       run: |
         .\build.ps1
-        Try {
-          .\test.ps1
-        }
-        Finally {
-          echo "::set-env name=test_exit_code::$LastExitCode"
-        }
+        @PowerShell -NonInteractive -NoProfile -Command "& {.\build.ps1; exit $LastExitCode }" 
+        echo "::set-env name=test_exit_code::$ErrorLevel"
     - name: Upload test artifacts
       uses: actions/upload-artifact@v1.0.0
       with:
