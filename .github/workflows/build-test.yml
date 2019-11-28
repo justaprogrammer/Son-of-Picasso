@@ -24,6 +24,11 @@ jobs:
           7z a reports.zip reports\*
           echo "::set-env name=test_exit_code::$ErrorLevel"
         }
+    - name: Upload Build Log
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        name: Build
+        path: build.log
     - name: Upload Reports
       uses: actions/upload-artifact@v1.0.0
       with:
