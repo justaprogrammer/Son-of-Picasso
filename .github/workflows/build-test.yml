@@ -19,9 +19,9 @@ jobs:
           .\test.ps1
         }
         catch {
+          echo "set-env name=test_exit_code::1"
+          echo "::set-env name=test_exit_code::1"
         }
-        echo "set-env name=test_exit_code::$LastExitCode"
-        echo "::set-env name=test_exit_code::$LastExitCode"
         7z a reports.zip reports\*
     - name: Upload Build Log
       uses: actions/upload-artifact@v1.0.0
