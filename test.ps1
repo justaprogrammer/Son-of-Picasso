@@ -1,3 +1,6 @@
+$defaultErrorActionPreference = $ErrorActionPreference
+$ErrorActionPreference="silentlycontinue"
+
 $testSuccess = $true
 
 function test {
@@ -5,11 +8,13 @@ function test {
         $project
     )
 
-    dotnet vstest src\$project\bin\Release\netcoreapp3.0\publish\$project.dll `
-        --logger:"trx;LogFileName=$project.trx" `
-        --ResultsDirectory:reports `
-        --collect:"XPlat code coverage" `
-        --settings:"src\coverletArgs.runsettings" | Tee-Object -Variable cmdOutput 
+	Write-Host "**** Testing $project ****"
+
+	dotnet vstest src\$project\bin\Release\netcoreapp3.0\publish\$project.dll `
+		--logger:"trx;LogFileName=$project.trx" `
+		--ResultsDirectory:reports `
+		--collect:"XPlat code coverage" `
+		--settings:"src\coverletArgs.runsettings" | Tee-Object -Variable cmdOutput 
     
     $script:testSuccess = $script:testSuccess -and ($LastExitCode -eq 0)
   
@@ -26,6 +31,8 @@ test "SonOfPicasso.Tools.Tests"
 test "SonOfPicasso.UI.Tests"
 
 gci -Path .\reports\ -Directory | rm -Recurse
+
+$ErrorActionPreference = $defaultErrorActionPreference
 
 if(!$testSuccess) {
     Write-Host "Test Failed"
