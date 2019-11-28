@@ -16,12 +16,6 @@ namespace SonOfPicasso.Data.Tests.Repository
         }
 
         [Fact]
-        public void Blah()
-        {
-            throw new Exception();
-        }
-
-        [Fact]
         public void CanSaveAndGetById()
         {
             var directory = new Folder
