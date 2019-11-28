@@ -14,8 +14,14 @@ jobs:
         dotnet-version: 3.0.100
     - name: Build and Test
       run: -|
-        $success = .\build.ps1
-        echo "Success $success"
+        .\build.ps1
+        powershell.exe -noprofile .\test.ps1
+        echo "::set-env name=test_exit_code::$LastExitCode"
+    - name: Upload test artifacts
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        name: Test Reports
+        path: reports/*
     - name: Upload SonOfPicasso.Core.Tests to CodeCov
       uses: codecov/codecov-action@v1.0.4
       with:
@@ -46,3 +52,5 @@ jobs:
         token: ${{secrets.CODECOV_TOKEN}}
         file: reports\SonOfPicasso.Tools.Tests.opencover.xml
         flags: tools
+    - name: Handle test result
+      run: exit $env:test_exit_code
