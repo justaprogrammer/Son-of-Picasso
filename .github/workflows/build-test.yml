@@ -20,10 +20,9 @@ jobs:
         }
         catch {
         }
-        finally{
-          7z a reports.zip reports\*
-          echo "::set-env name=test_exit_code::$ErrorLevel"
-        }
+        echo "set-env name=test_exit_code::$LastExitCode"
+        echo "::set-env name=test_exit_code::$LastExitCode"
+        7z a reports.zip reports\*
     - name: Upload Build Log
       uses: actions/upload-artifact@v1.0.0
       with:
