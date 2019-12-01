@@ -8,6 +8,7 @@
                            xmlns:viewModels="clr-namespace:SonOfPicasso.UI.ViewModels"
                            xmlns:converters="clr-namespace:SonOfPicasso.UI.Converters"
                            xmlns:windows="clr-namespace:SonOfPicasso.UI.Windows"
+                           xmlns:views="clr-namespace:SonOfPicasso.UI.Views"
                            mc:Ignorable="d"
                            Title="MainWindow" Height="450" Width="800"
                            Name="Window">
@@ -121,12 +122,21 @@
                           ShowsPreview="True"
                           Width="5" />
 
-            <ListView Name="ImagesList"
-                      Grid.Column="2"
-                      Grid.Row="0"
-                      ItemsSource="{Binding Source={StaticResource ImageContainersViewSource}}">
+            <ScrollViewer
+                Grid.Column="2"
+                Grid.Row="0"
+                VerticalScrollBarVisibility="Auto">
 
-            </ListView>
+                <ItemsControl
+                    ItemsSource="{Binding Source={StaticResource ImageContainersViewSource}}">
+
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="viewModels:ImageViewModel">
+                            <views:ImageContainerView ViewModel="{Binding}" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
 
             <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3">
                 <Grid.ColumnDefinitions>

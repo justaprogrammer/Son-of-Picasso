@@ -111,7 +111,7 @@ namespace SonOfPicasso.UI.Windows
                 _albumImageContainersViewSource.IsLiveGroupingRequested = true;
                 _albumImageContainersViewSource.IsLiveSortingRequested = true;
 
-                ImagesListScrollViewer = ImagesList.FindVisualChildren<ScrollViewer>().First();
+                //ImagesListScrollViewer = ImagesList.FindVisualChildren<ScrollViewer>().First();
 
                 this.BindCommand(ViewModel,
                         model => model.AddFolder,
@@ -156,13 +156,13 @@ namespace SonOfPicasso.UI.Windows
                             return (collection.AsEnumerable(), allItems);
                         })).DisposeWith(d);
 
-                ImagesList.Events().SelectionChanged
-                    .Subscribe(ea =>
-                    {
-                        ViewModel.ChangeSelectedImages(
-                            ea.AddedItems.Cast<ImageViewModel>(),
-                            ea.RemovedItems.Cast<ImageViewModel>());
-                    }).DisposeWith(d);
+//                ImagesList.Events().SelectionChanged
+//                    .Subscribe(ea =>
+//                    {
+//                        ViewModel.ChangeSelectedImages(
+//                            ea.AddedItems.Cast<ImageViewModel>(),
+//                            ea.RemovedItems.Cast<ImageViewModel>());
+//                    }).DisposeWith(d);
 
 //                ViewModel.UnselectImage
 //                    .ObserveOn(_schedulerProvider.MainThreadScheduler)
