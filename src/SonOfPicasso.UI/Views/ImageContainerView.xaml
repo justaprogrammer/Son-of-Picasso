@@ -19,8 +19,7 @@
             DockPanel.Dock="Bottom" 
             ItemsSource="{Binding Path=ImageViewModels,Mode=OneTime}"
             ScrollViewer.VerticalScrollBarVisibility="Disabled"
-            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-            >
+            ScrollViewer.HorizontalScrollBarVisibility="Disabled">
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
                     <Setter Property="Width" Value="{Binding ElementName=UserControl,Mode=OneWay,Path=ImageWidth}"></Setter>
@@ -33,9 +32,8 @@
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <StackPanel>
-                        <local:ImageView ViewModel="{Binding}" />
-                    </StackPanel>
+                    <local:ImageView ViewModel="{Binding}" 
+                                     Width="{Binding Source={x:Reference UserControl},Mode=OneWay,Path=ImageWidth}" />
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ListView>

@@ -25,7 +25,11 @@ namespace SonOfPicasso.UI.Views
 
             this.WhenAny(view => view.DefaultImageWidth, view => view.Zoom,
                     (change1, change2) => change1.Value * (change2.Value / 100))
-                .Subscribe(d => ImageWidth = d);
+                .Subscribe(d =>
+                {
+                    _logger.Verbose("Target Image Width {Value}", d);
+                    ImageWidth = d;
+                });
 
             this.WhenAny<ImageContainerListView, (double imageWidth, double containerWidth), double, double>(
                     view => view.ImageWidth,

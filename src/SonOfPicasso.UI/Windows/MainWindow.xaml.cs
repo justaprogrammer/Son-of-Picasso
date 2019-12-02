@@ -12,6 +12,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Forms;
+using System.Windows.Media.Imaging;
 using DynamicData;
 using DynamicData.Binding;
 using Microsoft.Extensions.Caching.Memory;
@@ -74,6 +75,8 @@ namespace SonOfPicasso.UI.Windows
             _imageContainersViewSource = (CollectionViewSource) FindResource("ImageContainersViewSource");
             _groupedImageContainersViewSource = (CollectionViewSource) FindResource("GroupedImageContainersViewSource");
             _albumImageContainersViewSource = (CollectionViewSource) FindResource("AlbumImageContainersViewSource");
+
+            ImageZoomSlider.Events().MouseDoubleClick.Subscribe(args => { ImageZoomSlider.Value = 100; });
 
             this.WhenActivated(d =>
             {
@@ -356,17 +359,22 @@ namespace SonOfPicasso.UI.Windows
 
             _schedulerProvider.TaskPool.Schedule(() =>
             {
-                memoryCache.GetOrCreateAsync(imageViewModel.Path, async entry =>
-                    {
-                        var bitmapSource = await _imageLoadingService.LoadThumbnailFromPath((string) entry.Key)
-                            .ObserveOn(_schedulerProvider.TaskPool);
-
-                        entry.SetSlidingExpiration(TimeSpan.FromMinutes(10));
-                        return bitmapSource;
-                    }).ToObservable()
+                GetBitmapSourceFromPath(imageViewModel.Path)
                     .ObserveOn(_schedulerProvider.MainThreadScheduler)
                     .Subscribe(source => image.Source = source);
             });
+        }
+
+        public IObservable<BitmapSource> GetBitmapSourceFromPath(string path)
+        {
+            return memoryCache.GetOrCreateAsync(path, async entry =>
+            {
+                var bitmapSource = await _imageLoadingService.LoadThumbnailFromPath((string) entry.Key)
+                    .ObserveOn(_schedulerProvider.TaskPool);
+
+                entry.SetSlidingExpiration(TimeSpan.FromMinutes(10));
+                return bitmapSource;
+            }).ToObservable();
         }
     }
 }

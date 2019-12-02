@@ -8,8 +8,10 @@
                                 xmlns:viewModels="clr-namespace:SonOfPicasso.UI.ViewModels"
                                 mc:Ignorable="d"
                                 Name="UserControl"
-                                d:DesignHeight="450" d:DesignWidth="800">
-        <StackPanel>
-            <Label Content="{Binding}" />
-        </StackPanel>
+                                d:DesignHeight="450" d:DesignWidth="800"
+                                d:DataContext="{d:DesignInstance viewModels:ImageViewModel}">
+    <StackPanel>
+        <Label Content="{Binding Path=Path}"/>
+        <Image Name="ImageControl" />
+    </StackPanel>
 </reactiveUi:ReactiveUserControl>
