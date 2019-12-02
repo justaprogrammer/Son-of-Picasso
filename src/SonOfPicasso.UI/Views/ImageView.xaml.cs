@@ -17,13 +17,9 @@ namespace SonOfPicasso.UI.Views
 
             this.WhenAny(view => view.ViewModel, change => change.Value)
                 .Skip(1)
-                .SelectMany(model => MainWindow.GetBitmapSourceFromPath(model.Path))
+                .SelectMany(model => model.GetBitmapSource())
                 .ObserveOnDispatcher()
                 .Subscribe(source => ImageControl.Source = source);
         }
-
-        public ImageContainerView ImageContainerView => (ImageContainerView) Parent;
-        public ImageContainerListView ImageContainerListView => (ImageContainerListView) ImageContainerView.Parent;
-        public MainWindow MainWindow => (MainWindow) ImageContainerListView.Parent;
     }
 }

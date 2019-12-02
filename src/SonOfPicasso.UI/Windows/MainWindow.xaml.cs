@@ -48,7 +48,6 @@ namespace SonOfPicasso.UI.Windows
         private readonly IImageLoadingService _imageLoadingService;
         private readonly ILogger _logger;
         private readonly ISchedulerProvider _schedulerProvider;
-        private readonly MemoryCache memoryCache;
         private readonly CollectionViewSource _imageContainersViewSource;
 
         public MainWindow(ILogger logger, IEnvironmentService environmentService, IFileSystem fileSystem,
@@ -70,7 +69,6 @@ namespace SonOfPicasso.UI.Windows
             _folderManagementViewModelFactory = folderManagementViewModelFactory;
 
             InitializeComponent();
-            memoryCache = new MemoryCache(new MemoryCacheOptions());
 
             _imageContainersViewSource = (CollectionViewSource) FindResource("ImageContainersViewSource");
             _groupedImageContainersViewSource = (CollectionViewSource) FindResource("GroupedImageContainersViewSource");
@@ -122,12 +120,12 @@ namespace SonOfPicasso.UI.Windows
                     .DisposeWith(d);
 
                 this.BindCommand(ViewModel,
-                        model => model.NewAlbum,
+                        model => model.AddNewAlbum,
                         window => window.NewAlbum)
                     .DisposeWith(d);
 
                 this.BindCommand(ViewModel,
-                        model => model.FolderManager,
+                        model => model.OpenFolderManager,
                         window => window.FolderManager)
                     .DisposeWith(d);
 
@@ -348,33 +346,8 @@ namespace SonOfPicasso.UI.Windows
             var imageViewModels =
                 viewModelSelectedTrayImages.Select(model => model.ImageViewModel).ToList();
 
-            ViewModel.NewAlbumWithImages.Execute(imageViewModels)
+            ViewModel.AddNewAlbumWithImages.Execute(imageViewModels)
                 .Subscribe();
-        }
-
-        private void ImageBitmap_OnInitialized(object sender, EventArgs e)
-        {
-            var image = (Image) sender;
-            var imageViewModel = (ImageViewModel) image.DataContext;
-
-            _schedulerProvider.TaskPool.Schedule(() =>
-            {
-                GetBitmapSourceFromPath(imageViewModel.Path)
-                    .ObserveOn(_schedulerProvider.MainThreadScheduler)
-                    .Subscribe(source => image.Source = source);
-            });
-        }
-
-        public IObservable<BitmapSource> GetBitmapSourceFromPath(string path)
-        {
-            return memoryCache.GetOrCreateAsync(path, async entry =>
-            {
-                var bitmapSource = await _imageLoadingService.LoadThumbnailFromPath((string) entry.Key)
-                    .ObserveOn(_schedulerProvider.TaskPool);
-
-                entry.SetSlidingExpiration(TimeSpan.FromMinutes(10));
-                return bitmapSource;
-            }).ToObservable();
         }
     }
 }

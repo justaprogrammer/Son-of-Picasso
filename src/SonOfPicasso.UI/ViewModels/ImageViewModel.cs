@@ -20,6 +20,7 @@ namespace SonOfPicasso.UI.ViewModels
 
         public ImageRef ImageRef { get; }
         public ImageContainerViewModel ImageContainerViewModel { get; }
+        public IObservable<BitmapSource> GetBitmapSource() => ImageContainerViewModel.ApplicationViewModel.GetBitmapSourceFromPath(Path);
         public string ImageRefId => ImageRef.Key;
         public DateTime ExifDate => ImageRef.ExifDate;
         public int ImageId => ImageRef.Id;

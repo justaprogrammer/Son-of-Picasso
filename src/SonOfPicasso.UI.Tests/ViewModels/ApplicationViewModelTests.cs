@@ -364,7 +364,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
                 context.SetOutput(null);
             });
 
-            applicationViewModel.FolderManager.Execute(Unit.Default)
+            applicationViewModel.OpenFolderManager.Execute(Unit.Default)
                 .Subscribe(unit =>
                 {
                     AutoResetEvent.Set();
