@@ -7,8 +7,9 @@
                                 xmlns:reactiveUi="http://reactiveui.net"
                                 xmlns:viewModels="clr-namespace:SonOfPicasso.UI.ViewModels"
                                 mc:Ignorable="d"
+                                Name="UserControl"
                                 d:DesignHeight="450" d:DesignWidth="800">
-    <DockPanel>
-        <Label Content="{Binding}" />
-    </DockPanel>
+        <StackPanel>
+            <Label Content="{Binding}" />
+        </StackPanel>
 </reactiveUi:ReactiveUserControl>

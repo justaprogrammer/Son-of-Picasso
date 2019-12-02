@@ -8,15 +8,27 @@
                                 xmlns:reactiveUi="http://reactiveui.net"
                                 xmlns:viewModels="clr-namespace:SonOfPicasso.UI.ViewModels"
                                 mc:Ignorable="d"
-                                d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance viewModels:ImageContainerViewModel}">
-    <DockPanel LastChildFill="True">
+                                Name="UserControl"
+                                d:DesignHeight="450" d:DesignWidth="800"
+                                d:DataContext="{d:DesignInstance viewModels:ImageContainerViewModel}">
+    <DockPanel LastChildFill="True" Name="DockPanel">
         <StackPanel DockPanel.Dock="Top">
-            <Label Content="{Binding}" />
+            <Label Content="{Binding Path=Name}" />
         </StackPanel>
-        <ItemsControl DockPanel.Dock="Bottom" ItemsSource="{Binding Path=ImageViewModels}">
+        <ListView
+            DockPanel.Dock="Bottom" 
+            ItemsSource="{Binding Path=ImageViewModels,Mode=OneTime}"
+            ScrollViewer.VerticalScrollBarVisibility="Disabled"
+            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+            >
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="Width" Value="{Binding ElementName=UserControl,Mode=OneWay,Path=ImageWidth}"></Setter>
+                </Style>
+            </ListView.ItemContainerStyle>
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <UniformGrid Columns="3" />
+                    <UniformGrid Columns="{Binding ElementName=UserControl,Path=Columns,Mode=OneWay}" />
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
@@ -26,6 +38,6 @@
                     </StackPanel>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
-        </ItemsControl>
+        </ListView>
     </DockPanel>
 </reactiveUi:ReactiveUserControl>

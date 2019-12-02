@@ -37,7 +37,9 @@
             </MenuItem>
             <MenuItem Header="_Help" />
         </Menu>
-
+        <StackPanel DockPanel.Dock="Top">
+            <Slider Name="ImageZoomSlider" Minimum="50" Maximum="150" Value="100" />
+        </StackPanel>
         <Grid DockPanel.Dock="Top">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
@@ -122,21 +124,12 @@
                           ShowsPreview="True"
                           Width="5" />
 
-            <ScrollViewer
+            <views:ImageContainerListView
                 Grid.Column="2"
                 Grid.Row="0"
-                VerticalScrollBarVisibility="Auto">
-
-                <ItemsControl
-                    ItemsSource="{Binding Source={StaticResource ImageContainersViewSource}}">
-
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="viewModels:ImageViewModel">
-                            <views:ImageContainerView ViewModel="{Binding}" />
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>
+                DefaultImageWidth="300"
+                Zoom="{Binding ElementName=ImageZoomSlider,Mode=OneWay,Path=Value}"
+                ViewModel="{Binding Source={StaticResource ImageContainersViewSource}}" />
 
             <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3">
                 <Grid.ColumnDefinitions>
