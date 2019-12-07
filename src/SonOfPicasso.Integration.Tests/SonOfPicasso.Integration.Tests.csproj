@@ -25,7 +25,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.1.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.4.0" />
     <PackageReference Include="NSubstitute" Version="4.2.1" />
     <PackageReference Include="NSubstitute.Analyzers.CSharp" Version="1.0.11" />
@@ -33,7 +33,7 @@
     <PackageReference Include="Serilog.Filters.Expressions" Version="2.0.0" />
     <PackageReference Include="Splat.Autofac" Version="9.2.11" />
     <PackageReference Include="Splat.Serilog" Version="9.2.11" />
-    <PackageReference Include="System.IO.Abstractions.TestingHelpers" Version="7.0.7" />
+    <PackageReference Include="System.IO.Abstractions.TestingHelpers" Version="7.0.15" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.analyzers" Version="0.10.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1">
