@@ -12,9 +12,10 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.0.100
+    - uses: StanleyGoldman/setup-GitHubActionsMSBuildLogger@v1
     - name: Build and Test
       run: |
-        .\build.ps1
+        dotnet publish -c Release .\SonOfPicasso.sln -v quiet -fl -flp:logfile=build.log -flp:verbosity=detailed /logger:GitHubActionsLogger,..\GitHubActionsMSBuildLogger.dll
         .\test.ps1
     - name: Upload Build Log
       if: always()
