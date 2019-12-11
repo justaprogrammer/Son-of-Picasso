@@ -10,8 +10,8 @@
                                 Name="UserControl"
                                 d:DesignHeight="450" d:DesignWidth="800"
                                 d:DataContext="{d:DesignInstance viewModels:ImageViewModel}">
-    <StackPanel>
-        <Label Content="{Binding Path=Path}"/>
-        <Image Name="ImageControl" />
-    </StackPanel>
+    <Image Name="ImageControl"
+           Margin="10"
+           MaxWidth="{Binding ElementName=UserControl,Mode=OneWay,Path=ImageSize}"
+           MaxHeight="{Binding ElementName=UserControl,Mode=OneWay,Path=ImageSize}" />
 </reactiveUi:ReactiveUserControl>

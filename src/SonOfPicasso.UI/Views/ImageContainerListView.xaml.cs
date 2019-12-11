@@ -23,16 +23,16 @@ namespace SonOfPicasso.UI.Views
             this.WhenAny(view => view.ViewModel, change => change.Value)
                 .Subscribe(collectionView => { ItemsControl.ItemsSource = collectionView; });
 
-            this.WhenAny(view => view.DefaultImageWidth, view => view.Zoom,
+            this.WhenAny(view => view.DefaultImageSize, view => view.Zoom,
                     (change1, change2) => change1.Value * (change2.Value / 100))
                 .Subscribe(d =>
                 {
-                    _logger.Verbose("Target Image Width {Value}", d);
-                    ImageWidth = d;
+                    _logger.Verbose("Target Image Size {Value}", d);
+                    ImageSize = d;
                 });
 
             this.WhenAny<ImageContainerListView, (double imageWidth, double containerWidth), double, double>(
-                    view => view.ImageWidth,
+                    view => view.ImageSize,
                     view => view.ScrollViewer.ActualWidth,
                     (change1, change2) => (change1.Value, change2.Value))
                 .Select(tuple => (int) (tuple.containerWidth / tuple.imageWidth))
@@ -40,30 +40,30 @@ namespace SonOfPicasso.UI.Views
                 .Subscribe(columns => Columns = columns);
         }
 
-        #region DefaultImageWidth
+        #region DefaultImageSize
 
-        public static readonly DependencyProperty DefaultImageWidthProperty = DependencyProperty.Register(
-            "DefaultImageWidth", typeof(int), typeof(ImageContainerListView), new PropertyMetadata(default(int)));
+        public static readonly DependencyProperty DefaultImageSizeProperty = DependencyProperty.Register(
+            "DefaultImageSize", typeof(int), typeof(ImageContainerListView), new PropertyMetadata(default(int)));
 
-        public int DefaultImageWidth
+        public int DefaultImageSize
         {
-            get => (int) GetValue(DefaultImageWidthProperty);
-            set => SetValue(DefaultImageWidthProperty, value);
+            get => (int) GetValue(DefaultImageSizeProperty);
+            set => SetValue(DefaultImageSizeProperty, value);
         }
 
         #endregion
 
-        #region ImageWidth
+        #region ImageSize
 
-        private static readonly DependencyPropertyKey ImageWidthPropertyKey = DependencyProperty.RegisterReadOnly(
-            "ImageWidth", typeof(double), typeof(ImageContainerListView), new PropertyMetadata(default(double)));
+        private static readonly DependencyPropertyKey ImageSizePropertyKey = DependencyProperty.RegisterReadOnly(
+            "ImageSize", typeof(double), typeof(ImageContainerListView), new PropertyMetadata(default(double)));
 
-        public static readonly DependencyProperty ImageWidthProperty = ImageWidthPropertyKey.DependencyProperty;
+        public static readonly DependencyProperty ImageSizeProperty = ImageSizePropertyKey.DependencyProperty;
 
-        public double ImageWidth
+        public double ImageSize
         {
-            get => (double) GetValue(ImageWidthProperty);
-            set => SetValue(ImageWidthPropertyKey, value);
+            get => (double) GetValue(ImageSizeProperty);
+            set => SetValue(ImageSizePropertyKey, value);
         }
 
         #endregion

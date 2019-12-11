@@ -21,9 +21,7 @@
             ScrollViewer.VerticalScrollBarVisibility="Disabled"
             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
             <ListView.ItemContainerStyle>
-                <Style TargetType="ListViewItem">
-                    <Setter Property="Width" Value="{Binding ElementName=UserControl,Mode=OneWay,Path=ImageWidth}"></Setter>
-                </Style>
+                <Style TargetType="ListViewItem" />
             </ListView.ItemContainerStyle>
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
@@ -33,7 +31,9 @@
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <local:ImageView ViewModel="{Binding}" 
-                                     Width="{Binding Source={x:Reference UserControl},Mode=OneWay,Path=ImageWidth}" />
+                                     Width="{Binding Source={x:Reference UserControl},Mode=OneWay,Path=ImageSize}" 
+                                     Height="{Binding Source={x:Reference UserControl},Mode=OneWay,Path=ImageSize}" 
+                                     ImageSize="{Binding Source={x:Reference UserControl},Mode=OneWay,Path=ImageSize}" />
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ListView>

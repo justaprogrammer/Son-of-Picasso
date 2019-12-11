@@ -127,7 +127,7 @@
             <views:ImageContainerListView
                 Grid.Column="2"
                 Grid.Row="0"
-                DefaultImageWidth="300"
+                DefaultImageSize="300"
                 Zoom="{Binding ElementName=ImageZoomSlider,Mode=OneWay,Path=Value}"
                 ViewModel="{Binding Source={StaticResource ImageContainersViewSource}}" />
 

@@ -8,6 +8,7 @@ using Akavache;
 using Serilog;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
+using SixLabors.Primitives;
 using SonOfPicasso.Core.Extensions;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
@@ -93,13 +94,11 @@ namespace SonOfPicasso.Core.Services
                     }
                 }
 
-                var fileInfo = _fileSystem.FileInfo.FromFileName(path);
-
                 var image = await LoadImageFromPath(path);
                 if (!observeOnlyThumbnail) observer.OnNext(image);
 
                 var size = image.Size();
-                var (width, height) = AspectRatioFactory.Calculate(size.Width, size.Height, 250, 250, false);
+                var (width, height) = size.ResizeKeepAspect(250, 250);
 
                 image.Mutate(context => context.Resize(width, height));
                 observer.OnNext(image);

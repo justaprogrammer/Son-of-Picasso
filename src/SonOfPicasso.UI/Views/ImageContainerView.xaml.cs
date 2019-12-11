@@ -28,15 +28,15 @@ namespace SonOfPicasso.UI.Views
 
         #endregion
 
-        #region ImageWidth
+        #region ImageSize
 
-        public static readonly DependencyProperty ImageWidthProperty = DependencyProperty.Register(
-            "ImageWidth", typeof(double), typeof(ImageContainerView), new PropertyMetadata(default(double)));
+        public static readonly DependencyProperty ImageSizeProperty = DependencyProperty.Register(
+            "ImageSize", typeof(double), typeof(ImageContainerView), new PropertyMetadata(default(double)));
 
-        public double ImageWidth
+        public double ImageSize
         {
-            get => (double) GetValue(ImageWidthProperty);
-            set => SetValue(ImageWidthProperty, value);
+            get => (double) GetValue(ImageSizeProperty);
+            set => SetValue(ImageSizeProperty, value);
         }
 
         #endregion

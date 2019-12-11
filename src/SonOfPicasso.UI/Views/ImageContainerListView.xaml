@@ -20,7 +20,7 @@
             <ItemsControl.ItemTemplate>
                 <DataTemplate DataType="viewModels:ImageViewModel">
                     <local:ImageContainerView ViewModel="{Binding Mode=OneTime}"
-                                              ImageWidth="{Binding Source={x:Reference UserControl},Mode=OneWay,Path=ImageWidth}"
+                                              ImageSize="{Binding Source={x:Reference UserControl},Mode=OneWay,Path=ImageSize}"
                                               Columns="{Binding Source={x:Reference UserControl},Mode=OneWay,Path=Columns}" />
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
