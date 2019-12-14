@@ -70,7 +70,7 @@
                             <DataTrigger Value="True">
                                 <DataTrigger.Binding>
                                     <MultiBinding Converter="{StaticResource MultiValueEqualityConverter}">
-                                        <Binding ElementName="Window" Path="ViewModel.VisibleItemContainerKey" />
+                                        <Binding ElementName="ImageContainerListView" Path="TopmostImageContainerKey" />
                                         <Binding Path="ContainerKey" />
                                     </MultiBinding>
                                 </DataTrigger.Binding>
@@ -127,6 +127,7 @@
             <views:ImageContainerListView
                 Grid.Column="2"
                 Grid.Row="0"
+                x:Name="ImageContainerListView"
                 DefaultImageSize="300"
                 Zoom="{Binding ElementName=ImageZoomSlider,Mode=OneWay,Path=Value}"
                 ViewModel="{Binding Source={StaticResource ImageContainersViewSource}}" />

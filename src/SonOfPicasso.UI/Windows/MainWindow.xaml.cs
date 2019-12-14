@@ -288,41 +288,6 @@ namespace SonOfPicasso.UI.Windows
 
         public ScrollViewer ImagesListScrollViewer { get; set; }
 
-        private ListViewItem GetFirstVisibleListViewItem<TDataContextType>(ScrollViewer imagesListScrollViewer)
-        {
-            var listViewItems = ImagesListScrollViewer
-                .FindVisualChildren<ListViewItem>()
-                .ToArray();
-
-            ListViewItem lastListViewItem = null;
-            Point lastViewViewItemPoint;
-
-            foreach (var listViewItem in listViewItems)
-            {
-                if (!listViewItem.DataContext.GetType().Equals(typeof(TDataContextType)))
-                    continue;
-
-                var translatePoint = listViewItem.TranslatePoint(new Point(), imagesListScrollViewer);
-
-                if (translatePoint.Y <= 0)
-                {
-                    if (lastListViewItem == null || lastViewViewItemPoint.Y != translatePoint.Y)
-                    {
-                        lastListViewItem = listViewItem;
-                        lastViewViewItemPoint = translatePoint;
-                    }
-
-                    continue;
-                }
-
-                if (lastListViewItem == null) lastListViewItem = listViewItem;
-
-                break;
-            }
-
-            return lastListViewItem;
-        }
-
         private void AlbumButton_AddImagesToAlbum_OnClick(object sender, RoutedEventArgs e)
         {
             var menuItem = (MenuItem) sender;

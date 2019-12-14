@@ -1,9 +1,14 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Linq;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows;
+using DynamicData.Binding;
 using ReactiveUI;
 using Serilog;
+using SonOfPicasso.UI.Extensions;
+using SonOfPicasso.UI.ViewModels;
 
 namespace SonOfPicasso.UI.Views
 {
@@ -38,6 +43,60 @@ namespace SonOfPicasso.UI.Views
                 .Select(tuple => (int) (tuple.containerWidth / tuple.imageWidth))
                 .Select(columns => Math.Max(1, columns))
                 .Subscribe(columns => Columns = columns);
+
+            var columns = ScrollViewer
+                .WhenAny(
+                    scrollViewer => scrollViewer.ViewportWidth,
+                    change => change.Value)
+                .Select(value => Math.Max(1, (int) (value / 310)));
+
+            columns.Subscribe(i =>
+            {
+                _logger.Verbose("Columns {Columns}", columns);
+            });
+
+            Observable.Create<string>(observer =>
+            {
+                var disposable1 = this.WhenAny(view => view.ViewModel, change => change.Value)
+                    .Skip(1)
+                    .SelectMany(collectionView =>
+                    {
+                        return collectionView
+                            .ObserveCollectionChanges()
+                            .Select(pattern => (ICollectionView) pattern.Sender)
+                            .Select(view => view.Cast<ImageContainerViewModel>().FirstOrDefault())
+                            .Where(model => model != null)
+                            .Select(model => model.ContainerKey)
+                            .DistinctUntilChanged();
+                    })
+                    .Subscribe(observer.OnNext);
+
+                var disposable2 = ScrollViewer
+                    .WhenAny(
+                        scrollViewer => scrollViewer.VerticalOffset,
+                        observedChange1 => observedChange1.Value)
+                    .Skip(1)
+                    .DistinctUntilChanged(verticalOffset => (int) (verticalOffset / 30))
+                    .Select(verticalOffset =>
+                    {
+                        var listViewItem = ScrollViewer.GetFirstVisibleListViewItem<ImageViewModel>();
+                        var imageViewModel1 = (ImageViewModel) listViewItem?.DataContext;
+                        return imageViewModel1?.ImageContainerViewModel;
+                    })
+                    .DistinctUntilChanged()
+                    .Subscribe(model =>
+                    {
+                        if (disposable1 != null)
+                        {
+                            disposable1.Dispose();
+                            disposable1 = null;
+                        }
+
+                        observer.OnNext(model?.ContainerKey);
+                    });
+
+                return new CompositeDisposable(disposable1, disposable2);
+            }).BindTo(this, view => view.TopmostImageContainerKey);
         }
 
         #region DefaultImageSize
@@ -63,10 +122,21 @@ namespace SonOfPicasso.UI.Views
         public double ImageSize
         {
             get => (double) GetValue(ImageSizeProperty);
-            set => SetValue(ImageSizePropertyKey, value);
+            private set => SetValue(ImageSizePropertyKey, value);
         }
 
         #endregion
+
+        public static readonly DependencyPropertyKey TopmostImageContainerKeyPropertyKey = DependencyProperty.RegisterReadOnly(
+            "TopmostImageContainerKey", typeof(string), typeof(ImageContainerListView), new PropertyMetadata(default(string)));
+        
+        public static readonly DependencyProperty TopmostImageContainerKeyProperty = TopmostImageContainerKeyPropertyKey.DependencyProperty;
+
+        public string TopmostImageContainerKey
+        {
+            get { return (string) GetValue(TopmostImageContainerKeyProperty); }
+            private set { SetValue(TopmostImageContainerKeyPropertyKey, value); }
+        }
 
         #region Columns
 
