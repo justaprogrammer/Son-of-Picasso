@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 using ReactiveUI;
 using SonOfPicasso.UI.ViewModels;
 
@@ -13,6 +15,10 @@ namespace SonOfPicasso.UI.Views
         public ImageContainerView()
         {
             InitializeComponent();
+
+            ListView.MouseWheel += (sender, args) =>
+            {
+            };
         }
 
         #region Columns
@@ -40,5 +46,17 @@ namespace SonOfPicasso.UI.Views
         }
 
         #endregion
+
+        private void UniformG5rid_OnPreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (!e.Handled)
+            {
+                e.Handled = true;
+                var eventArg = new MouseWheelEventArgs(e.MouseDevice, e.Timestamp, e.Delta);
+                eventArg.RoutedEvent = UIElement.MouseWheelEvent;
+                eventArg.Source = sender;
+                this.ListView.RaiseEvent(eventArg);
+            }
+        }
     }
 }

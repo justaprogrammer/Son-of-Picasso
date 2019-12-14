@@ -16,6 +16,7 @@
             <Label Content="{Binding Path=Name}" />
         </StackPanel>
         <ListView
+            Name="ListView"
             DockPanel.Dock="Bottom" 
             ItemsSource="{Binding Path=ImageViewModels,Mode=OneTime}"
             ScrollViewer.VerticalScrollBarVisibility="Disabled"
@@ -25,7 +26,10 @@
             </ListView.ItemContainerStyle>
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <UniformGrid Columns="{Binding ElementName=UserControl,Path=Columns,Mode=OneWay}" />
+                    <UniformGrid
+                        PreviewMouseWheel="UniformG5rid_OnPreviewMouseWheel"
+                        Columns="{Binding ElementName=UserControl,Path=Columns,Mode=OneWay}" 
+                        />
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
