@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows;
+using System.Windows.Input;
 using DynamicData.Binding;
 using ReactiveUI;
 using Serilog;
@@ -24,6 +25,18 @@ namespace SonOfPicasso.UI.Views
             InitializeComponent();
 
             _logger = Log.ForContext<ImageContainerListView>();
+
+            ScrollViewer.Events()
+                .PreviewMouseWheel
+                .Subscribe(e =>
+                {
+                    var eventArg = new MouseWheelEventArgs(e.MouseDevice, e.Timestamp, e.Delta);
+                    eventArg.RoutedEvent = UIElement.MouseWheelEvent;
+                    eventArg.Source = e.Source;
+                    ScrollViewer.RaiseEvent(eventArg);
+
+                    e.Handled = true;
+                });
 
             this.WhenAny(view => view.ViewModel, change => change.Value)
                 .Subscribe(collectionView => { ItemsControl.ItemsSource = collectionView; });
