@@ -167,14 +167,6 @@ namespace SonOfPicasso.UI.Windows
                         ViewModel.ChangeSelectedImages(eventArgs.AddedItems, eventArgs.RemovedItems);
                     }).DisposeWith(d);
 
-//                ImagesList.Events().SelectionChanged
-//                    .Subscribe(ea =>
-//                    {
-//                        ViewModel.ChangeSelectedImages(
-//                            ea.AddedItems.Cast<ImageViewModel>(),
-//                            ea.RemovedItems.Cast<ImageViewModel>());
-//                    }).DisposeWith(d);
-
 //                ViewModel.UnselectImage
 //                    .ObserveOn(_schedulerProvider.MainThreadScheduler)
 //                    .Subscribe(imageViewModels =>
