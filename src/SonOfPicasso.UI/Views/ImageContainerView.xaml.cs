@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using ReactiveUI;
 using SonOfPicasso.UI.ViewModels;
@@ -12,13 +13,15 @@ namespace SonOfPicasso.UI.Views
     /// </summary>
     public partial class ImageContainerView : ReactiveUserControl<ImageContainerViewModel>
     {
+        public event SelectionChangedEventHandler SelectionChanged;
+        
         public ImageContainerView()
         {
             InitializeComponent();
 
-            ListView.MouseWheel += (sender, args) =>
-            {
-            };
+            ListView.Events()
+                .SelectionChanged
+                .Subscribe(args => { SelectionChanged?.Invoke(this, args); });
         }
 
         #region Columns
@@ -47,16 +50,9 @@ namespace SonOfPicasso.UI.Views
 
         #endregion
 
-        private void UniformG5rid_OnPreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        public void ClearSelection()
         {
-            if (!e.Handled)
-            {
-                e.Handled = true;
-                var eventArg = new MouseWheelEventArgs(e.MouseDevice, e.Timestamp, e.Delta);
-                eventArg.RoutedEvent = UIElement.MouseWheelEvent;
-                eventArg.Source = sender;
-                this.ListView.RaiseEvent(eventArg);
-            }
+            ListView.SelectedItems.Clear();
         }
     }
 }

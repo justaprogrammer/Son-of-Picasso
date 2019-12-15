@@ -21,7 +21,8 @@
                 <DataTemplate DataType="viewModels:ImageViewModel">
                     <local:ImageContainerView ViewModel="{Binding Mode=OneTime}"
                                               ImageSize="{Binding Source={x:Reference UserControl},Mode=OneWay,Path=ImageSize}"
-                                              Columns="{Binding Source={x:Reference UserControl},Mode=OneWay,Path=Columns}" />
+                                              Columns="{Binding Source={x:Reference UserControl},Mode=OneWay,Path=Columns}"
+                                              SelectionChanged="ImageContainerView_OnSelectionChanged"/>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>

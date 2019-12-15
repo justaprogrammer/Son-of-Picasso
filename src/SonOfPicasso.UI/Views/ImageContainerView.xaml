@@ -26,10 +26,7 @@
             </ListView.ItemContainerStyle>
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <UniformGrid
-                        PreviewMouseWheel="UniformG5rid_OnPreviewMouseWheel"
-                        Columns="{Binding ElementName=UserControl,Path=Columns,Mode=OneWay}" 
-                        />
+                    <UniformGrid Columns="{Binding ElementName=UserControl,Path=Columns,Mode=OneWay}" />
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>

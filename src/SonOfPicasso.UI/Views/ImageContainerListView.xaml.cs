@@ -1,15 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using DynamicData;
 using DynamicData.Binding;
 using ReactiveUI;
 using Serilog;
 using SonOfPicasso.UI.Extensions;
 using SonOfPicasso.UI.ViewModels;
+using EventExtensions = System.Windows.EventExtensions;
 
 namespace SonOfPicasso.UI.Views
 {
@@ -18,7 +22,12 @@ namespace SonOfPicasso.UI.Views
     /// </summary>
     public partial class ImageContainerListView : ReactiveUserControl<ICollectionView>
     {
+        public delegate void ImageSelectionChangedEventHandler(object sender, ImageSelectionChangedEventArgs e);
+
         private readonly ILogger _logger;
+        private readonly Dictionary<string, ImageViewModel> _selectedImageViewModels;
+
+        private ImageContainerView _lastSelectedImageContainerView;
 
         public ImageContainerListView()
         {
@@ -26,17 +35,19 @@ namespace SonOfPicasso.UI.Views
 
             _logger = Log.ForContext<ImageContainerListView>();
 
-            ScrollViewer.Events()
+            EventExtensions.Events(ScrollViewer)
                 .PreviewMouseWheel
                 .Subscribe(e =>
                 {
                     var eventArg = new MouseWheelEventArgs(e.MouseDevice, e.Timestamp, e.Delta);
-                    eventArg.RoutedEvent = UIElement.MouseWheelEvent;
+                    eventArg.RoutedEvent = MouseWheelEvent;
                     eventArg.Source = e.Source;
                     ScrollViewer.RaiseEvent(eventArg);
 
                     e.Handled = true;
                 });
+
+            _selectedImageViewModels = new Dictionary<string, ImageViewModel>();
 
             this.WhenAny(view => view.ViewModel, change => change.Value)
                 .Subscribe(collectionView => { ItemsControl.ItemsSource = collectionView; });
@@ -112,6 +123,50 @@ namespace SonOfPicasso.UI.Views
             }).BindTo(this, view => view.TopmostImageContainerKey);
         }
 
+        public event ImageSelectionChangedEventHandler ImageSelectionChanged;
+
+        private void ImageContainerView_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            IList<ImageViewModel> addedItems = new List<ImageViewModel>(e.AddedItems.Cast<ImageViewModel>());
+            IList<ImageViewModel> removedItems = new List<ImageViewModel>(e.RemovedItems.Cast<ImageViewModel>());
+
+            var selectedImageContainerView = (ImageContainerView) sender;
+            if (_lastSelectedImageContainerView == null || _lastSelectedImageContainerView != selectedImageContainerView)
+            {
+                removedItems.AddRange(_selectedImageViewModels.Values);
+                _selectedImageViewModels.Clear();
+
+                _lastSelectedImageContainerView?.ClearSelection();
+                _lastSelectedImageContainerView = selectedImageContainerView;
+            }
+
+            foreach (var removedItem in e.RemovedItems.Cast<ImageViewModel>())
+                _selectedImageViewModels.Remove(removedItem.ImageRefKey);
+
+            foreach (var addedItem in e.AddedItems.Cast<ImageViewModel>())
+                _selectedImageViewModels.Add(addedItem.ImageRefKey, addedItem);
+
+            ImageSelectionChanged?.Invoke(this, new ImageSelectionChangedEventArgs(addedItems, removedItems));
+        }
+
+        #region TopmostImageContainerKey
+
+        public static readonly DependencyPropertyKey TopmostImageContainerKeyPropertyKey =
+            DependencyProperty.RegisterReadOnly(
+                "TopmostImageContainerKey", typeof(string), typeof(ImageContainerListView),
+                new PropertyMetadata(default(string)));
+
+        public static readonly DependencyProperty TopmostImageContainerKeyProperty =
+            TopmostImageContainerKeyPropertyKey.DependencyProperty;
+
+        public string TopmostImageContainerKey
+        {
+            get => (string) GetValue(TopmostImageContainerKeyProperty);
+            private set => SetValue(TopmostImageContainerKeyPropertyKey, value);
+        }
+
+        #endregion
+
         #region DefaultImageSize
 
         public static readonly DependencyProperty DefaultImageSizeProperty = DependencyProperty.Register(
@@ -139,17 +194,6 @@ namespace SonOfPicasso.UI.Views
         }
 
         #endregion
-
-        public static readonly DependencyPropertyKey TopmostImageContainerKeyPropertyKey = DependencyProperty.RegisterReadOnly(
-            "TopmostImageContainerKey", typeof(string), typeof(ImageContainerListView), new PropertyMetadata(default(string)));
-        
-        public static readonly DependencyProperty TopmostImageContainerKeyProperty = TopmostImageContainerKeyPropertyKey.DependencyProperty;
-
-        public string TopmostImageContainerKey
-        {
-            get { return (string) GetValue(TopmostImageContainerKeyProperty); }
-            private set { SetValue(TopmostImageContainerKeyPropertyKey, value); }
-        }
 
         #region Columns
 

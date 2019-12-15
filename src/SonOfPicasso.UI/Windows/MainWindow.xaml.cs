@@ -25,6 +25,7 @@ using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.UI.Extensions;
 using SonOfPicasso.UI.ViewModels;
 using SonOfPicasso.UI.ViewModels.FolderRules;
+using SonOfPicasso.UI.Views;
 using SonOfPicasso.UI.Windows.Dialogs;
 using ListViewItem = System.Windows.Controls.ListViewItem;
 using MenuItem = System.Windows.Controls.MenuItem;
@@ -156,6 +157,15 @@ namespace SonOfPicasso.UI.Windows
 
                             return (collection.AsEnumerable(), allItems);
                         })).DisposeWith(d);
+
+                Observable.FromEventPattern<ImageContainerListView.ImageSelectionChangedEventHandler, ImageSelectionChangedEventArgs>(
+                        handler => ImageContainerListView.ImageSelectionChanged += handler,
+                        handler => ImageContainerListView.ImageSelectionChanged -= handler)
+                    .Select(pattern => pattern.EventArgs)
+                    .Subscribe(eventArgs =>
+                    {
+                        ViewModel.ChangeSelectedImages(eventArgs.AddedItems, eventArgs.RemovedItems);
+                    }).DisposeWith(d);
 
 //                ImagesList.Events().SelectionChanged
 //                    .Subscribe(ea =>
