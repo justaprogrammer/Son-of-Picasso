@@ -15,7 +15,7 @@ jobs:
         dotnet-version: 3.1.100
     - name: Build and Test
       run: |
-        dotnet publish -c Release .\SonOfPicasso.sln -v quiet -fl -flp:logfile=build.log -flp:verbosity=detailed
+        dotnet publish -c Release .\SonOfPicasso.sln -v detailed -fl -flp:logfile=build.log -flp:verbosity=detailed
         .\test.ps1
     - name: Upload Build Log
       if: always()
