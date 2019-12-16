@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -53,6 +54,12 @@ namespace SonOfPicasso.UI.Views
         public void ClearSelection()
         {
             ListView.SelectedItems.Clear();
+        }
+
+        public void ClearSelection(IList<ImageViewModel> list)
+        {
+            foreach (var item in list) 
+                ListView.SelectedItems.Remove(item);
         }
     }
 }

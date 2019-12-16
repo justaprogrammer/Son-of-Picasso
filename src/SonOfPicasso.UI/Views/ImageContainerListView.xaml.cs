@@ -225,5 +225,10 @@ namespace SonOfPicasso.UI.Views
         }
 
         #endregion
+
+        public void ClearSelectedItems(IList<ImageViewModel> list)
+        {
+            _lastSelectedImageContainerView?.ClearSelection(list);
+        }
     }
 }

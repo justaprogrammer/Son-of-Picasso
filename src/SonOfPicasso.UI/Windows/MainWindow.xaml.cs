@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO.Abstractions;
 using System.Linq;
@@ -157,6 +158,11 @@ namespace SonOfPicasso.UI.Windows
 
                             return (collection.AsEnumerable(), allItems);
                         })).DisposeWith(d);
+
+                ViewModel.ClearTrayItems.Subscribe(list =>
+                {
+                    ImageContainerListView.ClearSelectedItems(list);
+                });
 
                 Observable.FromEventPattern<ImageContainerListView.ImageSelectionChangedEventHandler, ImageSelectionChangedEventArgs>(
                         handler => ImageContainerListView.ImageSelectionChanged += handler,

@@ -72,10 +72,12 @@ namespace SonOfPicasso.UI.ViewModels
             PinSelectedItems =
                 ReactiveCommand.CreateFromObservable<IEnumerable<TrayImageViewModel>, Unit>(ExecutePinSelectedItems,
                     hasItemsInTray);
+
             ClearTrayItems =
-                ReactiveCommand.CreateFromObservable<(IEnumerable<TrayImageViewModel>, bool), Unit>(
+                ReactiveCommand.CreateFromObservable<(IEnumerable<TrayImageViewModel>, bool), IList<ImageViewModel>>(
                     ExecuteClearTrayItems,
                     hasItemsInTray);
+
             AddTrayItemsToAlbum =
                 ReactiveCommand.CreateFromObservable<Unit, Unit>(ExecuteAddTrayItemsToAlbum, hasItemsInTray);
 
@@ -194,7 +196,7 @@ namespace SonOfPicasso.UI.ViewModels
 
         public ReactiveCommand<IEnumerable<TrayImageViewModel>, Unit> PinSelectedItems { get; }
 
-        public ReactiveCommand<(IEnumerable<TrayImageViewModel>, bool), Unit> ClearTrayItems { get; }
+        public ReactiveCommand<(IEnumerable<TrayImageViewModel>, bool), IList<ImageViewModel>> ClearTrayItems { get; }
 
         public Interaction<Unit, bool> ConfirmClearTrayItemsInteraction { get; } = new Interaction<Unit, bool>();
 
@@ -286,7 +288,7 @@ namespace SonOfPicasso.UI.ViewModels
             }, _schedulerProvider.MainThreadScheduler);
         }
 
-        private IObservable<Unit> ExecuteClearTrayItems(
+        private IObservable<IList<ImageViewModel>> ExecuteClearTrayItems(
             (IEnumerable<TrayImageViewModel> trayImageViewModels, bool isAllItems) tuple)
         {
             return Observable.Start(() =>
@@ -306,13 +308,14 @@ namespace SonOfPicasso.UI.ViewModels
                     if (shouldContinue)
                     {
                         var trayImageViewModelsArray = trayImageViewModels.ToArray();
+                        var imageViewModelsArray = trayImageViewModels.Select(model => model.ImageViewModel).ToArray();
                         var imageIds = trayImageViewModelsArray.Select(model => model.ImageViewModel.ImageId);
                         _trayImageSourceCache.RemoveKeys(imageIds);
-                        // _unselectImageSubject.OnNext(trayImageViewModelsArray.Select(model => model.ImageViewModel));
-                        // _unselectTrayImageSubject.OnNext(trayImageViewModelsArray);
+
+                        return imageViewModelsArray;
                     }
 
-                    return Unit.Default;
+                    return Array.Empty<ImageViewModel>();
                 });
         }
 
