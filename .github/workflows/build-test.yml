@@ -10,12 +10,12 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Setup .NET Core
-      uses: actions/setup-dotnet@master
+      uses: actions/setup-dotnet@fix-problem-matcher
       with:
         dotnet-version: 3.1.100
     - name: Build and Test
       run: |
-        dotnet publish -c Release .\SonOfPicasso.sln -v detailed -fl -flp:logfile=build.log -flp:verbosity=detailed
+        dotnet publish -c Release .\SonOfPicasso.sln -fl -flp:logfile=build.log -flp:verbosity=detailed
         .\test.ps1
     - name: Upload Build Log
       if: always()
