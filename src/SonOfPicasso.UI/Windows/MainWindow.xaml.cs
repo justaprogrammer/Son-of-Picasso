@@ -161,7 +161,8 @@ namespace SonOfPicasso.UI.Windows
 
                 ViewModel.ClearTrayItems.Subscribe(list =>
                 {
-                    ImageContainerListView.ClearSelectedItems(list);
+                    if(list.Any())
+                        ImageContainerListView.ClearSelectedItems(list);
                 });
 
                 Observable.FromEventPattern<ImageContainerListView.ImageSelectionChangedEventHandler, ImageSelectionChangedEventArgs>(
@@ -173,15 +174,6 @@ namespace SonOfPicasso.UI.Windows
                         ViewModel.ChangeSelectedImages(eventArgs.AddedItems, eventArgs.RemovedItems);
                     }).DisposeWith(d);
 
-//                ViewModel.UnselectImage
-//                    .ObserveOn(_schedulerProvider.MainThreadScheduler)
-//                    .Subscribe(imageViewModels =>
-//                    {
-//                        foreach (var imageViewModel in imageViewModels)
-//                            ImagesList.SelectedItems.Remove(imageViewModel);
-//                    })
-//                    .DisposeWith(d);
-
                 TrayImagesList.Events().SelectionChanged.Subscribe(ea =>
                 {
                     using (ViewModel.SelectedTrayImages.SuspendNotifications())
@@ -190,15 +182,6 @@ namespace SonOfPicasso.UI.Windows
                         ViewModel.SelectedTrayImages.AddRange(ea.AddedItems.Cast<TrayImageViewModel>());
                     }
                 }).DisposeWith(d);
-
-//                ViewModel.UnselectTrayImage
-//                    .ObserveOn(_schedulerProvider.MainThreadScheduler)
-//                    .Subscribe(trayImageViewModels =>
-//                    {
-//                        foreach (var trayImageViewModel in trayImageViewModels)
-//                            TrayImagesList.SelectedItems.Remove(trayImageViewModel);
-//                    })
-//                    .DisposeWith(d);
 
                 this.OneWayBind(ViewModel,
                     model => model.TrayImages,
