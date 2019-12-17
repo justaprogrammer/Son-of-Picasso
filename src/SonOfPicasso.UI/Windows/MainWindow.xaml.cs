@@ -9,6 +9,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Forms;
 using DynamicData;
+using MoreLinq;
 using ReactiveUI;
 using Serilog;
 using Serilog.Events;
@@ -235,6 +236,31 @@ namespace SonOfPicasso.UI.Windows
                         return Observable.Return(Unit.Default);
                     }).SubscribeOn(schedulerProvider.MainThreadScheduler);
                 }).DisposeWith(d);
+                
+                ContainersList.Events()
+                    .SelectionChanged
+                    .Subscribe(args =>
+                    {
+                        var imageContainerViewModel = args
+                            .AddedItems
+                            .Cast<ImageContainerViewModel>()
+                            .FirstOrDefault();
+
+                        if (imageContainerViewModel != null)
+                        {
+                            var foundIndex = imageContainersViewSource.View
+                                .Cast<ImageContainerViewModel>()
+                                .Index()
+                                .Where(pair => pair.Value == imageContainerViewModel)
+                                .Select(pair => (int?) pair.Key)
+                                .FirstOrDefault();
+
+                            if (foundIndex.HasValue)
+                            {
+                                ImageContainerListView.ScrollToIndex(foundIndex.Value);
+                            }
+                        }
+                    });
             });
         }
 

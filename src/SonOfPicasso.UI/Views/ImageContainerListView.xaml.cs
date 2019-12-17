@@ -230,5 +230,19 @@ namespace SonOfPicasso.UI.Views
         {
             _lastSelectedImageContainerView?.ClearSelection(list);
         }
+
+        public void ScrollToIndex(int index)
+        {
+            var imageContainerView
+                = ItemsControl.FindVisualChildren<ImageContainerView>()
+                    .Skip(index)
+                    .First();
+
+            var point = imageContainerView
+                .TransformToAncestor(ItemsControl)
+                .Transform(new Point());
+
+            ScrollViewer.ScrollToVerticalOffset(point.Y);
+        }
     }
 }
