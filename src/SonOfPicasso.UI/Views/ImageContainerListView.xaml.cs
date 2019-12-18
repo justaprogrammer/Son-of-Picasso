@@ -1,4 +1,10 @@
-﻿using System;
+﻿using DynamicData;
+using DynamicData.Binding;
+using ReactiveUI;
+using Serilog;
+using SonOfPicasso.UI.Extensions;
+using SonOfPicasso.UI.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -7,12 +13,6 @@ using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using DynamicData;
-using DynamicData.Binding;
-using ReactiveUI;
-using Serilog;
-using SonOfPicasso.UI.Extensions;
-using SonOfPicasso.UI.ViewModels;
 using EventExtensions = System.Windows.EventExtensions;
 
 namespace SonOfPicasso.UI.Views
@@ -101,14 +101,9 @@ namespace SonOfPicasso.UI.Views
                         observedChange1 => observedChange1.Value)
                     .Skip(1)
                     .DistinctUntilChanged(verticalOffset => (int) (verticalOffset / 30))
-                    .Select(verticalOffset =>
-                    {
-                        var listViewItem = ScrollViewer.GetFirstVisibleListViewItem<ImageViewModel>();
-                        var imageViewModel1 = (ImageViewModel) listViewItem?.DataContext;
-                        return imageViewModel1?.ImageContainerViewModel;
-                    })
+                    .Select(verticalOffset => GetFirstVisibleImageContainerView())
                     .DistinctUntilChanged()
-                    .Subscribe(model =>
+                    .Subscribe(containerKey =>
                     {
                         if (disposable1 != null)
                         {
@@ -116,7 +111,7 @@ namespace SonOfPicasso.UI.Views
                             disposable1 = null;
                         }
 
-                        observer.OnNext(model?.ContainerKey);
+                        observer.OnNext(containerKey);
                     });
 
                 return new CompositeDisposable(disposable1, disposable2);
@@ -243,6 +238,36 @@ namespace SonOfPicasso.UI.Views
                 .Transform(new Point());
 
             ScrollViewer.ScrollToVerticalOffset(point.Y);
+        }
+
+        public string GetFirstVisibleImageContainerView()
+        {
+            var imageContainerViews = ItemsControl
+                .FindVisualChildren<ImageContainerView>()
+                .ToArray();
+
+            ImageContainerView result = null;
+
+            foreach (var imageContainerView in imageContainerViews)
+            {
+                var translatePoint = imageContainerView
+                    .TranslatePoint(new Point(), ScrollViewer);
+
+                var listViewItemBottom = translatePoint.Y + imageContainerView.ActualHeight;
+
+                if (listViewItemBottom <= 0)
+                {
+                    continue;
+                }
+
+                result = imageContainerView;
+                break;
+            }
+
+            var imageContainerViewModel = (ImageContainerViewModel) result?.DataContext;
+            var containerKey = imageContainerViewModel?.ContainerKey;
+            
+            return containerKey;
         }
     }
 }
