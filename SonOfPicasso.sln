@@ -14,6 +14,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{30DC3442-C225-4FC5-9439-77BD1B3EE895}"
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
+		.github\workflows\build-test.yml = .github\workflows\build-test.yml
 		build.ps1 = build.ps1
 		clean.ps1 = clean.ps1
 		codecov.yml = codecov.yml
