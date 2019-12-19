@@ -35,16 +35,40 @@ namespace SonOfPicasso.UI.Views
 
             _logger = Log.ForContext<ImageContainerListView>();
 
-            EventExtensions.Events(ScrollViewer)
+            ScrollViewer.Events()
                 .PreviewMouseWheel
                 .Subscribe(e =>
                 {
+                    e.Handled = true;
+               
                     var eventArg = new MouseWheelEventArgs(e.MouseDevice, e.Timestamp, e.Delta);
                     eventArg.RoutedEvent = MouseWheelEvent;
                     eventArg.Source = e.Source;
                     ScrollViewer.RaiseEvent(eventArg);
+                });
 
-                    e.Handled = true;
+            ScrollViewer.Events()
+                .PreviewKeyDown
+                .Subscribe(e =>
+                {
+                    if(e.Key == Key.Down || e.Key == Key.Up)
+                    {
+                        e.Handled = true;
+
+                        var scrollDelta = 75;
+
+                        if (e.Key == Key.Up)
+                        {
+                            scrollDelta *= -1;
+                        }
+                        
+                        if(e.KeyboardDevice.IsKeyDown(Key.LeftShift) || e.KeyboardDevice.IsKeyDown(Key.RightShift))
+                        {
+                            scrollDelta *= 2;
+                        }
+
+                        ScrollViewer.ScrollToVerticalOffset(ScrollViewer.VerticalOffset + scrollDelta);
+                    }
                 });
 
             _selectedImageViewModels = new Dictionary<string, ImageViewModel>();
