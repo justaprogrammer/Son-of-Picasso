@@ -248,8 +248,9 @@ namespace SonOfPicasso.UI.Views
 
             ImageContainerView result = null;
 
-            foreach (var imageContainerView in imageContainerViews)
+            for (var index = 0; index < imageContainerViews.Length; index++)
             {
+                var imageContainerView = imageContainerViews[index];
                 var translatePoint = imageContainerView
                     .TranslatePoint(new Point(), ScrollViewer);
 
@@ -260,7 +261,14 @@ namespace SonOfPicasso.UI.Views
                     continue;
                 }
 
-                result = imageContainerView;
+                if (listViewItemBottom < 10 && index + 1 < imageContainerViews.Length)
+                {
+                    result = imageContainerViews[index + 1];
+                }
+                else
+                {
+                    result = imageContainerView;
+                }
                 break;
             }
 
