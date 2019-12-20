@@ -115,7 +115,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             await InitializeDataContextAsync();
             await using var connection = DataContext.Database.GetDbConnection();
 
-            var desiredImageCount = 50;
+            var desiredImageCount = 20;
             var generateImagesAsync = await GenerateImagesAsync(desiredImageCount);
             var imageCount = generateImagesAsync.SelectMany(pair => pair.Value).Count();
             var folderCount = generateImagesAsync.Count;
