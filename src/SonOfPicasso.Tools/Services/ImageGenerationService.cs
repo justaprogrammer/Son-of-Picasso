@@ -43,7 +43,7 @@ namespace SonOfPicasso.Tools.Services
             (3300, 2550),
             (4800, 2700),
             (4200, 3300),
-            (4800, 3300),
+            (4800, 3300)
         };
 
         private readonly IFileSystem _fileSystem;
@@ -96,14 +96,6 @@ namespace SonOfPicasso.Tools.Services
             return Observable.Defer(() =>
             {
                 var (height, width) = Faker.PickRandom(Sizes);
-                var cellHeight = height / 3;
-                var cellWidth = width / 3;
-
-                var red = Faker.Random.Int(0, 255);
-                var green = Faker.Random.Int(0, 255);
-                var blue = Faker.Random.Int(0, 255);
-
-                var colors = SimilarColors(red, green, blue);
 
                 ImageFile imageFile;
 
@@ -111,18 +103,16 @@ namespace SonOfPicasso.Tools.Services
                 {
                     using (var bitmap = new Bitmap(width, height))
                     {
-                        using (var graphics = Graphics.FromImage(bitmap))
-                        {
-                            for (var x = 0; x < 3; x++)
-                            for (var y = 0; y < 3; y++)
-                            {
-                                var xPos = x * cellWidth;
-                                var yPos = y * cellHeight;
+                        var cellSize = Faker.Random.Int(3, 10);
 
-                                using var brush = new SolidBrush(GetColor(colors, x, y));
-                                var rectangle = new Rectangle(xPos, yPos, cellWidth, cellHeight);
-                                graphics.FillRectangle(brush, rectangle);
-                            }
+                        using var graphics = Graphics.FromImage(bitmap);
+
+                        foreach (var y in ChunkValues(height, cellSize))
+                        foreach (var x in ChunkValues(width, cellSize))
+                        {
+                            using var brush = new SolidBrush(Color.FromKnownColor(Faker.PickRandom<KnownColor>()));
+                            var rectangle = new Rectangle(x, y, cellSize, cellSize);
+                            graphics.FillRectangle(brush, rectangle);
                         }
 
                         bitmap.Save(imageStream, ImageFormat.Jpeg);
@@ -143,6 +133,13 @@ namespace SonOfPicasso.Tools.Services
 
                 return Observable.Return(path);
             }).SubscribeOn(_schedulerProvider.TaskPool);
+        }
+
+        private static IEnumerable<int> ChunkValues(int max, int chunk)
+        {
+            for (var x = 0; x < max / chunk + 1; x++) yield return x * chunk;
+
+            if (max % chunk != 0) yield return max;
         }
 
         internal void CopyExifDataToImageFile(ExifData exifData, ImageFile imageFile)
