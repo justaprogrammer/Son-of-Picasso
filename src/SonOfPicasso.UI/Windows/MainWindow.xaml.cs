@@ -1,31 +1,24 @@
 ﻿using System;
 using System.ComponentModel;
-using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Forms;
 using DynamicData;
-using DynamicData.Binding;
-using Microsoft.Extensions.Caching.Memory;
 using MoreLinq;
 using ReactiveUI;
 using Serilog;
 using Serilog.Events;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Scheduling;
-using SonOfPicasso.UI.Extensions;
 using SonOfPicasso.UI.ViewModels;
 using SonOfPicasso.UI.ViewModels.FolderRules;
+using SonOfPicasso.UI.Views;
 using SonOfPicasso.UI.Windows.Dialogs;
-using ListViewItem = System.Windows.Controls.ListViewItem;
 using MenuItem = System.Windows.Controls.MenuItem;
 using MessageBox = System.Windows.MessageBox;
 
@@ -36,167 +29,53 @@ namespace SonOfPicasso.UI.Windows
     /// </summary>
     public partial class MainWindow : ReactiveWindow<ApplicationViewModel>
     {
-        private readonly Func<AddAlbumViewModel> _addAlbumViewModelFactory;
-        private readonly Func<AddAlbumWindow> _addAlbumWindowFactory;
-        private readonly CollectionViewSource _albumImageContainersViewSource;
-        private readonly IEnvironmentService _environmentService;
-        private readonly IFileSystem _fileSystem;
-        private readonly Func<ManageFolderRulesViewModel> _folderManagementViewModelFactory;
-        private readonly Func<FolderManagementWindow> _folderManagementWindowFactory;
-        private readonly CollectionViewSource _imageCollectionViewSource;
-        private readonly CollectionViewSource _imageContainersViewSource;
-        private readonly IImageLoadingService _imageLoadingService;
-        private readonly ILogger _logger;
-        private readonly ISchedulerProvider _schedulerProvider;
-        private MemoryCache memoryCache;
-
-        public MainWindow(ILogger logger, IEnvironmentService environmentService, IFileSystem fileSystem,
+        public MainWindow(ILogger logger,
+            IEnvironmentService environmentService,
             ISchedulerProvider schedulerProvider,
-            IImageLoadingService imageLoadingService,
             Func<AddAlbumWindow> addAlbumWindowFactory,
             Func<AddAlbumViewModel> addAlbumViewModelFactory,
             Func<FolderManagementWindow> folderManagementWindowFactory,
             Func<ManageFolderRulesViewModel> folderManagementViewModelFactory)
         {
-            _logger = logger;
-            _environmentService = environmentService;
-            _fileSystem = fileSystem;
-            _schedulerProvider = schedulerProvider;
-            _imageLoadingService = imageLoadingService;
-            _addAlbumWindowFactory = addAlbumWindowFactory;
-            _addAlbumViewModelFactory = addAlbumViewModelFactory;
-            _folderManagementWindowFactory = folderManagementWindowFactory;
-            _folderManagementViewModelFactory = folderManagementViewModelFactory;
-
             InitializeComponent();
-            memoryCache = new MemoryCache(new MemoryCacheOptions());
 
-            _imageCollectionViewSource = (CollectionViewSource) FindResource("ImagesCollectionViewSource");
-            _imageContainersViewSource = (CollectionViewSource) FindResource("ImageContainersViewSource");
-            _albumImageContainersViewSource = (CollectionViewSource) FindResource("AlbumImageContainersViewSource");
+            var imageContainersViewSource = (CollectionViewSource) FindResource("ImageContainersViewSource");
+            
+            imageContainersViewSource.SortDescriptions.Add(new SortDescription(nameof(ImageContainerViewModel.ContainerType), ListSortDirection.Ascending));
+            imageContainersViewSource.SortDescriptions.Add(new SortDescription(nameof(ImageContainerViewModel.Date), ListSortDirection.Descending));
+
+            imageContainersViewSource.IsLiveFilteringRequested = true;
+            imageContainersViewSource.IsLiveGroupingRequested = true;
+            imageContainersViewSource.IsLiveSortingRequested = true;
+
+            var groupedImageContainersViewSource = (CollectionViewSource) FindResource("GroupedImageContainersViewSource");
+            
+            groupedImageContainersViewSource.GroupDescriptions.Add(new PropertyGroupDescription(nameof(ImageContainerViewModel.ContainerType)));
+            groupedImageContainersViewSource.GroupDescriptions.Add(new PropertyGroupDescription(nameof(ImageContainerViewModel.Year)));
+
+            groupedImageContainersViewSource.SortDescriptions.Add(new SortDescription(nameof(ImageContainerViewModel.ContainerType), ListSortDirection.Ascending));
+            groupedImageContainersViewSource.SortDescriptions.Add(new SortDescription(nameof(ImageContainerViewModel.Date), ListSortDirection.Descending));
+
+            groupedImageContainersViewSource.IsLiveFilteringRequested = true;
+            groupedImageContainersViewSource.IsLiveGroupingRequested = true;
+            groupedImageContainersViewSource.IsLiveSortingRequested = true;
+
+            var albumImageContainersViewSource = (CollectionViewSource) FindResource("AlbumImageContainersViewSource");
+
+            albumImageContainersViewSource.SortDescriptions.Add(new SortDescription(nameof(ImageContainerViewModel.Year), ListSortDirection.Descending));
+            albumImageContainersViewSource.SortDescriptions.Add(new SortDescription(nameof(ImageContainerViewModel.Date), ListSortDirection.Descending));
+
+            albumImageContainersViewSource.IsLiveFilteringRequested = true;
+            albumImageContainersViewSource.IsLiveGroupingRequested = true;
+            albumImageContainersViewSource.IsLiveSortingRequested = true;
+
+            ImageZoomSlider.Events().MouseDoubleClick.Subscribe(args => { ImageZoomSlider.Value = 100; });
 
             this.WhenActivated(d =>
             {
-                _imageCollectionViewSource.Source = ViewModel.Images;
-
-                var propertyGroupDescription =
-                    new PropertyGroupDescription(nameof(ImageViewModel.ImageContainerViewModel));
-
-                _imageCollectionViewSource.GroupDescriptions.Add(propertyGroupDescription);
-                _imageCollectionViewSource.SortDescriptions.Add(new SortDescription(
-                    nameof(ImageViewModel.ContainerType),
-                    ListSortDirection.Ascending));
-                _imageCollectionViewSource.SortDescriptions.Add(new SortDescription(
-                    nameof(ImageViewModel.ContainerDate),
-                    ListSortDirection.Descending));
-                _imageCollectionViewSource.SortDescriptions.Add(new SortDescription(nameof(ImageViewModel.ExifDate),
-                    ListSortDirection.Ascending));
-
-                _imageCollectionViewSource.IsLiveFilteringRequested = true;
-                _imageCollectionViewSource.IsLiveGroupingRequested = true;
-                _imageCollectionViewSource.IsLiveSortingRequested = true;
-
-                _imageContainersViewSource.Source = ViewModel.ImageContainers;
-                _imageContainersViewSource.GroupDescriptions.Add(
-                    new PropertyGroupDescription(nameof(ImageContainerViewModel.ContainerType)));
-                _imageContainersViewSource.GroupDescriptions.Add(
-                    new PropertyGroupDescription(nameof(ImageContainerViewModel.Year)));
-                _imageContainersViewSource.SortDescriptions.Add(
-                    new SortDescription(nameof(ImageContainerViewModel.ContainerType),
-                        ListSortDirection.Ascending));
-                _imageContainersViewSource.SortDescriptions.Add(
-                    new SortDescription(nameof(ImageContainerViewModel.Date), ListSortDirection.Descending));
-
-                _imageContainersViewSource.IsLiveFilteringRequested = true;
-                _imageContainersViewSource.IsLiveGroupingRequested = true;
-                _imageContainersViewSource.IsLiveSortingRequested = true;
-
-                _albumImageContainersViewSource.Source = ViewModel.AlbumImageContainers;
-                _albumImageContainersViewSource.SortDescriptions.Add(
-                    new SortDescription(nameof(ImageContainerViewModel.Year), ListSortDirection.Descending));
-                _albumImageContainersViewSource.SortDescriptions.Add(
-                    new SortDescription(nameof(ImageContainerViewModel.Date), ListSortDirection.Descending));
-
-                _albumImageContainersViewSource.IsLiveFilteringRequested = true;
-                _albumImageContainersViewSource.IsLiveGroupingRequested = true;
-                _albumImageContainersViewSource.IsLiveSortingRequested = true;
-
-                ImagesListScrollViewer = ImagesList.FindVisualChildren<ScrollViewer>().First();
-
-                var currentViewportWidth = 0;
-                ImagesListScrollViewer
-                    .WhenAny(
-                        scrollViewer => scrollViewer.ViewportWidth,
-                        change => change.Value)
-                    .Select(value => Math.Max(1, (int)(value / 310)))
-                    .Subscribe(i => currentViewportWidth = i)
-                    .DisposeWith(d);
-
-                ContainersList.Events()
-                    .SelectionChanged
-                    .Subscribe(args =>
-                    {
-                        var imageContainerViewModel = args.AddedItems
-                            .Cast<ImageContainerViewModel>()
-                            .FirstOrDefault();
-
-                        if (imageContainerViewModel == null) return;
-
-                        var (groupIndex, rowIndex) = _imageCollectionViewSource
-                            .View
-                            .Groups
-                            .Cast<CollectionViewGroup>()
-                            .SelectMany((group, g) => group.Items
-                                .Cast<ImageViewModel>()
-                                .Batch(currentViewportWidth)
-                                .Select(models => (models, g)))
-                            .Select((tuple, r) => (tuple.models, tuple.g, r))
-                            .Where(tuple =>
-                                tuple.models.Any(model => model.ContainerKey == imageContainerViewModel.ContainerKey))
-                            .Select(tuple => (tuple.g, tuple.r))
-                            .FirstOrDefault();
-
-                        ImagesListScrollViewer.ScrollToVerticalOffset(rowIndex * 304 + groupIndex * 25.96);
-                    });
-
-                Observable.Create<string>(observer =>
-                    {
-                        var disposable1 = _imageCollectionViewSource
-                            .View
-                            .ObserveCollectionChanges()
-                            .Select(pattern => (ICollectionView) pattern.Sender)
-                            .Select(view => (CollectionViewGroup) view.Groups.FirstOrDefault())
-                            .Select(group => (ImageViewModel) group?.Items.FirstOrDefault())
-                            .DistinctUntilChanged(model => model?.ContainerKey)
-                            .Subscribe(imageViewModel => { observer.OnNext(imageViewModel?.ContainerKey); });
-
-                        var disposable2 = ImagesListScrollViewer
-                            .WhenAny(
-                                scrollViewer => scrollViewer.VerticalOffset,
-                                observedChange1 => observedChange1.Value)
-                            .Skip(1)
-                            .DistinctUntilChanged(verticalOffset => (int) (verticalOffset / 30))
-                            .Select(verticalOffset =>
-                            {
-                                var listViewItem = GetFirstVisibleListViewItem<ImageViewModel>(ImagesListScrollViewer);
-                                var imageViewModel1 = (ImageViewModel) listViewItem?.DataContext;
-                                return imageViewModel1?.ImageContainerViewModel;
-                            })
-                            .DistinctUntilChanged()
-                            .Subscribe(model =>
-                            {
-                                if (disposable1 != null)
-                                {
-                                    disposable1.Dispose();
-                                    disposable1 = null;
-                                }
-
-                                observer.OnNext(model?.ContainerKey);
-                            });
-
-                        return new CompositeDisposable(disposable1, disposable2);
-                    })
-                    .BindTo(ViewModel, model => model.VisibleItemContainerKey);
+                imageContainersViewSource.Source = ViewModel.ImageContainers;
+                groupedImageContainersViewSource.Source = ViewModel.ImageContainers;
+                albumImageContainersViewSource.Source = ViewModel.AlbumImageContainers;
 
                 this.BindCommand(ViewModel,
                         model => model.AddFolder,
@@ -204,12 +83,12 @@ namespace SonOfPicasso.UI.Windows
                     .DisposeWith(d);
 
                 this.BindCommand(ViewModel,
-                        model => model.NewAlbum,
+                        model => model.AddNewAlbum,
                         window => window.NewAlbum)
                     .DisposeWith(d);
 
                 this.BindCommand(ViewModel,
-                        model => model.FolderManager,
+                        model => model.OpenFolderManager,
                         window => window.FolderManager)
                     .DisposeWith(d);
 
@@ -241,22 +120,22 @@ namespace SonOfPicasso.UI.Windows
                             return (collection.AsEnumerable(), allItems);
                         })).DisposeWith(d);
 
-                ImagesList.Events().SelectionChanged
-                    .Subscribe(ea =>
-                    {
-                        ViewModel.ChangeSelectedImages(
-                            ea.AddedItems.Cast<ImageViewModel>(),
-                            ea.RemovedItems.Cast<ImageViewModel>());
-                    }).DisposeWith(d);
+                ViewModel.ClearTrayItems.Subscribe(list =>
+                {
+                    if (list.Any())
+                        ImageContainerListView.ClearSelectedItems(list);
+                });
 
-                ViewModel.UnselectImage
-                    .ObserveOn(_schedulerProvider.MainThreadScheduler)
-                    .Subscribe(imageViewModels =>
+                Observable
+                    .FromEventPattern<ImageContainerListView.ImageSelectionChangedEventHandler,
+                        ImageSelectionChangedEventArgs>(
+                        handler => ImageContainerListView.ImageSelectionChanged += handler,
+                        handler => ImageContainerListView.ImageSelectionChanged -= handler)
+                    .Select(pattern => pattern.EventArgs)
+                    .Subscribe(eventArgs =>
                     {
-                        foreach (var imageViewModel in imageViewModels)
-                            ImagesList.SelectedItems.Remove(imageViewModel);
-                    })
-                    .DisposeWith(d);
+                        ViewModel.ChangeSelectedImages(eventArgs.AddedItems, eventArgs.RemovedItems);
+                    }).DisposeWith(d);
 
                 TrayImagesList.Events().SelectionChanged.Subscribe(ea =>
                 {
@@ -267,15 +146,6 @@ namespace SonOfPicasso.UI.Windows
                     }
                 }).DisposeWith(d);
 
-                ViewModel.UnselectTrayImage
-                    .ObserveOn(_schedulerProvider.MainThreadScheduler)
-                    .Subscribe(trayImageViewModels =>
-                    {
-                        foreach (var trayImageViewModel in trayImageViewModels)
-                            TrayImagesList.SelectedItems.Remove(trayImageViewModel);
-                    })
-                    .DisposeWith(d);
-
                 this.OneWayBind(ViewModel,
                     model => model.TrayImages,
                     window => window.TrayImagesList.ItemsSource).DisposeWith(d);
@@ -284,8 +154,8 @@ namespace SonOfPicasso.UI.Windows
                 {
                     return Observable.Defer(() =>
                     {
-                        var addAlbumWindow = _addAlbumWindowFactory();
-                        var addAlbumViewModel = _addAlbumViewModelFactory();
+                        var addAlbumWindow = addAlbumWindowFactory();
+                        var addAlbumViewModel = addAlbumViewModelFactory();
 
                         addAlbumWindow.ViewModel = addAlbumViewModel;
 
@@ -294,7 +164,7 @@ namespace SonOfPicasso.UI.Windows
 
                         context.SetOutput(result);
                         return Observable.Return(Unit.Default);
-                    }).SubscribeOn(_schedulerProvider.MainThreadScheduler);
+                    }).SubscribeOn(schedulerProvider.MainThreadScheduler);
                 }).DisposeWith(d);
 
                 ViewModel.AddFolderInteraction.RegisterHandler(context =>
@@ -303,7 +173,7 @@ namespace SonOfPicasso.UI.Windows
                     {
                         var dialog = new FolderBrowserDialog
                         {
-                            SelectedPath = _environmentService.GetFolderPath(Environment.SpecialFolder.MyPictures)
+                            SelectedPath = environmentService.GetFolderPath(Environment.SpecialFolder.MyPictures)
                         };
 
                         string result = null;
@@ -311,7 +181,7 @@ namespace SonOfPicasso.UI.Windows
 
                         context.SetOutput(result);
                         return Observable.Return(Unit.Default);
-                    }).SubscribeOn(_schedulerProvider.MainThreadScheduler);
+                    }).SubscribeOn(schedulerProvider.MainThreadScheduler);
                 }).DisposeWith(d);
 
                 ViewModel.ConfirmClearTrayItemsInteraction.RegisterHandler(context =>
@@ -324,17 +194,17 @@ namespace SonOfPicasso.UI.Windows
                         context.SetOutput(messageBoxResult == MessageBoxResult.Yes);
 
                         return Observable.Return(Unit.Default);
-                    }).SubscribeOn(_schedulerProvider.MainThreadScheduler);
+                    }).SubscribeOn(schedulerProvider.MainThreadScheduler);
                 }).DisposeWith(d);
 
                 ViewModel.FolderManagerInteraction.RegisterHandler(context =>
                     {
                         return Observable.Defer(async () =>
                         {
-                            var folderManagementWindow = _folderManagementWindowFactory();
-                            var folderManagementViewModel = _folderManagementViewModelFactory();
+                            var folderManagementWindow = folderManagementWindowFactory();
+                            var folderManagementViewModel = folderManagementViewModelFactory();
 
-                            using (_logger.BeginTimedOperation("Initializing FolderManagementViewModel",
+                            using (logger.BeginTimedOperation("Initializing FolderManagementViewModel",
                                 level: LogEventLevel.Debug))
                             {
                                 await folderManagementViewModel.Initialize();
@@ -347,9 +217,8 @@ namespace SonOfPicasso.UI.Windows
 
                             context.SetOutput(result);
                             return Observable.Return(Unit.Default);
-                        }).SubscribeOn(_schedulerProvider.MainThreadScheduler);
-                    })
-                    .DisposeWith(d);
+                        }).SubscribeOn(schedulerProvider.MainThreadScheduler);
+                    }).DisposeWith(d);
 
                 ViewModel.FolderManagerConfirmationInteraction.RegisterHandler(context =>
                 {
@@ -365,46 +234,34 @@ namespace SonOfPicasso.UI.Windows
                         context.SetOutput(messageBoxResult == MessageBoxResult.Yes);
 
                         return Observable.Return(Unit.Default);
-                    }).SubscribeOn(_schedulerProvider.MainThreadScheduler);
-                });
-            });
-        }
-
-        public ScrollViewer ImagesListScrollViewer { get; set; }
-
-        private ListViewItem GetFirstVisibleListViewItem<TDataContextType>(ScrollViewer imagesListScrollViewer)
-        {
-            var listViewItems = ImagesListScrollViewer
-                .FindVisualChildren<ListViewItem>()
-                .ToArray();
-
-            ListViewItem lastListViewItem = null;
-            Point lastViewViewItemPoint;
-
-            foreach (var listViewItem in listViewItems)
-            {
-                if (!listViewItem.DataContext.GetType().Equals(typeof(TDataContextType)))
-                    continue;
-
-                var translatePoint = listViewItem.TranslatePoint(new Point(), imagesListScrollViewer);
-
-                if (translatePoint.Y <= 0)
-                {
-                    if (lastListViewItem == null || lastViewViewItemPoint.Y != translatePoint.Y)
+                    }).SubscribeOn(schedulerProvider.MainThreadScheduler);
+                }).DisposeWith(d);
+                
+                ContainersList.Events()
+                    .SelectionChanged
+                    .Subscribe(args =>
                     {
-                        lastListViewItem = listViewItem;
-                        lastViewViewItemPoint = translatePoint;
-                    }
+                        var imageContainerViewModel = args
+                            .AddedItems
+                            .Cast<ImageContainerViewModel>()
+                            .FirstOrDefault();
 
-                    continue;
-                }
+                        if (imageContainerViewModel != null)
+                        {
+                            var foundIndex = imageContainersViewSource.View
+                                .Cast<ImageContainerViewModel>()
+                                .Index()
+                                .Where(pair => pair.Value == imageContainerViewModel)
+                                .Select(pair => (int?) pair.Key)
+                                .FirstOrDefault();
 
-                if (lastListViewItem == null) lastListViewItem = listViewItem;
-
-                break;
-            }
-
-            return lastListViewItem;
+                            if (foundIndex.HasValue)
+                            {
+                                ImageContainerListView.ScrollToIndex(foundIndex.Value);
+                            }
+                        }
+                    });
+            });
         }
 
         private void AlbumButton_AddImagesToAlbum_OnClick(object sender, RoutedEventArgs e)
@@ -430,28 +287,8 @@ namespace SonOfPicasso.UI.Windows
             var imageViewModels =
                 viewModelSelectedTrayImages.Select(model => model.ImageViewModel).ToList();
 
-            ViewModel.NewAlbumWithImages.Execute(imageViewModels)
+            ViewModel.AddNewAlbumWithImages.Execute(imageViewModels)
                 .Subscribe();
-        }
-
-        private void ImageBitmap_OnInitialized(object sender, EventArgs e)
-        {
-            var image = (Image) sender;
-            var imageViewModel = (ImageViewModel) image.DataContext;
-
-            _schedulerProvider.TaskPool.Schedule(() =>
-            {
-                memoryCache.GetOrCreateAsync(imageViewModel.Path, async entry =>
-                    {
-                        var bitmapSource = await _imageLoadingService.LoadThumbnailFromPath((string) entry.Key)
-                            .ObserveOn(_schedulerProvider.TaskPool);
-
-                        entry.SetSlidingExpiration(TimeSpan.FromMinutes(10));
-                        return bitmapSource;
-                    }).ToObservable()
-                    .ObserveOn(_schedulerProvider.MainThreadScheduler)
-                    .Subscribe(source => image.Source = source);
-            });
         }
     }
 }

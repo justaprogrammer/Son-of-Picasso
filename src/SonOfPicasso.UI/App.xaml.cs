@@ -17,7 +17,6 @@ using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Core.Services;
 using SonOfPicasso.Data.Repository;
 using SonOfPicasso.Data.Services;
-using SonOfPicasso.UI.Services;
 using SonOfPicasso.UI.ViewModels;
 using SonOfPicasso.UI.Windows;
 using Splat;
@@ -64,7 +63,8 @@ namespace SonOfPicasso.UI
             {
                 configuration
                     .Filter.ByExcluding(logEvent =>
-                        matches.Select(func => func(logEvent)).Any() && logEvent.Level <= LogEventLevel.Verbose)
+                        logEvent.Level <= LogEventLevel.Verbose
+                        && !matches.Select(func => func(logEvent)).Any())
                     .WriteTo
                     .File("SonOfPicasso.log", outputTemplate: outputTemplate);
             });
@@ -117,12 +117,11 @@ namespace SonOfPicasso.UI
                         cacheFolderOverride = directoryInfo.CreateSubdirectory("Thumbnails").FullName;
                     }
 
-                    return new ImageLoadingService(fileSystem, 
+                    return new ImageLoadingService(fileSystem,
                         context.Resolve<ILogger>().ForContext<ImageLoadingService>(),
-                        context.Resolve<ISchedulerProvider>(), 
-                        context.Resolve<IBlobCacheProvider>(), 
+                        context.Resolve<ISchedulerProvider>(),
+                        context.Resolve<IBlobCacheProvider>(),
                         cacheFolderOverride);
-
                 }).As<IImageLoadingService>()
                 .InstancePerLifetimeScope();
 
@@ -130,7 +129,7 @@ namespace SonOfPicasso.UI
                 {
                     var environmentService = context.Resolve<IEnvironmentService>();
                     var cachePath = environmentService.GetEnvironmentVariable("SonOfPicasso_CachePath");
-                    
+
                     if (!string.IsNullOrWhiteSpace(cachePath))
                     {
                         var fileSystem = context.Resolve<IFileSystem>();
@@ -141,9 +140,8 @@ namespace SonOfPicasso.UI
                         var blobCacheProvider = new CustomBlobCacheProvider(fileSystem, cachePath);
                         return blobCacheProvider;
                     }
-                    
-                    return new BlobCacheProvider();
 
+                    return new BlobCacheProvider();
                 }).As<IBlobCacheProvider>()
                 .InstancePerLifetimeScope();
 

@@ -8,14 +8,15 @@
                            xmlns:viewModels="clr-namespace:SonOfPicasso.UI.ViewModels"
                            xmlns:converters="clr-namespace:SonOfPicasso.UI.Converters"
                            xmlns:windows="clr-namespace:SonOfPicasso.UI.Windows"
+                           xmlns:views="clr-namespace:SonOfPicasso.UI.Views"
                            mc:Ignorable="d"
                            Title="MainWindow" Height="450" Width="800"
                            Name="Window">
 
     <Window.Resources>
         <CollectionViewSource x:Key="ImageContainersViewSource" />
+        <CollectionViewSource x:Key="GroupedImageContainersViewSource" />
         <CollectionViewSource x:Key="AlbumImageContainersViewSource" />
-        <CollectionViewSource x:Key="ImagesCollectionViewSource" />
         <converters:MultiValueEqualityConverter x:Key="MultiValueEqualityConverter" />
     </Window.Resources>
     <DockPanel>
@@ -36,7 +37,9 @@
             </MenuItem>
             <MenuItem Header="_Help" />
         </Menu>
-
+        <StackPanel DockPanel.Dock="Top">
+            <Slider Name="ImageZoomSlider" Minimum="50" Maximum="150" Value="100" />
+        </StackPanel>
         <Grid DockPanel.Dock="Top">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
@@ -51,7 +54,7 @@
             <ListView Name="ContainersList"
                       Grid.Column="0"
                       Grid.Row="0"
-                      ItemsSource="{Binding Source={StaticResource ImageContainersViewSource}}"
+                      ItemsSource="{Binding Source={StaticResource GroupedImageContainersViewSource}}"
                       DockPanel.Dock="Left"
                       MinWidth="300"
                       VirtualizingStackPanel.IsVirtualizing="True"
@@ -67,7 +70,7 @@
                             <DataTrigger Value="True">
                                 <DataTrigger.Binding>
                                     <MultiBinding Converter="{StaticResource MultiValueEqualityConverter}">
-                                        <Binding ElementName="Window" Path="ViewModel.VisibleItemContainerKey" />
+                                        <Binding ElementName="ImageContainerListView" Path="TopmostImageContainerKey" />
                                         <Binding Path="ContainerKey" />
                                     </MultiBinding>
                                 </DataTrigger.Binding>
@@ -121,62 +124,13 @@
                           ShowsPreview="True"
                           Width="5" />
 
-            <ListView Name="ImagesList"
-                      Grid.Column="2"
-                      Grid.Row="0"
-                      ItemsSource="{Binding Source={StaticResource ImagesCollectionViewSource}}"
-                      VirtualizingStackPanel.IsVirtualizing="True"
-                      VirtualizingStackPanel.IsVirtualizingWhenGrouping="True"
-                      VirtualizingStackPanel.VirtualizationMode="Standard"
-                      VirtualizingStackPanel.ScrollUnit="Pixel"
-                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                      SelectionMode="Extended">
-
-                <ListView.GroupStyle>
-                    <GroupStyle HidesIfEmpty="False">
-                        <GroupStyle.ContainerStyle>
-                            <Style TargetType="{x:Type GroupItem}">
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="{x:Type GroupItem}">
-                                            <StackPanel Width="{Binding RelativeSource={RelativeSource AncestorType=VirtualizingStackPanel},Path=ActualWidth}">
-                                                <ContentPresenter x:Name="PART_Header" />
-                                                <ItemsPresenter x:Name="ItemsPresenter" Margin="5,0,0,0" />
-                                            </StackPanel>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </GroupStyle.ContainerStyle>
-
-                        <GroupStyle.HeaderTemplate>
-                            <DataTemplate DataType="CollectionViewGroup">
-                                <StackPanel DataContext="{Binding Path=Name}"
-                                            d:DataContext="{d:DesignInstance viewModels:ImageContainerViewModel}">
-                                    <Label Name="FolderName" Content="{Binding Path=Name}" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </GroupStyle.HeaderTemplate>
-                    </GroupStyle>
-                </ListView.GroupStyle>
-
-                <ListView.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <WrapPanel />
-                    </ItemsPanelTemplate>
-                </ListView.ItemsPanel>
-
-                <ListView.ItemTemplate>
-                    <DataTemplate DataType="viewModels:ImageViewModel">
-                        <DockPanel Height="300" Width="300">
-                            <Image Height="250" Width="250"
-                                   Name="ImageBitmap"
-                                   Stretch="None" DataContext="{Binding}"
-                                   Initialized="ImageBitmap_OnInitialized" />
-                        </DockPanel>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+            <views:ImageContainerListView
+                Grid.Column="2"
+                Grid.Row="0"
+                x:Name="ImageContainerListView"
+                DefaultImageSize="300"
+                Zoom="{Binding ElementName=ImageZoomSlider,Mode=OneWay,Path=Value}"
+                ViewModel="{Binding Source={StaticResource ImageContainersViewSource}}" />
 
             <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3">
                 <Grid.ColumnDefinitions>

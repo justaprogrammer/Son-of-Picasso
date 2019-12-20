@@ -4,9 +4,11 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
+using System.Reactive.Threading.Tasks;
+using System.Windows.Media.Imaging;
 using DynamicData;
 using DynamicData.Binding;
+using Microsoft.Extensions.Caching.Memory;
 using ReactiveUI;
 using Serilog;
 using SonOfPicasso.Core.Interfaces;
@@ -22,18 +24,13 @@ namespace SonOfPicasso.UI.ViewModels
     {
         private readonly IImageContainerManagementService _imageContainerManagementService;
         private readonly IObservableCache<ImageContainerViewModel, string> _imageContainerViewModelCache;
-        private readonly IObservableCache<ImageViewModel, string> _imageViewModelCache;
+        private readonly IImageLoadingService _imageLoadingService;
         private readonly ILogger _logger;
+        private readonly MemoryCache _memoryCache;
         private readonly ISchedulerProvider _schedulerProvider;
         private readonly SourceCache<ImageViewModel, int> _selectedImagesSourceCache;
         private readonly IObservableCache<TrayImageViewModel, int> _trayImageCache;
         private readonly SourceCache<ImageViewModel, int> _trayImageSourceCache;
-        private readonly Subject<IEnumerable<ImageViewModel>> _unselectImageSubject =
-            new Subject<IEnumerable<ImageViewModel>>();
-        private readonly Subject<IEnumerable<TrayImageViewModel>> _unselectTrayImageSubject =
-            new Subject<IEnumerable<TrayImageViewModel>>();
-
-        private string _visibleItemContainerKey;
 
         public ApplicationViewModel(ISchedulerProvider schedulerProvider,
             IImageContainerManagementService imageContainerManagementService,
@@ -41,27 +38,29 @@ namespace SonOfPicasso.UI.ViewModels
             ViewModelActivator activator,
             ILogger logger) : base(activator)
         {
+            _memoryCache = new MemoryCache(new MemoryCacheOptions());
             _schedulerProvider = schedulerProvider;
             _imageContainerManagementService = imageContainerManagementService;
+            _imageLoadingService = imageLoadingService;
             _logger = logger;
 
             _selectedImagesSourceCache = new SourceCache<ImageViewModel, int>(model => model.ImageId);
 
-            FolderManager =
+            OpenFolderManager =
                 ReactiveCommand.CreateFromObservable<Unit, Unit>(
-                    ExecuteFolderManager);
+                    ExecuteOpenFolderManager);
 
             AddFolder =
                 ReactiveCommand.CreateFromObservable<Unit, Unit>(
                     ExecuteAddFolder);
 
-            NewAlbum =
+            AddNewAlbum =
                 ReactiveCommand.CreateFromObservable<Unit, ImageContainerViewModel>(
-                    ExecuteNewAlbum);
+                    ExecuteAddNewAlbum);
 
-            NewAlbumWithImages = ReactiveCommand
+            AddNewAlbumWithImages = ReactiveCommand
                 .CreateFromObservable<IEnumerable<ImageViewModel>, ImageContainerViewModel>(
-                    ExecuteNewAlbumWithImages);
+                    ExecuteAddNewAlbumWithImages);
 
             AddImagesToAlbum = ReactiveCommand
                 .CreateFromObservable<(IEnumerable<ImageViewModel>, ImageContainerViewModel),
@@ -73,26 +72,19 @@ namespace SonOfPicasso.UI.ViewModels
             PinSelectedItems =
                 ReactiveCommand.CreateFromObservable<IEnumerable<TrayImageViewModel>, Unit>(ExecutePinSelectedItems,
                     hasItemsInTray);
+
             ClearTrayItems =
-                ReactiveCommand.CreateFromObservable<(IEnumerable<TrayImageViewModel>, bool), Unit>(
+                ReactiveCommand.CreateFromObservable<(IEnumerable<TrayImageViewModel>, bool), IList<ImageViewModel>>(
                     ExecuteClearTrayItems,
                     hasItemsInTray);
+
             AddTrayItemsToAlbum =
                 ReactiveCommand.CreateFromObservable<Unit, Unit>(ExecuteAddTrayItemsToAlbum, hasItemsInTray);
 
             _imageContainerViewModelCache = _imageContainerManagementService
                 .ImageContainerCache
                 .Connect()
-                .Transform(imageContainer => new ImageContainerViewModel(imageContainer))
-                .DisposeMany()
-                .AsObservableCache();
-
-            _imageViewModelCache = _imageContainerViewModelCache
-                .Connect()
-                .TransformMany(imageContainerViewModel =>
-                        imageContainerViewModel.ImageRefs.Select(imageRef =>
-                            new ImageViewModel(imageRef, imageContainerViewModel)),
-                    imageViewModel => imageViewModel.ImageRefId)
+                .Transform(imageContainer => new ImageContainerViewModel(imageContainer, this))
                 .DisposeMany()
                 .AsObservableCache();
 
@@ -158,13 +150,6 @@ namespace SonOfPicasso.UI.ViewModels
                     .Subscribe()
                     .DisposeWith(d);
 
-                _imageViewModelCache
-                    .Connect()
-                    .ObserveOn(_schedulerProvider.MainThreadScheduler)
-                    .Bind(Images)
-                    .Subscribe()
-                    .DisposeWith(d);
-
                 _trayImageCache
                     .Connect()
                     .ObserveOn(_schedulerProvider.MainThreadScheduler)
@@ -173,10 +158,6 @@ namespace SonOfPicasso.UI.ViewModels
                     .DisposeWith(d);
             });
         }
-
-        public IObservable<IEnumerable<ImageViewModel>> UnselectImage => _unselectImageSubject;
-
-        public IObservable<IEnumerable<TrayImageViewModel>> UnselectTrayImage => _unselectTrayImageSubject;
 
         public Interaction<Unit, string> AddFolderInteraction { get; } = new Interaction<Unit, string>();
 
@@ -206,41 +187,41 @@ namespace SonOfPicasso.UI.ViewModels
 
         public ReactiveCommand<Unit, Unit> AddFolder { get; }
 
-        public ReactiveCommand<Unit, ImageContainerViewModel> NewAlbum { get; }
+        public ReactiveCommand<Unit, ImageContainerViewModel> AddNewAlbum { get; }
 
         public ReactiveCommand<(IEnumerable<ImageViewModel>, ImageContainerViewModel), ImageContainerViewModel>
             AddImagesToAlbum { get; }
 
-        public ReactiveCommand<IEnumerable<ImageViewModel>, ImageContainerViewModel> NewAlbumWithImages { get; }
+        public ReactiveCommand<IEnumerable<ImageViewModel>, ImageContainerViewModel> AddNewAlbumWithImages { get; }
 
         public ReactiveCommand<IEnumerable<TrayImageViewModel>, Unit> PinSelectedItems { get; }
 
-        public ReactiveCommand<(IEnumerable<TrayImageViewModel>, bool), Unit> ClearTrayItems { get; }
+        public ReactiveCommand<(IEnumerable<TrayImageViewModel>, bool), IList<ImageViewModel>> ClearTrayItems { get; }
 
         public Interaction<Unit, bool> ConfirmClearTrayItemsInteraction { get; } = new Interaction<Unit, bool>();
 
         public ReactiveCommand<Unit, Unit> AddTrayItemsToAlbum { get; }
 
-        public ReactiveCommand<Unit, Unit> FolderManager { get; }
-
-        public string VisibleItemContainerKey
-        {
-            get => _visibleItemContainerKey;
-            set => this.RaiseAndSetIfChanged(ref _visibleItemContainerKey, value);
-        }
+        public ReactiveCommand<Unit, Unit> OpenFolderManager { get; }
 
         public void Dispose()
         {
             _imageContainerViewModelCache?.Dispose();
-            _imageViewModelCache?.Dispose();
-            _selectedImagesSourceCache?.Dispose();
-            _trayImageCache?.Dispose();
-            _trayImageSourceCache?.Dispose();
-            _unselectImageSubject?.Dispose();
-            _unselectTrayImageSubject?.Dispose();
         }
 
-        private IObservable<ImageContainerViewModel> ExecuteNewAlbum(Unit _)
+        public IObservable<BitmapSource> GetBitmapSourceFromPath(string path)
+        {
+            return _memoryCache.GetOrCreateAsync(path, async entry =>
+            {
+                var bitmapSource = await _imageLoadingService.LoadThumbnailFromPath((string) entry.Key)
+                    .ObserveOn(_schedulerProvider.TaskPool);
+
+                entry.SetSlidingExpiration(TimeSpan.FromMinutes(10));
+                return bitmapSource;
+            }).ToObservable();
+        }
+
+        private IObservable<ImageContainerViewModel> ExecuteAddNewAlbum(Unit _)
         {
             return NewAlbumInteraction.Handle(Unit.Default)
                 .ObserveOn(_schedulerProvider.TaskPool)
@@ -271,10 +252,10 @@ namespace SonOfPicasso.UI.ViewModels
             }).SubscribeOn(_schedulerProvider.TaskPool);
         }
 
-        private IObservable<ImageContainerViewModel> ExecuteNewAlbumWithImages(
+        private IObservable<ImageContainerViewModel> ExecuteAddNewAlbumWithImages(
             IEnumerable<ImageViewModel> imageViewModels)
         {
-            return ExecuteNewAlbum(Unit.Default)
+            return ExecuteAddNewAlbum(Unit.Default)
                 .Select(model =>
                 {
                     if (model == null) return Observable.Return((ImageContainerViewModel) null);
@@ -307,7 +288,7 @@ namespace SonOfPicasso.UI.ViewModels
             }, _schedulerProvider.MainThreadScheduler);
         }
 
-        private IObservable<Unit> ExecuteClearTrayItems(
+        private IObservable<IList<ImageViewModel>> ExecuteClearTrayItems(
             (IEnumerable<TrayImageViewModel> trayImageViewModels, bool isAllItems) tuple)
         {
             return Observable.Start(() =>
@@ -327,13 +308,14 @@ namespace SonOfPicasso.UI.ViewModels
                     if (shouldContinue)
                     {
                         var trayImageViewModelsArray = trayImageViewModels.ToArray();
+                        var imageViewModelsArray = trayImageViewModels.Select(model => model.ImageViewModel).ToArray();
                         var imageIds = trayImageViewModelsArray.Select(model => model.ImageViewModel.ImageId);
                         _trayImageSourceCache.RemoveKeys(imageIds);
-                        _unselectImageSubject.OnNext(trayImageViewModelsArray.Select(model => model.ImageViewModel));
-                        _unselectTrayImageSubject.OnNext(trayImageViewModelsArray);
+
+                        return imageViewModelsArray;
                     }
 
-                    return Unit.Default;
+                    return Array.Empty<ImageViewModel>();
                 });
         }
 
@@ -351,7 +333,7 @@ namespace SonOfPicasso.UI.ViewModels
             });
         }
 
-        private IObservable<Unit> ExecuteFolderManager(Unit unit)
+        private IObservable<Unit> ExecuteOpenFolderManager(Unit unit)
         {
             return FolderManagerInteraction.Handle(Unit.Default)
                 .ObserveOn(_schedulerProvider.TaskPool)

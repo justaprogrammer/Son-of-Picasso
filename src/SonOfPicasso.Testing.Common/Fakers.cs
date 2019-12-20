@@ -116,6 +116,8 @@ namespace SonOfPicasso.Testing.Common
                 .RuleFor(image => image.Id, faker => faker.Random.Int(0))
                 .RuleFor(image => image.ExifData, () => ExifDataFaker)
                 .RuleFor(image => image.ExifDataId, (faker, image) => image.ExifData.Id)
+                .RuleFor(image => image.CreationTime, (faker) => faker.Date.Recent())
+                .RuleFor(image => image.LastWriteTime, (faker) => faker.Date.Recent())
                 .RuleFor(image => image.Folder, () => null)
                 .RuleFor(image => image.FolderId, (faker, image) => 0)
                 .RuleFor(image => image.AlbumImages, () => new List<AlbumImage>())

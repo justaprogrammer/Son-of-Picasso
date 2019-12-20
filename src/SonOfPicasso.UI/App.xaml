@@ -8,7 +8,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary>
                     <converters:DataTypeConverter x:Key="DataTypeConverter" />
-
+                    <converters:DebugDataBindingConverter x:Key="DebugBinding" />
                     <Style x:Key="TextBoxError" TargetType="TextBox">
                         <Setter Property="BorderBrush" Value="Red" />
 

@@ -1,7 +1,7 @@
-﻿using System;
-using System.Drawing;
+﻿using System.Drawing;
+using SonOfPicasso.Core.Services;
 
-namespace SonOfPicasso.Core.Services
+namespace SonOfPicasso.Core.Extensions
 {
     public static class SizeExtensions
     {
@@ -13,6 +13,11 @@ namespace SonOfPicasso.Core.Services
             var (width, height) = AspectRatioFactory.Calculate(srcWidth, srcHeight, maxWidth, maxHeight, enlarge);
 
             return new Size(width, height);
+        }
+
+        public static (int width, int height) ResizeKeepAspect(this SixLabors.Primitives.Size size, int maxWidth, int maxHeight)
+        {
+            return AspectRatioFactory.Calculate(size.Width, size.Height, maxWidth, maxHeight, false);
         }
     }
 }
