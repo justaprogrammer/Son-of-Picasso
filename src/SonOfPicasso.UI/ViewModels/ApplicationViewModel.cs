@@ -238,6 +238,7 @@ namespace SonOfPicasso.UI.ViewModels
                     if(setValue != null)
                     {
                         _selectedImagesSourceCache.Clear();
+                        _trayImageSourceCache.Clear();
                     }
                 }
             }

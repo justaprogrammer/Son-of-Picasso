@@ -120,10 +120,10 @@ namespace SonOfPicasso.UI.Windows
                             return (collection.AsEnumerable(), allItems);
                         })).DisposeWith(d);
 
-                ViewModel.ClearTrayItems.Subscribe(list =>
+                ViewModel.ClearTrayItems.Subscribe(imageViewModels =>
                 {
-                    if (list.Any())
-                        ImageContainerListView.ClearSelectedItems(list);
+                    if (imageViewModels.Any())
+                        ImageContainerListView.ClearSelection(imageViewModels);
                 });
 
                 Observable
@@ -241,6 +241,8 @@ namespace SonOfPicasso.UI.Windows
                     .SelectionChanged
                     .Subscribe(args =>
                     {
+                        ImageContainerListView.ClearSelection();
+
                         var imageContainerViewModel = args
                             .AddedItems
                             .Cast<ImageContainerViewModel>()
