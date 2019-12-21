@@ -157,13 +157,6 @@ namespace SonOfPicasso.UI.ViewModels
                     .Bind(TrayImages)
                     .Subscribe()
                     .DisposeWith(d);
-
-                this.WhenAny(model => model.SelectedImageContainer, change => change.Value)
-                    .Subscribe(model =>
-                    {
-                        if (model != null) _selectedImagesSourceCache.Clear();
-                    })
-                    .DisposeWith(d);
             });
         }
 
@@ -237,7 +230,17 @@ namespace SonOfPicasso.UI.ViewModels
         public ImageContainerViewModel SelectedImageContainer
         {
             get => _selectedImageContainer;
-            set => this.RaiseAndSetIfChanged(ref _selectedImageContainer, value);
+            set
+            {
+                if (TrayImages.All(model => !model.Pinned))
+                {
+                    var setValue = this.RaiseAndSetIfChanged(ref _selectedImageContainer, value);
+                    if(setValue != null)
+                    {
+                        _selectedImagesSourceCache.Clear();
+                    }
+                }
+            }
         }
 
         #endregion

@@ -248,6 +248,8 @@ namespace SonOfPicasso.UI.Windows
 
                         if (imageContainerViewModel != null)
                         {
+                            ViewModel.SelectedImageContainer = imageContainerViewModel;
+
                             var foundIndex = imageContainersViewSource.View
                                 .Cast<ImageContainerViewModel>()
                                 .Index()

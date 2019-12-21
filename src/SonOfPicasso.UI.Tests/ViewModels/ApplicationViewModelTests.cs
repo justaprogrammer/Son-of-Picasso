@@ -176,7 +176,7 @@ namespace SonOfPicasso.UI.Tests.ViewModels
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(1);
 
             applicationViewModel.TrayImages.Should().HaveCount(1);
-            applicationViewModel.TrayImages.First().ImageViewModel.Should().Be(imageViewModel);
+            applicationViewModel.TrayImages[0].ImageViewModel.Should().Be(imageViewModel);
 
             applicationViewModel.SelectedImageContainer = imageContainerViewModel;
 
@@ -184,6 +184,50 @@ namespace SonOfPicasso.UI.Tests.ViewModels
 
             TestSchedulerProvider.MainThreadScheduler.AdvanceBy(1);
             applicationViewModel.TrayImages.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void ShouldNotClearSelectedImagesOnSelectImageContainerWhenAnyPinned()
+        {
+            using var imageContainerCache =
+                new SourceCache<IImageContainer, string>(imageContainer => imageContainer.Key);
+
+            var imageContainerManagementService = AutoSubstitute.Resolve<IImageContainerManagementService>();
+            imageContainerManagementService.ImageContainerCache.Returns(imageContainerCache);
+
+            var applicationViewModel = AutoSubstitute.Resolve<ApplicationViewModel>();
+            applicationViewModel.Activator.Activate();
+
+            applicationViewModel.SelectedImageContainer.Should().BeNull();
+            applicationViewModel.TrayImages.Should().HaveCount(0);
+
+            var imageContainerViewModels = CreateImageContainerViewModels(applicationViewModel);
+
+            imageContainerCache.AddOrUpdate(_imageContainers);
+
+            var imageContainerViewModel = Faker.PickRandom(imageContainerViewModels);
+            var imageViewModel = Faker.PickRandom(imageContainerViewModel.ImageViewModels);
+
+            applicationViewModel.ChangeSelectedImages(new[] {imageViewModel}, Array.Empty<ImageViewModel>());
+
+            TestSchedulerProvider.MainThreadScheduler.AdvanceBy(1);
+
+            applicationViewModel.TrayImages.Should().HaveCount(1);
+            applicationViewModel.TrayImages[0].ImageViewModel.Should().Be(imageViewModel);
+            applicationViewModel.TrayImages[0].Pinned.Should().BeFalse();
+
+            applicationViewModel.TrayImages[0].Pinned = true;
+
+            applicationViewModel.TrayImages[0].Pinned.Should().BeTrue();
+
+            applicationViewModel.SelectedImageContainer = imageContainerViewModel;
+            
+            applicationViewModel.SelectedImageContainer.Should().BeNull();
+
+            TestSchedulerProvider.MainThreadScheduler.AdvanceBy(1);
+
+            applicationViewModel.TrayImages.Should().HaveCount(1);
+            applicationViewModel.TrayImages[0].ImageViewModel.Should().Be(imageViewModel);
         }
     }
 }
