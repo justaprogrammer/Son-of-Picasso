@@ -215,7 +215,6 @@ namespace SonOfPicasso.UI.ViewModels
 
                 if (SelectedImageContainer != null)
                 {
-                    updater.AddOrUpdate(SelectedImageContainer.ImageViewModels);
                     SelectedImageContainer = null;
                 }
 
@@ -232,15 +231,19 @@ namespace SonOfPicasso.UI.ViewModels
             get => _selectedImageContainer;
             set
             {
-                if (TrayImages.All(model => !model.Pinned))
+                if (value == null)
                 {
-                    var setValue = this.RaiseAndSetIfChanged(ref _selectedImageContainer, value);
-                    if(setValue != null)
-                    {
-                        _selectedImagesSourceCache.Clear();
-                        _trayImageSourceCache.Clear();
-                    }
+                    this.RaiseAndSetIfChanged(ref _selectedImageContainer, null);
                 }
+                else
+                {
+                    var anyPinned = TrayImages.Any(model => model.Pinned);
+                    if (!anyPinned)
+                    {
+                         this.RaiseAndSetIfChanged(ref _selectedImageContainer, value);
+                    }    
+                }
+                
             }
         }
 
