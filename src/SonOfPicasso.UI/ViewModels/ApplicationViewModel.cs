@@ -100,7 +100,8 @@ namespace SonOfPicasso.UI.ViewModels
             {
                 _imageContainerManagementService
                     .Start()
-                    .Subscribe();
+                    .Subscribe()
+                    .DisposeWith(d);
 
                 _selectedImagesSourceCache
                     .Connect()
@@ -156,10 +157,17 @@ namespace SonOfPicasso.UI.ViewModels
                     .Bind(TrayImages)
                     .Subscribe()
                     .DisposeWith(d);
+
+                this.WhenAny(model => model.SelectedImageContainer, change => change.Value)
+                    .Subscribe(model =>
+                    {
+                        if (model != null) _selectedImagesSourceCache.Clear();
+                    })
+                    .DisposeWith(d);
             });
         }
 
-        public Interaction<Unit, string> AddFolderInteraction { get; } = 
+        public Interaction<Unit, string> AddFolderInteraction { get; } =
             new Interaction<Unit, string>();
 
         public Interaction<Unit, AddAlbumViewModel> NewAlbumInteraction { get; } =
@@ -186,7 +194,7 @@ namespace SonOfPicasso.UI.ViewModels
         public IObservableCollection<TrayImageViewModel> SelectedTrayImages { get; } =
             new ObservableCollectionExtended<TrayImageViewModel>();
 
-        public Interaction<Unit, bool> ConfirmClearTrayItemsInteraction { get; } = 
+        public Interaction<Unit, bool> ConfirmClearTrayItemsInteraction { get; } =
             new Interaction<Unit, bool>();
 
         public void Dispose()
@@ -211,11 +219,30 @@ namespace SonOfPicasso.UI.ViewModels
             _selectedImagesSourceCache.Edit(updater =>
             {
                 updater.AddOrUpdate(added);
+
+                if (SelectedImageContainer != null)
+                {
+                    updater.AddOrUpdate(SelectedImageContainer.ImageViewModels);
+                    SelectedImageContainer = null;
+                }
+
                 updater.Remove(removed);
             });
         }
 
-        #region AddImagesToAlbum
+        #region SelectedImageContainer
+
+        private ImageContainerViewModel _selectedImageContainer;
+
+        public ImageContainerViewModel SelectedImageContainer
+        {
+            get => _selectedImageContainer;
+            set => this.RaiseAndSetIfChanged(ref _selectedImageContainer, value);
+        }
+
+        #endregion
+
+        #region AddImagesToAlbum Command
 
         public ReactiveCommand<(IEnumerable<ImageViewModel>, ImageContainerViewModel), ImageContainerViewModel>
             AddImagesToAlbum { get; }
@@ -238,7 +265,7 @@ namespace SonOfPicasso.UI.ViewModels
 
         #endregion
 
-        #region AddFolder
+        #region AddFolder Command
 
         public ReactiveCommand<Unit, Unit> AddFolder { get; }
 
@@ -259,7 +286,7 @@ namespace SonOfPicasso.UI.ViewModels
 
         #endregion
 
-        #region ClearTrayItems
+        #region ClearTrayItems Command
 
         public ReactiveCommand<(IEnumerable<TrayImageViewModel>, bool), IList<ImageViewModel>> ClearTrayItems { get; }
 
@@ -296,7 +323,7 @@ namespace SonOfPicasso.UI.ViewModels
 
         #endregion
 
-        #region AddTrayItemsToAlbum
+        #region AddTrayItemsToAlbum Command
 
         public ReactiveCommand<Unit, Unit> AddTrayItemsToAlbum { get; }
 
@@ -307,7 +334,7 @@ namespace SonOfPicasso.UI.ViewModels
 
         #endregion
 
-        #region PinSelectedItems
+        #region PinSelectedItems Command
 
         public ReactiveCommand<IEnumerable<TrayImageViewModel>, Unit> PinSelectedItems { get; }
 
@@ -321,7 +348,7 @@ namespace SonOfPicasso.UI.ViewModels
 
         #endregion
 
-        #region OpenFolderManager
+        #region OpenFolderManager Command
 
         public ReactiveCommand<Unit, Unit> OpenFolderManager { get; }
 
@@ -358,7 +385,7 @@ namespace SonOfPicasso.UI.ViewModels
 
         #endregion
 
-        #region AddNewAlbum
+        #region AddNewAlbum Command
 
         public ReactiveCommand<Unit, ImageContainerViewModel> AddNewAlbum { get; }
 
@@ -379,7 +406,7 @@ namespace SonOfPicasso.UI.ViewModels
 
         #endregion
 
-        #region AddNewAlbumWithImages
+        #region AddNewAlbumWithImages Command
 
         public ReactiveCommand<IEnumerable<ImageViewModel>, ImageContainerViewModel> AddNewAlbumWithImages { get; }
 
