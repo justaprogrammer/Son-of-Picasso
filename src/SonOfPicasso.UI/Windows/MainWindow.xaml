@@ -18,6 +18,7 @@
         <CollectionViewSource x:Key="GroupedImageContainersViewSource" />
         <CollectionViewSource x:Key="AlbumImageContainersViewSource" />
         <converters:MultiValueEqualityConverter x:Key="MultiValueEqualityConverter" />
+        <converters:IsNullConverter x:Key="IsNullConverter"/>
     </Window.Resources>
     <DockPanel>
         <Menu DockPanel.Dock="Top" Width="Auto" Height="20">
@@ -139,24 +140,53 @@
                     <ColumnDefinition Width="10*" />
                 </Grid.ColumnDefinitions>
 
-                <ListView Name="TrayImagesList" Grid.Column="0"
-                          VirtualizingStackPanel.IsVirtualizing="True"
-                          VirtualizingStackPanel.IsVirtualizingWhenGrouping="True"
-                          VirtualizingStackPanel.VirtualizationMode="Recycling"
-                          VirtualizingStackPanel.ScrollUnit="Pixel"
-                          SelectionMode="Extended">
-                    <ListView.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <WrapPanel />
-                        </ItemsPanelTemplate>
-                    </ListView.ItemsPanel>
+                <DockPanel Grid.Column="0" LastChildFill="True">
+                    <StackPanel>
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Style.Triggers>
+                                    <DataTrigger Value="True"
+                                                 Binding="{Binding ElementName=Window,Path=ViewModel.SelectedImageContainer,Mode=OneWay,Converter={StaticResource IsNullConverter}}">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
 
-                    <ListView.ItemTemplate>
-                        <DataTemplate>
-                            <reactiveUi:ViewModelViewHost ViewModel="{Binding}" />
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
+                        <Label Content="{Binding ElementName=Window,Path=ViewModel.SelectedImageContainer.ContainerKey}" />
+
+                    </StackPanel>
+                    <ListView Name="TrayImagesList"
+                              VirtualizingStackPanel.IsVirtualizing="True"
+                              VirtualizingStackPanel.IsVirtualizingWhenGrouping="True"
+                              VirtualizingStackPanel.VirtualizationMode="Recycling"
+                              VirtualizingStackPanel.ScrollUnit="Pixel"
+                              SelectionMode="Extended">
+
+                        <ListView.Style>
+                            <Style TargetType="ListView">
+                                <Style.Triggers>
+                                    <DataTrigger Value="False"
+                                        Binding="{Binding ElementName=Window,Path=ViewModel.SelectedImageContainer,Mode=OneWay,Converter={StaticResource IsNullConverter}}">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ListView.Style>
+
+                        <ListView.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel />
+                            </ItemsPanelTemplate>
+                        </ListView.ItemsPanel>
+
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <reactiveUi:ViewModelViewHost ViewModel="{Binding}" />
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </DockPanel>
 
                 <DockPanel Grid.Column="1" LastChildFill="False">
                     <Button Name="PinSelectedItems" DockPanel.Dock="Top">Pin</Button>
