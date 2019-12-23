@@ -15,7 +15,7 @@
     <PackageReference Include="Bogus" Version="28.4.4" />
     <PackageReference Include="ExifLibNet" Version="2.1.1" />
     <PackageReference Include="FluentColorConsole" Version="2.0.1" />
-    <PackageReference Include="GitVersionTask" Version="5.1.3-beta1.121">
+    <PackageReference Include="GitVersionTask" Version="5.1.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
