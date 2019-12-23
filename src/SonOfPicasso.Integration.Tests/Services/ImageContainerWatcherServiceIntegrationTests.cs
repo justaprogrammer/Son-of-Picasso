@@ -47,7 +47,9 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
             var imageContainerWatcherService = Container.Resolve<ImageContainerWatcherService>();
-            imageContainerWatcherService.Start(imageRefCache)
+            
+            imageContainerWatcherService
+                .Start(imageRefCache)
                 .Subscribe(unit => { }, () =>
                 {
                     AutoResetEvent.Set();
@@ -124,7 +126,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             var generatedImages = await GenerateImagesAsync(1);
             var path = generatedImages.First().Value.First();
 
-            WaitOne(5);
+            WaitOne(25);
 
             list.Should().HaveCount(1);
             list.First().Should().Be(path);
@@ -132,7 +134,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             await ImageGenerationService.GenerateImage(path,
                 Fakers.ExifDataFaker);
 
-            WaitOne(5);
+            WaitOne(25);
 
             list.Should().HaveCount(2);
             list.Skip(1).First().Should().Be(path);
