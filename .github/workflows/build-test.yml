@@ -1,6 +1,5 @@
 name: Build and Test
 on: [push]
-
 jobs:
   build:
     runs-on: windows-latest
@@ -13,12 +12,6 @@ jobs:
     - name: Build
       run: |
         dotnet publish -c Release .\SonOfPicasso.sln -fl -flp:logfile=build.log -flp:verbosity=detailed
-    - name: Test SonOfPicasso.Core
-      if: always()
-      env:
-        SonOfPicasso_Verbose: True
-      run: |
-        .\test.ps1 "SonOfPicasso.Core.Tests"
     - name: Test - SonOfPicasso.Core
       if: always()
       env:
