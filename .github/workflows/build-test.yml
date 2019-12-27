@@ -1,22 +1,51 @@
 name: Build and Test
 on: [push]
-
 jobs:
   build:
     runs-on: windows-latest
-    env:
-      SonOfPicasso_Verbose: True
-      GitHubActionsLogger_Debug: True
     steps:
     - uses: actions/checkout@v1
     - name: Setup .NET Core
       uses: actions/setup-dotnet@master
       with:
         dotnet-version: 3.1.100
-    - name: Build and Test
+    - name: Build
       run: |
         dotnet publish -c Release .\SonOfPicasso.sln -fl -flp:logfile=build.log -flp:verbosity=detailed
-        .\test.ps1
+    - name: Test - SonOfPicasso.Core
+      if: always()
+      env:
+        SonOfPicasso_Verbose: True
+      run: |
+        .\test.ps1 "SonOfPicasso.Core.Tests"
+    - name: Test - SonOfPicasso.Data
+      if: always()
+      env:
+        SonOfPicasso_Verbose: True
+      run: |
+        .\test.ps1 "SonOfPicasso.Data.Tests"
+    - name: Test - SonOfPicasso.Integration
+      if: always()
+      env:
+        SonOfPicasso_Verbose: True
+      run: |
+        .\test.ps1 "SonOfPicasso.Integration.Tests"
+    - name: Test - SonOfPicasso.UI
+      if: always()
+      env:
+        SonOfPicasso_Verbose: True
+      run: |
+        .\test.ps1 "SonOfPicasso.UI.Tests"
+    - name: Test - SonOfPicasso.Tools
+      if: always()
+      env:
+        SonOfPicasso_Verbose: True
+      run: |
+        .\test.ps1 "SonOfPicasso.Tools.Tests"
+    - name: Test Cleanup
+      if: always()
+      run: |
+        gci -Path .\reports\ -Directory | rm -Recurse
     - name: Upload Build Log
       if: always()
       uses: actions/upload-artifact@v1.0.0
