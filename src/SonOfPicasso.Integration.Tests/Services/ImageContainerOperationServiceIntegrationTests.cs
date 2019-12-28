@@ -101,7 +101,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                     }
                 });
 
-            WaitOne(15);
+            WaitOne(45);
 
             scannedImageRefs.Should().HaveCount(imagesCount);
 
@@ -189,7 +189,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                     }
                 });
 
-            WaitOne(15);
+            WaitOne(45);
 
             scannedImageRefs.Should().HaveCount(imagesCount);
 
@@ -288,7 +288,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                     }
                 });
 
-            WaitOne(15);
+            WaitOne(45);
 
             scannedImageRefs.Should().HaveCount(imagesCount);
 
@@ -389,7 +389,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                     }
                 });
 
-            WaitOne(15);
+            WaitOne(45);
 
             scannedImageRefs.Should().HaveCount(imagesCount);
 
@@ -504,7 +504,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                     }
                 });
 
-            WaitOne(15);
+            WaitOne(45);
 
             scannedImageRefs.Should().HaveCount(imagesCount);
 
@@ -717,7 +717,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                     }
                 });
 
-            WaitOne(15);
+            WaitOne(45);
 
             scannedImageRefs.Should().HaveCount(imagesCount);
 
@@ -821,7 +821,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                     }
                 });
 
-            WaitOne(15);
+            WaitOne(45);
 
             scannedImageRefs.Should().HaveCount(imagesCount);
 
@@ -925,7 +925,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                     }
                 });
 
-            WaitOne(15);
+            WaitOne(45);
 
             scannedImageRefs.Should().HaveCount(imagesCount);
             var imageContainerIds = scannedImageRefs
@@ -1016,7 +1016,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                     }
                 });
 
-            WaitOne(15);
+            WaitOne(45);
             disposable.Dispose();
 
             scannedImageRefs.Should().HaveCount(imagesCount);
@@ -1075,7 +1075,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                 .ScanFolder(ImagesPath, folderImageRefCache)
                 .ToArray();
 
-            WaitOne(15);
+            WaitOne(45);
             disposable.Dispose();
 
             directoryCount = imagesDirectoryInfo.EnumerateDirectories().Count();
