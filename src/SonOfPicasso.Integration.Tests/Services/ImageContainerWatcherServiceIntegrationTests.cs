@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Autofac;
 using DynamicData;
 using FluentAssertions;
+using FluentAssertions.Execution;
 using Serilog;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Model;
@@ -47,7 +48,9 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
             var imageContainerWatcherService = Container.Resolve<ImageContainerWatcherService>();
-            imageContainerWatcherService.Start(imageRefCache)
+            
+            imageContainerWatcherService
+                .Start(imageRefCache)
                 .Subscribe(unit => { }, () =>
                 {
                     AutoResetEvent.Set();
@@ -119,23 +122,28 @@ namespace SonOfPicasso.Integration.Tests.Services
             });
 
             await imageContainerWatcherService.Start(imageRefCache);
-            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(3));
 
             var generatedImages = await GenerateImagesAsync(1);
             var path = generatedImages.First().Value.First();
 
-            WaitOne(5);
-
-            list.Should().HaveCount(1);
-            list.First().Should().Be(path);
+            WaitOne(45);
+            
+            using(new AssertionScope())
+            {
+                list.Should().HaveCount(1);
+                list.First().Should().Be(path);
+            }
 
             await ImageGenerationService.GenerateImage(path,
                 Fakers.ExifDataFaker);
 
-            WaitOne(5);
+            WaitOne(45);
 
-            list.Should().HaveCount(2);
-            list.Skip(1).First().Should().Be(path);
+            using(new AssertionScope())
+            {
+                list.Should().HaveCount(2);
+                list.Skip(1).First().Should().Be(path);
+            }
 
             imageContainerWatcherService.Stop();
         }
