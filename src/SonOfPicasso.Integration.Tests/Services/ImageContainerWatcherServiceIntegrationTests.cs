@@ -51,6 +51,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             
             imageContainerWatcherService
                 .Start(imageRefCache)
+                .SubscribeOn(SchedulerProvider.TaskPool)
                 .Subscribe(unit => { }, () =>
                 {
                     Logger.Debug("Result observed");

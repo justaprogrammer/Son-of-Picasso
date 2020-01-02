@@ -51,8 +51,7 @@ namespace SonOfPicasso.Core.Services
 
                     return Observable.Return(folderRules)
                         .Do(rules => { }, () => unitOfWork.Dispose());
-                })
-                .SubscribeOn(_schedulerProvider.TaskPool);
+                });
         }
 
         public IObservable<Unit> ResetFolderManagementRules(IEnumerable<FolderRule> folderRules)
