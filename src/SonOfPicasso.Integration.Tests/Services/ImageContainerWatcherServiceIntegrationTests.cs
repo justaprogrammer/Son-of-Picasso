@@ -53,6 +53,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                 .Start(imageRefCache)
                 .Subscribe(unit => { }, () =>
                 {
+                    Logger.Debug("Result observed");
                     AutoResetEvent.Set();
                 });
 
