@@ -71,9 +71,9 @@ namespace SonOfPicasso.Integration.Tests.Services
             var imageContainerWatcherService = Container.Resolve<ImageContainerWatcherService>();
 
             var list = new List<string>();
-            imageContainerWatcherService.FileDiscovered.Subscribe(info =>
+            imageContainerWatcherService.FileDiscovered.Subscribe(item =>
             {
-                list.Add(info);
+                list.Add(item);
                 Set();
             });
 
@@ -108,9 +108,9 @@ namespace SonOfPicasso.Integration.Tests.Services
             var imageContainerWatcherService = Container.Resolve<ImageContainerWatcherService>();
 
             var list = new List<string>();
-            imageContainerWatcherService.FileDiscovered.Subscribe(info =>
+            imageContainerWatcherService.FileDiscovered.Subscribe(item =>
             {
-                list.Add(info);
+                list.Add(item);
                 Set();
             });
 
@@ -164,9 +164,10 @@ namespace SonOfPicasso.Integration.Tests.Services
             var imageContainerWatcherService = Container.Resolve<ImageContainerWatcherService>();
 
             var list = new List<string>();
-            imageContainerWatcherService.FileDiscovered.Subscribe(info =>
+            imageContainerWatcherService.FileDiscovered.Subscribe(item =>
             {
-                list.Add(info);
+                list.Add(item);
+                Logger.Debug("Adding {Item}", item);
                 Set();
             });
 
@@ -202,9 +203,9 @@ namespace SonOfPicasso.Integration.Tests.Services
             var imageContainerWatcherService = Container.Resolve<ImageContainerWatcherService>();
 
             var list = new List<string>();
-            imageContainerWatcherService.FileDeleted.Subscribe(info =>
+            imageContainerWatcherService.FileDeleted.Subscribe(item =>
             {
-                list.Add(info);
+                list.Add(item);
                 Set();
             });
 
@@ -243,9 +244,9 @@ namespace SonOfPicasso.Integration.Tests.Services
             var imageContainerWatcherService = Container.Resolve<ImageContainerWatcherService>();
 
             var list = new List<string>();
-            imageContainerWatcherService.FileDeleted.Subscribe(info =>
+            imageContainerWatcherService.FileDeleted.Subscribe(item =>
             {
-                list.Add(info);
+                list.Add(item);
                 Set();
             });
 
@@ -324,9 +325,9 @@ namespace SonOfPicasso.Integration.Tests.Services
             var imageContainerWatcherService = Container.Resolve<ImageContainerWatcherService>();
 
             var list = new List<string>();
-            imageContainerWatcherService.FileDiscovered.Subscribe(info =>
+            imageContainerWatcherService.FileDiscovered.Subscribe(item =>
             {
-                list.Add(info);
+                list.Add(item);
                 Set();
             });
 
