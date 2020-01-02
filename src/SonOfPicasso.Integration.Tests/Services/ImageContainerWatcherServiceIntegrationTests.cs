@@ -48,17 +48,8 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
             var imageContainerWatcherService = Container.Resolve<ImageContainerWatcherService>();
-            
-            imageContainerWatcherService
-                .Start(imageRefCache)
-                .SubscribeOn(SchedulerProvider.TaskPool)
-                .Subscribe(unit => { }, () =>
-                {
-                    Logger.Debug("Result observed");
-                    AutoResetEvent.Set();
-                });
 
-            WaitOne(5);
+            await imageContainerWatcherService.Start(imageRefCache);
         }
 
         [Fact]
