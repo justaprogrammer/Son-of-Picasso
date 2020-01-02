@@ -42,6 +42,8 @@ namespace SonOfPicasso.Core.Services
         {
             return Observable.Defer(() =>
                 {
+                    _logger.Debug("GetFolderManagementRules");
+
                     var unitOfWork = _unitOfWorkFactory();
                     var folderRules = unitOfWork.FolderRuleRepository
                         .Get()
