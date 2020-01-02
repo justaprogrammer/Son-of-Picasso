@@ -176,8 +176,7 @@ namespace SonOfPicasso.Core.Services
 
                     _imageRefCache = imageRefCache;
 
-                    return _folderRulesManagementService.GetFolderManagementRules()
-                        .SubscribeOn(_schedulerProvider.TaskPool);
+                    return _folderRulesManagementService.GetFolderManagementRules();
                 }).Select(list =>
                 {
                     var dictionary = list
