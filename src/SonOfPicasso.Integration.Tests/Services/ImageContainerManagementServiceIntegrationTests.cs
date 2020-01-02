@@ -157,7 +157,7 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             using (new AssertionScope())
             {
-                WaitOne(TimeSpan.FromSeconds(15));
+                WaitOne(30);
 
                 beginTimedOperation.Dispose();
 
@@ -285,8 +285,6 @@ namespace SonOfPicasso.Integration.Tests.Services
             await imageContainerManagementService.ResetRules(new[]
                 {new FolderRule {Path = ImagesPath, Action = FolderRuleActionEnum.Always}});
 
-            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(1));
-
             var imageCount = 1;
             var generateImagesAsync = await GenerateImagesAsync(imageCount);
 
@@ -298,7 +296,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                     if (tuple.Item1 == generateImagesAsync.Count && tuple.Item2 == imageCount) AutoResetEvent.Set();
                 });
 
-            WaitOne(TimeSpan.FromSeconds(15));
+            WaitOne(45);
 
             await using var connection = DataContext.Database.GetDbConnection();
 
