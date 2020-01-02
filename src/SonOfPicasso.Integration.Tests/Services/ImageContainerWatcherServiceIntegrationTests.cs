@@ -74,6 +74,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             imageContainerWatcherService.FileDiscovered.Subscribe(item =>
             {
                 list.Add(item);
+                Logger.Verbose("File discovered '{Item}'", item);
                 Set();
             });
 
@@ -111,6 +112,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             imageContainerWatcherService.FileDiscovered.Subscribe(item =>
             {
                 list.Add(item);
+                Logger.Verbose("File discovered '{Item}'", item);
                 Set();
             });
 
@@ -167,7 +169,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             imageContainerWatcherService.FileDiscovered.Subscribe(item =>
             {
                 list.Add(item);
-                Logger.Debug("Adding {Item}", item);
+                Logger.Verbose("File discovered '{Item}'", item);
                 Set();
             });
 
@@ -206,13 +208,14 @@ namespace SonOfPicasso.Integration.Tests.Services
             imageContainerWatcherService.FileDeleted.Subscribe(item =>
             {
                 list.Add(item);
+                Logger.Verbose("File deleted '{Item}'", item);
                 Set();
             });
 
             await imageContainerWatcherService.Start(imageRefCache);
             AutoResetEvent.WaitOne(TimeSpan.FromSeconds(3));
 
-            Logger.Verbose("Delete Path {Path}", path);
+            Logger.Verbose("Delete Path '{Path}'", path);
             FileSystem.File.Delete(path);
 
             WaitOne(5);
@@ -247,13 +250,14 @@ namespace SonOfPicasso.Integration.Tests.Services
             imageContainerWatcherService.FileDeleted.Subscribe(item =>
             {
                 list.Add(item);
+                Logger.Verbose("File deleted '{Item}'", item);
                 Set();
             });
 
             await imageContainerWatcherService.Start(imageRefCache);
             AutoResetEvent.WaitOne(TimeSpan.FromSeconds(1));
 
-            Logger.Verbose("Delete Path {Path}", path);
+            Logger.Verbose("Delete Path '{Path}'", path);
             FileSystem.File.Delete(path);
 
             AutoResetEvent.WaitOne(TimeSpan.FromSeconds(5)).Should().BeFalse();
@@ -287,6 +291,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             imageContainerWatcherService.FileRenamed.Subscribe(tuple =>
             {
                 list.Add(tuple);
+                Logger.Verbose("File renamed '{From}' '{To}'", tuple.oldFullPath, tuple.fullPath);
                 Set();
             });
 
@@ -296,7 +301,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             var movedTo = Path.Combine(generatedImages.First().Key, "a" + FileSystem.Path.GetFileName(imagePath));
             FileSystem.File.Move(imagePath, movedTo);
 
-            Logger.Verbose("Moving File {Path} {ToPath}", imagePath, movedTo);
+            Logger.Verbose("Moving File '{Path}' '{ToPath}'", imagePath, movedTo);
 
             WaitOne(5);
 
@@ -328,6 +333,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             imageContainerWatcherService.FileDiscovered.Subscribe(item =>
             {
                 list.Add(item);
+                Logger.Verbose("File discovered '{Item}'", item);
                 Set();
             });
 
@@ -341,88 +347,6 @@ namespace SonOfPicasso.Integration.Tests.Services
             WaitOne(5);
             list.Should().HaveCount(1);
             list.First().Should().Be(movedTo);
-        }
-
-        [Fact]
-        public async Task ShouldDetectDirectoryCreate()
-        {
-            await InitializeDataContextAsync();
-
-            var folderRulesManagementService = Container.Resolve<IFolderRulesManagementService>();
-            await folderRulesManagementService.ResetFolderManagementRules(new[]
-            {
-                new FolderRule
-                {
-                    Path = ImagesPath,
-                    Action = FolderRuleActionEnum.Always
-                }
-            });
-
-            var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
-            var imageContainerWatcherService = Container.Resolve<ImageContainerWatcherService>();
-           
-            await imageContainerWatcherService.Start(imageRefCache);
-            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(1));
-         
-            var directoryInfo = ImagesDirectoryInfo.CreateSubdirectory("Test");
-
-            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(3));
-        }
-
-        [Fact]
-        public async Task ShouldDetectDirectoryDelete()
-        {
-            await InitializeDataContextAsync();
-
-            var folderRulesManagementService = Container.Resolve<IFolderRulesManagementService>();
-            await folderRulesManagementService.ResetFolderManagementRules(new[]
-            {
-                new FolderRule
-                {
-                    Path = ImagesPath,
-                    Action = FolderRuleActionEnum.Always
-                }
-            });
-
-            var subdirectory = ImagesDirectoryInfo.CreateSubdirectory("Test");
-
-            var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
-            var imageContainerWatcherService = Container.Resolve<ImageContainerWatcherService>();
-        
-            await imageContainerWatcherService.Start(imageRefCache);
-            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(1));
-       
-            subdirectory.Delete();
-
-            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(3));
-        }
-
-        [Fact]
-        public async Task ShouldDetectDirectoryRename()
-        {
-            await InitializeDataContextAsync();
-
-            var folderRulesManagementService = Container.Resolve<IFolderRulesManagementService>();
-            await folderRulesManagementService.ResetFolderManagementRules(new[]
-            {
-                new FolderRule
-                {
-                    Path = ImagesPath,
-                    Action = FolderRuleActionEnum.Always
-                }
-            });
-
-            var subdirectory = ImagesDirectoryInfo.CreateSubdirectory("Test");
-
-            var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
-            var imageContainerWatcherService = Container.Resolve<ImageContainerWatcherService>();
-        
-            await imageContainerWatcherService.Start(imageRefCache);
-            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(1));
-         
-            subdirectory.MoveTo(FileSystem.Path.Combine(ImagesPath, "Test2"));
-
-            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(3));
         }
     }
 }
