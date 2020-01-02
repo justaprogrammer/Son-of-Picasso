@@ -49,6 +49,9 @@ namespace SonOfPicasso.Integration.Tests
         {
             TestPath = FileSystem.Path.Combine(FileSystem.Path.GetTempPath(), "SonOfPicasso.IntegrationTests",
                 Guid.NewGuid().ToString());
+
+            Logger.Debug("Integration test path: {TestPath}", TestPath);
+
             FileSystem.Directory.CreateDirectory(TestPath);
 
             ImagesPath = FileSystem.Path.Combine(TestPath, "Images");
