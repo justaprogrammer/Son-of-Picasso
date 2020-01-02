@@ -52,6 +52,9 @@ namespace SonOfPicasso.Integration.Tests
 
             Logger.Debug("Integration test path: {TestPath}", TestPath);
 
+            if(FileSystem.Directory.Exists(TestPath))
+                throw new InvalidOperationException($"Path '{TestPath}' already exists");
+
             FileSystem.Directory.CreateDirectory(TestPath);
 
             ImagesPath = FileSystem.Path.Combine(TestPath, "Images");
