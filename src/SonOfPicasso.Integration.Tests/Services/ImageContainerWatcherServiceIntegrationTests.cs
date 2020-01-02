@@ -178,11 +178,9 @@ namespace SonOfPicasso.Integration.Tests.Services
             });
 
             await imageContainerWatcherService.Start(imageRefCache);
-            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(3));
+            await GenerateImagesAsync(1);
 
-            var generatedImages2 = await GenerateImagesAsync(1);
-
-            WaitOne(5);
+            WaitOne(15);
 
             list.Should().HaveCount(1);
         }
