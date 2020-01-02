@@ -89,7 +89,7 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             await GenerateImagesAsync(1);
 
-            WaitOne(5);
+            WaitOne(45);
 
             list.Should().HaveCount(1);
 
@@ -180,7 +180,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             await imageContainerWatcherService.Start(imageRefCache);
             await GenerateImagesAsync(1);
 
-            WaitOne(15);
+            WaitOne(45);
 
             list.Should().HaveCount(1);
         }
