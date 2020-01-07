@@ -4,7 +4,8 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v1
+    - name: Checkout commit
+      uses: actions/checkout@v2.0.0
     - name: Setup .NET Core
       uses: actions/setup-dotnet@master
       with:
