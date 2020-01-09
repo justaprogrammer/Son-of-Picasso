@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
@@ -121,10 +122,10 @@ namespace SonOfPicasso.Integration.Tests.Services
             using var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
             var imageContainerWatcherService = Container.Resolve<ImageContainerWatcherService>();
 
-            var list = new List<string>();
+            var set = new HashSet<string>();
             imageContainerWatcherService.FileDiscovered.Subscribe(item =>
             {
-                list.Add(item);
+                set.Add(item);
                 Logger.Verbose("File discovered '{Item}'", item);
                 Set();
             });
@@ -138,8 +139,8 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             using (new AssertionScope())
             {
-                list.Should().HaveCount(1);
-                list.First().Should().Be(path);
+                set.Should().HaveCount(1);
+                set.First().Should().Be(path);
             }
 
             await ImageGenerationService.GenerateImage(path,
@@ -149,8 +150,8 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             using (new AssertionScope())
             {
-                list.Should().HaveCount(2);
-                list.Skip(1).First().Should().Be(path);
+                set.Should().HaveCount(2);
+                set.Skip(1).First().Should().Be(path);
             }
 
             imageContainerWatcherService.Stop();
@@ -233,7 +234,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             Logger.Verbose("Delete Path '{Path}'", path);
             FileSystem.File.Delete(path);
 
-            WaitOne(5);
+            WaitOne(45);
 
             list.Should().HaveCount(1);
             list.First().Should().Be(path);
