@@ -42,12 +42,17 @@ namespace SonOfPicasso.Core.Services
         {
             return Observable.Defer(() =>
                 {
-                    _logger.Debug("GetFolderManagementRules");
+                    _logger.Verbose("GetFolderManagementRules");
 
                     var unitOfWork = _unitOfWorkFactory();
                     var folderRules = unitOfWork.FolderRuleRepository
                         .Get()
                         .ToArray();
+
+                    foreach (var folderRule in folderRules)
+                    {
+                        _logger.Debug("FolderRule {Action} {Path}", folderRule.Action, folderRule.Path);
+                    }
 
                     return Observable.Return(folderRules)
                         .Do(rules => { }, () => unitOfWork.Dispose());
