@@ -48,7 +48,8 @@ namespace SonOfPicasso.Core.Services
                     var folderRules = unitOfWork.FolderRuleRepository
                         .Get()
                         .ToArray();
-
+                    
+                    _logger.Debug("FolderRules {Count}", folderRules.Length);
                     foreach (var folderRule in folderRules)
                     {
                         _logger.Debug("FolderRule {Action} {Path}", folderRule.Action, folderRule.Path);

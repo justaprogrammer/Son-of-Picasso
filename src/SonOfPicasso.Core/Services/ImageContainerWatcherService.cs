@@ -183,11 +183,13 @@ namespace SonOfPicasso.Core.Services
                     var dictionary = list
                         .GetTopLevelItemDictionary();
 
-                    _logger.Verbose("Creating Watchers");
+                    _logger.Verbose("Creating {Count} Watchers", dictionary.Keys.Count);
 
                     var watchers = dictionary.Select(keyValuePair =>
                     {
                         var path = keyValuePair.Key;
+
+                        _logger.Verbose("Creating Watcher {Path}", path);
 
                         var fileSystemWatcher = _fileSystem.FileSystemWatcher
                             .FromPath(path)
