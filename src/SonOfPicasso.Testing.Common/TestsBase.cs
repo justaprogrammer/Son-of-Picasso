@@ -22,10 +22,10 @@ namespace SonOfPicasso.Testing.Common
 
             Faker = new Faker();
 
-            Log.Logger = loggerConfiguration
-                .CreateLogger();
+            Logger = loggerConfiguration
+                .CreateLogger()
+                .ForContext(GetType());
 
-            Logger = Log.Logger.ForContext(GetType());
             AutoResetEvent = new AutoResetEvent(false);
         }
 
