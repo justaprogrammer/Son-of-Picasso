@@ -8,7 +8,6 @@ using Autofac;
 using DynamicData;
 using FluentAssertions;
 using FluentAssertions.Execution;
-using Serilog;
 using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Model;
 using SonOfPicasso.Core.Services;
@@ -34,19 +33,31 @@ namespace SonOfPicasso.Integration.Tests.Services
             Container = containerBuilder.Build();
         }
 
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+            if (disposing)
+            {
+                Container.Dispose();
+            }
+        }
+
         protected override IContainer Container { get; }
 
         private ImageRef CreateImageRef(string imagePath)
         {
-            return new ImageRef(Faker.Random.Int(), imagePath, Faker.Date.Recent(), Faker.Date.Recent(), Faker.Date.Recent(), Faker.Random.Int(), Faker.Random.String(), Faker.PickRandom<ImageContainerTypeEnum>(), Faker.Date.Recent());
+            return new ImageRef(Faker.Random.Int(), imagePath, Faker.Date.Recent(), Faker.Date.Recent(),
+                Faker.Date.Recent(), Faker.Random.Int(), Faker.Random.String(),
+                Faker.PickRandom<ImageContainerTypeEnum>(), Faker.Date.Recent());
         }
 
         [Fact]
         public async Task ShouldStartWithNoExistingRules()
         {
-            await InitializeDataContextAsync();
+            await InitializeDataContextAsync().ConfigureAwait(false);
+            using var scope = Container.BeginLifetimeScope();
 
-            var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
+            using var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
             var imageContainerWatcherService = Container.Resolve<ImageContainerWatcherService>();
 
             await imageContainerWatcherService.Start(imageRefCache);
@@ -55,7 +66,8 @@ namespace SonOfPicasso.Integration.Tests.Services
         [Fact]
         public async Task ShouldDetectCreatedOrChangedFiles()
         {
-            await InitializeDataContextAsync();
+            await InitializeDataContextAsync().ConfigureAwait(false);
+            using var scope = Container.BeginLifetimeScope();
 
             var folderRulesManagementService = Container.Resolve<IFolderRulesManagementService>();
             await folderRulesManagementService.ResetFolderManagementRules(new[]
@@ -67,9 +79,9 @@ namespace SonOfPicasso.Integration.Tests.Services
                 }
             });
 
-            var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
+            using var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
             var imageContainerWatcherService = Container.Resolve<ImageContainerWatcherService>();
-
+            
             var list = new List<string>();
             imageContainerWatcherService.FileDiscovered.Subscribe(item =>
             {
@@ -81,7 +93,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             await imageContainerWatcherService.Start(imageRefCache);
             AutoResetEvent.WaitOne(TimeSpan.FromSeconds(3));
 
-            await GenerateImagesAsync(1);
+            await GenerateImagesAsync(1).ConfigureAwait(false);
 
             WaitOne(45);
 
@@ -93,7 +105,8 @@ namespace SonOfPicasso.Integration.Tests.Services
         [Fact]
         public async Task ShouldDetectUpdatedFiles()
         {
-            await InitializeDataContextAsync();
+            await InitializeDataContextAsync().ConfigureAwait(false);
+            using var scope = Container.BeginLifetimeScope();
 
             var folderRulesManagementService = Container.Resolve<IFolderRulesManagementService>();
             await folderRulesManagementService.ResetFolderManagementRules(new[]
@@ -105,7 +118,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                 }
             });
 
-            var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
+            using var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
             var imageContainerWatcherService = Container.Resolve<ImageContainerWatcherService>();
 
             var list = new List<string>();
@@ -118,12 +131,12 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             await imageContainerWatcherService.Start(imageRefCache);
 
-            var generatedImages = await GenerateImagesAsync(1);
+            var generatedImages = await GenerateImagesAsync(1).ConfigureAwait(false);
             var path = generatedImages.First().Value.First();
 
             WaitOne(45);
-            
-            using(new AssertionScope())
+
+            using (new AssertionScope())
             {
                 list.Should().HaveCount(1);
                 list.First().Should().Be(path);
@@ -134,7 +147,7 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             WaitOne(45);
 
-            using(new AssertionScope())
+            using (new AssertionScope())
             {
                 list.Should().HaveCount(2);
                 list.Skip(1).First().Should().Be(path);
@@ -146,7 +159,8 @@ namespace SonOfPicasso.Integration.Tests.Services
         [Fact]
         public async Task ShouldDetectUnknownCreatedOrChangedFiles()
         {
-            await InitializeDataContextAsync();
+            await InitializeDataContextAsync().ConfigureAwait(false);
+            using var scope = Container.BeginLifetimeScope();
 
             var folderRulesManagementService = Container.Resolve<IFolderRulesManagementService>();
             await folderRulesManagementService.ResetFolderManagementRules(new[]
@@ -158,9 +172,9 @@ namespace SonOfPicasso.Integration.Tests.Services
                 }
             });
 
-            var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
+            using var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
 
-            var generatedImages = await GenerateImagesAsync(1);
+            var generatedImages = await GenerateImagesAsync(1).ConfigureAwait(false);
             imageRefCache.AddOrUpdate(CreateImageRef(generatedImages.First().Value.First()));
 
             var imageContainerWatcherService = Container.Resolve<ImageContainerWatcherService>();
@@ -174,7 +188,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             });
 
             await imageContainerWatcherService.Start(imageRefCache);
-            await GenerateImagesAsync(1);
+            await GenerateImagesAsync(1).ConfigureAwait(false);
 
             WaitOne(45);
 
@@ -184,7 +198,8 @@ namespace SonOfPicasso.Integration.Tests.Services
         [Fact]
         public async Task ShouldDetectFileDelete()
         {
-            await InitializeDataContextAsync();
+            await InitializeDataContextAsync().ConfigureAwait(false);
+            using var scope = Container.BeginLifetimeScope();
 
             var folderRulesManagementService = Container.Resolve<IFolderRulesManagementService>();
             await folderRulesManagementService.ResetFolderManagementRules(new[]
@@ -196,10 +211,10 @@ namespace SonOfPicasso.Integration.Tests.Services
                 }
             });
 
-            var generatedImages = await GenerateImagesAsync(1, ImagesPath);
+            var generatedImages = await GenerateImagesAsync(1, ImagesPath).ConfigureAwait(false);
             var path = generatedImages.First().Value.First();
 
-            var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
+            using var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
             imageRefCache.AddOrUpdate(CreateImageRef(path));
 
             var imageContainerWatcherService = Container.Resolve<ImageContainerWatcherService>();
@@ -227,7 +242,8 @@ namespace SonOfPicasso.Integration.Tests.Services
         [Fact]
         public async Task ShouldIgnoreUnknownFileDelete()
         {
-            await InitializeDataContextAsync();
+            await InitializeDataContextAsync().ConfigureAwait(false);
+            using var scope = Container.BeginLifetimeScope();
 
             var folderRulesManagementService = Container.Resolve<IFolderRulesManagementService>();
             await folderRulesManagementService.ResetFolderManagementRules(new[]
@@ -239,10 +255,10 @@ namespace SonOfPicasso.Integration.Tests.Services
                 }
             });
 
-            var generatedImages = await GenerateImagesAsync(1, ImagesPath);
+            var generatedImages = await GenerateImagesAsync(1, ImagesPath).ConfigureAwait(false);
             var path = generatedImages.First().Value.First();
 
-            var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
+            using var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
 
             var imageContainerWatcherService = Container.Resolve<ImageContainerWatcherService>();
 
@@ -268,7 +284,8 @@ namespace SonOfPicasso.Integration.Tests.Services
         [Fact]
         public async Task ShouldDetectFileRename()
         {
-            await InitializeDataContextAsync();
+            await InitializeDataContextAsync().ConfigureAwait(false);
+            using var scope = Container.BeginLifetimeScope();
 
             var folderRulesManagementService = Container.Resolve<IFolderRulesManagementService>();
             await folderRulesManagementService.ResetFolderManagementRules(new[]
@@ -280,8 +297,8 @@ namespace SonOfPicasso.Integration.Tests.Services
                 }
             });
 
-            var generatedImages = await GenerateImagesAsync(1, ImagesPath);
-            var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
+            var generatedImages = await GenerateImagesAsync(1, ImagesPath).ConfigureAwait(false);
+            using var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
             var imagePath = generatedImages.First().Value.First();
             imageRefCache.AddOrUpdate(CreateImageRef(imagePath));
 
@@ -312,7 +329,8 @@ namespace SonOfPicasso.Integration.Tests.Services
         [Fact]
         public async Task ShouldDetectUnknownFileRenameAsDiscover()
         {
-            await InitializeDataContextAsync();
+            await InitializeDataContextAsync().ConfigureAwait(false);
+            using var scope = Container.BeginLifetimeScope();
 
             var folderRulesManagementService = Container.Resolve<IFolderRulesManagementService>();
             await folderRulesManagementService.ResetFolderManagementRules(new[]
@@ -324,8 +342,8 @@ namespace SonOfPicasso.Integration.Tests.Services
                 }
             });
 
-            var generatedImages = await GenerateImagesAsync(1, ImagesPath);
-            var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
+            var generatedImages = await GenerateImagesAsync(1, ImagesPath).ConfigureAwait(false);
+            using var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
 
             var imageContainerWatcherService = Container.Resolve<ImageContainerWatcherService>();
 
@@ -339,7 +357,7 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             await imageContainerWatcherService.Start(imageRefCache);
             AutoResetEvent.WaitOne(TimeSpan.FromSeconds(1));
-     
+
             var file = generatedImages.First().Value.First();
             var movedTo = Path.Combine(generatedImages.First().Key, "a" + FileSystem.Path.GetFileName(file));
             FileSystem.File.Move(file, movedTo);

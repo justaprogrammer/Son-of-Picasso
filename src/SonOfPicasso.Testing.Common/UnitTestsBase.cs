@@ -45,10 +45,13 @@ namespace SonOfPicasso.Testing.Common
             AutoSubstitute.Provide<IFileSystem>(MockFileSystem);
         }
 
-        public override void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            base.Dispose();
-            AutoSubstitute?.Dispose();
+            base.Dispose(disposing);
+            if (disposing)
+            {
+                AutoSubstitute?.Dispose();
+            }
         }
     }
 }

@@ -15,7 +15,7 @@ using SonOfPicasso.Core.Scheduling;
 
 namespace SonOfPicasso.Core.Services
 {
-    public class ImageContainerWatcherService : IImageContainerWatcherService, IDisposable
+    public sealed class ImageContainerWatcherService : IImageContainerWatcherService, IDisposable
     {
         private const int DebounceDirectoryChangeSeconds = 2;
         private readonly Subject<IObservable<FileSystemEventArgs>> _currentStreamObservableSubject;
@@ -154,6 +154,7 @@ namespace SonOfPicasso.Core.Services
             _fileDiscoveredSubject?.Dispose();
             _fileRenamedSubject?.Dispose();
             _fileSystemEventArgsSubject?.Dispose();
+            _imageRefCache?.Dispose();
             _startDisposables?.Dispose();
         }
 

@@ -52,7 +52,7 @@ namespace SonOfPicasso.Integration.Tests
 
             Logger.Debug("Integration test path: {TestPath}", TestPath);
 
-            if(FileSystem.Directory.Exists(TestPath))
+            if (FileSystem.Directory.Exists(TestPath))
                 throw new InvalidOperationException($"Path '{TestPath}' already exists");
 
             FileSystem.Directory.CreateDirectory(TestPath);
@@ -61,6 +61,8 @@ namespace SonOfPicasso.Integration.Tests
             FileSystem.Directory.CreateDirectory(ImagesPath);
 
             DatabasePath = FileSystem.Path.Combine(TestPath, "database.db");
+
+            Logger.Debug("Database path: {DatabasePath}", DatabasePath);
 
             DbContextOptions =
                 new DbContextOptionsBuilder<DataContext>()
@@ -82,33 +84,35 @@ namespace SonOfPicasso.Integration.Tests
             return containerBuilder;
         }
 
-        public override void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            base.Dispose();
+            base.Dispose(disposing);
+            if (disposing)
+            {
+                Container?.Dispose();
+                DataContext?.Dispose();
 
-            Container?.Dispose();
-            DataContext?.Dispose();
+                if (FileSystem.Directory.Exists(TestPath))
+                    try
+                    {
+                        FileSystem.Directory.Delete(TestPath, true);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Warning(e, "Unable to delete test directory {TestPath}", TestPath);
 
-            if (FileSystem.Directory.Exists(TestPath))
-                try
-                {
-                    FileSystem.Directory.Delete(TestPath, true);
-                }
-                catch (Exception e)
-                {
-                    Logger.Warning(e, "Unable to delete test directory {TestPath}", TestPath);
-
-                    foreach (var file in FileSystem.Directory.EnumerateFiles(TestPath, "*.*",
-                        SearchOption.AllDirectories))
-                        try
-                        {
-                            FileSystem.File.Delete(file);
-                        }
-                        catch (Exception e1)
-                        {
-                            Logger.Error(e1, "Unable to delete file {File}", file);
-                        }
-                }
+                        foreach (var file in FileSystem.Directory.EnumerateFiles(TestPath, "*.*",
+                            SearchOption.AllDirectories))
+                            try
+                            {
+                                FileSystem.File.Delete(file);
+                            }
+                            catch (Exception e1)
+                            {
+                                Logger.Error(e1, "Unable to delete file {File}", file);
+                            }
+                    }
+            }
         }
 
         protected async Task InitializeDataContextAsync()
