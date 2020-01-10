@@ -80,10 +80,10 @@ namespace SonOfPicasso.Integration.Tests.Services
             using var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
             var imageContainerWatcherService = Container.Resolve<ImageContainerWatcherService>();
 
-            var list = new List<string>();
+            var set = new HashSet<string>();
             imageContainerWatcherService.FileDiscovered.Subscribe(item =>
             {
-                list.Add(item);
+                set.Add(item);
                 Logger.Verbose("File discovered '{Item}'", item);
                 Set();
             });
@@ -95,7 +95,7 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             WaitOne(45);
 
-            list.Should().HaveCount(1);
+            set.Should().HaveCount(1);
 
             imageContainerWatcherService.Stop();
         }
