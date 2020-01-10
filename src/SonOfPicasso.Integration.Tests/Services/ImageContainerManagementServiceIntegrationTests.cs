@@ -25,13 +25,11 @@ namespace SonOfPicasso.Integration.Tests.Services
 {
     public class ImageContainerManagementServiceIntegrationTests : IntegrationTestsBase
     {
-        public IDirectoryInfo ThumbnailsDirectoryInfo { get; }
-
         public ImageContainerManagementServiceIntegrationTests(ITestOutputHelper testOutputHelper)
             : base(GetCustomConfiguration(testOutputHelper))
         {
             ThumbnailsDirectoryInfo = ImagesDirectoryInfo.Parent.CreateSubdirectory("Thumbnails");
-            
+
             var containerBuilder = GetContainerBuilder();
             containerBuilder.RegisterType<ExifDataService>().As<IExifDataService>();
             containerBuilder.RegisterType<TestBlobCacheProvider>().As<IBlobCacheProvider>();
@@ -53,6 +51,8 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             Container = containerBuilder.Build();
         }
+
+        public IDirectoryInfo ThumbnailsDirectoryInfo { get; }
 
         private static LoggerConfiguration GetCustomConfiguration(ITestOutputHelper testOutputHelper)
         {
@@ -161,16 +161,20 @@ namespace SonOfPicasso.Integration.Tests.Services
 
                 beginTimedOperation.Dispose();
 
-                var images = (await connection.QueryAsync<Image>("SELECT * FROM Images").ConfigureAwait(false))
+                var images =
+                    (await connection.QueryAsync<Image>("SELECT * FROM Images").ConfigureAwait(false))
                     .ToArray();
 
-                var folders = (await connection.QueryAsync<Folder>("SELECT * FROM Folders").ConfigureAwait(false))
+                var folders =
+                    (await connection.QueryAsync<Folder>("SELECT * FROM Folders").ConfigureAwait(false))
                     .ToArray();
 
-                var exifDatas = (await connection.QueryAsync("SELECT * FROM ExifData").ConfigureAwait(false))
+                var exifDatas =
+                    (await connection.QueryAsync("SELECT * FROM ExifData").ConfigureAwait(false))
                     .ToArray();
 
-                var folderRules = (await connection.QueryAsync<FolderRule>("SELECT * FROM FolderRules").ConfigureAwait(false))
+                var folderRules =
+                    (await connection.QueryAsync<FolderRule>("SELECT * FROM FolderRules").ConfigureAwait(false))
                     .ToArray();
 
                 images.Should().HaveCount(imageCount);
@@ -232,16 +236,20 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             await using var connection = DataContext.Database.GetDbConnection();
 
-            var images = (await connection.QueryAsync<Image>("SELECT * FROM Images").ConfigureAwait(false))
+            var images =
+                (await connection.QueryAsync<Image>("SELECT * FROM Images").ConfigureAwait(false))
                 .ToArray();
 
-            var folders = (await connection.QueryAsync<Folder>("SELECT * FROM Folders").ConfigureAwait(false))
+            var folders =
+                (await connection.QueryAsync<Folder>("SELECT * FROM Folders").ConfigureAwait(false))
                 .ToArray();
 
-            var exifDatas = (await connection.QueryAsync("SELECT * FROM ExifData").ConfigureAwait(false))
+            var exifDatas =
+                (await connection.QueryAsync("SELECT * FROM ExifData").ConfigureAwait(false))
                 .ToArray();
 
-            var folderRules = (await connection.QueryAsync<FolderRule>("SELECT * FROM FolderRules").ConfigureAwait(false))
+            var folderRules =
+                (await connection.QueryAsync<FolderRule>("SELECT * FROM FolderRules").ConfigureAwait(false))
                 .ToArray();
 
             using (new AssertionScope())
@@ -300,16 +308,20 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             await using var connection = DataContext.Database.GetDbConnection();
 
-            var images = (await connection.QueryAsync<Image>("SELECT * FROM Images").ConfigureAwait(false))
+            var images =
+                (await connection.QueryAsync<Image>("SELECT * FROM Images").ConfigureAwait(false))
                 .ToArray();
 
-            var folders = (await connection.QueryAsync<Folder>("SELECT * FROM Folders").ConfigureAwait(false))
+            var folders =
+                (await connection.QueryAsync<Folder>("SELECT * FROM Folders").ConfigureAwait(false))
                 .ToArray();
 
-            var exifDatas = (await connection.QueryAsync("SELECT * FROM ExifData").ConfigureAwait(false))
+            var exifDatas =
+                (await connection.QueryAsync("SELECT * FROM ExifData").ConfigureAwait(false))
                 .ToArray();
 
-            var folderRules = (await connection.QueryAsync<FolderRule>("SELECT * FROM FolderRules").ConfigureAwait(false))
+            var folderRules =
+                (await connection.QueryAsync<FolderRule>("SELECT * FROM FolderRules").ConfigureAwait(false))
                 .ToArray();
 
             using (new AssertionScope())

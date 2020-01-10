@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
@@ -82,7 +81,7 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             using var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
             var imageContainerWatcherService = Container.Resolve<ImageContainerWatcherService>();
-            
+
             var list = new List<string>();
             imageContainerWatcherService.FileDiscovered.Subscribe(item =>
             {
