@@ -55,7 +55,6 @@ namespace SonOfPicasso.Integration.Tests.Services
         public async Task ShouldStartWithNoExistingRules()
         {
             await InitializeDataContextAsync().ConfigureAwait(false);
-            using var scope = Container.BeginLifetimeScope();
 
             using var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
             var imageContainerWatcherService = Container.Resolve<ImageContainerWatcherService>();
@@ -67,7 +66,6 @@ namespace SonOfPicasso.Integration.Tests.Services
         public async Task ShouldDetectCreatedOrChangedFiles()
         {
             await InitializeDataContextAsync().ConfigureAwait(false);
-            using var scope = Container.BeginLifetimeScope();
 
             var folderRulesManagementService = Container.Resolve<IFolderRulesManagementService>();
             await folderRulesManagementService.ResetFolderManagementRules(new[]
@@ -106,7 +104,6 @@ namespace SonOfPicasso.Integration.Tests.Services
         public async Task ShouldDetectUpdatedFiles()
         {
             await InitializeDataContextAsync().ConfigureAwait(false);
-            using var scope = Container.BeginLifetimeScope();
 
             var folderRulesManagementService = Container.Resolve<IFolderRulesManagementService>();
             await folderRulesManagementService.ResetFolderManagementRules(new[]
@@ -161,7 +158,6 @@ namespace SonOfPicasso.Integration.Tests.Services
         public async Task ShouldDetectUnknownCreatedOrChangedFiles()
         {
             await InitializeDataContextAsync().ConfigureAwait(false);
-            using var scope = Container.BeginLifetimeScope();
 
             var folderRulesManagementService = Container.Resolve<IFolderRulesManagementService>();
             await folderRulesManagementService.ResetFolderManagementRules(new[]
@@ -202,7 +198,6 @@ namespace SonOfPicasso.Integration.Tests.Services
         public async Task ShouldDetectFileDelete()
         {
             await InitializeDataContextAsync().ConfigureAwait(false);
-            using var scope = Container.BeginLifetimeScope();
 
             var folderRulesManagementService = Container.Resolve<IFolderRulesManagementService>();
             await folderRulesManagementService.ResetFolderManagementRules(new[]
@@ -246,7 +241,6 @@ namespace SonOfPicasso.Integration.Tests.Services
         public async Task ShouldIgnoreUnknownFileDelete()
         {
             await InitializeDataContextAsync().ConfigureAwait(false);
-            using var scope = Container.BeginLifetimeScope();
 
             var folderRulesManagementService = Container.Resolve<IFolderRulesManagementService>();
             await folderRulesManagementService.ResetFolderManagementRules(new[]
@@ -288,7 +282,6 @@ namespace SonOfPicasso.Integration.Tests.Services
         public async Task ShouldDetectFileRename()
         {
             await InitializeDataContextAsync().ConfigureAwait(false);
-            using var scope = Container.BeginLifetimeScope();
 
             var folderRulesManagementService = Container.Resolve<IFolderRulesManagementService>();
             await folderRulesManagementService.ResetFolderManagementRules(new[]
@@ -335,7 +328,6 @@ namespace SonOfPicasso.Integration.Tests.Services
         public async Task ShouldDetectUnknownFileRenameAsDiscover()
         {
             await InitializeDataContextAsync().ConfigureAwait(false);
-            using var scope = Container.BeginLifetimeScope();
 
             var folderRulesManagementService = Container.Resolve<IFolderRulesManagementService>();
             await folderRulesManagementService.ResetFolderManagementRules(new[]
