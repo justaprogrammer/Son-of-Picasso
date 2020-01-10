@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
-using Autofac;
+﻿using Autofac;
 using DynamicData;
 using FluentAssertions;
 using FluentAssertions.Execution;
@@ -13,8 +7,16 @@ using SonOfPicasso.Core.Model;
 using SonOfPicasso.Core.Services;
 using SonOfPicasso.Data.Model;
 using SonOfPicasso.Testing.Common;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Linq;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.Repeat;
 
 namespace SonOfPicasso.Integration.Tests.Services
 {
@@ -278,8 +280,9 @@ namespace SonOfPicasso.Integration.Tests.Services
             list.Should().BeEmpty();
         }
 
-        [Fact]
-        public async Task ShouldDetectFileRename()
+        [Theory]
+        [Repeat(10)]
+        public async Task ShouldDetectFileRename(int iterationNumber)
         {
             await InitializeDataContextAsync().ConfigureAwait(false);
 
