@@ -54,11 +54,13 @@ namespace SonOfPicasso.Integration.Tests.Services
 
         protected override IContainer Container { get; }
 
-        public override void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            base.Dispose();
-
-            Container.Dispose();
+            base.Dispose(disposing);
+            if (disposing)
+            {
+                Container.Dispose();
+            }
         }
 
         private class TestCreateAlbum : ICreateAlbum

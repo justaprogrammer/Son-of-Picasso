@@ -42,15 +42,22 @@ namespace SonOfPicasso.Core.Services
         {
             return Observable.Defer(() =>
                 {
+                    _logger.Verbose("GetFolderManagementRules");
+
                     var unitOfWork = _unitOfWorkFactory();
                     var folderRules = unitOfWork.FolderRuleRepository
                         .Get()
                         .ToArray();
+                    
+                    _logger.Debug("FolderRules {Count}", folderRules.Length);
+                    foreach (var folderRule in folderRules)
+                    {
+                        _logger.Debug("FolderRule {Action} {Path}", folderRule.Action, folderRule.Path);
+                    }
 
                     return Observable.Return(folderRules)
                         .Do(rules => { }, () => unitOfWork.Dispose());
-                })
-                .SubscribeOn(_schedulerProvider.TaskPool);
+                });
         }
 
         public IObservable<Unit> ResetFolderManagementRules(IEnumerable<FolderRule> folderRules)

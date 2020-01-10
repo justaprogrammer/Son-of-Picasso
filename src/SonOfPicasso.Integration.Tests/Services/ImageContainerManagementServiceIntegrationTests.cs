@@ -25,13 +25,11 @@ namespace SonOfPicasso.Integration.Tests.Services
 {
     public class ImageContainerManagementServiceIntegrationTests : IntegrationTestsBase
     {
-        public IDirectoryInfo ThumbnailsDirectoryInfo { get; }
-
         public ImageContainerManagementServiceIntegrationTests(ITestOutputHelper testOutputHelper)
             : base(GetCustomConfiguration(testOutputHelper))
         {
             ThumbnailsDirectoryInfo = ImagesDirectoryInfo.Parent.CreateSubdirectory("Thumbnails");
-            
+
             var containerBuilder = GetContainerBuilder();
             containerBuilder.RegisterType<ExifDataService>().As<IExifDataService>();
             containerBuilder.RegisterType<TestBlobCacheProvider>().As<IBlobCacheProvider>();
@@ -54,6 +52,8 @@ namespace SonOfPicasso.Integration.Tests.Services
             Container = containerBuilder.Build();
         }
 
+        public IDirectoryInfo ThumbnailsDirectoryInfo { get; }
+
         private static LoggerConfiguration GetCustomConfiguration(ITestOutputHelper testOutputHelper)
         {
             return GetLoggerConfiguration(testOutputHelper, configuration => configuration
@@ -73,7 +73,7 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             Logger.Information("ShouldScanFolderWithRealImages");
 
-            await InitializeDataContextAsync();
+            await InitializeDataContextAsync().ConfigureAwait(false);
 
             var imageContainerManagementService = Container.Resolve<ImageContainerManagementService>();
             imageContainerManagementService.ImageContainerCache
@@ -112,11 +112,11 @@ namespace SonOfPicasso.Integration.Tests.Services
         [Fact]
         public async Task ShouldScanExistingFolder()
         {
-            await InitializeDataContextAsync();
+            await InitializeDataContextAsync().ConfigureAwait(false);
             await using var connection = DataContext.Database.GetDbConnection();
 
             var desiredImageCount = 20;
-            var generateImagesAsync = await GenerateImagesAsync(desiredImageCount);
+            var generateImagesAsync = await GenerateImagesAsync(desiredImageCount).ConfigureAwait(false);
             var imageCount = generateImagesAsync.SelectMany(pair => pair.Value).Count();
             var folderCount = generateImagesAsync.Count;
 
@@ -157,20 +157,24 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             using (new AssertionScope())
             {
-                WaitOne(TimeSpan.FromSeconds(15));
+                WaitOne(30);
 
                 beginTimedOperation.Dispose();
 
-                var images = (await connection.QueryAsync<Image>("SELECT * FROM Images"))
+                var images =
+                    (await connection.QueryAsync<Image>("SELECT * FROM Images").ConfigureAwait(false))
                     .ToArray();
 
-                var folders = (await connection.QueryAsync<Folder>("SELECT * FROM Folders"))
+                var folders =
+                    (await connection.QueryAsync<Folder>("SELECT * FROM Folders").ConfigureAwait(false))
                     .ToArray();
 
-                var exifDatas = (await connection.QueryAsync("SELECT * FROM ExifData"))
+                var exifDatas =
+                    (await connection.QueryAsync("SELECT * FROM ExifData").ConfigureAwait(false))
                     .ToArray();
 
-                var folderRules = (await connection.QueryAsync<FolderRule>("SELECT * FROM FolderRules"))
+                var folderRules =
+                    (await connection.QueryAsync<FolderRule>("SELECT * FROM FolderRules").ConfigureAwait(false))
                     .ToArray();
 
                 images.Should().HaveCount(imageCount);
@@ -190,7 +194,7 @@ namespace SonOfPicasso.Integration.Tests.Services
         [Fact]
         public async Task ShouldWatchFolderWithAlwaysRulePreset()
         {
-            await InitializeDataContextAsync();
+            await InitializeDataContextAsync().ConfigureAwait(false);
 
             var folderRulesManagementService = Container.Resolve<IFolderRulesManagementService>();
             await folderRulesManagementService.AddFolderManagementRule(new FolderRule
@@ -218,7 +222,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             await imageContainerManagementService.Start();
 
             var imageCount = 20;
-            var generateImagesAsync = await GenerateImagesAsync(imageCount);
+            var generateImagesAsync = await GenerateImagesAsync(imageCount).ConfigureAwait(false);
 
             imageContainers.WhenPropertyChanged(items => items.Count)
                 .CombineLatest(imageRefs.WhenPropertyChanged(items => items.Count),
@@ -232,16 +236,20 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             await using var connection = DataContext.Database.GetDbConnection();
 
-            var images = (await connection.QueryAsync<Image>("SELECT * FROM Images"))
+            var images =
+                (await connection.QueryAsync<Image>("SELECT * FROM Images").ConfigureAwait(false))
                 .ToArray();
 
-            var folders = (await connection.QueryAsync<Folder>("SELECT * FROM Folders"))
+            var folders =
+                (await connection.QueryAsync<Folder>("SELECT * FROM Folders").ConfigureAwait(false))
                 .ToArray();
 
-            var exifDatas = (await connection.QueryAsync("SELECT * FROM ExifData"))
+            var exifDatas =
+                (await connection.QueryAsync("SELECT * FROM ExifData").ConfigureAwait(false))
                 .ToArray();
 
-            var folderRules = (await connection.QueryAsync<FolderRule>("SELECT * FROM FolderRules"))
+            var folderRules =
+                (await connection.QueryAsync<FolderRule>("SELECT * FROM FolderRules").ConfigureAwait(false))
                 .ToArray();
 
             using (new AssertionScope())
@@ -263,7 +271,7 @@ namespace SonOfPicasso.Integration.Tests.Services
         [Fact]
         public async Task ShouldWatchFolderWithResetAlwaysRule()
         {
-            await InitializeDataContextAsync();
+            await InitializeDataContextAsync().ConfigureAwait(false);
 
             var imageContainerManagementService = Container.Resolve<ImageContainerManagementService>();
 
@@ -285,10 +293,8 @@ namespace SonOfPicasso.Integration.Tests.Services
             await imageContainerManagementService.ResetRules(new[]
                 {new FolderRule {Path = ImagesPath, Action = FolderRuleActionEnum.Always}});
 
-            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(1));
-
             var imageCount = 1;
-            var generateImagesAsync = await GenerateImagesAsync(imageCount);
+            var generateImagesAsync = await GenerateImagesAsync(imageCount).ConfigureAwait(false);
 
             imageContainers.WhenPropertyChanged(items => items.Count)
                 .CombineLatest(imageRefs.WhenPropertyChanged(items => items.Count),
@@ -298,20 +304,24 @@ namespace SonOfPicasso.Integration.Tests.Services
                     if (tuple.Item1 == generateImagesAsync.Count && tuple.Item2 == imageCount) AutoResetEvent.Set();
                 });
 
-            WaitOne(TimeSpan.FromSeconds(15));
+            WaitOne(45);
 
             await using var connection = DataContext.Database.GetDbConnection();
 
-            var images = (await connection.QueryAsync<Image>("SELECT * FROM Images"))
+            var images =
+                (await connection.QueryAsync<Image>("SELECT * FROM Images").ConfigureAwait(false))
                 .ToArray();
 
-            var folders = (await connection.QueryAsync<Folder>("SELECT * FROM Folders"))
+            var folders =
+                (await connection.QueryAsync<Folder>("SELECT * FROM Folders").ConfigureAwait(false))
                 .ToArray();
 
-            var exifDatas = (await connection.QueryAsync("SELECT * FROM ExifData"))
+            var exifDatas =
+                (await connection.QueryAsync("SELECT * FROM ExifData").ConfigureAwait(false))
                 .ToArray();
 
-            var folderRules = (await connection.QueryAsync<FolderRule>("SELECT * FROM FolderRules"))
+            var folderRules =
+                (await connection.QueryAsync<FolderRule>("SELECT * FROM FolderRules").ConfigureAwait(false))
                 .ToArray();
 
             using (new AssertionScope())

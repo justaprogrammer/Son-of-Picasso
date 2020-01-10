@@ -117,6 +117,8 @@ namespace SonOfPicasso.Core.Services
         {
             return Observable.DeferAsync(async token =>
             {
+                _logger.Debug("Starting");
+
                 var imageContainers = await _imageContainerOperationService
                     .GetAllImageContainers()
                     .ToArray();
@@ -141,6 +143,8 @@ namespace SonOfPicasso.Core.Services
                             .Subscribe();
                     }
                 }
+
+                _logger.Debug("Started");
 
                 return Observable.Return(Unit.Default);
             });
