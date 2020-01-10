@@ -151,8 +151,8 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             using (new AssertionScope())
             {
-                set.Should().HaveCount(2);
-                set.Skip(1).First().Should().Be(path);
+                set.Should().HaveCount(1);
+                set.First().Should().Be(path);
             }
 
             imageContainerWatcherService.Stop();
