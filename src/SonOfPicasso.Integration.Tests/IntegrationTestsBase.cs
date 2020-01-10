@@ -73,7 +73,7 @@ namespace SonOfPicasso.Integration.Tests
         protected ContainerBuilder GetContainerBuilder()
         {
             var containerBuilder = new ContainerBuilder();
-            containerBuilder.RegisterLogger();
+            containerBuilder.RegisterLogger(Logger);
             containerBuilder.RegisterType<FileSystem>().As<IFileSystem>();
             containerBuilder.RegisterInstance(DbContextOptions).As<DbContextOptions<DataContext>>();
             containerBuilder.RegisterType<UnitOfWork>()
