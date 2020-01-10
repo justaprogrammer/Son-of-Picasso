@@ -298,7 +298,9 @@ namespace SonOfPicasso.Integration.Tests.Services
                 }
             });
 
-            var generatedImages = await GenerateImagesAsync(1, ImagesPath).ConfigureAwait(false);
+            var generatedImages = await GenerateImagesAsync(1, ImagesPath)
+                .ConfigureAwait(false);
+
             using var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
             var imagePath = generatedImages.First().Value.First();
             imageRefCache.AddOrUpdate(CreateImageRef(imagePath));
@@ -314,14 +316,13 @@ namespace SonOfPicasso.Integration.Tests.Services
             });
 
             await imageContainerWatcherService.Start(imageRefCache);
-            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(1));
-
+            
             var movedTo = Path.Combine(generatedImages.First().Key, "a" + FileSystem.Path.GetFileName(imagePath));
             FileSystem.File.Move(imagePath, movedTo);
 
             Logger.Verbose("Moving File '{Path}' '{ToPath}'", imagePath, movedTo);
 
-            WaitOne(5);
+            WaitOne(45);
 
             list.Should().HaveCount(1);
             list.First().Should().Be((imagePath, movedTo));
