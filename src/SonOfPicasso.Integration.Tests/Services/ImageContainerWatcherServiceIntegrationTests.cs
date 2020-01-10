@@ -280,9 +280,8 @@ namespace SonOfPicasso.Integration.Tests.Services
             list.Should().BeEmpty();
         }
 
-        [Theory]
-        [Repeat(100)]
-        public async Task ShouldDetectFileRename(int iterationNumber)
+        [Fact]
+        public async Task ShouldDetectFileRename()
         {
             await InitializeDataContextAsync().ConfigureAwait(false);
 
