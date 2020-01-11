@@ -11,6 +11,7 @@ using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Model;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Data.Model;
+using Svg;
 
 namespace SonOfPicasso.Core.Services
 {
@@ -55,11 +56,6 @@ namespace SonOfPicasso.Core.Services
                 .SelectMany(path => _imageContainerOperationService.DeleteImage(path))
                 .Subscribe(container => _imageContainerCache.AddOrUpdate(container))
                 .DisposeWith(_disposables);
-
-            _imageContainerWatcherService.FileRenamed
-                .SelectMany(tuple => imageContainerOperationService.RenameImage(tuple.oldFullPath, tuple.fullPath))
-                .Subscribe(container => _imageContainerCache.AddOrUpdate(container))
-                .DisposeWith(_disposables);
             
             imageContainerOperationService.ScanImageObservable
                 .Select((imageRef) => imageRef.ContainerId)
@@ -85,27 +81,29 @@ namespace SonOfPicasso.Core.Services
 
         public IObservable<Unit> ResetRules(IEnumerable<FolderRule> folderRules)
         {
-            var folderRulesArray = folderRules.ToArray();
+            return Observable.DeferAsync(async token =>
+            {
+                _logger.Verbose("ResetRules");
 
-            var resetRules = _folderRulesManagementService.ResetFolderManagementRules(folderRulesArray);
+                var folderRulesArray = folderRules.ToArray();
 
-            var applyImageChanges = _imageContainerOperationService.ApplyRuleChanges(folderRulesArray)
-                .Select(changes =>
-                {
-                    _imageContainerCache.Remove(changes.DeletedFolderIds.Select(FolderImageContainer.GetContainerKey));
+                var paths = folderRulesArray
+                    .GetTopLevelItemDictionary()
+                    .Keys
+                    .ToArray();
 
-                    return Unit.Default;
-                });
+                await _folderRulesManagementService.ResetFolderManagementRules(folderRulesArray);
 
-            var result = resetRules
-                .Zip(applyImageChanges, (unit, _) => unit)
-                .SelectMany(unit =>
-                {
-                    _imageContainerWatcherService.Stop();
-                    return _imageContainerWatcherService.Start(_folderImageRefCache);
-                });
+                var changes = await _imageContainerOperationService.ApplyRuleChanges(folderRulesArray);
+                
+                _imageContainerCache.Remove(changes.DeletedFolderIds.Select(FolderImageContainer.GetContainerKey));
 
-            return result;
+                _imageContainerWatcherService.Stop();
+
+                _imageContainerWatcherService.Start(_folderImageRefCache, paths);
+
+                return Observable.Return(Unit.Default);
+            });
         }
 
         public IObservable<ResetChanges> PreviewResetRulesChanges(IEnumerable<FolderRule> folderRules)
@@ -128,13 +126,14 @@ namespace SonOfPicasso.Core.Services
                     _imageContainerCache.AddOrUpdate(imageContainer);
                 }
 
-                await _imageContainerWatcherService.Start(_folderImageRefCache);
-
                 var folderRules = await _folderRulesManagementService.GetFolderManagementRules();
 
                 var folderRuleDictionary = folderRules.ToDictionary(rule => rule.Path, rule => rule.Action);
 
                 var topLevelItemDictionary = folderRules.GetTopLevelItemDictionary();
+
+                _imageContainerWatcherService.Start(_folderImageRefCache, topLevelItemDictionary.Keys.ToArray());
+
                 foreach (var (key, _) in topLevelItemDictionary)
                 {
                     if (folderRuleDictionary[key] == FolderRuleActionEnum.Always)
@@ -188,12 +187,6 @@ namespace SonOfPicasso.Core.Services
         public IObservable<IImageContainer> DeleteImage(string path)
         {
             return _imageContainerOperationService.DeleteImage(path)
-                .Do(container => _imageContainerCache.AddOrUpdate(container));
-        }
-
-        public IObservable<IImageContainer> RenameImage(string oldPath, string newPath)
-        {
-            return _imageContainerOperationService.RenameImage(oldPath, newPath)
                 .Do(container => _imageContainerCache.AddOrUpdate(container));
         }
 

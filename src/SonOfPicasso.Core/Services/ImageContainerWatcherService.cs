@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
-using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -17,235 +17,117 @@ namespace SonOfPicasso.Core.Services
 {
     public sealed class ImageContainerWatcherService : IImageContainerWatcherService, IDisposable
     {
-        private const int DebounceDirectoryChangeSeconds = 2;
-        private readonly Subject<IObservable<FileSystemEventArgs>> _currentStreamObservableSubject;
-        private readonly CompositeDisposable _disposables;
-        private readonly Subject<string> _fileDeletedSubject;
-        private readonly Subject<string> _fileDiscoveredSubject;
-        private readonly Subject<(string oldFullPath, string fullPath)> _fileRenamedSubject;
+        private readonly Subject<string> _fileDeletedSubject = new Subject<string>();
+        private readonly Subject<string> _fileDiscoveredSubject = new Subject<string>();
+
         private readonly IFileSystem _fileSystem;
-        private readonly Subject<FileSystemEventArgs> _fileSystemEventArgsSubject;
-        private readonly IFolderRulesManagementService _folderRulesManagementService;
         private readonly ILogger _logger;
+
         private readonly ISchedulerProvider _schedulerProvider;
 
-        private IObservableCache<ImageRef, string> _imageRefCache;
-        private CompositeDisposable _startDisposables;
+        private CompositeDisposable _watchers;
+        private CompositeDisposable _subscriptions;
 
-        public ImageContainerWatcherService(ISchedulerProvider schedulerProvider,
+        public ImageContainerWatcherService(
+            ISchedulerProvider schedulerProvider,
             ILogger logger,
-            IFolderRulesManagementService folderRulesManagementService,
-            IImageLocationService imageLocationService,
             IFileSystem fileSystem)
         {
             _schedulerProvider = schedulerProvider;
             _logger = logger;
-            _folderRulesManagementService = folderRulesManagementService;
             _fileSystem = fileSystem;
-            _disposables = new CompositeDisposable();
-
-            _fileSystemEventArgsSubject = new Subject<FileSystemEventArgs>();
-
-            _currentStreamObservableSubject = new Subject<IObservable<FileSystemEventArgs>>();
-            _currentStreamObservableSubject.Switch()
-                .Subscribe(args => { _fileSystemEventArgsSubject.OnNext(args); });
-
-            _fileDiscoveredSubject = new Subject<string>();
-            _fileDeletedSubject = new Subject<string>();
-            _fileRenamedSubject = new Subject<(string oldFullPath, string fullPath)>();
-
-            _fileSystemEventArgsSubject.Subscribe(args =>
-                {
-                    var containerPath = args.FullPath.Substring(0, args.FullPath.Length - args.Name.Length);
-                    var containerName = _fileSystem.DirectoryInfo.FromDirectoryName(containerPath).Name;
-
-                    if (args.ChangeType != WatcherChangeTypes.Deleted)
-                        if (_fileSystem.Directory.Exists(args.FullPath))
-                        {
-                            _logger.Verbose("Directory Event {Name} {FullPath} {ChangeType}", containerName, args.Name,
-                                args.ChangeType);
-                            return;
-                        }
-
-                    _logger.Verbose("File Event {Name} {FullPath} {ChangeType}", containerName, args.Name,
-                        args.ChangeType);
-                })
-                .DisposeWith(_disposables);
-
-            _fileSystemEventArgsSubject
-                .Where(args => args.ChangeType == WatcherChangeTypes.Created ||
-                               args.ChangeType == WatcherChangeTypes.Changed)
-                .Select(args =>
-                {
-                    if (_fileSystem.Directory.Exists(args.FullPath)) return args.FullPath;
-
-                    return _fileSystem.FileInfo.FromFileName(args.FullPath).DirectoryName;
-                })
-                .Buffer(TimeSpan.FromSeconds(DebounceDirectoryChangeSeconds))
-                .SelectMany(list => list.GroupBy(s => s).Select(grouping => (grouping.Key, grouping.Count() + 1)))
-                .Subscribe(tuple =>
-                {
-                    var (path, count) = tuple;
-                    _logger.Verbose("Grouped Scanner Event {Path} {GroupCount}", path, count);
-                    imageLocationService.GetImages(path)
-                        .Subscribe(fileInfo =>
-                        {
-                            var imageRef = _imageRefCache.Lookup(fileInfo.FullName);
-                            if (!imageRef.HasValue)
-                            {
-                                _logger.Verbose("Discovered {Path}", fileInfo.FullName);
-                                _fileDiscoveredSubject.OnNext(fileInfo.FullName);
-                            }
-                            else if (imageRef.Value.LastWriteTime != fileInfo.LastWriteTimeUtc ||
-                                     imageRef.Value.CreationTime != fileInfo.CreationTimeUtc)
-                            {
-                                _logger.Verbose("File Updated {Path}", fileInfo.FullName);
-                                _fileDiscoveredSubject.OnNext(fileInfo.FullName);
-                            }
-                        });
-                })
-                .DisposeWith(_disposables);
-
-            _fileSystemEventArgsSubject
-                .Where(args => args.ChangeType == WatcherChangeTypes.Deleted)
-                .Select(args => args.FullPath)
-                .Subscribe(path =>
-                {
-                    var imageRef = _imageRefCache.Lookup(path);
-                    if (imageRef.HasValue)
-                    {
-                        _logger.Verbose("Deleted {Path}", path);
-                        _fileDeletedSubject.OnNext(path);
-                    }
-                })
-                .DisposeWith(_disposables);
-
-            _fileSystemEventArgsSubject
-                .Where(args => args.ChangeType == WatcherChangeTypes.Renamed)
-                .Cast<RenamedEventArgs>()
-                .Select<RenamedEventArgs, (string oldFullPath, string fullPath)>(args =>
-                    (args.OldFullPath, args.FullPath))
-                .Subscribe(tuple =>
-                {
-                    var (oldFullPath, fullPath) = tuple;
-                    var imageRef = _imageRefCache.Lookup(oldFullPath);
-                    if (_fileSystem.File.Exists(fullPath))
-                    {
-                        if (imageRef.HasValue)
-                        {
-                            _logger.Verbose("Renamed {OldPath} {Path}", oldFullPath, fullPath);
-                            _fileRenamedSubject.OnNext((oldFullPath, fullPath));
-                        }
-                        else
-                        {
-                            _logger.Verbose("Renamed; Previously unknown; Considering Discovered {Path}", fullPath);
-                            _fileDiscoveredSubject.OnNext(fullPath);
-                        }
-                    }
-                })
-                .DisposeWith(_disposables);
         }
 
         public void Dispose()
         {
-            _currentStreamObservableSubject?.Dispose();
-            _disposables?.Dispose();
-            _fileDeletedSubject?.Dispose();
-            _fileDiscoveredSubject?.Dispose();
-            _fileRenamedSubject?.Dispose();
-            _fileSystemEventArgsSubject?.Dispose();
-            _imageRefCache?.Dispose();
-            _startDisposables?.Dispose();
+            _subscriptions?.Dispose();
+            _watchers?.Dispose();
+            _fileDiscoveredSubject.Dispose();
+            _fileDeletedSubject.Dispose();
         }
 
         public IObservable<string> FileDiscovered => _fileDiscoveredSubject.AsObservable();
 
         public IObservable<string> FileDeleted => _fileDeletedSubject.AsObservable();
 
-        public IObservable<(string oldFullPath, string fullPath)> FileRenamed => _fileRenamedSubject.AsObservable();
-
-        public IObservable<Unit> Start(IObservableCache<ImageRef, string> imageRefCache)
+        public void Start(IObservableCache<ImageRef, string> imageRefCache, IList<string> paths)
         {
             if (imageRefCache == null) throw new ArgumentNullException(nameof(imageRefCache));
+            if (paths == null) throw new ArgumentNullException(nameof(paths));
 
-            return Observable.Defer(() =>
-                {
-                    _logger.Verbose("Start");
+            _subscriptions?.Dispose();
+            _watchers?.Dispose();
 
-                    _startDisposables?.Dispose();
-                    _startDisposables = new CompositeDisposable();
+            _watchers = new CompositeDisposable();
+            _subscriptions = new CompositeDisposable();
 
-                    _imageRefCache = imageRefCache;
-
-                    return _folderRulesManagementService.GetFolderManagementRules();
-                }).Select(list =>
-                {
-                    var dictionary = list
-                        .GetTopLevelItemDictionary();
-
-                    _logger.Verbose("Creating {Count} Watchers", dictionary.Keys.Count);
-
-                    var watchers = dictionary.Select(keyValuePair =>
+            foreach (var path in paths)
+            {
+                var pollingFileSystemWatcher = new PollingFileSystemWatcher(path, "*",
+                    new EnumerationOptions
                     {
-                        var path = keyValuePair.Key;
+                        RecurseSubdirectories = true
+                    });
 
-                        _logger.Verbose("Creating Watcher {Path}", path);
+                _watchers.Add(pollingFileSystemWatcher);
 
-                        var fileSystemWatcher = _fileSystem.FileSystemWatcher
-                            .FromPath(path)
-                            .DisposeWith(_startDisposables);
+                var subscription = Observable
+                    .FromEventPattern<PollingFileSystemEventHandler, PollingFileSystemEventArgs>(
+                        action => pollingFileSystemWatcher.ChangedDetailed += action,
+                        action => pollingFileSystemWatcher.ChangedDetailed -= action)
+                    .SubscribeOn(_schedulerProvider.TaskPool)
+                    .Select(pattern => pattern.EventArgs)
+                    .Subscribe(args =>
+                    {
+                        foreach (var change in args.Changes)
+                        {
+                            var filePath = _fileSystem.Path.Combine(change.Directory, change.Name);
+                            var imageRef = imageRefCache.Lookup(filePath);
 
-                        var d1 = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
-                                action => fileSystemWatcher.Created += action,
-                                action => { })
-                            .SubscribeOn(_schedulerProvider.TaskPool)
-                            .Select(pattern => pattern.EventArgs);
+                            switch (change.ChangeType)
+                            {
+                                case WatcherChangeTypes.Created:
+                                case WatcherChangeTypes.Changed:
 
-                        var d2 = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
-                                action => fileSystemWatcher.Deleted += action,
-                                action => { })
-                            .SubscribeOn(_schedulerProvider.TaskPool)
-                            .Select(pattern => pattern.EventArgs);
+                                    var fileInfo = _fileSystem.FileInfo.FromFileName(filePath);
 
-                        var d3 = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
-                                action => fileSystemWatcher.Changed += action,
-                                action => { })
-                            .SubscribeOn(_schedulerProvider.TaskPool)
-                            .Select(pattern => pattern.EventArgs);
+                                    if (!imageRef.HasValue)
+                                    {
+                                        _logger.Debug("Discovered {Path}", fileInfo.FullName);
+                                        _fileDiscoveredSubject.OnNext(fileInfo.FullName);
+                                    }
+                                    else if (imageRef.Value.LastWriteTime != fileInfo.LastWriteTimeUtc ||
+                                             imageRef.Value.CreationTime != fileInfo.CreationTimeUtc)
+                                    {
+                                        _logger.Debug("File Updated {Path}", fileInfo.FullName);
+                                        _fileDiscoveredSubject.OnNext(fileInfo.FullName);
+                                    }
 
-                        var d4 = Observable.FromEventPattern<RenamedEventHandler, RenamedEventArgs>(
-                                action => fileSystemWatcher.Renamed += action,
-                                action => { })
-                            .SubscribeOn(_schedulerProvider.TaskPool)
-                            .Select(pattern => (FileSystemEventArgs) pattern.EventArgs);
+                                    break;
 
-                        // https://docs.microsoft.com/en-us/dotnet/api/system.io.filesystemwatcher.internalbuffersize?view=netframework-4.8
-                        // Default is 8k, Max is 64k, for best performance use multiples of 4k
-                        fileSystemWatcher.InternalBufferSize = 4096 * 8;
+                                case WatcherChangeTypes.Deleted:
+                                    if (imageRef.HasValue)
+                                    {
+                                        _fileDeletedSubject.OnNext(filePath);
+                                    }
+                                    break;
+                            }
+                        }
+                    });
 
-                        fileSystemWatcher.IncludeSubdirectories = true;
-                        fileSystemWatcher.EnableRaisingEvents = true;
+                _subscriptions.Add(subscription);
 
-                        var observables = new[] {d1, d2, d3, d4};
-                        return (fileSystemWatcher, observables);
-                    }).ToArray();
-
-                    var allObservables = watchers.SelectMany(tuple => tuple.observables).ToArray();
-
-                    var observable = Observable.Merge(allObservables);
-                    _currentStreamObservableSubject.OnNext(observable);
-
-                    return Unit.Default;
-                })
-                .Do(unit => _logger.Verbose("Started"));
+                pollingFileSystemWatcher.Start();
+            }
         }
 
         public void Stop()
         {
-            _currentStreamObservableSubject.OnNext(Observable.Never<FileSystemEventArgs>());
+            _subscriptions?.Dispose();
+            _watchers?.Dispose();
 
-            _startDisposables?.Dispose();
-            _startDisposables = null;
+            _subscriptions = null;
+            _watchers = null;
         }
     }
 }
