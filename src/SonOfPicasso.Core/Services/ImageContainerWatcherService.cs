@@ -195,7 +195,7 @@ namespace SonOfPicasso.Core.Services
 
                 // https://docs.microsoft.com/en-us/dotnet/api/system.io.filesystemwatcher.internalbuffersize?view=netframework-4.8
                 // Default is 8k, Max is 64k, for best performance use multiples of 4k
-                // fileSystemWatcher.InternalBufferSize = 4096 * 8;
+                watcher.InternalBufferSize = 4096 * 1;
 
                 watchers[index] = watcher;
 
