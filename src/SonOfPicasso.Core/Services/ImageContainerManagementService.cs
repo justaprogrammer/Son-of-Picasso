@@ -86,29 +86,29 @@ namespace SonOfPicasso.Core.Services
 
         public IObservable<Unit> ResetRules(IEnumerable<FolderRule> folderRules)
         {
-            _logger.Verbose("ResetRules");
+            return Observable.DeferAsync(async token =>
+            {
+                _logger.Verbose("ResetRules");
 
-            var folderRulesArray = folderRules.ToArray();
+                var folderRulesArray = folderRules.ToArray();
 
-            var resetRules = _folderRulesManagementService.ResetFolderManagementRules(folderRulesArray);
+                var paths = folderRulesArray
+                    .GetTopLevelItemDictionary()
+                    .Keys
+                    .ToArray();
 
-            var applyImageChanges = _imageContainerOperationService.ApplyRuleChanges(folderRulesArray)
-                .Select(changes =>
-                {
-                    _imageContainerCache.Remove(changes.DeletedFolderIds.Select(FolderImageContainer.GetContainerKey));
+                await _folderRulesManagementService.ResetFolderManagementRules(folderRulesArray);
 
-                    return Unit.Default;
-                });
+                var changes = await _imageContainerOperationService.ApplyRuleChanges(folderRulesArray);
+                
+                _imageContainerCache.Remove(changes.DeletedFolderIds.Select(FolderImageContainer.GetContainerKey));
 
-            var result = resetRules
-                .Zip(applyImageChanges, (unit, _) => unit)
-                .SelectMany(unit =>
-                {
-                    _imageContainerWatcherService.Stop();
-                    return _imageContainerWatcherService.Start(_folderImageRefCache);
-                });
+                _imageContainerWatcherService.Stop();
 
-            return result;
+                _imageContainerWatcherService.Start(_folderImageRefCache, paths);
+
+                return Observable.Return(Unit.Default);
+            });
         }
 
         public IObservable<ResetChanges> PreviewResetRulesChanges(IEnumerable<FolderRule> folderRules)
@@ -131,13 +131,14 @@ namespace SonOfPicasso.Core.Services
                     _imageContainerCache.AddOrUpdate(imageContainer);
                 }
 
-                await _imageContainerWatcherService.Start(_folderImageRefCache);
-
                 var folderRules = await _folderRulesManagementService.GetFolderManagementRules();
 
                 var folderRuleDictionary = folderRules.ToDictionary(rule => rule.Path, rule => rule.Action);
 
                 var topLevelItemDictionary = folderRules.GetTopLevelItemDictionary();
+
+                _imageContainerWatcherService.Start(_folderImageRefCache, topLevelItemDictionary.Keys.ToArray());
+
                 foreach (var (key, _) in topLevelItemDictionary)
                 {
                     if (folderRuleDictionary[key] == FolderRuleActionEnum.Always)

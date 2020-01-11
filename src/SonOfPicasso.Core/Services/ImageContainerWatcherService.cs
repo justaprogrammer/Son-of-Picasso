@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
@@ -6,6 +7,8 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Threading.Tasks;
+using System.Windows.Documents;
 using DynamicData;
 using Serilog;
 using SonOfPicasso.Core.Extensions;
@@ -25,30 +28,27 @@ namespace SonOfPicasso.Core.Services
         private readonly Subject<(string oldFullPath, string fullPath)> _fileRenamedSubject;
         private readonly IFileSystem _fileSystem;
         private readonly Subject<FileSystemEventArgs> _fileSystemEventArgsSubject;
-        private readonly IFolderRulesManagementService _folderRulesManagementService;
         private readonly ILogger _logger;
         private readonly ISchedulerProvider _schedulerProvider;
-        private IFileSystemWatcher[] currentWatchers; 
 
         private IObservableCache<ImageRef, string> _imageRefCache;
         private CompositeDisposable _startDisposables;
 
         public ImageContainerWatcherService(ISchedulerProvider schedulerProvider,
             ILogger logger,
-            IFolderRulesManagementService folderRulesManagementService,
             IImageLocationService imageLocationService,
             IFileSystem fileSystem)
         {
             _schedulerProvider = schedulerProvider;
             _logger = logger;
-            _folderRulesManagementService = folderRulesManagementService;
             _fileSystem = fileSystem;
             _disposables = new CompositeDisposable();
 
             _fileSystemEventArgsSubject = new Subject<FileSystemEventArgs>();
 
             _currentStreamObservableSubject = new Subject<IObservable<FileSystemEventArgs>>();
-            _currentStreamObservableSubject.Switch()
+            _currentStreamObservableSubject
+                .Switch()
                 .Subscribe(args => { _fileSystemEventArgsSubject.OnNext(args); });
 
             _fileDiscoveredSubject = new Subject<string>();
@@ -165,82 +165,74 @@ namespace SonOfPicasso.Core.Services
 
         public IObservable<(string oldFullPath, string fullPath)> FileRenamed => _fileRenamedSubject.AsObservable();
 
-        public IObservable<Unit> Start(IObservableCache<ImageRef, string> imageRefCache)
+        public void Start(IObservableCache<ImageRef, string> imageRefCache, IList<string> paths)
         {
+            _logger.Verbose("Start");
+
             if (imageRefCache == null) throw new ArgumentNullException(nameof(imageRefCache));
 
-            return Observable.Defer(() =>
-                {
-                    _logger.Verbose("Start");
+            _startDisposables?.Dispose();
+            _startDisposables = new CompositeDisposable();
 
-                    _startDisposables?.Dispose();
-                    _startDisposables = new CompositeDisposable();
+            _imageRefCache = imageRefCache;
 
-                    _imageRefCache = imageRefCache;
+            _logger.Verbose("Creating {Count} Watchers", paths.Count);
 
-                    return _folderRulesManagementService.GetFolderManagementRules();
-                }).Select(list =>
-                {
-                    var dictionary = list
-                        .GetTopLevelItemDictionary();
+            var watchers = new IFileSystemWatcher[paths.Count];
+            var observables = new IObservable<FileSystemEventArgs>[paths.Count * 4];
 
-                    _logger.Verbose("Creating {Count} Watchers", dictionary.Keys.Count);
+            for (var index = 0; index < paths.Count; index++)
+            {
+                var path = paths[index];
 
-                    var watchers = dictionary.Select(keyValuePair =>
-                    {
-                        var path = keyValuePair.Key;
+                _logger.Verbose("Creating Watcher {Path}", path);
 
-                        _logger.Verbose("Creating Watcher {Path}", path);
+                var watcher = _fileSystem.FileSystemWatcher
+                    .FromPath(path)
+                    .DisposeWith(_startDisposables);
 
-                        var fileSystemWatcher = _fileSystem.FileSystemWatcher
-                            .FromPath(path)
-                            .DisposeWith(_startDisposables);
+                watcher.IncludeSubdirectories = true;
 
-                        var d1 = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
-                                action => fileSystemWatcher.Created += action,
-                                action => { })
-                            .SubscribeOn(_schedulerProvider.TaskPool)
-                            .Select(pattern => pattern.EventArgs);
+                // https://docs.microsoft.com/en-us/dotnet/api/system.io.filesystemwatcher.internalbuffersize?view=netframework-4.8
+                // Default is 8k, Max is 64k, for best performance use multiples of 4k
+                // fileSystemWatcher.InternalBufferSize = 4096 * 8;
 
-                        var d2 = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
-                                action => fileSystemWatcher.Deleted += action,
-                                action => { })
-                            .SubscribeOn(_schedulerProvider.TaskPool)
-                            .Select(pattern => pattern.EventArgs);
+                watchers[index] = watcher;
 
-                        var d3 = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
-                                action => fileSystemWatcher.Changed += action,
-                                action => { })
-                            .SubscribeOn(_schedulerProvider.TaskPool)
-                            .Select(pattern => pattern.EventArgs);
+                var observableIndex = index * 4;
+                observables[observableIndex++] = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
+                        action => watcher.Created += action,
+                        action => { })
+                    .SubscribeOn(_schedulerProvider.TaskPool)
+                    .Select(pattern => pattern.EventArgs);
 
-                        var d4 = Observable.FromEventPattern<RenamedEventHandler, RenamedEventArgs>(
-                                action => fileSystemWatcher.Renamed += action,
-                                action => { })
-                            .SubscribeOn(_schedulerProvider.TaskPool)
-                            .Select(pattern => (FileSystemEventArgs) pattern.EventArgs);
+                observables[observableIndex++] = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
+                        action => watcher.Deleted += action,
+                        action => { })
+                    .SubscribeOn(_schedulerProvider.TaskPool)
+                    .Select(pattern => pattern.EventArgs);
 
-                        // https://docs.microsoft.com/en-us/dotnet/api/system.io.filesystemwatcher.internalbuffersize?view=netframework-4.8
-                        // Default is 8k, Max is 64k, for best performance use multiples of 4k
-                        // fileSystemWatcher.InternalBufferSize = 4096 * 8;
+                observables[observableIndex++] = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
+                        action => watcher.Changed += action,
+                        action => { })
+                    .SubscribeOn(_schedulerProvider.TaskPool)
+                    .Select(pattern => pattern.EventArgs);
 
-                        fileSystemWatcher.IncludeSubdirectories = true;
-                        fileSystemWatcher.EnableRaisingEvents = true;
+                observables[observableIndex] = Observable.FromEventPattern<RenamedEventHandler, RenamedEventArgs>(
+                        action => watcher.Renamed += action,
+                        action => { })
+                    .SubscribeOn(_schedulerProvider.TaskPool)
+                    .Select(pattern => (FileSystemEventArgs) pattern.EventArgs);
+            }
 
-                        var observables = new[] {d1, d2, d3, d4};
-                        return (fileSystemWatcher, observables);
-                    }).ToArray();
+            _currentStreamObservableSubject.OnNext(Observable.Merge(observables));
 
-                    currentWatchers = watchers.Select(tuple => tuple.fileSystemWatcher).ToArray();
+            foreach (var watcher in watchers)
+            {
+                watcher.EnableRaisingEvents = true;
+            }
 
-                    var allObservables = watchers.SelectMany(tuple => tuple.observables).ToArray();
-
-                    var observable = Observable.Merge(allObservables);
-                    _currentStreamObservableSubject.OnNext(observable);
-
-                    return Unit.Default;
-                })
-                .Do(unit => _logger.Verbose("Started"));
+            _logger.Verbose("Started");
         }
 
         public void Stop()
