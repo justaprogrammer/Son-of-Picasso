@@ -299,62 +299,6 @@ namespace SonOfPicasso.Core.Services
                 .SubscribeOn(_schedulerProvider.TaskPool);
         }
 
-        public IObservable<IImageContainer> RenameImage(string oldPath, string newPath)
-        {
-            return Observable.Defer(() =>
-                {
-                    var oldDirectoryPath = _fileSystem.Path.GetDirectoryName(oldPath);
-                    var newDirectoryPath = _fileSystem.Path.GetDirectoryName(newPath);
-
-                    lock (_writeLock)
-                    {
-                        using var unitOfWork = _unitOfWorkFactory();
-                        using var transaction = unitOfWork.BeginTransaction();
-
-                        var image = unitOfWork.ImageRepository
-                            .Get(i => i.Path.Equals(oldPath), includeProperties: "ExifData")
-                            .First();
-
-                        image.Path = newPath;
-
-                        var oldFolderId = image.FolderId;
-
-                        if (oldDirectoryPath == newDirectoryPath)
-                        {
-                            unitOfWork.Save();
-                            transaction.Commit();
-                            return Observable.Return(image.FolderId);
-                        }
-
-                        var folder = unitOfWork.FolderRepository
-                            .Get(f => f.Path.Equals(newDirectoryPath))
-                            .FirstOrDefault();
-
-                        if (folder == null)
-                        {
-                            folder = new Folder
-                            {
-                                Path = newDirectoryPath,
-                                Date = image.ExifData.DateTime.Date,
-                                Images = new List<Image> {image}
-                            };
-
-                            unitOfWork.FolderRepository.Insert(folder);
-                        }
-                        else
-                        {
-                            image.FolderId = folder.Id;
-                        }
-
-                        unitOfWork.Save();
-                        transaction.Commit();
-                        return new[] {oldFolderId, folder.Id}.ToObservable();
-                    }
-                })
-                .SelectMany(GetFolderImageContainer)
-                .SubscribeOn(_schedulerProvider.TaskPool);
-        }
-
         public IObservable<Unit> DeleteAlbum(int albumId)
         {
             return Observable.Defer(() =>

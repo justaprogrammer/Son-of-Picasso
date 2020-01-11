@@ -56,11 +56,6 @@ namespace SonOfPicasso.Core.Services
                 .SelectMany(path => _imageContainerOperationService.DeleteImage(path))
                 .Subscribe(container => _imageContainerCache.AddOrUpdate(container))
                 .DisposeWith(_disposables);
-
-            _imageContainerWatcherService.FileRenamed
-                .SelectMany(tuple => imageContainerOperationService.RenameImage(tuple.oldFullPath, tuple.fullPath))
-                .Subscribe(container => _imageContainerCache.AddOrUpdate(container))
-                .DisposeWith(_disposables);
             
             imageContainerOperationService.ScanImageObservable
                 .Select((imageRef) => imageRef.ContainerId)
@@ -192,12 +187,6 @@ namespace SonOfPicasso.Core.Services
         public IObservable<IImageContainer> DeleteImage(string path)
         {
             return _imageContainerOperationService.DeleteImage(path)
-                .Do(container => _imageContainerCache.AddOrUpdate(container));
-        }
-
-        public IObservable<IImageContainer> RenameImage(string oldPath, string newPath)
-        {
-            return _imageContainerOperationService.RenameImage(oldPath, newPath)
                 .Do(container => _imageContainerCache.AddOrUpdate(container));
         }
 

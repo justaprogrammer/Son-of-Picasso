@@ -18,7 +18,6 @@ namespace SonOfPicasso.Core.Interfaces
         IObservable<IImageContainer> AddImage(string path);
         IObservable<IImageContainer> DeleteImage(string path);
         IObservable<IImageContainer> UpdateImage(string path);
-        IObservable<IImageContainer> RenameImage(string oldPath, string newPath);
         IObservable<Unit> DeleteAlbum(int albumId);
         IObservable<ImageRef> AddOrUpdateImage(string path);
         IObservable<ResetChanges> PreviewRuleChangesEffect(IEnumerable<FolderRule> folderRules);
