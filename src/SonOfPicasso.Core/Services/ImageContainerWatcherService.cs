@@ -52,6 +52,9 @@ namespace SonOfPicasso.Core.Services
 
         public void Start(IObservableCache<ImageRef, string> imageRefCache, IList<string> paths)
         {
+            if (imageRefCache == null) throw new ArgumentNullException(nameof(imageRefCache));
+            if (paths == null) throw new ArgumentNullException(nameof(paths));
+
             _subscriptions?.Dispose();
             _watchers?.Dispose();
 
@@ -77,35 +80,39 @@ namespace SonOfPicasso.Core.Services
                     .Subscribe(args =>
                     {
                         foreach (var change in args.Changes)
+                        {
+                            var filePath = _fileSystem.Path.Combine(change.Directory, change.Name);
+                            var imageRef = imageRefCache.Lookup(filePath);
+
                             switch (change.ChangeType)
                             {
                                 case WatcherChangeTypes.Created:
                                 case WatcherChangeTypes.Changed:
 
-                                    var fileInfo = _fileSystem.FileInfo.FromFileName(change.Name);
+                                    var fileInfo = _fileSystem.FileInfo.FromFileName(filePath);
 
-                                    var imageRef = imageRefCache.Lookup(fileInfo.FullName);
                                     if (!imageRef.HasValue)
                                     {
-                                        _logger.Verbose("Discovered {Path}", fileInfo.FullName);
+                                        _logger.Debug("Discovered {Path}", fileInfo.FullName);
                                         _fileDiscoveredSubject.OnNext(fileInfo.FullName);
                                     }
                                     else if (imageRef.Value.LastWriteTime != fileInfo.LastWriteTimeUtc ||
                                              imageRef.Value.CreationTime != fileInfo.CreationTimeUtc)
                                     {
-                                        _logger.Verbose("File Updated {Path}", fileInfo.FullName);
+                                        _logger.Debug("File Updated {Path}", fileInfo.FullName);
                                         _fileDiscoveredSubject.OnNext(fileInfo.FullName);
                                     }
 
                                     break;
 
                                 case WatcherChangeTypes.Deleted:
-                                    _fileDeletedSubject.OnNext(change.Name);
-                                    break;
-
-                                case WatcherChangeTypes.Renamed:
+                                    if (imageRef.HasValue)
+                                    {
+                                        _fileDeletedSubject.OnNext(filePath);
+                                    }
                                     break;
                             }
+                        }
                     });
 
                 _subscriptions.Add(subscription);

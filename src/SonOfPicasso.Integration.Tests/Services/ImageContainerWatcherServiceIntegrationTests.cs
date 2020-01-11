@@ -75,14 +75,18 @@ namespace SonOfPicasso.Integration.Tests.Services
                 Set();
             });
 
-            imageContainerWatcherService.Start(imageRefCache, new[]{ImagesPath});
-            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(3));
+            imageContainerWatcherService.Start(imageRefCache, new[] { ImagesPath });
 
-            await GenerateImagesAsync(1).ConfigureAwait(false);
+            var generatedImages = await GenerateImagesAsync(1).ConfigureAwait(false);
+            var path = generatedImages.First().Value.First();
 
-            WaitOne(45);
+            WaitOne(5);
 
-            set.Should().HaveCount(1);
+            using (new AssertionScope())
+            {
+                set.Should().HaveCount(1);
+                set.First().Should().Be(path);
+            }
 
             imageContainerWatcherService.Stop();
         }
@@ -101,13 +105,12 @@ namespace SonOfPicasso.Integration.Tests.Services
                 Set();
             });
 
-            imageContainerWatcherService.Start(imageRefCache, new[]{ImagesPath});
-            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(3));
+            imageContainerWatcherService.Start(imageRefCache, new[] { ImagesPath });
 
             var generatedImages = await GenerateImagesAsync(1).ConfigureAwait(false);
             var path = generatedImages.First().Value.First();
 
-            WaitOne(45);
+            WaitOne(5);
 
             using (new AssertionScope())
             {
@@ -118,7 +121,7 @@ namespace SonOfPicasso.Integration.Tests.Services
             await ImageGenerationService.GenerateImage(path,
                 Fakers.ExifDataFaker);
 
-            WaitOne(45);
+            WaitOne(5);
 
             using (new AssertionScope())
             {
@@ -135,26 +138,32 @@ namespace SonOfPicasso.Integration.Tests.Services
             using var imageRefCache = new SourceCache<ImageRef, string>(imageRef => imageRef.ImagePath);
 
             var generatedImages = await GenerateImagesAsync(1).ConfigureAwait(false);
+            var path = generatedImages.First().Value.First();
+
             imageRefCache.AddOrUpdate(CreateImageRef(generatedImages.First().Value.First()));
 
             var imageContainerWatcherService = Container.Resolve<ImageContainerWatcherService>();
 
-            var list = new List<string>();
+            var set = new HashSet<string>();
             imageContainerWatcherService.FileDiscovered.Subscribe(item =>
             {
-                list.Add(item);
+                set.Add(item);
                 Logger.Verbose("File discovered '{Item}'", item);
                 Set();
             });
 
-            imageContainerWatcherService.Start(imageRefCache, new[]{ImagesPath});
-            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(3));
+            imageContainerWatcherService.Start(imageRefCache, new[] { ImagesPath });
 
-            await GenerateImagesAsync(1).ConfigureAwait(false);
+            generatedImages = await GenerateImagesAsync(1).ConfigureAwait(false);
+            path = generatedImages.First().Value.First();
 
-            WaitOne(45);
+            WaitOne(5);
 
-            list.Should().HaveCount(1);
+            using (new AssertionScope())
+            {
+                set.Should().HaveCount(1);
+                set.First().Should().Be(path);
+            }
         }
 
         [Fact]
@@ -168,24 +177,26 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             var imageContainerWatcherService = Container.Resolve<ImageContainerWatcherService>();
 
-            var list = new List<string>();
+            var set = new HashSet<string>();
             imageContainerWatcherService.FileDeleted.Subscribe(item =>
             {
-                list.Add(item);
+                set.Add(item);
                 Logger.Verbose("File deleted '{Item}'", item);
                 Set();
             });
 
-            imageContainerWatcherService.Start(imageRefCache, new[]{ImagesPath});
-            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(3));
+            imageContainerWatcherService.Start(imageRefCache, new[] { ImagesPath });
 
             Logger.Verbose("Delete Path '{Path}'", path);
             FileSystem.File.Delete(path);
 
-            WaitOne(45);
+            WaitOne(5);
 
-            list.Should().HaveCount(1);
-            list.First().Should().Be(path);
+            using (new AssertionScope())
+            {
+                set.Should().HaveCount(1);
+                set.First().Should().Be(path);
+            }
         }
 
         [Fact]
@@ -198,23 +209,22 @@ namespace SonOfPicasso.Integration.Tests.Services
 
             var imageContainerWatcherService = Container.Resolve<ImageContainerWatcherService>();
 
-            var list = new List<string>();
+            var set = new HashSet<string>();
             imageContainerWatcherService.FileDeleted.Subscribe(item =>
             {
-                list.Add(item);
+                set.Add(item);
                 Logger.Verbose("File deleted '{Item}'", item);
                 Set();
             });
 
-            imageContainerWatcherService.Start(imageRefCache, new[]{ImagesPath});
-            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(3));
+            imageContainerWatcherService.Start(imageRefCache, new[] { ImagesPath });
 
             Logger.Verbose("Delete Path '{Path}'", path);
             FileSystem.File.Delete(path);
 
             AutoResetEvent.WaitOne(TimeSpan.FromSeconds(5)).Should().BeFalse();
 
-            list.Should().BeEmpty();
+            set.Should().BeEmpty();
         }
     }
 }
