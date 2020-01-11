@@ -16,7 +16,6 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.Repeat;
 
 namespace SonOfPicasso.Integration.Tests.Services
 {
