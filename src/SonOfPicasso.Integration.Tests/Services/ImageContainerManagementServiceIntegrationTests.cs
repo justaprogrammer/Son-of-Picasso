@@ -139,6 +139,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                 .Subscribe();
 
             await imageContainerManagementService.Start();
+            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(3));
 
             var beginTimedOperation = Logger.BeginTimedOperation("Started Scanning");
 
@@ -220,6 +221,7 @@ namespace SonOfPicasso.Integration.Tests.Services
                 .Subscribe();
 
             await imageContainerManagementService.Start();
+            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(3));
 
             var imageCount = 20;
             var generateImagesAsync = await GenerateImagesAsync(imageCount).ConfigureAwait(false);
@@ -290,8 +292,11 @@ namespace SonOfPicasso.Integration.Tests.Services
                 .Subscribe();
 
             await imageContainerManagementService.Start();
+            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(3));
+       
             await imageContainerManagementService.ResetRules(new[]
                 {new FolderRule {Path = ImagesPath, Action = FolderRuleActionEnum.Always}});
+            AutoResetEvent.WaitOne(TimeSpan.FromSeconds(3));
 
             var imageCount = 1;
             var generateImagesAsync = await GenerateImagesAsync(imageCount).ConfigureAwait(false);

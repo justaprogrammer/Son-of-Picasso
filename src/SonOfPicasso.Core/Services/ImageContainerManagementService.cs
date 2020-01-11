@@ -11,6 +11,7 @@ using SonOfPicasso.Core.Interfaces;
 using SonOfPicasso.Core.Model;
 using SonOfPicasso.Core.Scheduling;
 using SonOfPicasso.Data.Model;
+using Svg;
 
 namespace SonOfPicasso.Core.Services
 {
@@ -85,6 +86,8 @@ namespace SonOfPicasso.Core.Services
 
         public IObservable<Unit> ResetRules(IEnumerable<FolderRule> folderRules)
         {
+            _logger.Verbose("ResetRules");
+
             var folderRulesArray = folderRules.ToArray();
 
             var resetRules = _folderRulesManagementService.ResetFolderManagementRules(folderRulesArray);
