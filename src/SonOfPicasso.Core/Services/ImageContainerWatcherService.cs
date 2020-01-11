@@ -28,6 +28,7 @@ namespace SonOfPicasso.Core.Services
         private readonly IFolderRulesManagementService _folderRulesManagementService;
         private readonly ILogger _logger;
         private readonly ISchedulerProvider _schedulerProvider;
+        private IFileSystemWatcher[] currentWatchers; 
 
         private IObservableCache<ImageRef, string> _imageRefCache;
         private CompositeDisposable _startDisposables;
@@ -229,6 +230,8 @@ namespace SonOfPicasso.Core.Services
                         var observables = new[] {d1, d2, d3, d4};
                         return (fileSystemWatcher, observables);
                     }).ToArray();
+
+                    currentWatchers = watchers.Select(tuple => tuple.fileSystemWatcher).ToArray();
 
                     var allObservables = watchers.SelectMany(tuple => tuple.observables).ToArray();
 
