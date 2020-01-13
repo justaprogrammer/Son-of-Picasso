@@ -58,38 +58,9 @@ jobs:
       with:
         name: Reports
         path: reports
-    - name: Upload SonOfPicasso.Core.Tests to CodeCov
+    - name: Upload to CodeCov
       if: always()
       uses: codecov/codecov-action@v1
       with:
         token: ${{secrets.CODECOV_TOKEN}}
-        file: reports\SonOfPicasso.Core.Tests.opencover.xml
-        flags: coretests
-    - name: Upload SonOfPicasso.Data.Tests to CodeCov
-      if: always()
-      uses: codecov/codecov-action@v1
-      with:
-        token: ${{secrets.CODECOV_TOKEN}}
-        file: reports\SonOfPicasso.Data.Tests.opencover.xml
-        flags: datatests
-    - name: Upload SonOfPicasso.UI.Tests to CodeCov
-      if: always()
-      uses: codecov/codecov-action@v1
-      with:
-        token: ${{secrets.CODECOV_TOKEN}}
-        file: reports\SonOfPicasso.UI.Tests.opencover.xml
-        flags: uitests
-    - name: Upload SonOfPicasso.Integration.Tests to CodeCov
-      if: always()
-      uses: codecov/codecov-action@v1
-      with:
-        token: ${{secrets.CODECOV_TOKEN}}
-        file: reports\SonOfPicasso.Integration.Tests.opencover.xml
-        flags: integration
-    - name: Upload SonOfPicasso.Tools.Tests to CodeCov
-      if: always()
-      uses: codecov/codecov-action@v1
-      with:
-        token: ${{secrets.CODECOV_TOKEN}}
-        file: reports\SonOfPicasso.Tools.Tests.opencover.xml
-        flags: tools
+        file: reports/*.opencover.xml
