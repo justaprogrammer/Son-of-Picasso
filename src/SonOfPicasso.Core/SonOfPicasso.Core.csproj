@@ -36,7 +36,7 @@
     <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0007" />
     <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta0007" />
     <PackageReference Include="Svg" Version="3.0.84" />
-    <PackageReference Include="System.IO.Abstractions" Version="7.1.3" />
+    <PackageReference Include="System.IO.Abstractions" Version="7.1.4" />
     <PackageReference Include="System.IO.FileSystem.Watcher.Polling" Version="0.1.1-preview2-190117-2" />
     <PackageReference Include="System.Reactive" Version="4.3.2" />
     <PackageReference Include="System.Threading.Channels" Version="4.7.0" />
