@@ -63,5 +63,4 @@ jobs:
       uses: codecov/codecov-action@v1
       with:
         token: ${{secrets.CODECOV_TOKEN}}
-        file: reports\*.opencover.xml
-        flags: coretests
+        file: reports/*.opencover.xml
